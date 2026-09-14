@@ -9,6 +9,7 @@ import 'package:crm_app/controllers/pmam/pmam_controller.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/app_select_field.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class PmamCreatePlanScreen extends StatefulWidget {
   const PmamCreatePlanScreen({super.key});
@@ -62,8 +63,8 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedAccount == null) {
       Get.snackbar(
-        'Required',
-        'Please select a trading account',
+        TranslationUtils.tr('ibm_required'),
+        TranslationUtils.tr('pmam_create_plan_please_select_trading_account'),
         backgroundColor: AppColors.error,
         colorText: AppColors.onColoredBackground,
         snackPosition: SnackPosition.TOP,
@@ -116,7 +117,8 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
         //     ),
         //   ),
         // ),
-        title: Text('Create New Plan', style: AppTextStyles.heading),
+        title: Text(TranslationUtils.tr('copy_trading_create_plan_create_new_plan'),
+            style: AppTextStyles.heading),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -144,7 +146,8 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'MANAGER PROFILE',
+                      TranslationUtils.tr(
+                          'pmam_create_plan_manager_profile_caps'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w700,
@@ -154,11 +157,11 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                     ),
                     SizedBox(height: 12.h),
                     _ProfileRow(
-                      label: 'Name',
+                      label: TranslationUtils.tr('unified_compliance_wizard_name'),
                       value: authCtrl.userFullName ?? '',
                     ),
                     _ProfileRow(
-                      label: 'Manager ID',
+                      label: TranslationUtils.tr('pmam_create_plan_manager_id'),
                       value:
                           _ctrl.managerCode.value.isEmpty
                               ? 'N/A'
@@ -168,7 +171,7 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Status',
+                          TranslationUtils.tr('common_status'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             color: AppColors.textGrey,
@@ -184,7 +187,8 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                             borderRadius: BorderRadius.circular(6.r),
                           ),
                           child: Text(
-                            'Approved Manager',
+                            TranslationUtils.tr(
+                                'pmam_create_plan_screen_approved_manager'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               color: AppColors.green,
@@ -216,14 +220,17 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _FormLabel('Plan Name', optional: true),
+                    _FormLabel(TranslationUtils.tr('pmam_create_plan_plan_name'),
+                        optional: true),
                     _StyledTextField(
                       controller: _planNameCtrl,
-                      hint: 'e.g. Conservative Growth Fund',
+                      hint: TranslationUtils.tr(
+                          'pmam_create_plan_plan_name_hint'),
                     ),
                     SizedBox(height: 16.h),
 
-                    _FormLabel('Trading Account', required: true),
+                    _FormLabel(TranslationUtils.tr('settings_trading_account'),
+                        required: true),
                     Obx(() {
                       final accounts = _ctrl.eligibleAccounts;
                       if (accounts.isEmpty) {
@@ -234,7 +241,8 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                             borderRadius: BorderRadius.circular(10.r),
                           ),
                           child: Text(
-                            'No eligible accounts available',
+                            TranslationUtils.tr(
+                                'pmam_create_plan_screen_no_eligible_accounts_available'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               color: AppColors.textGrey,
@@ -244,8 +252,10 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                       }
                       return AppSelectField<Map<String, dynamic>>(
                         value: _selectedAccount,
-                        hint: 'Select a trading account',
-                        sheetTitle: 'Select Trading Account',
+                        hint: TranslationUtils.tr(
+                            'pmam_create_plan_select_a_trading_account'),
+                        sheetTitle: TranslationUtils.tr(
+                            'pmam_manager_detail_screen_select_trading_account'),
                         valueEquals: (a, b) => a['id'] == b['id'],
                         options:
                             accounts.map((acc) {
@@ -278,7 +288,8 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                     GestureDetector(
                       onTap: () {},
                       child: Text(
-                        "Don't see your account? Add new account",
+                        TranslationUtils.tr(
+                            'pmam_create_plan_screen_don_see_your_account_add_new'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: AppColors.primary,
@@ -287,23 +298,30 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                     ),
                     SizedBox(height: 16.h),
 
-                    _FormLabel('Commission %', required: true),
+                    _FormLabel(
+                        TranslationUtils.tr('pmam_edit_plan_commission_percent'),
+                        required: true),
                     _StyledTextField(
                       controller: _commissionCtrl,
-                      hint: 'e.g. 20',
+                      hint: TranslationUtils.tr(
+                          'pmam_create_plan_commission_hint'),
                       keyboardType: TextInputType.number,
                       validator: (v) {
-                        if (v == null || v.isEmpty) return 'Required';
+                        if (v == null || v.isEmpty) {
+                          return TranslationUtils.tr('ibm_required');
+                        }
                         final n = double.tryParse(v);
                         if (n == null || n < 0 || n > 100) {
-                          return 'Enter a value between 0 and 100';
+                          return TranslationUtils.tr(
+                              'pmam_create_plan_enter_value_between_0_and_100');
                         }
                         return null;
                       },
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      'Percentage of profits charged as your commission.',
+                      TranslationUtils.tr(
+                          'pmam_create_plan_screen_percentage_of_profits_charged_as_your'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: AppColors.textGrey,
@@ -311,33 +329,48 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                     ),
                     SizedBox(height: 16.h),
 
-                    _FormLabel('Minimum Investment (\$)', required: true),
+                    _FormLabel(
+                        TranslationUtils.tr(
+                            'pmam_create_plan_minimum_investment_dollar'),
+                        required: true),
                     _StyledTextField(
                       controller: _minInvestmentCtrl,
-                      hint: 'e.g. 500',
+                      hint: TranslationUtils.tr(
+                          'pmam_create_plan_min_investment_hint'),
                       keyboardType: TextInputType.number,
                       validator: (v) {
-                        if (v == null || v.isEmpty) return 'Required';
+                        if (v == null || v.isEmpty) {
+                          return TranslationUtils.tr('ibm_required');
+                        }
                         final n = double.tryParse(v);
-                        if (n == null || n <= 0) return 'Enter a valid amount';
+                        if (n == null || n <= 0) {
+                          return TranslationUtils.tr(
+                              'pmam_create_plan_enter_a_valid_amount');
+                        }
                         return null;
                       },
                     ),
                     SizedBox(height: 16.h),
 
-                    _FormLabel('About this Plan', optional: true),
+                    _FormLabel(
+                        TranslationUtils.tr('pmam_create_plan_about_this_plan'),
+                        optional: true),
                     _StyledTextField(
                       controller: _descriptionCtrl,
-                      hint:
-                          'Describe your trading strategy, approach, goals...',
+                      hint: TranslationUtils.tr(
+                          'pmam_create_plan_describe_strategy_hint'),
                       maxLines: 3,
                     ),
                     SizedBox(height: 16.h),
 
-                    _FormLabel('Risk Information', optional: true),
+                    _FormLabel(
+                        TranslationUtils.tr(
+                            'copy_trading_create_plan_risk_information'),
+                        optional: true),
                     _StyledTextField(
                       controller: _riskInfoCtrl,
-                      hint: 'Describe the risk level and max drawdown...',
+                      hint: TranslationUtils.tr(
+                          'pmam_create_plan_describe_risk_hint'),
                       maxLines: 3,
                     ),
                   ],
@@ -365,7 +398,8 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                         _ctrl.isCreatePlanLoading.value
                             ? CommonLoadingWidget(size: 22, color: AppColors.onColoredBackground)
                             : Text(
-                              'Submit Plan',
+                              TranslationUtils.tr(
+                                  'pmam_create_plan_screen_submit_plan'),
                               style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.onColoredBackground,
                                 fontSize: 15.sp,
@@ -405,7 +439,7 @@ class _FormLabel extends StatelessWidget {
             TextSpan(text: text),
             if (optional)
               TextSpan(
-                text: ' (optional)',
+                text: ' ${TranslationUtils.tr('pmam_create_plan_optional')}',
                 style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.textGrey,
                   fontWeight: FontWeight.w400,

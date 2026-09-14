@@ -240,7 +240,7 @@ class _EnhancedPendingOrderContentState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Price',
+            TranslationUtils.tr('common_price'),
             style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w500),
           ),
           SizedBox(height: 8.h),
@@ -250,7 +250,9 @@ class _EnhancedPendingOrderContentState
                 child: TextField(
                   controller: priceController,
                   decoration: InputDecoration(
-                    hintText: 'Enter price',
+                    hintText: Get.find<LanguageService>().tr(
+                      'trading_order_enter_price',
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.r),
                     ),
@@ -280,7 +282,7 @@ class _EnhancedPendingOrderContentState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Volume',
+          TranslationUtils.tr('general_volume'),
           style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w500),
         ),
         SizedBox(height: 8.h),
@@ -315,7 +317,9 @@ class _EnhancedPendingOrderContentState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Stop Loss & Take Profit',
+          TranslationUtils.tr(
+            'enhanced_pending_order_content_stop_loss_take_profit',
+          ),
           style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w500),
         ),
         SizedBox(height: 12.h),
@@ -326,7 +330,7 @@ class _EnhancedPendingOrderContentState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Stop Loss',
+                    TranslationUtils.tr('general_stop_loss'),
                     style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: Colors.grey[600]),
                   ),
                   SizedBox(height: 4.h),
@@ -366,7 +370,7 @@ class _EnhancedPendingOrderContentState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Take Profit',
+                    TranslationUtils.tr('general_take_profit'),
                     style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: Colors.grey[600]),
                   ),
                   SizedBox(height: 4.h),
@@ -508,7 +512,9 @@ class _EnhancedPendingOrderContentState
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Select Order Type',
+                  TranslationUtils.tr(
+                    'enhanced_pending_order_content_select_order_type',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
@@ -655,7 +661,12 @@ class _EnhancedPendingOrderContentState
             title: Text(
               Get.find<LanguageService>().tr('pending_order_order_placed'),
             ),
-            content: Text('$action order has been placed successfully'),
+            content: Text(
+              TranslationUtils.trArgs(
+                'enhanced_pending_order_content_action_order_placed',
+                {'action': action},
+              ),
+            ),
             actions: [
               TextButton(
                 onPressed: () {

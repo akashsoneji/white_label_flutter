@@ -5,6 +5,7 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/ib/data/repositories/ib_repository.dart';
 import 'package:crm_app/screens/ib/presentation/pages/ib_transfer_create_screen.dart';
 import 'package:crm_app/screens/ib/view_models/ib_transfer_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -72,7 +73,7 @@ class _IbTransferCommissionScreenState
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: Padding(
-          padding: EdgeInsets.only(left: 10.w),
+          padding: EdgeInsetsDirectional.only(start: 10.w),
           // child: AppBackButton(onPressed: () => Get.back()),
           child: IconButton(
             icon: SvgPicture.asset(
@@ -85,7 +86,10 @@ class _IbTransferCommissionScreenState
             onPressed: () => Get.offAllNamed(AppPages.TRADING),
           ),
         ),
-        title: Text('Transfer Commission', style: AppTextStyles.screenTitle),
+        title: Text(
+          TranslationUtils.tr('ib_nav_transfer_comm'),
+          style: AppTextStyles.screenTitle,
+        ),
         centerTitle: true,
         actions: [
           IconButton(
@@ -149,7 +153,9 @@ class _IbTransferCommissionScreenState
                                 ),
                                 SizedBox(height: 16.h),
                                 Text(
-                                  'No transfer history found',
+                                  TranslationUtils.tr(
+                                    'internal_transfer_history_screen_no_transfer_history_found',
+                                  ),
                                   style: TextStyle(
                                     color: AppColors.textSecondary,
                                     fontSize: 16.sp,
@@ -227,8 +233,8 @@ class _IbTransferCommissionScreenState
                 ? AppColors.secondary.withOpacity(0.15)
                 : AppColors.secondary.withOpacity(0.9),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
         ),
         boxShadow: [
           BoxShadow(
@@ -246,8 +252,8 @@ class _IbTransferCommissionScreenState
         child: Stack(
           children: [
             // Background circles decoration
-            Positioned(
-              right: -20.w,
+            PositionedDirectional(
+              end: -20.w,
               top: -20.h,
               child: CircleAvatar(
                 radius: 60.r,
@@ -257,8 +263,8 @@ class _IbTransferCommissionScreenState
                         : Colors.white.withOpacity(0.08),
               ),
             ),
-            Positioned(
-              left: -40.w,
+            PositionedDirectional(
+              start: -40.w,
               bottom: -40.h,
               child: CircleAvatar(
                 radius: 80.r,
@@ -277,7 +283,9 @@ class _IbTransferCommissionScreenState
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'TRANSFER COMMISSION',
+                        TranslationUtils.tr(
+                          'ib_nav_transfer_comm',
+                        ).toUpperCase(),
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.7),
                           fontSize: 12.sp,
@@ -309,7 +317,9 @@ class _IbTransferCommissionScreenState
                   Obx(() {
                     final data = _controller.initData.value;
                     return Text(
-                      'Min Transfer: \$${data?.minAmount?.toStringAsFixed(2) ?? "0.00"}',
+                      TranslationUtils.trArgs('ib_transfer_min_transfer', {
+                        'amount': data?.minAmount?.toStringAsFixed(2) ?? "0.00",
+                      }),
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.7),
                         fontSize: 12.sp,
@@ -397,8 +407,11 @@ class _IbTransferCommissionScreenState
                     Text(
                       item.toClientName ??
                           (item.toClientUserId != null
-                              ? 'Client #${item.toClientUserId}'
-                              : 'Unknown Client'),
+                              ? TranslationUtils.trArgs(
+                                'ib_transfer_client_number',
+                                {'id': '${item.toClientUserId}'},
+                              )
+                              : TranslationUtils.tr('ib_transfer_unknown_client')),
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 14.sp,
@@ -493,7 +506,9 @@ class _IbTransferCommissionScreenState
                                       ),
                                       SizedBox(height: 16.h),
                                       Text(
-                                        'Cancel Transfer',
+                                        TranslationUtils.tr(
+                                          'ib_transfer_cancel_transfer',
+                                        ),
                                         style: TextStyle(
                                           color: AppColors.textPrimary,
                                           fontSize: 20.sp,
@@ -502,7 +517,9 @@ class _IbTransferCommissionScreenState
                                       ),
                                       SizedBox(height: 12.h),
                                       Text(
-                                        'Are you sure you want to cancel this transfer request? This action cannot be undone.',
+                                        TranslationUtils.tr(
+                                          'ib_transfer_cancel_confirm_message',
+                                        ),
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: AppColors.textSecondary,
@@ -527,7 +544,9 @@ class _IbTransferCommissionScreenState
                                                 ),
                                               ),
                                               child: Text(
-                                                'No, Keep It',
+                                                TranslationUtils.tr(
+                                                  'ib_transfer_no_keep_it',
+                                                ),
                                                 style: TextStyle(
                                                   color: AppColors.textGrey,
                                                   fontSize: 15.sp,
@@ -559,7 +578,9 @@ class _IbTransferCommissionScreenState
                                                 ),
                                               ),
                                               child: Text(
-                                                'Yes, Cancel',
+                                                TranslationUtils.tr(
+                                                  'cregis_address_screen_yes_cancel',
+                                                ),
                                                 style: TextStyle(
                                                   color: Colors.white,
                                                   fontSize: 15.sp,
@@ -586,7 +607,7 @@ class _IbTransferCommissionScreenState
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                             child: Text(
-                              'Cancel',
+                              TranslationUtils.tr('account_management_cancel'),
                               style: TextStyle(
                                 color: Colors.red,
                                 fontSize: 10.sp,

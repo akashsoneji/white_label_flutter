@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_settings_controller.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class SettingsTab extends StatelessWidget {
   const SettingsTab({super.key});
@@ -26,7 +27,7 @@ class SettingsTab extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Settings',
+          TranslationUtils.tr('bottom_navigation_settings'),
           style: AppTextStyles.heading.copyWith(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
@@ -64,7 +65,7 @@ class SettingsTab extends StatelessWidget {
                     children: [
                       SizedBox(height: 15.h),
                       Text(
-                        'Copy',
+                        TranslationUtils.tr('common_copy'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           color: AppColors.primary,
@@ -80,48 +81,48 @@ class SettingsTab extends StatelessWidget {
             // Menu Items
             _MenuItem(
               svgIconPath: 'assets/svg/bottom_navigation/wallet.svg',
-              label: 'Wallet',
+              label: TranslationUtils.tr('bottom_navigation_wallet'),
 
               onTap: () => Get.toNamed('/copy-trading-wallet'),
             ),
             _MenuItem(
               svgIconPath: 'assets/svg/deshboard/money-recive.svg',
-              label: 'Deposit',
+              label: TranslationUtils.tr('general_deposit'),
               onTap: () => Get.toNamed(AppPages.FINANCE),
             ),
             _MenuItem(
               svgIconPath: 'assets/svg/ib_dashboard/copy.svg',
-              label: 'Copier Area',
+              label: TranslationUtils.tr('settings_tab_copier_area'),
               onTap: () {},
             ),
             _MenuItem(
               svgIconPath: 'assets/svg/chart_screen_icon/bell_icon.svg',
-              label: 'Notification',
+              label: TranslationUtils.tr('settings_tab_notification'),
               onTap: () {},
             ),
             _MenuItem(
               svgIconPath: 'assets/svg/copy_trading/setting/trade_win.svg',
-              label: 'Trade and Win',
+              label: TranslationUtils.tr('settings_tab_trade_and_win'),
               onTap: () {},
             ),
             _MenuItem(
               svgIconPath: 'assets/svg/copy_trading/setting/share.svg',
-              label: 'Invite a Friend',
+              label: TranslationUtils.tr('invite_friend_screen_invite_friend'),
               onTap: () => Get.toNamed('/copy-trading-invite-friend'),
             ),
             _MenuItem(
               svgIconPath: 'assets/svg/bottom_navigation/setting.svg',
-              label: 'Settings',
+              label: TranslationUtils.tr('bottom_navigation_settings'),
               onTap: () {},
             ),
             _MenuItem(
               svgIconPath: 'assets/svg/more/ib_dashboard/ib-support.svg',
-              label: 'Start a live chat',
+              label: TranslationUtils.tr('settings_tab_start_a_live_chat'),
               onTap: () {},
             ),
             _MenuItem(
               svgIconPath: 'assets/svg/copy_trading/setting/document-text.svg',
-              label: 'Terms & Conditions',
+              label: TranslationUtils.tr('create_account_terms_conditions'),
               onTap: () {},
             ),
 

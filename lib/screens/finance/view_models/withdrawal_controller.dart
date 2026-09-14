@@ -9,6 +9,7 @@ import 'package:crm_app/models/bank_withdralList_model.dart'
     show AllowedCryptoNetwork;
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/core/network/api_response.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
 
@@ -130,12 +131,15 @@ class UserWithdrawalMethod {
       if (label.isNotEmpty && (bankAccountNo?.isNotEmpty ?? false)) {
         return '$label (${bankAccountNo!})';
       }
-      return label.isNotEmpty ? label : (bankAccountNo ?? 'Bank Account');
+      return label.isNotEmpty
+          ? label
+          : (bankAccountNo ??
+              TranslationUtils.tr('withdrawal_screen_bank_account'));
     }
     if (method == 'upi') {
       return 'UPI (${upiAddress ?? ''})';
     }
-    return holderName ?? id ?? 'Account';
+    return holderName ?? id ?? TranslationUtils.tr('settings_account');
   }
 
   bool get isApproved =>
@@ -488,11 +492,13 @@ class WithdrawalController extends GetxController {
           errorMessage.value =
               withdrawalMethodResponse.message.isNotEmpty
                   ? withdrawalMethodResponse.message
-                  : "Something went wrong";
+                  : TranslationUtils.tr('finance_something_went_wrong');
           Get.back(closeOverlays: true);
         }
       } else {
-        errorMessage.value = response.message ?? "Something went wrong";
+        errorMessage.value =
+            response.message ??
+            TranslationUtils.tr('finance_something_went_wrong');
         Get.back(closeOverlays: true);
       }
     } catch (e) {
@@ -710,8 +716,12 @@ class WithdrawalController extends GetxController {
             // API returned status: false - show no data view with message
             print("Status false - showing no data view: ${data.message}");
             shouldShowNoData = true;
-            noDataMsg = data.message ?? "Something went wrong";
-            errorMessage.value = data.message ?? "Something went wrong";
+            noDataMsg =
+                data.message ??
+                TranslationUtils.tr('finance_something_went_wrong');
+            errorMessage.value =
+                data.message ??
+                TranslationUtils.tr('finance_something_went_wrong');
             // Clear account data
             userMT5Accounts.clear();
             wallet.value = null;
@@ -722,7 +732,9 @@ class WithdrawalController extends GetxController {
           }
         } catch (parseError) {
           print("JSON parsing error: $parseError");
-          errorMessage.value = "Error parsing response data";
+          errorMessage.value = TranslationUtils.tr(
+            'finance_error_parsing_response_data',
+          );
           // If parsing fails, don't show no data view, just show error toast
           shouldShowNoData = false;
         }
@@ -760,8 +772,12 @@ class WithdrawalController extends GetxController {
             // Show no data view with message from API
             print("Showing no data view with message: ${response.message}");
             shouldShowNoData = true;
-            noDataMsg = response.message ?? "Something went wrong";
-            errorMessage.value = response.message ?? "Something went wrong";
+            noDataMsg =
+                response.message ??
+                TranslationUtils.tr('finance_something_went_wrong');
+            errorMessage.value =
+                response.message ??
+                TranslationUtils.tr('finance_something_went_wrong');
             // Clear account data
             userMT5Accounts.clear();
             wallet.value = null;
@@ -772,7 +788,9 @@ class WithdrawalController extends GetxController {
           } else {
             // Other errors - error message will be shown automatically
             print("Response not successful, message: ${response.message}");
-            errorMessage.value = response.message ?? "Something went wrong";
+            errorMessage.value =
+                response.message ??
+                TranslationUtils.tr('finance_something_went_wrong');
             // Don't show no data view for other errors
             shouldShowNoData = false;
           }
@@ -833,10 +851,14 @@ class WithdrawalController extends GetxController {
           }
         } else {
           // Handle case where data is empty array or unexpected format
-          errorMessage.value = "Invalid response format";
+          errorMessage.value = TranslationUtils.tr(
+            'finance_invalid_response_format',
+          );
         }
       } else {
-        errorMessage.value = response.message ?? "Something went wrong";
+        errorMessage.value =
+            response.message ??
+            TranslationUtils.tr('finance_something_went_wrong');
       }
     } catch (e) {
       errorMessage.value = "Error while submitting withdrawal: $e";
@@ -928,10 +950,14 @@ class WithdrawalController extends GetxController {
                 data['message'] ?? "Failed to add withdrawal method";
           }
         } else {
-          errorMessage.value = "Invalid response format";
+          errorMessage.value = TranslationUtils.tr(
+            'finance_invalid_response_format',
+          );
         }
       } else {
-        errorMessage.value = response.message ?? "Something went wrong";
+        errorMessage.value =
+            response.message ??
+            TranslationUtils.tr('finance_something_went_wrong');
       }
     } catch (e) {
       errorMessage.value = "Error while adding withdrawal method: $e";
@@ -960,10 +986,14 @@ class WithdrawalController extends GetxController {
             errorMessage.value = data['message'] ?? "Failed to send OTP";
           }
         } else {
-          errorMessage.value = "Invalid response format";
+          errorMessage.value = TranslationUtils.tr(
+            'finance_invalid_response_format',
+          );
         }
       } else {
-        errorMessage.value = response.message ?? "Something went wrong";
+        errorMessage.value =
+            response.message ??
+            TranslationUtils.tr('finance_something_went_wrong');
       }
     } catch (e) {
       errorMessage.value = "Error while sending OTP: $e";
@@ -1205,14 +1235,20 @@ class WithdrawalController extends GetxController {
                 Get.back(closeOverlays: true);
               });
             } else {
-              errorMessage.value = "Invalid response format";
+              errorMessage.value = TranslationUtils.tr(
+                'finance_invalid_response_format',
+              );
             }
           } else {
-            errorMessage.value = "Invalid response format";
+            errorMessage.value = TranslationUtils.tr(
+              'finance_invalid_response_format',
+            );
           }
         }
       } else {
-        errorMessage.value = response.message ?? "Something went wrong";
+        errorMessage.value =
+            response.message ??
+            TranslationUtils.tr('finance_something_went_wrong');
       }
     } catch (e) {
       errorMessage.value = "Error while submitting withdrawal: $e";

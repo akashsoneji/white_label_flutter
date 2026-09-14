@@ -7,6 +7,7 @@ import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ibm/presentation/widgets/verification_status_dialog.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class IbmController extends GetxController {
   final IbmApiProvider _apiProvider = IbmApiProvider();
@@ -130,8 +131,9 @@ class IbmController extends GetxController {
               final status = partnerRequest['status'];
               if (status == 'rejected') {
                 CustomToastService.showError(
-                  message:
-                      'Your IB application has been rejected. Please contact support for more information.',
+                  message: TranslationUtils.tr(
+                    'more_screen_your_ib_application_has_been_rejected',
+                  ),
                 );
                 return;
               }
@@ -145,7 +147,9 @@ class IbmController extends GetxController {
         }
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to get system status',
+          message:
+              response.message ??
+              TranslationUtils.tr('ibm_failed_to_get_system_status'),
         );
       }
     } catch (e) {
@@ -181,8 +185,9 @@ class IbmController extends GetxController {
 
       if (ibStatus == 'rejected') {
         CustomToastService.showError(
-          message:
-              'Your IB application has been rejected. Please contact support for more information.',
+          message: TranslationUtils.tr(
+            'more_screen_your_ib_application_has_been_rejected',
+          ),
         );
         return;
       }
@@ -207,14 +212,14 @@ class IbmController extends GetxController {
           duration: const Duration(seconds: 2),
           message:
               ibStatusResponse.message ??
-              'Profile is not complete. Please complete your profile first.',
+              TranslationUtils.tr('ibm_profile_is_not_complete'),
         );
       }
     } else {
       String errorMsg =
           ibStatusResponse?.message ?? ibController.errorMessage.value;
       if (errorMsg.isEmpty)
-        errorMsg = 'Failed to check IB status. Please try again.';
+        errorMsg = TranslationUtils.tr('ibm_failed_to_check_ib_status');
       CustomToastService.showError(message: errorMsg);
     }
   }
@@ -393,13 +398,15 @@ class IbmController extends GetxController {
       Get.back(closeOverlays: true);
       if (response.success) {
         CustomToastService.showSuccess(
-          message: 'Request approved successfully',
+          message: TranslationUtils.tr('ibm_request_approved_successfully'),
         );
         fetchRequests();
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to approve request',
+          message:
+              response.message ??
+              TranslationUtils.tr('ibm_failed_to_approve_request'),
         );
         return false;
       }
@@ -427,12 +434,16 @@ class IbmController extends GetxController {
       );
       Get.back(closeOverlays: true);
       if (response.success) {
-        CustomToastService.showSuccess(message: 'Request rejected');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr('ibm_request_rejected'),
+        );
         fetchRequests();
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to reject request',
+          message:
+              response.message ??
+              TranslationUtils.tr('ibm_failed_to_reject_request'),
         );
         return false;
       }
@@ -589,12 +600,16 @@ class IbmController extends GetxController {
         Get.back();
       }
       if (response.success) {
-        CustomToastService.showSuccess(message: 'Referral link created!');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr('ibm_referral_link_created'),
+        );
         fetchLinks();
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to create link',
+          message:
+              response.message ??
+              TranslationUtils.tr('ibm_failed_to_create_link'),
         );
         return false;
       }
@@ -639,14 +654,18 @@ class IbmController extends GetxController {
       if (response.success) {
         CustomToastService.showSuccess(
           message: isActive != null
-              ? (isActive ? 'Link switched on!' : 'Link switched off!')
-              : 'Referral link updated!',
+              ? (isActive
+                  ? TranslationUtils.tr('ibm_link_switched_on')
+                  : TranslationUtils.tr('ibm_link_switched_off'))
+              : TranslationUtils.tr('ibm_referral_link_updated'),
         );
         fetchLinks();
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to update link',
+          message:
+              response.message ??
+              TranslationUtils.tr('ibm_failed_to_update_link'),
         );
         return false;
       }
@@ -672,12 +691,16 @@ class IbmController extends GetxController {
         Get.back();
       }
       if (response.success) {
-        CustomToastService.showSuccess(message: 'Referral link deleted!');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr('ibm_referral_link_deleted'),
+        );
         fetchLinks();
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to delete link',
+          message:
+              response.message ??
+              TranslationUtils.tr('ibm_failed_to_delete_link'),
         );
         return false;
       }
@@ -701,12 +724,16 @@ class IbmController extends GetxController {
       final response = await _apiProvider.createPartnerPlan(planData);
       Get.back(closeOverlays: true);
       if (response.success) {
-        CustomToastService.showSuccess(message: 'Commission plan created!');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr('ibm_commission_plan_created'),
+        );
         fetchPlans();
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to create plan',
+          message:
+              response.message ??
+              TranslationUtils.tr('ibm_failed_to_create_plan'),
         );
         return false;
       }
@@ -728,12 +755,16 @@ class IbmController extends GetxController {
       final response = await _apiProvider.deletePartnerPlan(planId);
       Get.back(closeOverlays: true);
       if (response.success) {
-        CustomToastService.showSuccess(message: 'Plan deleted');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr('ibm_plan_deleted'),
+        );
         fetchPlans();
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to delete plan',
+          message:
+              response.message ??
+              TranslationUtils.tr('ibm_failed_to_delete_plan'),
         );
         return false;
       }
@@ -777,7 +808,7 @@ class IbmController extends GetxController {
         currentClientOverview.assignAll(data);
       } else {
         profileErrorMessage.value =
-            response.message ?? 'Error loading overview';
+            response.message ?? TranslationUtils.tr('ibm_error_loading_overview');
       }
     } catch (e) {
       profileErrorMessage.value = e.toString();
@@ -1015,7 +1046,7 @@ class IbmController extends GetxController {
         }
       } else {
         CustomToastService.showError(
-          message: 'At least one trading group must remain visible.',
+          message: TranslationUtils.tr('ibm_at_least_one_group_visible'),
         );
       }
     } else {
@@ -1037,7 +1068,7 @@ class IbmController extends GetxController {
     try {
       if (selectedVisibleGroupIds.isEmpty) {
         CustomToastService.showError(
-          message: 'Please select at least one visible group.',
+          message: TranslationUtils.tr('ibm_please_select_one_visible_group'),
         );
         return false;
       }
@@ -1058,13 +1089,15 @@ class IbmController extends GetxController {
 
       if (response.success) {
         CustomToastService.showSuccess(
-          message: 'Client visibility updated successfully!',
+          message: TranslationUtils.tr('ibm_client_visibility_updated'),
         );
         fetchClientVisibility();
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to update visibility',
+          message:
+              response.message ??
+              TranslationUtils.tr('ibm_failed_to_update_visibility'),
         );
         return false;
       }
@@ -1302,11 +1335,17 @@ class IbmController extends GetxController {
       final response = await _apiProvider.moveClient(clientId, targetIbId);
       Get.back(closeOverlays: true);
       if (response.success) {
-        CustomToastService.showSuccess(message: 'Client reassigned successfully.');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr('ibm_client_reassigned_successfully'),
+        );
         fetchClients();
         return true;
       } else {
-        CustomToastService.showError(message: response.message ?? 'Failed to move client.');
+        CustomToastService.showError(
+          message:
+              response.message ??
+              TranslationUtils.tr('ibm_failed_to_move_client'),
+        );
         return false;
       }
     } catch (e) {
@@ -1342,12 +1381,18 @@ class IbmController extends GetxController {
       final response = await _apiProvider.cancelPayout(payoutId, reason: reason);
       Get.back(closeOverlays: true);
       if (response.success) {
-        CustomToastService.showSuccess(message: 'Payout request cancelled successfully.');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr('ibm_payout_request_cancelled'),
+        );
         fetchWallet();
         fetchTransactions();
         return true;
       } else {
-        CustomToastService.showError(message: response.message ?? 'Failed to cancel payout.');
+        CustomToastService.showError(
+          message:
+              response.message ??
+              TranslationUtils.tr('ibm_failed_to_cancel_payout'),
+        );
         return false;
       }
     } catch (e) {

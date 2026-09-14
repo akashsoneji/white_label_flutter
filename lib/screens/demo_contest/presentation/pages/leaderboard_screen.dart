@@ -228,7 +228,7 @@ class _SelectedContestHeader extends StatelessWidget {
     final languageService = Get.find<LanguageService>();
     final live = contest.isLive;
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 4.h),
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.all(14.w),
@@ -275,7 +275,9 @@ class _SelectedContestHeader extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6.r),
               ),
               child: Text(
-                live ? '● LIVE' : 'UPCOMING',
+                live
+                    ? '● ${TranslationUtils.tr('dc_live')}'
+                    : TranslationUtils.tr('dc_tab_upcoming').toUpperCase(),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w800,
@@ -356,7 +358,7 @@ class _LeaderboardBody extends StatelessWidget {
                       ),
                       SizedBox(width: 8.w),
                       Text(
-                        'Your rank',
+                        TranslationUtils.tr('leaderboard_screen_your_rank'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w700,

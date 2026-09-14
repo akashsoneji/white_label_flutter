@@ -209,7 +209,9 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                 if (showInitialLoader) {
                   return Center(
                     child: CommonLoadingWidget(
-                      message: 'Loading instruments...',
+                      message: languageService.tr(
+                        'instruments_screen_loading_instruments',
+                      ),
                       size: 50.0,
                       color: AppColors.primary,
                     ),
@@ -317,14 +319,14 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
     }
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 8.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 6.h, 16.w, 8.h),
       child: Column(
         children: [
           Row(
             children: [
               Expanded(
                 child: Text(
-                  'Instruments',
+                  languageService.tr('instruments_title'),
                   style: AppTextStyles.screenTitle.copyWith(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
@@ -361,10 +363,10 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                 // Show favorites count for Favorites filter
                 final displayText =
                     filter == 'Favorites'
-                        ? 'Favorites (${_controller.favoritesCount})'
+                        ? '${languageService.tr('instruments_favorites')} (${_controller.favoritesCount})'
                         : filter;
                 return Padding(
-                  padding: EdgeInsets.only(right: 8.w),
+                  padding: EdgeInsetsDirectional.only(end: 8.w),
                   child: GestureDetector(
                     onTap: () {
                       if (_isSearching) {
@@ -431,7 +433,9 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'By ${_controller.currentSort.value}',
+                TranslationUtils.trArgs('instruments_sort_by_value', {
+                  'sort': _sortLabel(_controller.currentSort.value),
+                }),
                 style: AppTextStyles.input.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w400,
@@ -562,7 +566,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                 ReorderableDragStartListener(
                   index: reorderIndex,
                   child: Padding(
-                    padding: EdgeInsets.only(right: 2.w),
+                    padding: EdgeInsetsDirectional.only(end: 2.w),
                     child: SizedBox(
                       height: 30.h,
                       width: 24.w,
@@ -729,8 +733,8 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
         key: Key('dismiss_${instrument.symbol}'),
         direction: DismissDirection.endToStart,
         background: Container(
-          alignment: Alignment.centerRight,
-          padding: EdgeInsets.only(right: 20.w),
+          alignment: AlignmentDirectional.centerEnd,
+          padding: EdgeInsetsDirectional.only(end: 20.w),
           color: Colors.red,
           child: Icon(Icons.delete, color: Colors.white, size: 24.sp),
         ),
@@ -993,7 +997,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
               ),
               SizedBox(height: 16.h),
               Text(
-                'Sort by',
+                languageService.tr('instruments_screen_sort_by'),
                 style: AppTextStyles.heading.copyWith(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
@@ -1016,7 +1020,10 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                                   padding: EdgeInsets.all(2.sp),
                                   child: _getSortIcon(option),
                                 ),
-                                Text(option, style: AppTextStyles.input),
+                                Text(
+                                  _sortLabel(option),
+                                  style: AppTextStyles.input,
+                                ),
                               ],
                             ),
                             trailing:
@@ -1044,6 +1051,21 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
         );
       },
     );
+  }
+
+  /// Display-only label for a sort option. The raw option strings are logic
+  /// values compared against [InstrumentsController.currentSort].
+  String _sortLabel(String option) {
+    switch (option) {
+      case 'Default':
+        return languageService.tr('ibm_default');
+      case 'Symbol A-Z':
+        return languageService.tr('instruments_sort_symbol_az');
+      case 'Symbol Z-A':
+        return languageService.tr('instruments_sort_symbol_za');
+      default:
+        return option;
+    }
   }
 
   Widget _getSortIcon(String option) {
@@ -1230,7 +1252,7 @@ class _BidPriceColumn extends StatelessWidget {
               if (dayLowValue != null) ...[
                 SizedBox(height: (compact ? 3.0 : 1.0).h),
                 RichText(
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.end,
                   text: TextSpan(
                     children: [
                       TextSpan(
@@ -1372,7 +1394,7 @@ class _AskPriceColumn extends StatelessWidget {
           if (dayHighValue != null) ...[
             SizedBox(height: (compact ? 3.0 : 1.0).h),
             RichText(
-              textAlign: TextAlign.left,
+              textAlign: TextAlign.start,
               text: TextSpan(
                 children: [
                   TextSpan(

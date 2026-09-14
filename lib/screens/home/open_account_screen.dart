@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import '../../constants/color.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
 class OpenAccountScreen extends StatefulWidget {
@@ -39,7 +40,7 @@ class _OpenAccountScreenState extends State<OpenAccountScreen> {
         elevation: 0,
         leading: const AppBackButton(),
         title: Text(
-          'Open Account',
+          TranslationUtils.tr('dashboard_open_account'),
           style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 18,
@@ -55,7 +56,7 @@ class _OpenAccountScreenState extends State<OpenAccountScreen> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 40, vertical: 24),
             child: Text(
-              'Open a trading account to get superior trading conditions any strategy',
+              TranslationUtils.tr('dashboard_open_account_subtitle'),
               textAlign: TextAlign.center,
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14,
@@ -104,7 +105,9 @@ class _OpenAccountScreenState extends State<OpenAccountScreen> {
                           ),
                           SizedBox(height: 12),
                           Text(
-                            'Real Account',
+                            TranslationUtils.tr(
+                              'open_account_screen_real_account',
+                            ),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -156,7 +159,9 @@ class _OpenAccountScreenState extends State<OpenAccountScreen> {
                           ),
                           SizedBox(height: 12),
                           Text(
-                            'Demo Account',
+                            TranslationUtils.tr(
+                              'open_account_screen_demo_account',
+                            ),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -195,8 +200,10 @@ class _OpenAccountScreenState extends State<OpenAccountScreen> {
                 child: Center(
                   child: Text(
                     selectedAccountType != null
-                        ? 'Next'
-                        : 'Select Account Type',
+                        ? TranslationUtils.tr('navigation_next')
+                        : TranslationUtils.tr(
+                          'kyc_bank_screen_select_account_type',
+                        ),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,

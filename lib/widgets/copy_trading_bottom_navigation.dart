@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 
 class CopyTradingBottomNavItem {
   final String label;
@@ -28,20 +30,22 @@ class CopyTradingBottomNavigation extends StatelessWidget {
     this.isMaster = false,
   });
 
+  /// `label` holds a translation key, resolved at render time so these lists
+  /// can stay `const` while still following the active language.
   static const List<CopyTradingBottomNavItem> _copierItems = [
     CopyTradingBottomNavItem(
-      label: 'Become Master',
+      label: 'copy_trading_nav_become_master',
       icon: "assets/svg/copy_trading/bottom_navigation/become_master.svg",
       iconActive:
           "assets/svg/copy_trading/bottom_navigation/become_master_bold.svg",
     ),
     CopyTradingBottomNavItem(
-      label: 'Explore',
+      label: 'copy_trading_nav_explore',
       icon: "assets/svg/copy_trading/bottom_navigation/explore.svg",
       iconActive: "assets/svg/copy_trading/bottom_navigation/explore_bold.svg",
     ),
     CopyTradingBottomNavItem(
-      label: 'Investments',
+      label: 'copy_trading_nav_investments',
       icon: 'assets/svg/copy_trading/bottom_navigation/investments.svg',
       iconActive:
           'assets/svg/copy_trading/bottom_navigation/investments_bold.svg',
@@ -50,29 +54,29 @@ class CopyTradingBottomNavigation extends StatelessWidget {
 
   static const List<CopyTradingBottomNavItem> _masterItems = [
     CopyTradingBottomNavItem(
-      label: 'Dashboard',
+      label: 'copy_trading_nav_dashboard',
       icon: 'assets/svg/copy_trading/bottom_navigation/dashboard.svg',
       iconActive:
           'assets/svg/copy_trading/bottom_navigation/dashboard_bold.svg',
     ),
     CopyTradingBottomNavItem(
-      label: 'My Plans',
+      label: 'copy_trading_nav_my_plans',
       icon: "assets/svg/copy_trading/bottom_navigation/my_plans.svg",
       iconActive: "assets/svg/copy_trading/bottom_navigation/my_plans_bold.svg",
     ),
     CopyTradingBottomNavItem(
-      label: 'My Copiers',
+      label: 'copy_trading_nav_my_copiers',
       icon: "assets/svg/copy_trading/bottom_navigation/my_copiers.svg",
       iconActive:
           "assets/svg/copy_trading/bottom_navigation/my_copiers_bold.svg",
     ),
     CopyTradingBottomNavItem(
-      label: 'Explore',
+      label: 'copy_trading_nav_explore',
       icon: "assets/svg/copy_trading/bottom_navigation/explore.svg",
       iconActive: "assets/svg/copy_trading/bottom_navigation/explore_bold.svg",
     ),
     CopyTradingBottomNavItem(
-      label: 'Investments',
+      label: 'copy_trading_nav_investments',
       icon: 'assets/svg/copy_trading/bottom_navigation/investments.svg',
       iconActive:
           'assets/svg/copy_trading/bottom_navigation/investments_bold.svg',
@@ -85,7 +89,11 @@ class CopyTradingBottomNavigation extends StatelessWidget {
 
     return SafeArea(
       child: Padding(
-        padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 12.h),
+        padding: EdgeInsetsDirectional.only(
+          start: 16.w,
+          end: 16.w,
+          bottom: 12.h,
+        ),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(32.r),
@@ -128,7 +136,7 @@ class CopyTradingBottomNavigation extends StatelessWidget {
                           idx,
                           item.icon,
                           item.iconActive,
-                          item.label,
+                          Get.find<LanguageService>().tr(item.label),
                         );
                       }).toList(),
                 ),

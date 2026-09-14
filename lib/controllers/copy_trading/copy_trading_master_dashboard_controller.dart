@@ -2,6 +2,7 @@ import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/models/copy_trading_dashboard_overview.dart';
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
@@ -495,7 +496,8 @@ class CopyTradingMasterDashboardController extends GetxController {
       ]);
       await _loadOpenPositions();
     } catch (e) {
-      errorMessage.value = 'Failed to load dashboard: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('pmam_failed_to_load_dashboard')}: $e';
     } finally {
       if (showLoading) isLoading.value = false;
     }
@@ -676,7 +678,8 @@ class CopyTradingMasterDashboardController extends GetxController {
       );
       if (!res.success || res.data == null) {
         eligibleAccounts.clear();
-        eligibleAccountsError.value = res.message ?? 'Failed to load eligible accounts';
+        eligibleAccountsError.value = res.message ??
+            TranslationUtils.tr('copy_trading_failed_to_load_eligible_accounts');
         return;
       }
       final data = res.data?['data'];
@@ -688,7 +691,8 @@ class CopyTradingMasterDashboardController extends GetxController {
         eligibleAccounts.clear();
       }
     } catch (e) {
-      eligibleAccountsError.value = 'Failed to load eligible accounts: $e';
+      eligibleAccountsError.value =
+          '${TranslationUtils.tr('copy_trading_failed_to_load_eligible_accounts')}: $e';
       eligibleAccounts.clear();
     } finally {
       eligibleAccountsLoading.value = false;
@@ -704,11 +708,13 @@ class CopyTradingMasterDashboardController extends GetxController {
         await _loadPlans();
         await _loadStats();
       } else {
-        errorMessage.value = res.message ?? 'Failed to create plan';
+        errorMessage.value =
+            res.message ?? TranslationUtils.tr('copy_trading_failed_to_create_plan');
       }
       return res;
     } catch (e) {
-      errorMessage.value = 'Create plan error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_create_plan_error')}: $e';
       return ApiResponse.error(errorMessage.value);
     } finally {
       isLoading.value = false;
@@ -726,11 +732,13 @@ class CopyTradingMasterDashboardController extends GetxController {
         await _loadPlans();
         await _loadStats();
       } else {
-        errorMessage.value = res.message ?? 'Failed to inactivate plan';
+        errorMessage.value = res.message ??
+            TranslationUtils.tr('copy_trading_failed_to_inactivate_plan');
       }
       return res;
     } catch (e) {
-      errorMessage.value = 'Inactivate plan error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_inactivate_plan_error')}: $e';
       return ApiResponse.error(errorMessage.value);
     } finally {
       isLoading.value = false;
@@ -748,11 +756,13 @@ class CopyTradingMasterDashboardController extends GetxController {
         await _loadPlans();
         await _loadStats();
       } else {
-        errorMessage.value = res.message ?? 'Failed to pause plan';
+        errorMessage.value =
+            res.message ?? TranslationUtils.tr('copy_trading_failed_to_pause_plan');
       }
       return res;
     } catch (e) {
-      errorMessage.value = 'Pause plan error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_pause_plan_error')}: $e';
       return ApiResponse.error(errorMessage.value);
     } finally {
       isLoading.value = false;
@@ -770,11 +780,13 @@ class CopyTradingMasterDashboardController extends GetxController {
         await _loadPlans();
         await _loadStats();
       } else {
-        errorMessage.value = res.message ?? 'Failed to resume plan';
+        errorMessage.value =
+            res.message ?? TranslationUtils.tr('copy_trading_failed_to_resume_plan');
       }
       return res;
     } catch (e) {
-      errorMessage.value = 'Resume plan error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_resume_plan_error')}: $e';
       return ApiResponse.error(errorMessage.value);
     } finally {
       isLoading.value = false;
@@ -792,11 +804,13 @@ class CopyTradingMasterDashboardController extends GetxController {
         await _loadPlans();
         await _loadStats();
       } else {
-        errorMessage.value = res.message ?? 'Failed to update plan';
+        errorMessage.value =
+            res.message ?? TranslationUtils.tr('copy_trading_failed_to_update_plan');
       }
       return res;
     } catch (e) {
-      errorMessage.value = 'Update plan error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_update_plan_error')}: $e';
       return ApiResponse.error(errorMessage.value);
     } finally {
       isLoading.value = false;

@@ -67,7 +67,7 @@ class _DepositScreenState extends State<DepositScreen> {
         backgroundColor: AppColors.whiteColor,
         elevation: 0,
         leading: Padding(
-          padding: EdgeInsets.only(left: 10.w),
+          padding: EdgeInsetsDirectional.only(start: 10.w),
           child: AppBackButton(onPressed: () => NavigationHelper.safeBack(context: context),
           ),
         ),
@@ -141,7 +141,7 @@ class _DepositScreenState extends State<DepositScreen> {
         _SingleDecimalTextFormatter(),
       ],
       decoration: InputDecoration(
-        labelText: 'Amount',
+        labelText: TranslationUtils.tr('deposit_amount'),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -189,7 +189,9 @@ class _DepositScreenState extends State<DepositScreen> {
     // Show loading
 
     if (amountController.text.isEmpty || amountController.text == "0.00") {
-      CustomToastService.showError(message: 'Please enter a valid amount');
+      CustomToastService.showError(
+        message: TranslationUtils.tr('deposit_validation_amount'),
+      );
       return;
     }
 

@@ -296,7 +296,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
       final col    = change >= 0 ? MetaTheme.tpGreen : MetaTheme.sellRed;
 
       return Padding(
-        padding: EdgeInsets.fromLTRB(14.w, 2.h, 14.w, 4.h),
+        padding: EdgeInsetsDirectional.fromSTEB(14.w, 2.h, 14.w, 4.h),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -363,15 +363,19 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
   // ── Chart area — just the WebView, no overlay ─────────────────────────
   Widget _chartArea(BuildContext c) {
     return Container(
-      margin: EdgeInsets.fromLTRB(4.w, 0, 4.w, 4.h),
+      margin: EdgeInsetsDirectional.fromSTEB(4.w, 0, 4.w, 4.h),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: MetaTheme.divider(c), width: 0.5),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.r),
-        // _MetaChartArea seeds the WebView symbol ONCE and updates via key
-        child: _MetaChartArea(isDark: AppColors.chartTheme == 'dark'),
+        // _MetaChartArea seeds the WebView symbol ONCE and updates via key.
+        // Candle chart: never mirror the price/time axes.
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: _MetaChartArea(isDark: AppColors.chartTheme == 'dark'),
+        ),
       ),
     );
   }
@@ -720,7 +724,7 @@ class _SymbolPickerState extends State<_SymbolPicker> {
   @override
   Widget build(BuildContext c) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 16.h),
+      padding: EdgeInsetsDirectional.fromSTEB(14.w, 12.h, 14.w, 16.h),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

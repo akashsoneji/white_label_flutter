@@ -419,9 +419,9 @@ class _TradeScreenState extends State<TradeScreen> {
                                 )
                               else
                                 SliverPadding(
-                                  padding: EdgeInsets.only(
-                                    left: 16.w,
-                                    right: 16.w,
+                                  padding: EdgeInsetsDirectional.only(
+                                    start: 16.w,
+                                    end: 16.w,
                                     bottom:
                                         77.h +
                                         MediaQuery.of(context).padding.bottom,
@@ -495,16 +495,31 @@ class _TradeScreenState extends State<TradeScreen> {
     );
   }
 
+  /// Display-only label for the direction filter. The raw value is still used
+  /// for comparison and for the controller/API call.
+  String _directionLabel(String direction) {
+    switch (direction) {
+      case 'All':
+        return languageService.tr('common_all');
+      case 'Buy':
+        return languageService.tr('general_buy');
+      case 'Sell':
+        return languageService.tr('general_sell');
+      default:
+        return direction;
+    }
+  }
+
   String _getEmptyStateMessage(int selectedTab) {
     switch (selectedTab) {
       case 0:
-        return 'No Open Trade';
+        return languageService.tr('trade_screen_no_open_trade');
       case 1:
-        return 'No Pending Order';
+        return languageService.tr('trade_screen_no_pending_order');
       case 2:
-        return 'No Trade History';
+        return languageService.tr('trade_screen_no_trade_history');
       default:
-        return 'No Open Trade';
+        return languageService.tr('trade_screen_no_open_trade');
     }
   }
 
@@ -620,9 +635,21 @@ class _TradeScreenState extends State<TradeScreen> {
         ),
         child: Row(
           children: [
-            _buildTabItem(tradingController, 0, 'Market'),
-            _buildTabItem(tradingController, 1, 'Pending'),
-            _buildTabItem(tradingController, 2, 'History'),
+            _buildTabItem(
+              tradingController,
+              0,
+              languageService.tr('iquote_tab_market'),
+            ),
+            _buildTabItem(
+              tradingController,
+              1,
+              languageService.tr('kyc_verification_pending'),
+            ),
+            _buildTabItem(
+              tradingController,
+              2,
+              languageService.tr('dashboard_history'),
+            ),
           ],
         ),
       );
@@ -673,9 +700,21 @@ class _TradeScreenState extends State<TradeScreen> {
             // Tab Buttons
             Row(
               children: [
-                _buildTabItem(tradingController, 0, 'Market'),
-                _buildTabItem(tradingController, 1, 'Pending'),
-                _buildTabItem(tradingController, 2, 'History'),
+                _buildTabItem(
+                  tradingController,
+                  0,
+                  languageService.tr('iquote_tab_market'),
+                ),
+                _buildTabItem(
+                  tradingController,
+                  1,
+                  languageService.tr('kyc_verification_pending'),
+                ),
+                _buildTabItem(
+                  tradingController,
+                  2,
+                  languageService.tr('dashboard_history'),
+                ),
               ],
             ),
           ],
@@ -826,7 +865,7 @@ class _TradeScreenState extends State<TradeScreen> {
                     child: Opacity(
                       opacity: 0,
                       child: Padding(
-                        padding: EdgeInsets.only(left: 4.w),
+                        padding: EdgeInsetsDirectional.only(start: 4.w),
                         child: badge,
                       ),
                     ),
@@ -842,7 +881,10 @@ class _TradeScreenState extends State<TradeScreen> {
                   ),
                 ),
                 if (count > 0 && index != 2)
-                  Padding(padding: EdgeInsets.only(left: 4.w), child: badge),
+                  Padding(
+                    padding: EdgeInsetsDirectional.only(start: 4.w),
+                    child: badge,
+                  ),
               ],
             ),
           );
@@ -909,13 +951,16 @@ class _TradeScreenState extends State<TradeScreen> {
                       TextSpan(
                         text:
                             tradingController.selectedTab == 1
-                                ? 'Pending orders:\n'
-                                : 'Floating profit:\n',
+                                ? '${languageService.tr('trade_screen_pending_orders')}\n'
+                                : '${languageService.tr('trade_screen_floating_profit')}\n',
                       ),
                       TextSpan(
                         text:
                             tradingController.selectedTab == 1
-                                ? '${positions.length} orders'
+                                ? TranslationUtils.trArgs(
+                                  'trade_screen_count_orders',
+                                  {'count': '${positions.length}'},
+                                )
                                 : '\$${PrecisionHelper.formatPnL(totalProfitLoss)}',
                         style: AppTextStyles.bodyText.copyWith(
                           fontWeight: FontWeight.w600,
@@ -964,8 +1009,8 @@ class _TradeScreenState extends State<TradeScreen> {
                           ),
                           // Badge showing count when filter is active
                           if (hasDateFilter)
-                            Positioned(
-                              right: 0,
+                            PositionedDirectional(
+                              end: 0,
                               top: 0,
                               child: Container(
                                 padding: EdgeInsets.symmetric(
@@ -1033,8 +1078,8 @@ class _TradeScreenState extends State<TradeScreen> {
                         ),
                         // Badge showing count when filter is active
                         if (isInstrumentFilterActive)
-                          Positioned(
-                            right: 0,
+                          PositionedDirectional(
+                            end: 0,
                             top: 0,
                             child: Container(
                               padding: EdgeInsets.symmetric(
@@ -1103,8 +1148,8 @@ class _TradeScreenState extends State<TradeScreen> {
                         ),
                         // Badge showing count when filter is active
                         if (isFilterActive)
-                          Positioned(
-                            right: 0,
+                          PositionedDirectional(
+                            end: 0,
                             top: 0,
                             child: Container(
                               padding: EdgeInsets.symmetric(
@@ -1159,7 +1204,10 @@ class _TradeScreenState extends State<TradeScreen> {
                         isAnyActive
                             ? Padding(
                               key: const ValueKey('reset_btn'),
-                              padding: EdgeInsets.only(left: 4.w, right: 2.w),
+                              padding: EdgeInsetsDirectional.only(
+                                start: 4.w,
+                                end: 2.w,
+                              ),
                               child: InkWell(
                                 onTap: () async {
                                   await tradingController.resetAllFilters();
@@ -1206,7 +1254,7 @@ class _TradeScreenState extends State<TradeScreen> {
     }
 
     return Container(
-      margin: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 16.h),
+      margin: EdgeInsetsDirectional.fromSTEB(16.w, 6.h, 16.w, 16.h),
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       decoration: BoxDecoration(
         color: AppColors.cardBackGround,
@@ -1228,7 +1276,7 @@ class _TradeScreenState extends State<TradeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Loading more history',
+                  languageService.tr('trade_screen_loading_more_history'),
                   style: AppTextStyles.heading.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
@@ -1237,7 +1285,7 @@ class _TradeScreenState extends State<TradeScreen> {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  'Please wait…',
+                  languageService.tr('trade_screen_please_wait'),
                   style: AppTextStyles.label.copyWith(
                     fontSize: 12.sp,
                     color: AppColors.textGrey,
@@ -1430,7 +1478,7 @@ class _TradeScreenState extends State<TradeScreen> {
                 ),
                 // Expand icon
                 Padding(
-                  padding: EdgeInsets.only(top: 8.h, right: 8.w),
+                  padding: EdgeInsetsDirectional.only(top: 8.h, end: 8.w),
                   child: Icon(
                     isExpanded ? Icons.expand_less : Icons.expand_more,
                     color: AppColors.textGrey,
@@ -1513,7 +1561,7 @@ class _TradeScreenState extends State<TradeScreen> {
         },
         background: Container(
           margin: EdgeInsets.only(bottom: 16.h),
-          alignment: Alignment.centerRight,
+          alignment: AlignmentDirectional.centerEnd,
           decoration: BoxDecoration(
             color: AppColors.error,
             borderRadius: BorderRadius.circular(12.r),
@@ -1528,7 +1576,7 @@ class _TradeScreenState extends State<TradeScreen> {
               ),
               SizedBox(width: 8.w),
               Text(
-                'Close',
+                languageService.tr('bank_list_close'),
                 style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.whiteColor,
                   fontSize: 14.sp,
@@ -1539,9 +1587,9 @@ class _TradeScreenState extends State<TradeScreen> {
           ),
         ),
         secondaryBackground: Container(
-          alignment: Alignment.centerRight,
+          alignment: AlignmentDirectional.centerEnd,
           margin: EdgeInsets.only(bottom: 8.h),
-          padding: EdgeInsets.only(right: 20.w),
+          padding: EdgeInsetsDirectional.only(end: 20.w),
           decoration: BoxDecoration(
             color: AppColors.error,
             borderRadius: BorderRadius.circular(12.r),
@@ -1647,7 +1695,7 @@ class _TradeScreenState extends State<TradeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    'Price Range',
+                    languageService.tr('trade_screen_price_range'),
                     style: AppTextStyles.label.copyWith(
                       fontSize: 9.sp,
                       color: AppColors.textGrey,
@@ -1671,7 +1719,9 @@ class _TradeScreenState extends State<TradeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    isPendingTab ? 'Status' : 'Profit',
+                    isPendingTab
+                        ? languageService.tr('common_status')
+                        : languageService.tr('dashboard_profit'),
                     style: AppTextStyles.label.copyWith(
                       fontSize: 9.sp,
                       color: AppColors.textGrey,
@@ -1773,7 +1823,7 @@ class _TradeScreenState extends State<TradeScreen> {
                       tradingController.availableInstruments.isEmpty
                           ? Center(
                             child: Text(
-                              'No Open Trade',
+                              languageService.tr('trade_screen_no_open_trade'),
                               style: AppTextStyles.heading,
                             ),
                           )
@@ -1920,7 +1970,7 @@ class _TradeScreenState extends State<TradeScreen> {
                                 // Removed maximumSize to avoid constraint conflicts
                               ),
                               child: Text(
-                                'Confirm',
+                                languageService.tr('confirm'),
                                 style: AppTextStyles.label.copyWith(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w600,
@@ -2000,7 +2050,7 @@ class _TradeScreenState extends State<TradeScreen> {
                         final isSelected = currentDirection == direction;
                         return ListTile(
                           title: Text(
-                            direction,
+                            _directionLabel(direction),
                             style: AppTextStyles.label.copyWith(
                               fontSize: 16.sp,
                               color: AppColors.textPrimary,
@@ -2139,7 +2189,9 @@ class _TradeScreenState extends State<TradeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Filter History',
+                          languageService.tr(
+                            'internal_transfer_history_screen_filter_history',
+                          ),
                           style: AppTextStyles.heading.copyWith(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w700,
@@ -2163,7 +2215,7 @@ class _TradeScreenState extends State<TradeScreen> {
                       children: [
                         Expanded(
                           child: _buildQuickFilterButton(
-                            'Today',
+                            languageService.tr('dc_range_today'),
                             selectedFilter == 'today',
                             () {
                               setState(() {
@@ -2189,7 +2241,9 @@ class _TradeScreenState extends State<TradeScreen> {
                         SizedBox(width: 8.w),
                         Expanded(
                           child: _buildQuickFilterButton(
-                            'Last Week',
+                            languageService.tr(
+                              'transaction_history_period_last_week',
+                            ),
                             selectedFilter == 'thisWeek',
                             () {
                               setState(() {
@@ -2212,7 +2266,7 @@ class _TradeScreenState extends State<TradeScreen> {
                         SizedBox(width: 8.w),
                         Expanded(
                           child: _buildQuickFilterButton(
-                            'Last Month',
+                            languageService.tr('trade_screen_last_month'),
                             selectedFilter == 'thisMonth',
                             () {
                               setState(() {
@@ -2236,7 +2290,9 @@ class _TradeScreenState extends State<TradeScreen> {
                         SizedBox(width: 8.w),
                         Expanded(
                           child: _buildQuickFilterButton(
-                            'Custom',
+                            languageService.tr(
+                              'transaction_history_period_custom',
+                            ),
                             selectedFilter == 'custom',
                             () {
                               setState(() {
@@ -2312,7 +2368,9 @@ class _TradeScreenState extends State<TradeScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      'Start',
+                                      languageService.tr(
+                                        'transaction_history_start',
+                                      ),
                                       style: AppTextStyles.label.copyWith(
                                         fontSize: 11.sp,
                                         color: AppColors.textGrey,
@@ -2322,7 +2380,7 @@ class _TradeScreenState extends State<TradeScreen> {
                                     Text(
                                       startDate != null
                                           ? '${startDate!.day}/${startDate!.month}/${startDate!.year}'
-                                          : 'Select',
+                                          : languageService.tr('common_select'),
                                       style: AppTextStyles.label.copyWith(
                                         fontSize: 13.sp,
                                         fontWeight: FontWeight.w600,
@@ -2393,7 +2451,9 @@ class _TradeScreenState extends State<TradeScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      'End',
+                                      languageService.tr(
+                                        'transaction_history_end',
+                                      ),
                                       style: AppTextStyles.label.copyWith(
                                         fontSize: 11.sp,
                                         color: AppColors.textGrey,
@@ -2403,7 +2463,7 @@ class _TradeScreenState extends State<TradeScreen> {
                                     Text(
                                       endDate != null
                                           ? '${endDate!.day}/${endDate!.month}/${endDate!.year}'
-                                          : 'Select',
+                                          : languageService.tr('common_select'),
                                       style: AppTextStyles.label.copyWith(
                                         fontSize: 13.sp,
                                         fontWeight: FontWeight.w600,
@@ -2448,7 +2508,7 @@ class _TradeScreenState extends State<TradeScreen> {
                                 ),
                               ),
                               child: Text(
-                                'Reset All',
+                                languageService.tr('trade_screen_reset_all'),
                                 style: AppTextStyles.label.copyWith(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w600,
@@ -2470,7 +2530,9 @@ class _TradeScreenState extends State<TradeScreen> {
                                     (startDate == null || endDate == null)) {
                                   CustomToastService.showError(
                                     message:
-                                        'Please select both start and end dates',
+                                        languageService.tr(
+                                          'trade_select_dates',
+                                        ),
                                   );
                                   return;
                                 }
@@ -2479,7 +2541,9 @@ class _TradeScreenState extends State<TradeScreen> {
                                     endDate!.isBefore(startDate!)) {
                                   CustomToastService.showError(
                                     message:
-                                        'End date must be after start date',
+                                        languageService.tr(
+                                          'trade_date_range_error',
+                                        ),
                                   );
                                   return;
                                 }
@@ -2545,7 +2609,7 @@ class _TradeScreenState extends State<TradeScreen> {
                                 ),
                               ),
                               child: Text(
-                                'Apply Filter',
+                                languageService.tr('trade_screen_apply_filter'),
                                 style: AppTextStyles.label.copyWith(
                                   fontSize: 15.sp,
                                   fontWeight: FontWeight.w600,
@@ -2713,7 +2777,9 @@ class _TradeScreenState extends State<TradeScreen> {
                             ),
                             Text(
                               tradingController.selectedTab == 1
-                                  ? 'Pending'
+                                  ? languageService.tr(
+                                    'kyc_verification_pending',
+                                  )
                                   : '\$${PrecisionHelper.formatPnL(currentProfitLoss)}',
                               style: AppTextStyles.heading.copyWith(
                                 fontSize: 14.sp,
@@ -2768,7 +2834,13 @@ class _TradeScreenState extends State<TradeScreen> {
                             SizedBox(height: 4.h),
                             Text(
                               tradingController.selectedTab == 1
-                                  ? 'Order: ${currentPosition.entryPrice} | Current: ${currentPosition.currentPrice}'
+                                  ? TranslationUtils.trArgs(
+                                    'trade_screen_order_current_prices',
+                                    {
+                                      'order': currentPosition.entryPrice,
+                                      'current': currentPosition.currentPrice,
+                                    },
+                                  )
                                   : '${currentPosition.entryPrice} → ${currentPosition.currentPrice}',
                               style: AppTextStyles.label.copyWith(
                                 fontSize: 12.sp,
@@ -2791,7 +2863,10 @@ class _TradeScreenState extends State<TradeScreen> {
                                     currentPosition.stopLoss != '0' &&
                                     currentPosition.stopLoss != '0.0') ...[
                                   Text(
-                                    'SL: ${currentPosition.stopLoss}',
+                                    TranslationUtils.trArgs(
+                                      'trade_screen_sl_value',
+                                      {'value': currentPosition.stopLoss},
+                                    ),
                                     style: AppTextStyles.label.copyWith(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w400,
@@ -2806,7 +2881,10 @@ class _TradeScreenState extends State<TradeScreen> {
                                     currentPosition.takeProfit != '0' &&
                                     currentPosition.takeProfit != '0.0') ...[
                                   Text(
-                                    'TP: ${currentPosition.takeProfit}',
+                                    TranslationUtils.trArgs(
+                                      'trade_screen_tp_value',
+                                      {'value': currentPosition.takeProfit},
+                                    ),
                                     style: AppTextStyles.label.copyWith(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w400,
@@ -2824,7 +2902,7 @@ class _TradeScreenState extends State<TradeScreen> {
                                         currentPosition.takeProfit == '0' ||
                                         currentPosition.takeProfit == '0.0'))
                                   Text(
-                                    'SL: -  TP: -',
+                                    TranslationUtils.tr('trade_screen_sl_tp'),
                                     style: AppTextStyles.label.copyWith(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w400,
@@ -2835,7 +2913,9 @@ class _TradeScreenState extends State<TradeScreen> {
                             ),
                             // Right side: Position ID
                             Text(
-                              'ID: ${currentPosition.orderId}',
+                              TranslationUtils.trArgs('trade_screen_id_value', {
+                                'id': currentPosition.orderId,
+                              }),
                               style: AppTextStyles.label.copyWith(
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.w400,
@@ -2849,7 +2929,7 @@ class _TradeScreenState extends State<TradeScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Open: ${_formatPositionTime(displayOpenTime)}',
+                              '${TranslationUtils.tr('meta_history_screen_open')} ${_formatPositionTime(displayOpenTime)}',
                               style: AppTextStyles.label.copyWith(
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.w400,
@@ -2857,7 +2937,7 @@ class _TradeScreenState extends State<TradeScreen> {
                               ),
                             ),
                             Text(
-                              'Swap: ${_formatSwapValue(displaySwap)}',
+                              '${TranslationUtils.tr('meta_history_screen_swap')} ${_formatSwapValue(displaySwap)}',
                               style: AppTextStyles.label.copyWith(
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.w400,
@@ -2884,8 +2964,10 @@ class _TradeScreenState extends State<TradeScreen> {
                       // Pending order actions
                       _buildActionOption(
                         icon: Icons.cancel,
-                        title: 'Cancel Order',
-                        subtitle: 'Cancel this pending order',
+                        title: languageService.tr('trade_cancel_order'),
+                        subtitle: languageService.tr(
+                          'trade_cancel_order_subtitle',
+                        ),
                         onTap: () async {
                           Get.back(closeOverlays: true);
                           await _showCancelOrderConfirmation(
@@ -2897,9 +2979,10 @@ class _TradeScreenState extends State<TradeScreen> {
                       ),
                       _buildActionOption(
                         icon: Icons.edit,
-                        title: 'Modify Order',
-                        subtitle:
-                            'Change order price, stop loss or take profit',
+                        title: languageService.tr('trade_modify_order'),
+                        subtitle: languageService.tr(
+                          'trade_screen_change_order_price_stop_loss_or',
+                        ),
                         onTap: () {
                           Get.back(closeOverlays: true);
                           Get.to(() => EditOrderScreen(position: position));
@@ -2908,8 +2991,10 @@ class _TradeScreenState extends State<TradeScreen> {
                       ),
                       _buildActionOption(
                         icon: Icons.add,
-                        title: 'New Order',
-                        subtitle: 'Place a new order for this instrument',
+                        title: languageService.tr('trade_new_order'),
+                        subtitle: languageService.tr(
+                          'trade_new_order_subtitle',
+                        ),
                         onTap: () {
                           Get.back(closeOverlays: true);
                           // Use callback to navigate to chart tab in TradingMainScreen
@@ -2921,8 +3006,8 @@ class _TradeScreenState extends State<TradeScreen> {
                       ),
                       _buildActionOption(
                         icon: Icons.show_chart,
-                        title: 'Chart',
-                        subtitle: 'View detailed chart for this instrument',
+                        title: languageService.tr('bottom_navigation_chart'),
+                        subtitle: languageService.tr('trade_chart_subtitle'),
                         onTap: () {
                           Get.back(closeOverlays: true);
                           // Use callback to navigate to chart tab in TradingMainScreen
@@ -2937,8 +3022,12 @@ class _TradeScreenState extends State<TradeScreen> {
                       // Market position actions
                       _buildActionOption(
                         icon: Icons.close,
-                        title: 'Close / Modify Position',
-                        subtitle: 'Close / Modify this position immediately',
+                        title: languageService.tr(
+                          'trade_close_modify_position',
+                        ),
+                        subtitle: languageService.tr(
+                          'trade_close_modify_subtitle',
+                        ),
                         onTap: () {
                           Get.back(closeOverlays: true);
                           Get.to(() => ClosePositionScreen(position: position));
@@ -2957,8 +3046,10 @@ class _TradeScreenState extends State<TradeScreen> {
                       // ),
                       _buildActionOption(
                         icon: Icons.add,
-                        title: 'New Order',
-                        subtitle: 'Place a new order for this instrument',
+                        title: languageService.tr('trade_new_order'),
+                        subtitle: languageService.tr(
+                          'trade_new_order_subtitle',
+                        ),
                         onTap: () {
                           Get.back(closeOverlays: true);
                           // Use callback to navigate to chart tab in TradingMainScreen
@@ -2970,8 +3061,8 @@ class _TradeScreenState extends State<TradeScreen> {
                       ),
                       _buildActionOption(
                         icon: Icons.show_chart,
-                        title: 'Chart',
-                        subtitle: 'View detailed chart for this instrument',
+                        title: languageService.tr('bottom_navigation_chart'),
+                        subtitle: languageService.tr('trade_chart_subtitle'),
                         onTap: () {
                           Get.back(closeOverlays: true);
                           // Use callback to navigate to chart tab in TradingMainScreen
@@ -3067,7 +3158,9 @@ class _TradeScreenState extends State<TradeScreen> {
                   Padding(
                     padding: EdgeInsets.all(16.w),
                     child: Text(
-                      'Which positions would you like to close at market prices?',
+                      languageService.tr(
+                        'trade_screen_which_positions_would_you_like_to',
+                      ),
                       style: AppTextStyles.heading.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
@@ -3086,7 +3179,9 @@ class _TradeScreenState extends State<TradeScreen> {
                             _buildCloseOption(
                               tradingController,
                               'all_currently_open',
-                              'All currently open',
+                              languageService.tr(
+                                'iquote_position_all_currently_open',
+                              ),
                               () => tradingController.getTotalProfitLoss(),
                               selectedOption == 'all_currently_open',
                               (value) => setState(() => selectedOption = value),
@@ -3094,7 +3189,9 @@ class _TradeScreenState extends State<TradeScreen> {
                             _buildCloseOption(
                               tradingController,
                               'all_profitable',
-                              'All profitable',
+                              languageService.tr(
+                                'iquote_position_all_profitable',
+                              ),
                               () =>
                                   tradingController
                                       .getTotalProfitableProfitLoss(),
@@ -3104,7 +3201,7 @@ class _TradeScreenState extends State<TradeScreen> {
                             _buildCloseOption(
                               tradingController,
                               'all_losing',
-                              'All losing',
+                              languageService.tr('trade_screen_all_losing'),
                               () =>
                                   tradingController.getTotalLosingProfitLoss(),
                               selectedOption == 'all_losing',
@@ -3113,7 +3210,7 @@ class _TradeScreenState extends State<TradeScreen> {
                             _buildCloseOption(
                               tradingController,
                               'all_long',
-                              'All Long',
+                              languageService.tr('trade_screen_all_long'),
                               () => tradingController.getTotalLongProfitLoss(),
                               selectedOption == 'all_long',
                               (value) => setState(() => selectedOption = value),
@@ -3121,7 +3218,7 @@ class _TradeScreenState extends State<TradeScreen> {
                             _buildCloseOption(
                               tradingController,
                               'all_short',
-                              'All Short',
+                              languageService.tr('trade_screen_all_short'),
                               () => tradingController.getTotalShortProfitLoss(),
                               selectedOption == 'all_short',
                               (value) => setState(() => selectedOption = value),
@@ -3155,7 +3252,7 @@ class _TradeScreenState extends State<TradeScreen> {
                                 // Removed maximumSize to avoid constraint conflicts
                               ),
                               child: Text(
-                                'Cancel',
+                                languageService.tr('account_management_cancel'),
                                 style: AppTextStyles.label.copyWith(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w600,
@@ -3183,12 +3280,27 @@ class _TradeScreenState extends State<TradeScreen> {
                                 final count =
                                     tradingController.pendingPositions.length;
                                 buttonText =
-                                    'Confirm ($count order${count != 1 ? 's' : ''})';
+                                    TranslationUtils.trArgs(
+                                      'trade_screen_confirm_orders_count',
+                                      {'count': '$count'},
+                                    );
                               } else {
                                 buttonText =
                                     isPositive
-                                        ? 'Confirm (+\$${PrecisionHelper.formatPnL(pnl)})'
-                                        : 'Confirm (\$${PrecisionHelper.formatPnL(pnl)})';
+                                        ? TranslationUtils.trArgs(
+                                          'trade_screen_confirm_amount',
+                                          {
+                                            'amount':
+                                                '+\$${PrecisionHelper.formatPnL(pnl)}',
+                                          },
+                                        )
+                                        : TranslationUtils.trArgs(
+                                          'trade_screen_confirm_amount',
+                                          {
+                                            'amount':
+                                                '\$${PrecisionHelper.formatPnL(pnl)}',
+                                          },
+                                        );
                               }
 
                               return ElevatedButton(
@@ -3368,8 +3480,8 @@ class _TradeScreenState extends State<TradeScreen> {
 
     if (activeAccount == null) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'No active account found',
+        title: languageService.tr('close_position_error'),
+        message: languageService.tr('chart_no_active_account'),
       );
       return;
     }
@@ -3426,8 +3538,9 @@ class _TradeScreenState extends State<TradeScreen> {
       // The controller will show the API response error message
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Failed to close positions: ${e.toString()}',
-          title: 'Error',
+          message:
+              '${languageService.tr('trade_screen_failed_to_close_positions')}: ${e.toString()}',
+          title: languageService.tr('close_position_error'),
         );
       }
     }
@@ -3462,14 +3575,16 @@ class _TradeScreenState extends State<TradeScreen> {
                   maxWidth: 400.w,
                   maxHeight: MediaQuery.of(dialogContext).size.height * 0.6,
                 ),
-                padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 24.h),
+                padding: EdgeInsetsDirectional.fromSTEB(24.w, 24.h, 24.w, 24.h),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Title
                     Text(
-                      isPendingOrder ? 'Cancel Order' : 'Close Position',
+                      isPendingOrder
+                          ? languageService.tr('trade_cancel_order')
+                          : languageService.tr('meta_trade_close_position'),
                       style: AppTextStyles.heading.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
@@ -3482,8 +3597,22 @@ class _TradeScreenState extends State<TradeScreen> {
                       child: SingleChildScrollView(
                         child: Text(
                           isPendingOrder
-                              ? 'Are you sure you want to cancel ${_getDisplaySymbol(position.symbol)} ${position.action} ${position.volume} order?'
-                              : 'Are you sure you want to close ${_getDisplaySymbol(position.symbol)} ${position.action} ${position.volume}?',
+                              ? TranslationUtils.trArgs(
+                                'trade_screen_confirm_cancel_order',
+                                {
+                                  'symbol': _getDisplaySymbol(position.symbol),
+                                  'action': position.action,
+                                  'volume': '${position.volume}',
+                                },
+                              )
+                              : TranslationUtils.trArgs(
+                                'trade_screen_confirm_close_position',
+                                {
+                                  'symbol': _getDisplaySymbol(position.symbol),
+                                  'action': position.action,
+                                  'volume': '${position.volume}',
+                                },
+                              ),
                           style: AppTextStyles.label.copyWith(
                             fontSize: 14.sp,
                             color: AppColors.textGrey,
@@ -3522,7 +3651,7 @@ class _TradeScreenState extends State<TradeScreen> {
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
-                                'Cancel',
+                                languageService.tr('account_management_cancel'),
                                 style: AppTextStyles.label.copyWith(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w600,
@@ -3580,8 +3709,12 @@ class _TradeScreenState extends State<TradeScreen> {
                               } else {
                                 print('❌ No active account found');
                                 CustomToastService.showError(
-                                  title: 'Error',
-                                  message: 'No active account found',
+                                  title: languageService.tr(
+                                    'close_position_error',
+                                  ),
+                                  message: languageService.tr(
+                                    'chart_no_active_account',
+                                  ),
                                 );
                               }
                             },
@@ -3600,7 +3733,9 @@ class _TradeScreenState extends State<TradeScreen> {
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
-                                isPendingOrder ? 'Cancel Order' : 'Close',
+                                isPendingOrder
+                                    ? languageService.tr('trade_cancel_order')
+                                    : languageService.tr('bank_list_close'),
                                 style: AppTextStyles.label.copyWith(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w600,
@@ -3643,14 +3778,14 @@ class _TradeScreenState extends State<TradeScreen> {
                   maxWidth: 400.w,
                   maxHeight: MediaQuery.of(dialogContext).size.height * 0.6,
                 ),
-                padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 24.h),
+                padding: EdgeInsetsDirectional.fromSTEB(24.w, 24.h, 24.w, 24.h),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Title
                     Text(
-                      'Cancel Order',
+                      languageService.tr('trade_cancel_order'),
                       style: AppTextStyles.heading.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
@@ -3662,7 +3797,14 @@ class _TradeScreenState extends State<TradeScreen> {
                     Flexible(
                       child: SingleChildScrollView(
                         child: Text(
-                          'Are you sure you want to cancel ${_getDisplaySymbol(position.symbol)} ${position.action} ${position.volume} order?',
+                          TranslationUtils.trArgs(
+                            'trade_screen_confirm_cancel_order',
+                            {
+                              'symbol': _getDisplaySymbol(position.symbol),
+                              'action': position.action,
+                              'volume': '${position.volume}',
+                            },
+                          ),
                           style: AppTextStyles.label.copyWith(
                             fontSize: 14.sp,
                             color: AppColors.textGrey,
@@ -3701,7 +3843,7 @@ class _TradeScreenState extends State<TradeScreen> {
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
-                                'Cancel',
+                                languageService.tr('account_management_cancel'),
                                 style: AppTextStyles.label.copyWith(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w600,
@@ -3743,8 +3885,12 @@ class _TradeScreenState extends State<TradeScreen> {
                               } else {
                                 print('❌ No active account found');
                                 CustomToastService.showError(
-                                  title: 'Error',
-                                  message: 'No active account found',
+                                  title: languageService.tr(
+                                    'close_position_error',
+                                  ),
+                                  message: languageService.tr(
+                                    'chart_no_active_account',
+                                  ),
                                 );
                               }
                             },
@@ -3763,7 +3909,7 @@ class _TradeScreenState extends State<TradeScreen> {
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
-                                'Cancel Order',
+                                languageService.tr('trade_cancel_order'),
                                 style: AppTextStyles.label.copyWith(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w600,
@@ -4248,7 +4394,7 @@ class _TradeScreenState extends State<TradeScreen> {
               buildMT5DoubleRow(
                 label1: languageService.tr('trade_label_open'),
                 value1: formattedOpenTime,
-                label2: 'Close',
+                label2: languageService.tr('bank_list_close'),
                 value2: formattedCloseTime,
               ),
 
@@ -4262,7 +4408,7 @@ class _TradeScreenState extends State<TradeScreen> {
               buildMT5DoubleRow(
                 label1: languageService.tr('trade_label_id'),
                 value1: "#${position.orderId}",
-                label2: 'Duration',
+                label2: languageService.tr('bonus_screen_duration'),
                 value2: durationValue,
               ),
             ],
@@ -4295,7 +4441,7 @@ class _TradeScreenState extends State<TradeScreen> {
               Expanded(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerRight,
+                  alignment: AlignmentDirectional.centerEnd,
                   child: Text(
                     value1,
                     style: AppTextStyles.bodyText.copyWith(
@@ -4326,7 +4472,7 @@ class _TradeScreenState extends State<TradeScreen> {
               Expanded(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerRight,
+                  alignment: AlignmentDirectional.centerEnd,
                   child: Text(
                     value2,
                     style: AppTextStyles.bodyText.copyWith(

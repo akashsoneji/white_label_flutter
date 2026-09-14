@@ -269,7 +269,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
       readOnly: true, // field is non-editable
       onTap: null, // disable dropdown tap
       decoration: InputDecoration(
-        labelText: 'Payment Mode',
+        labelText: TranslationUtils.tr('deposit_payment_mode'),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -309,7 +309,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         ),
       ),
       decoration: InputDecoration(
-        labelText: 'Deposit to',
+        labelText: TranslationUtils.tr('deposit_real_deposit_to'),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -348,9 +348,15 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         if (entered != null) {
           final converted = _convertedAmount(entered);
           if (minLimit != null && converted < minLimit) {
-            error = 'Minimum deposit is \$${minLimit.toStringAsFixed(2)}';
+            error = TranslationUtils.trArgs(
+              'deposit_real_screen_minimum_deposit_is',
+              {'amount': '\$${minLimit.toStringAsFixed(2)}'},
+            );
           } else if (maxLimit != null && converted > maxLimit) {
-            error = 'Maximum deposit is \$${maxLimit.toStringAsFixed(2)}';
+            error = TranslationUtils.trArgs(
+              'deposit_real_screen_maximum_deposit_is',
+              {'amount': '\$${maxLimit.toStringAsFixed(2)}'},
+            );
           }
         }
       }
@@ -376,7 +382,10 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
           errorText: error,
           errorStyle: TextStyle(color: AppColors.error, fontSize: 12.sp),
           helperText: (minLimit != null && maxLimit != null)
-              ? 'Limit: \$${minLimit.toStringAsFixed(2)} - \$${maxLimit.toStringAsFixed(2)}'
+              ? TranslationUtils.trArgs('deposit_real_screen_limit_min_max', {
+                'min': '\$${minLimit.toStringAsFixed(2)}',
+                'max': '\$${maxLimit.toStringAsFixed(2)}',
+              })
               : null,
           helperStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
           contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -421,9 +430,11 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
   String _amountLabel() {
     if (_hasConversion) {
-      return 'Amount ($_sourceCurrency)';
+      return TranslationUtils.trArgs('deposit_real_screen_amount_currency', {
+        'currency': _sourceCurrency,
+      });
     }
-    return 'Amount';
+    return TranslationUtils.tr('deposit_amount');
   }
 
   /// Converts the entered source-currency amount into the target (USD)
@@ -447,8 +458,10 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
   Widget _buildFeeDisplay() {
     return Align(
-      alignment: Alignment.centerRight,
-      child: RichText(
+      alignment: AlignmentDirectional.centerEnd,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
         text: TextSpan(
           children: [
             TextSpan(
@@ -469,6 +482,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
             ),
           ],
         ),
+        ),
       ),
     );
   }
@@ -485,7 +499,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'To be deposited',
+            TranslationUtils.tr('deposit_to_be_deposited'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
@@ -519,7 +533,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         padding: EdgeInsets.zero,
       ),
       child: Text(
-        'Confirm',
+        TranslationUtils.tr('confirm'),
         style: AppTextStyles.bodyText.copyWith(
           fontSize: 14.sp,
           height: 1.71,
@@ -534,7 +548,9 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
     final raw = amountController.text.trim();
     final entered = double.tryParse(raw);
     if (entered == null || entered <= 0) {
-      CustomToastService.showError(message: 'Please enter a valid amount');
+      CustomToastService.showError(
+        message: TranslationUtils.tr('deposit_real_please_enter_valid_amount'),
+      );
       return;
     }
 
@@ -545,13 +561,15 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
       final converted = _convertedAmount(entered);
       if (minLimit != null && converted < minLimit) {
         CustomToastService.showError(
-          message: 'Amount cannot be less than minimum limit of \$${minLimit.toStringAsFixed(2)}',
+          message:
+              '${TranslationUtils.tr('deposit_real_amount_less_than_min_limit')} \$${minLimit.toStringAsFixed(2)}',
         );
         return;
       }
       if (maxLimit != null && converted > maxLimit) {
         CustomToastService.showError(
-          message: 'Amount cannot be more than maximum limit of \$${maxLimit.toStringAsFixed(2)}',
+          message:
+              '${TranslationUtils.tr('deposit_real_amount_more_than_max_limit')} \$${maxLimit.toStringAsFixed(2)}',
         );
         return;
       }
@@ -600,7 +618,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
               padding: EdgeInsets.all(24.0),
               child: Center(
                 child: Text(
-                  "No accounts available",
+                  TranslationUtils.tr('common_no_accounts'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w500,

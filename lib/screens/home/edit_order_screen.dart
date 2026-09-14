@@ -432,8 +432,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       final activeAccount = accountController.activeMT5Account;
       if (activeAccount == null) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'No active account found',
+          title: TranslationUtils.tr('general_error'),
+          message: TranslationUtils.tr('trade_no_active_account'),
         );
         return;
       }
@@ -471,8 +471,9 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       }
     } catch (e) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to modify order: ${e.toString()}',
+        title: TranslationUtils.tr('close_position_error'),
+        message:
+            '${TranslationUtils.tr('edit_order_modify_failed')}: ${e.toString()}',
       );
     } finally {
       setState(() {
@@ -648,7 +649,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Edit Order',
+                        TranslationUtils.tr('edit_order_screen_edit_order'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.heading.copyWith(
@@ -751,7 +752,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Chart',
+                  TranslationUtils.tr('bottom_navigation_chart'),
                   style: AppTextStyles.label.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -824,7 +825,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
           Column(
             children: [
               Text(
-                'Bid',
+                TranslationUtils.tr('meta_watchlist_bid'),
                 style: AppTextStyles.label.copyWith(
                   fontSize: 10.sp,
                   color: AppColors.textGrey,
@@ -850,7 +851,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
           Column(
             children: [
               Text(
-                'Ask',
+                TranslationUtils.tr('meta_watchlist_ask'),
                 style: AppTextStyles.label.copyWith(
                   fontSize: 10.sp,
                   color: AppColors.textGrey,
@@ -886,9 +887,15 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       ),
       child: Column(
         children: [
-          _buildDetailRow('Open Time', widget.position.openTime),
+          _buildDetailRow(
+            TranslationUtils.tr('open_time'),
+            widget.position.openTime,
+          ),
           SizedBox(height: 12.h),
-          _buildDetailRow('Position ID', '#${widget.position.orderId}'),
+          _buildDetailRow(
+            TranslationUtils.tr('pmam_investor_portal_screen_position_id'),
+            '#${widget.position.orderId}',
+          ),
         ],
       ),
     );
@@ -1098,12 +1105,33 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     );
   }
 
+  /// Display-only translation for TP/SL field labels. The raw label value is
+  /// still used for the `label == 'Take Profit'` logic checks.
+  String _fieldLabel(String label) {
+    switch (label) {
+      case 'Take Profit':
+        return TranslationUtils.tr('general_take_profit');
+      case 'Stop Loss':
+        return TranslationUtils.tr('general_stop_loss');
+      case 'Potential Profit at TP':
+        return TranslationUtils.tr('pending_order_potential_profit_at_tp');
+      case 'Potential Loss at SL':
+        return TranslationUtils.tr('pending_order_potential_loss_at_sl');
+      default:
+        return label;
+    }
+  }
+
   Widget _buildSwitchTile(
     String title,
     bool value, {
     required Function(bool) onChanged,
   }) {
-    return AppSwitchTile(title: title, value: value, onChanged: onChanged);
+    return AppSwitchTile(
+      title: _fieldLabel(title),
+      value: value,
+      onChanged: onChanged,
+    );
   }
 
   /// Build P&L display widget below TP/SL fields
@@ -1169,12 +1197,12 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
             : AppColors.error;
 
     return Padding(
-      padding: EdgeInsets.only(top: 8.h, left: 12.w, right: 12.w),
+      padding: EdgeInsetsDirectional.only(top: 8.h, start: 12.w, end: 12.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            label,
+            _fieldLabel(label),
             style: AppTextStyles.label.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w400,
@@ -1374,7 +1402,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                 children: [
                   // Minus button
                   Padding(
-                    padding: EdgeInsets.only(left: 17.w),
+                    padding: EdgeInsetsDirectional.only(start: 17.w),
                     child: Container(
                       width: 22.w,
                       height: 22.h,
@@ -1426,7 +1454,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          label,
+                          _fieldLabel(label),
                           style: AppTextStyles.label.copyWith(
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w500,
@@ -1500,7 +1528,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                   ),
                   // Plus button
                   Padding(
-                    padding: EdgeInsets.only(right: 17.w),
+                    padding: EdgeInsetsDirectional.only(end: 17.w),
                     child: Container(
                       width: 22.w,
                       height: 22.h,
@@ -1622,7 +1650,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                   padding: EdgeInsets.zero,
                 ),
                 child: Text(
-                  'Discard',
+                  TranslationUtils.tr('edit_order_screen_discard'),
                   style: AppTextStyles.label.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
@@ -1664,7 +1692,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                             ),
                             SizedBox(width: 12.w),
                             Text(
-                              'Processing...',
+                              TranslationUtils.tr('pending_order_processing'),
                               style: AppTextStyles.label.copyWith(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w700,
@@ -1674,7 +1702,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                           ],
                         )
                         : Text(
-                          'Confirm',
+                          TranslationUtils.tr('confirm'),
                           style: AppTextStyles.label.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w700,

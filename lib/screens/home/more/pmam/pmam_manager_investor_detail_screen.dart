@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class PmamManagerInvestorDetailScreen extends StatefulWidget {
   final int investorId;
@@ -48,19 +49,19 @@ class _PmamManagerInvestorDetailScreenState
 
   String _fmtDateLong(DateTime? dt) {
     if (dt == null) return '-';
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+    final months = [
+      TranslationUtils.tr('month_short_jan'),
+      TranslationUtils.tr('month_short_feb'),
+      TranslationUtils.tr('month_short_mar'),
+      TranslationUtils.tr('month_short_apr'),
+      TranslationUtils.tr('month_short_may'),
+      TranslationUtils.tr('month_short_jun'),
+      TranslationUtils.tr('month_short_jul'),
+      TranslationUtils.tr('month_short_aug'),
+      TranslationUtils.tr('month_short_sep'),
+      TranslationUtils.tr('month_short_oct'),
+      TranslationUtils.tr('month_short_nov'),
+      TranslationUtils.tr('month_short_dec'),
     ];
     final m = months[(dt.month - 1).clamp(0, 11)];
     return '$m ${dt.day}, ${dt.year}';
@@ -99,7 +100,7 @@ class _PmamManagerInvestorDetailScreenState
     required String label,
     required String value,
     Color? valueColor,
-    TextAlign align = TextAlign.left,
+    TextAlign align = TextAlign.start,
   }) {
     return RichText(
       maxLines: 1,
@@ -163,7 +164,7 @@ class _PmamManagerInvestorDetailScreenState
               SizedBox(width: 10.w),
               _richLabelValue(
                 context,
-                label: 'Lot',
+                label: TranslationUtils.tr('scratch_card_screen_lot'),
                 value: lotText,
                 valueColor: AppColors.textPrimary,
                 align: TextAlign.right,
@@ -179,7 +180,7 @@ class _PmamManagerInvestorDetailScreenState
               Expanded(
                 child: _richLabelValue(
                   context,
-                  label: 'Open Price',
+                  label: TranslationUtils.tr('open_price'),
                   value: openPriceText,
                   valueColor: AppColors.textPrimary,
                 ),
@@ -188,7 +189,7 @@ class _PmamManagerInvestorDetailScreenState
               Expanded(
                 child: _richLabelValue(
                   context,
-                  label: 'Open Time',
+                  label: TranslationUtils.tr('open_time'),
                   value: openTimeText,
                   valueColor: AppColors.textPrimary,
                   align: TextAlign.right,
@@ -231,7 +232,7 @@ class _PmamManagerInvestorDetailScreenState
               SizedBox(width: 10.w),
               _richLabelValue(
                 context,
-                label: 'Net',
+                label: TranslationUtils.tr('pmam_net'),
                 value: _fmtMoney(d.netProfitCredited),
                 valueColor: netColor,
                 align: TextAlign.right,
@@ -247,7 +248,7 @@ class _PmamManagerInvestorDetailScreenState
               Expanded(
                 child: _richLabelValue(
                   context,
-                  label: 'Gross',
+                  label: TranslationUtils.tr('pmam_gross'),
                   value: _fmtMoney(d.grossProfitShare),
                   valueColor: grossColor,
                 ),
@@ -256,7 +257,7 @@ class _PmamManagerInvestorDetailScreenState
               Expanded(
                 child: _richLabelValue(
                   context,
-                  label: 'Commission',
+                  label: TranslationUtils.tr('general_commission'),
                   value: _fmtMoney(d.commissionCharged),
                   valueColor: d.commissionCharged > 0
                       ? AppColors.primary
@@ -298,7 +299,7 @@ class _PmamManagerInvestorDetailScreenState
               SizedBox(width: 10.w),
               _richLabelValue(
                 context,
-                label: 'Type',
+                label: TranslationUtils.tr('common_type'),
                 value: type.isEmpty ? '-' : type,
                 valueColor: AppColors.textPrimary,
                 align: TextAlign.right,
@@ -311,7 +312,7 @@ class _PmamManagerInvestorDetailScreenState
           // Line 2: Date
           _richLabelValue(
             context,
-            label: 'Date',
+            label: TranslationUtils.tr('common_date'),
             value: _fmtDateLong(f.entryTime),
             valueColor: AppColors.textPrimary,
           ),
@@ -329,7 +330,9 @@ class _PmamManagerInvestorDetailScreenState
       final resp = await PmamService.getManagerInvestorDetail(widget.investorId);
       if (!resp.success || resp.data == null) {
         setState(() {
-          _error = resp.message ?? 'Failed to load investor details';
+          _error =
+              resp.message ??
+              TranslationUtils.tr('pmam_failed_load_investor_details');
           _loading = false;
         });
         return;
@@ -422,7 +425,9 @@ class _PmamManagerInvestorDetailScreenState
             colorFilter: ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
           ),
         ),
-        title: Text(  'Investor: ${widget.investorName}', style: AppTextStyles.heading),
+        title: Text(
+            '${TranslationUtils.tr('pmam_investor_label')}: ${widget.investorName}',
+            style: AppTextStyles.heading),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -457,7 +462,7 @@ class _PmamManagerInvestorDetailScreenState
                               borderRadius: BorderRadius.circular(10.r),
                             ),
                           ),
-                          child: Text('Retry'),
+                          child: Text(TranslationUtils.tr('common_retry')),
                         ),
                       ],
                     ),
@@ -478,7 +483,8 @@ class _PmamManagerInvestorDetailScreenState
                                 children: [
                                  
                                   Text(
-                                    'Investment Summary',
+                                    TranslationUtils.tr(
+                                        'pmam_investor_portal_screen_investment_summary'),
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.w800,
@@ -490,14 +496,15 @@ class _PmamManagerInvestorDetailScreenState
                                     children: [
                                       Expanded(
                                         child: _metricCard(
-                                          label: 'Invested',
+                                          label: TranslationUtils.tr(
+                                              'pmam_invested'),
                                           value: _fmtMoney(invested),
                                         ),
                                       ),
                                       SizedBox(width: 12.w),
                                       Expanded(
                                         child: _metricCard(
-                                          label: 'P&L',
+                                          label: TranslationUtils.tr('pmam_pnl'),
                                           value: _fmtMoney(pnl),
                                         ),
                                       ),
@@ -508,14 +515,16 @@ class _PmamManagerInvestorDetailScreenState
                                     children: [
                                       Expanded(
                                         child: _metricCard(
-                                          label: 'Current Value',
+                                          label: TranslationUtils.tr(
+                                              'pmam_current_value'),
                                           value: _fmtMoney(currentValue),
                                         ),
                                       ),
                                       SizedBox(width: 12.w),
                                       Expanded(
                                         child: _metricCard(
-                                          label: 'Pool Share',
+                                          label: TranslationUtils.tr(
+                                              'pmam_pool_share'),
                                           value: _fmtPct(poolShare),
                                         ),
                                       ),
@@ -553,7 +562,8 @@ class _PmamManagerInvestorDetailScreenState
                                     Tab(
                                       child: Center(
                                         child: Text(
-                                          'Open\nAllocations',
+                                          TranslationUtils.tr(
+                                              'pmam_tab_open_allocations'),
                                           textAlign: TextAlign.center,
                                           maxLines: 2,
                                         ),
@@ -562,7 +572,8 @@ class _PmamManagerInvestorDetailScreenState
                                     Tab(
                                       child: Center(
                                         child: Text(
-                                          'Settlement\nHistory',
+                                          TranslationUtils.tr(
+                                              'pmam_tab_settlement_history'),
                                           textAlign: TextAlign.center,
                                           maxLines: 2,
                                         ),
@@ -571,7 +582,8 @@ class _PmamManagerInvestorDetailScreenState
                                     Tab(
                                       child: Center(
                                         child: Text(
-                                          'Fund\nEntries',
+                                          TranslationUtils.tr(
+                                              'pmam_tab_fund_entries'),
                                           textAlign: TextAlign.center,
                                           maxLines: 2,
                                         ),
@@ -595,7 +607,8 @@ class _PmamManagerInvestorDetailScreenState
                                     horizontal: 18.w,
                                     vertical: 12.h,
                                   ),
-                                  child: _emptyHint('No open positions.'),
+                                  child: _emptyHint(TranslationUtils.tr(
+                                      'pmam_no_open_positions')),
                                 );
                               }
                               return ListView.separated(
@@ -619,7 +632,8 @@ class _PmamManagerInvestorDetailScreenState
                                 ),
                                 children: [
                                   if (settlements.isEmpty)
-                                    _emptyHint('No settlements yet.')
+                                    _emptyHint(TranslationUtils.tr(
+                                        'pmam_no_settlements_yet'))
                                   else
                                     ...List.generate(settlements.length, (i) {
                                       return Padding(
@@ -641,7 +655,8 @@ class _PmamManagerInvestorDetailScreenState
                                     horizontal: 18.w,
                                     vertical: 12.h,
                                   ),
-                                  child: _emptyHint('No fund entries.'),
+                                  child: _emptyHint(TranslationUtils.tr(
+                                      'pmam_no_fund_entries')),
                                 );
                               }
                               return ListView.separated(

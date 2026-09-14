@@ -303,8 +303,8 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
           topRight: Radius.circular(20.0),
         ),
         inputDecoration: InputDecoration(
-          labelText: 'Search',
-          hintText: 'Start typing to search',          
+          labelText: TranslationUtils.tr('kyc_details_screen_search'),
+          hintText: TranslationUtils.tr('edit_profile_start_typing'),
           prefixIcon: Icon(Icons.search, color: AppColors.textPrimary),
           border: OutlineInputBorder(
             borderSide: BorderSide(
@@ -395,7 +395,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
       return KycScaffold(
         body: Center(
           child: CommonLoadingWidget(
-            message: 'Loading profile data...',
+            message: languageService.tr('edit_profile_loading'),
             size: 50.0,
             color: AppColors.primary,
           ),
@@ -414,7 +414,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
 
               // Section Title
               Text(
-                'Personal Details',
+                languageService.tr('kyc_intro_personal_details'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w500,
@@ -510,7 +510,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                     child: authController.isLoading
                         ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
                         : Text(
-                          'Save',
+                          languageService.tr('edit_profile_save'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
@@ -589,7 +589,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
         onTap: _selectDate,
         style: AppTextStyles.black16400h1_5,
         decoration: InputDecoration(
-          labelText: 'Date of Birth (yyyy-MM-dd)',
+          labelText: languageService.tr(
+            'kyc_details_screen_date_of_birth_yyyy_mm_dd',
+          ),
           labelStyle: AppTextStyles.bodyText.copyWith(
             color: hasError ? AppColors.error : AppColors.textGrey,
           ),
@@ -661,7 +663,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
           ),
           SizedBox(width: 8.w),
           Expanded(
-            child: TextFormField(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: TextFormField(
               controller: _phoneController,
               readOnly: true,
               keyboardType: TextInputType.phone,
@@ -672,7 +676,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
               onChanged: (_) => _formatPhoneInput(),
               style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
               decoration: InputDecoration(
-                labelText: 'Phone Number',
+                labelText: languageService.tr(
+                  'create_account_screen_phone_number',
+                ),
                 labelStyle: AppTextStyles.bodyText.copyWith(
                   color: hasError ? AppColors.error : AppColors.textGrey,
                 ),
@@ -708,10 +714,13 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
               validator: (value) {
                 final digits = (value ?? '').replaceAll(RegExp(r'[^0-9]'), '');
                 if (digits.isEmpty) {
-                  return 'Please enter your phone number';
+                  return languageService.tr(
+                    'kyc_details_screen_please_enter_your_phone_number',
+                  );
                 }
                 return null;
               },
+            ),
             ),
           ),
         ],
@@ -732,7 +741,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
           ),
           onTap: () => _showCountryOptions(),
           decoration: InputDecoration(
-            labelText: 'Country',
+            labelText: languageService.tr('register_country'),
             labelStyle: AppTextStyles.bodyText.copyWith(
               color: hasError ? AppColors.error : AppColors.textGrey,
             ),
@@ -811,7 +820,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                           ? () => _showStateOptions()
                           : null,
                   decoration: InputDecoration(
-                    labelText: 'State',
+                    labelText: languageService.tr('edit_profile_state'),
                     labelStyle: AppTextStyles.bodyText.copyWith(
                       color: hasError ? AppColors.error : AppColors.textGrey,
                     ),
@@ -963,7 +972,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                 ),
                 SizedBox(height: 24.h),
                 Text(
-                  'Select Title',
+                  languageService.tr('kyc_details_screen_select_title'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
@@ -1045,7 +1054,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
         ),
         onTap: () => _showGenderOptions(),
         decoration: InputDecoration(
-          labelText: 'Gender',
+          labelText: languageService.tr('edit_profile_gender'),
           labelStyle: AppTextStyles.bodyText.copyWith(
             color: hasError ? AppColors.error : AppColors.textGrey,
           ),
@@ -1112,7 +1121,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                 ),
                 SizedBox(height: 24.h),
                 Text(
-                  'Select Gender',
+                  languageService.tr('edit_profile_select_gender'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
@@ -1201,7 +1210,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                           ? () => _showCityOptions()
                           : null,
                   decoration: InputDecoration(
-                    labelText: 'City',
+                    labelText: languageService.tr('edit_profile_city'),
                     labelStyle: AppTextStyles.bodyText.copyWith(
                       color: hasError ? AppColors.error : AppColors.textGrey,
                     ),
@@ -1303,7 +1312,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                   ),
                   SizedBox(height: 10.h),
                   Text(
-                    'Select Country',
+                  languageService.tr('edit_profile_select_country'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
@@ -1331,7 +1340,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                       }
                     },
                     decoration: InputDecoration(
-                      hintText: 'Search countries...',
+                      hintText: languageService.tr(
+                        'edit_profile_search_countries',
+                      ),
                       prefixIcon: Icon(Icons.search, color: AppColors.icongrey),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -1378,7 +1389,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                               ),
                               SizedBox(height: 16.h),
                               Text(
-                                'No countries found',
+                        languageService.tr(
+                          'kyc_details_screen_no_countries_found',
+                        ),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 16.sp,
                                   color: AppColors.textGrey,
@@ -1489,7 +1502,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                   ),
                   SizedBox(height: 24.h),
                   Text(
-                    'Select State',
+                  languageService.tr('edit_profile_select_state'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
@@ -1513,7 +1526,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                       }
                     },
                     decoration: InputDecoration(
-                      hintText: 'Search states...',
+                      hintText: languageService.tr(
+                        'edit_profile_search_states',
+                      ),
                       prefixIcon: Icon(Icons.search, color: AppColors.icongrey),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -1560,7 +1575,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                               ),
                               SizedBox(height: 16.h),
                               Text(
-                                'No states found',
+                        languageService.tr('kyc_details_screen_no_states_found'),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 16.sp,
                                   color: AppColors.textGrey,
@@ -1671,7 +1686,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                   ),
                   SizedBox(height: 24.h),
                   Text(
-                    'Select City',
+                  languageService.tr('edit_profile_select_city'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
@@ -1695,7 +1710,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                       }
                     },
                     decoration: InputDecoration(
-                      hintText: 'Search cities...',
+                      hintText: languageService.tr(
+                        'edit_profile_search_cities',
+                      ),
                       prefixIcon: Icon(Icons.search, color: AppColors.icongrey),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -1742,7 +1759,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                               ),
                               SizedBox(height: 16.h),
                               Text(
-                                'No cities found',
+                        languageService.tr('kyc_details_screen_no_cities_found'),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 16.sp,
                                   color: AppColors.textGrey,
@@ -1860,8 +1877,10 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
           Get.back(closeOverlays: true); // Close OTP modal
           if (Get.isRegistered<AppNotificationController>()) {
             Get.find<AppNotificationController>().showSuccess(
-              message: 'Phone number verified successfully!',
-              title: 'Success',
+              message: languageService.tr(
+                'kyc_details_screen_phone_number_verified_successfully',
+              ),
+              title: languageService.tr('create_account_success'),
             );
           }
         },
@@ -1873,52 +1892,62 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
   void _handleSave() {
     // Validate form fields
     if (_firstNameController.text.trim().isEmpty) {
+      final message = languageService.tr(
+        'kyc_details_screen_please_enter_your_first_name',
+      );
       setState(() {
-        _firstNameError = 'Please enter your first name';
+        _firstNameError = message;
       });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please enter your first name',
-          title: 'Error',
+          message: message,
+          title: languageService.tr('close_position_error'),
         );
       }
       return;
     }
 
     if (_lastNameController.text.trim().isEmpty) {
+      final message = languageService.tr(
+        'kyc_details_screen_please_enter_your_last_name',
+      );
       setState(() {
-        _lastNameError = 'Please enter your last name';
+        _lastNameError = message;
       });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please enter your last name',
-          title: 'Error',
+          message: message,
+          title: languageService.tr('close_position_error'),
         );
       }
       return;
     }
 
     if (_emailController.text.trim().isEmpty) {
+      final message = languageService.tr('forgot_password_enter_your_email');
       setState(() {
-        _emailError = 'Please enter your email';
+        _emailError = message;
       });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please enter your email',
-          title: 'Error',
+          message: message,
+          title: languageService.tr('close_position_error'),
         );
       }
       return;
     }
 
     if (_phoneController.text.trim().isEmpty) {
+      final message = languageService.tr(
+        'kyc_details_screen_please_enter_your_phone_number',
+      );
       setState(() {
-        _phoneError = 'Please enter your phone number';
+        _phoneError = message;
       });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please enter your phone number',
-          title: 'Error',
+          message: message,
+          title: languageService.tr('close_position_error'),
         );
       }
       return;
@@ -1928,101 +1957,106 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
     final combinedPhone = '$_selectedCountryCode$digits';
 
     if (dropdownService.selectedCountry.value == null) {
+      final message = languageService.tr(
+        'kyc_details_screen_please_select_country',
+      );
       setState(() {
-        _countryError = 'Please select country';
+        _countryError = message;
       });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please select country',
-          title: 'Error',
+          message: message,
+          title: languageService.tr('close_position_error'),
         );
       }
       return;
     }
 
     if (dropdownService.selectedState.value == null) {
+      final message = languageService.tr('edit_profile_please_select_state');
       setState(() {
-        _stateError = 'Please select state';
+        _stateError = message;
       });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please select state',
-          title: 'Error',
+          message: message,
+          title: languageService.tr('close_position_error'),
         );
       }
       return;
     }
 
     if (dropdownService.selectedCity.value == null) {
+      final message = languageService.tr('edit_profile_please_select_city');
       setState(() {
-        _cityError = 'Please select city';
+        _cityError = message;
       });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please select city',
-          title: 'Error',
+          message: message,
+          title: languageService.tr('close_position_error'),
         );
       }
       return;
     }
 
     if (_addressController.text.trim().isEmpty) {
+      final message = languageService.tr('create_account_validation_address');
       setState(() {
-        _addressError = 'Please enter your address';
+        _addressError = message;
       });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please enter your address',
-          title: 'Error',
+          message: message,
+          title: languageService.tr('close_position_error'),
         );
       }
       return;
     }
 
     if (_postcodeController.text.trim().isEmpty) {
+      final message = languageService.tr(
+        'kyc_details_screen_please_enter_your_postcode',
+      );
       setState(() {
-        _postcodeError = 'Please enter your postcode';
+        _postcodeError = message;
       });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please enter your postcode',
-          title: 'Error',
+          message: message,
+          title: languageService.tr('close_position_error'),
         );
       }
       return;
     }
 
-    // if (_otpController.text.trim().isEmpty) {
-    //   Get.snackbar(
-    //     'Error',
-    //     'Please enter OTP',
-    //     backgroundColor: AppColors.error,
-    //     colorText: AppColors.whiteColor,
-    //   );
-    //   return;
-    // }
-
     if (_selectedTitle.trim().isEmpty) {
+      final message = languageService.tr(
+        'kyc_details_screen_please_select_title',
+      );
       setState(() {
-        _titleError = 'Please select title';
+        _titleError = message;
       });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please select title',
-          title: 'Error',
+          message: message,
+          title: languageService.tr('close_position_error'),
         );
       }
       return;
     }
 
     if (_dobController.text.trim().isEmpty) {
+      final message = languageService.tr(
+        'kyc_details_screen_please_enter_date_of_birth',
+      );
       setState(() {
-        _dobError = 'Please enter date of birth';
+        _dobError = message;
       });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please enter date of birth',
-          title: 'Error',
+          message: message,
+          title: languageService.tr('close_position_error'),
         );
       }
       return;

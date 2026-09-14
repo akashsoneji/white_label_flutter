@@ -76,6 +76,7 @@ import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/trading/data/repositories/trading_repository.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/audio_service.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class ChartController extends GetxController {
   final TradingRepository _tradingRepo = Get.find<TradingRepository>();
@@ -247,9 +248,9 @@ class ChartController extends GetxController {
 
       final token = await SecureStorageService.getAuthToken();
       if (token == null || token.isEmpty) {
-        errorMessage.value = 'Authentication token not found';
+        errorMessage.value = TranslationUtils.tr('chart_controller_authentication_token_not_found');
         isLoadingMT5Accounts.value = false;
-        return {'success': false, 'error': 'Authentication token not found'};
+        return {'success': false, 'error': errorMessage.value};
       }
 
       final requestData = <String, dynamic>{
@@ -347,7 +348,7 @@ class ChartController extends GetxController {
         };
       } else {
         print("❌ ChartController: Order failed - ${response.message}");
-        errorMessage.value = response.message ?? 'Failed to execute trade';
+        errorMessage.value = response.message ?? TranslationUtils.tr('chart_controller_failed_to_execute_trade');
         CustomToastService.showError(message: errorMessage.value);
 
         // Play no money sound if the error is about insufficient funds
@@ -373,7 +374,7 @@ class ChartController extends GetxController {
         return {'success': false, 'error': errorMessage.value};
       }
     } catch (e) {
-      errorMessage.value = 'Error placing trade: $e';
+      errorMessage.value = '${TranslationUtils.tr('chart_controller_error_placing_trade')}: $e';
       print('❌ ChartController: Error placing trade: $e');
       return {'success': false, 'error': errorMessage.value};
     } finally {

@@ -2,6 +2,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/models/demo_contest/demo_contest_model.dart';
 import 'package:crm_app/screens/demo_contest/presentation/pages/widgets/contest_countdown_timer.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -33,10 +34,10 @@ class ContestJoinCard extends StatelessWidget {
             : AppColors.warning;
 
     final tagLabel = ended
-        ? 'ENDED'
+        ? TranslationUtils.tr('dc_status_ended').toUpperCase()
         : live
-            ? '● LIVE NOW'
-            : 'UPCOMING';
+            ? '● ${TranslationUtils.tr('dc_live_now')}'
+            : TranslationUtils.tr('dc_tab_upcoming').toUpperCase();
 
     return Material(
       color: Colors.transparent,
@@ -175,10 +176,10 @@ class ContestJoinCard extends StatelessWidget {
                   SizedBox(width: 6.w),
                   Text(
                     ended
-                        ? 'Ended · ${_formatDate(contest.endsAt)}'
+                        ? '${TranslationUtils.tr('dc_status_ended')} · ${_formatDate(contest.endsAt)}'
                         : live
-                            ? 'Ends in'
-                            : 'Starts in',
+                            ? TranslationUtils.tr('dc_ends_in')
+                            : TranslationUtils.tr('dc_starts_in'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       color: AppColors.textGrey,
@@ -210,10 +211,10 @@ class ContestJoinCard extends StatelessWidget {
                   ),
                   child: Text(
                     joined
-                        ? 'View Entry'
+                        ? TranslationUtils.tr('dc_view_entry')
                         : ended
-                            ? 'View Results'
-                            : 'View Details',
+                            ? TranslationUtils.tr('dc_view_results')
+                            : TranslationUtils.tr('tw_view_details'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 14.sp,
@@ -238,11 +239,13 @@ class ContestJoinCard extends StatelessWidget {
   }
 
   String _monthName(int m) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    const monthKeys = [
+      'month_short_jan', 'month_short_feb', 'month_short_mar',
+      'month_short_apr', 'month_short_may', 'month_short_jun',
+      'month_short_jul', 'month_short_aug', 'month_short_sep',
+      'month_short_oct', 'month_short_nov', 'month_short_dec',
     ];
-    return months[m - 1];
+    return TranslationUtils.tr(monthKeys[m - 1]);
   }
 }
 

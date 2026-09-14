@@ -4,6 +4,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class CopyTradingInviteFriendScreen extends StatelessWidget {
   const CopyTradingInviteFriendScreen({super.key});
@@ -18,7 +19,7 @@ class CopyTradingInviteFriendScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Invite a Friend',
+          TranslationUtils.tr('invite_friend_screen_invite_friend'),
           style: AppTextStyles.heading.copyWith(fontWeight: FontWeight.w600),
         ),
         leading: IconButton(
@@ -45,7 +46,9 @@ class CopyTradingInviteFriendScreen extends StatelessWidget {
 
             SizedBox(height: 32.h),
             Text(
-              'Share link and get reward',
+              TranslationUtils.tr(
+                'invite_friend_screen_share_link_and_get_reward',
+              ),
               style: AppTextStyles.heading.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
@@ -66,7 +69,7 @@ class CopyTradingInviteFriendScreen extends StatelessWidget {
                   elevation: 0,
                 ),
                 child: Text(
-                  'Share Link',
+                  TranslationUtils.tr('invite_friend_screen_share_link'),
                   style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.whiteColor,
                     fontSize: 14.sp,
@@ -79,9 +82,9 @@ class CopyTradingInviteFriendScreen extends StatelessWidget {
 
             SizedBox(height: 30.h),
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: Text(
-                'Referral Statistic',
+                TranslationUtils.tr('invite_friend_screen_referral_statistic'),
                 style: AppTextStyles.label.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
@@ -92,12 +95,12 @@ class CopyTradingInviteFriendScreen extends StatelessWidget {
 
             _StatisticItem(
               iconData: Icons.person_outline_rounded,
-              label: 'Your clients',
+              label: TranslationUtils.tr('invite_friend_screen_your_clients'),
               onTap: () {},
             ),
             _StatisticItem(
               iconData: Icons.show_chart_rounded,
-              label: 'Active clients',
+              label: TranslationUtils.tr('invite_friend_screen_active_clients'),
               isSvg: true,
               svg: 'assets/svg/copy_trading/setting/diagram.svg',
               onTap: () {},
@@ -106,7 +109,7 @@ class CopyTradingInviteFriendScreen extends StatelessWidget {
               iconData: Icons.attach_money_rounded,
               isSvg: true,
               svg: 'assets/svg/your_earning.svg',
-              label: 'Total profit',
+              label: TranslationUtils.tr('dashboard_total_profit'),
               onTap: () {},
             ),
 

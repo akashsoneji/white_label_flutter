@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:crm_app/screens/auth/data/models/riyadex_country_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
+import 'package:crm_app/services/language_service.dart';
 
 import '../../../core/storage/session_storage.dart';
 import 'auth_controller.dart';
@@ -93,8 +94,8 @@ class RiyadexRegistrationController extends GetxController {
       final ipCountryCode = geoCountry.value?.countryCode;
       if (ipCountryCode != country.iso2) {
         allowedToRegister.value = false;
-        restrictedMessage.value = configData.value?.geoRule.blockedMessage ?? 
-            'Sorry, our services are not available in this country.';
+        restrictedMessage.value = configData.value?.geoRule.blockedMessage ??
+            TranslationUtils.tr('riyadex_country_not_available');
       } else {
         allowedToRegister.value = true;
         restrictedMessage.value = '';

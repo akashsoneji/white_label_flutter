@@ -27,6 +27,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
@@ -179,7 +180,9 @@ class TenaxChartWebViewState extends State<TenaxChartWebView> {
     if (_loading) {
       return Center(
         child: CommonLoadingWidget(
-          message: 'Initializing chart...',
+          message: Get.find<LanguageService>().tr(
+            'tenax_chart_webview_initializing_chart',
+          ),
           size: 40.0,
           color: AppColors.primary,
         ),
@@ -229,22 +232,25 @@ class TenaxChartWebViewState extends State<TenaxChartWebView> {
     // MediaQuery.removePadding strips any top/bottom safe-area insets injected
     // by the parent Scaffold's SafeArea so the WebView fills edge-to-edge
     // without a blank gap at the top or bottom.
-    return MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
-      removeBottom: true,
-      child: TenaxChartView(
-        // Stable ValueKey → WebView is never torn down on symbol change.
-        key: const ValueKey('tenax_chart_pipze'),
-        api: _api!,
-        initialSymbol: _initialSymbol,
-        initialResolution: '15m',
-        theme: widget.isDark ? ChartTheme.dark : ChartTheme.light,
-        onControllerReady: (c) {
-          _controller = c;
-          _syncOrders();
-        },
-        onError: (e) => debugPrint('TenaxChartWebView: $e'),
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        removeBottom: true,
+        child: TenaxChartView(
+          // Stable ValueKey → WebView is never torn down on symbol change.
+          key: const ValueKey('tenax_chart_pipze'),
+          api: _api!,
+          initialSymbol: _initialSymbol,
+          initialResolution: '15m',
+          theme: widget.isDark ? ChartTheme.dark : ChartTheme.light,
+          onControllerReady: (c) {
+            _controller = c;
+            _syncOrders();
+          },
+          onError: (e) => debugPrint('TenaxChartWebView: $e'),
+        ),
       ),
     );
   }

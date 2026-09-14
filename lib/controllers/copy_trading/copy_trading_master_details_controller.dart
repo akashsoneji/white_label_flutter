@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:get/get.dart';
 
 num _parseNum(dynamic value, num defaultValue) {
@@ -309,20 +310,22 @@ class CopyTradingMasterDetailsController extends GetxController {
       final res = await ApiService.get(endpoint: ApiConstants.copyTradingMasterProfile(masterCode, timeframe: timeframe, selectedPlanId: planId));
       if (!res.success || res.data == null) {
         profile.value = null;
-        errorMessage.value = res.message ?? 'Failed to load master profile';
+      errorMessage.value = res.message ??
+          TranslationUtils.tr('copy_trading_failed_to_load_master_profile');
         return;
       }
       final data = res.data?['data'];
       if (data is! Map) {
         profile.value = null;
-        errorMessage.value = 'Invalid response';
+      errorMessage.value = TranslationUtils.tr('copy_trading_invalid_response');
         return;
       }
       profile.value = CopyTradingMasterProfile.fromJson(data.cast<String, dynamic>());
       await loadTradeHistory();
     } catch (e) {
       profile.value = null;
-      errorMessage.value = 'Load error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_load_error')}: $e';
     } finally {
       if (isTimeframeReload || isPlanReload) {
         isTimeframeLoading.value = false;

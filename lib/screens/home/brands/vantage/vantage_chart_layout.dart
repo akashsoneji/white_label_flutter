@@ -596,7 +596,7 @@ class _Header extends StatelessWidget {
     final fg = isDark ? Colors.white : const Color(0xFF111114);
     final muted = isDark ? Colors.white60 : const Color(0xFF6B6B7A);
     return Padding(
-      padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 8.h),
+      padding: EdgeInsetsDirectional.fromSTEB(12.w, 8.h, 12.w, 8.h),
       child: Row(
         children: [
           // Back arrow
@@ -920,7 +920,11 @@ class _ChartAreaState extends State<_ChartArea> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
+    // The chart WebView renders candles / price axes and must never be
+    // mirrored by the ambient RTL direction.
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Obx(() {
       final useNew = FlavorConfig.instance.useNewChart;
       final raw = _stripDot(Get.find<SymbolSelectionService>().currentSymbol);
       String? acc;
@@ -944,7 +948,8 @@ class _ChartAreaState extends State<_ChartArea> {
         symbol: effective,
         url: url,
       );
-    });
+      }),
+    );
   }
 }
 
@@ -1007,7 +1012,7 @@ class _BottomDock extends StatelessWidget {
           ),
         ],
       ),
-      padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 14.h),
+      padding: EdgeInsetsDirectional.fromSTEB(12.w, 8.h, 12.w, 14.h),
       child: Obx(() {
         // ──────────────────────────────────────────�───────────────
         // ignore: unused_local_variable
@@ -1106,7 +1111,11 @@ class _BottomDock extends StatelessWidget {
             ),
             SizedBox(height: 10.h),
             SafeArea(
-              child: Row(
+              // Bid / spread / ask are numeric market data — keep the
+              // price columns left-to-right even in Arabic.
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Row(
                 children: [
                   Expanded(
                     child: _SideButton(
@@ -1146,6 +1155,7 @@ class _BottomDock extends StatelessWidget {
                     ),
                   ),
                 ],
+                ),
               ),
             ),
           ],

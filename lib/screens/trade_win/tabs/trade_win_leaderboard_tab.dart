@@ -27,7 +27,7 @@ class _TradeWinLeaderboardTabState extends State<TradeWinLeaderboardTab> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(0.w, 0.h, 0.w, 0),
+          padding: EdgeInsetsDirectional.fromSTEB(0.w, 0.h, 0.w, 0),
           child: Row(
             children: [
               const AppBackButton(closeOverlays: true),
@@ -60,7 +60,7 @@ class _TradeWinLeaderboardTabState extends State<TradeWinLeaderboardTab> {
             final rest = entries.where((e) => e.rank > 3).toList();
 
             return ListView(
-              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 100.h),
+              padding: EdgeInsetsDirectional.fromSTEB(16.w, 0, 16.w, 100.h),
               children: [
                 if (top3.isNotEmpty)
                   _Podium(top3: top3, languageService: languageService),
@@ -231,10 +231,13 @@ class _LeaderboardRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(
-            '#${entry.rank}',
-            style: AppTextStyles.subheading.copyWith(
-              fontWeight: FontWeight.w600,
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Text(
+              '#${entry.rank}',
+              style: AppTextStyles.subheading.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           SizedBox(width: 12.w),
@@ -262,21 +265,24 @@ class _LeaderboardRow extends StatelessWidget {
               style: AppTextStyles.label,
             ),
           ),
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: TradeWinFormat.lots(entry.lots),
-                  style: AppTextStyles.headingblack.copyWith(
-                    fontSize: 14.sp,
-                    color: AppColors.primary,
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: TradeWinFormat.lots(entry.lots),
+                    style: AppTextStyles.headingblack.copyWith(
+                      fontSize: 14.sp,
+                      color: AppColors.primary,
+                    ),
                   ),
-                ),
-                TextSpan(
-                  text: ' $lotsLabel',
-                  style: AppTextStyles.subheading.copyWith(fontSize: 12.sp),
-                ),
-              ],
+                  TextSpan(
+                    text: ' $lotsLabel',
+                    style: AppTextStyles.subheading.copyWith(fontSize: 12.sp),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

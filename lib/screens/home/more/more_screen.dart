@@ -259,7 +259,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                     Transform.scale(scale: value, child: child),
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
-              padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 18.h),
+              padding: EdgeInsetsDirectional.fromSTEB(18.w, 16.h, 18.w, 18.h),
               decoration: BoxDecoration(
                 color: AppColors.whiteColor,
                 borderRadius: BorderRadius.circular(18.r),
@@ -320,7 +320,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                           ),
                         ),
                         child: Text(
-                          'Add New Broker +',
+                          languageService.tr('switch_account_add_new_broker'),
                           style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.whiteColor,
                             fontSize: 16.sp,
@@ -506,7 +506,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                 ),
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
-              padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 18.h),
+              padding: EdgeInsetsDirectional.fromSTEB(18.w, 16.h, 18.w, 18.h),
               decoration: BoxDecoration(
                 color: AppColors.whiteColor,
                 borderRadius: BorderRadius.circular(18.r),
@@ -515,10 +515,15 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Add Account', style: AppTextStyles.heading),
+                  Text(
+                    languageService.tr('more_screen_add_account'),
+                    style: AppTextStyles.heading,
+                  ),
                   SizedBox(height: 12.h),
                   Text(
-                    'Current broker: $selectedBrokerName',
+                    TranslationUtils.trArgs('more_current_broker', {
+                      'broker': selectedBrokerName,
+                    }),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w500,
@@ -548,7 +553,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                           ),
                         ),
                         child: Text(
-                          'Choose Broker',
+                          languageService.tr('add_account_choose_broker'),
                           style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.whiteColor,
                             fontSize: 16.sp,
@@ -570,7 +575,10 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
       final ibmController = Get.put(IbmController());
       await ibmController.checkSystemAndNavigate();
     } catch (e) {
-      CustomToastService.showError(message: 'Error checking IB status: $e');
+      CustomToastService.showError(
+        message:
+            '${languageService.tr('more_screen_error_checking_ib_status')}: $e',
+      );
     }
   }
 
@@ -650,7 +658,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Dashboard',
+          languageService.tr('dashboard_title'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -671,7 +679,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(
+          padding: EdgeInsetsDirectional.fromSTEB(
             16.w,
             8.h,
             16.w,
@@ -1079,12 +1087,12 @@ Obx(() {
                     label: languageService.tr('ticket_title'),
                     onTap: () => Get.toNamed(AppPages.TICKET_LIST),
                   ),
-                  // _MenuItem(
-                  //   icon: 'language',
-                  //   label: languageService.tr('language_selector_title'),
-                  //   onTap: () => Get.toNamed(AppPages.LANGUAGE_SELECTOR),
-                  //   iconData: Icons.language,
-                  // ),
+                  _MenuItem(
+                    icon: 'language',
+                    label: languageService.tr('settings_language_title'),
+                    onTap: () => Get.toNamed(AppPages.LANGUAGE_SELECTOR),
+                    iconData: Icons.language,
+                  ),
                   _ThemeMenuItem(),
                   const _BiometricLoginMenuItem(),
                   _MenuItem(
@@ -1701,7 +1709,7 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: 4.w, bottom: 7.h, top: 2.h),
+      padding: EdgeInsetsDirectional.only(start: 4.w, bottom: 7.h, top: 2.h),
       child: Row(
         children: [
           Container(
@@ -1899,7 +1907,7 @@ class _OneClickTradingMenuItemState extends State<_OneClickTradingMenuItem> {
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
-              'One Click Trading',
+              TranslationUtils.tr('more_screen_one_click_trading'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.5.sp,
                 fontWeight: FontWeight.w500,
@@ -1937,7 +1945,9 @@ class _OneClickTradingMenuItemState extends State<_OneClickTradingMenuItem> {
               child: AnimatedAlign(
                 duration: const Duration(milliseconds: 200),
                 alignment:
-                    _isEnabled ? Alignment.centerRight : Alignment.centerLeft,
+                    _isEnabled
+                        ? AlignmentDirectional.centerEnd
+                        : AlignmentDirectional.centerStart,
                 curve: Curves.easeOut,
                 child: Container(
                   padding: EdgeInsets.all(2.w),
@@ -2211,7 +2221,9 @@ class _BiometricLoginMenuItemState extends State<_BiometricLoginMenuItem> {
                 child: AnimatedAlign(
                   duration: const Duration(milliseconds: 200),
                   alignment:
-                      _isEnabled ? Alignment.centerRight : Alignment.centerLeft,
+                      _isEnabled
+                          ? AlignmentDirectional.centerEnd
+                          : AlignmentDirectional.centerStart,
                   curve: Curves.easeOut,
                   child: Container(
                     padding: EdgeInsets.all(2.w),

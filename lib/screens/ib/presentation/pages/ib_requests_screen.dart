@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/models/ib_models.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 
 class IBRequestsScreen extends StatefulWidget {
@@ -68,13 +69,13 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
   String _getStatusLabel(String? status) {
     switch (status?.toLowerCase()) {
       case 'inreview':
-        return 'In Review';
+        return TranslationUtils.tr('ib_status_in_review');
       case 'approved':
-        return 'Approved';
+        return TranslationUtils.tr('kyc_verification_approved');
       case 'rejected':
-        return 'Rejected';
+        return TranslationUtils.tr('kyc_verification_rejected');
       default:
-        return status ?? 'Unknown';
+        return status ?? TranslationUtils.tr('ib_status_unknown');
     }
   }
 
@@ -101,7 +102,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
         title: Text(
-          'IB Requests',
+          TranslationUtils.tr('ib_requests_screen_ib_requests'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -125,7 +126,9 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                 controller.ibApprovalRequests.isEmpty) {
               return Center(
                 child: CommonLoadingWidget(
-                  message: 'Loading requests...',
+                  message: TranslationUtils.tr(
+                    'ib_requests_screen_loading_requests',
+                  ),
                   size: 50.0,
                   color: AppColors.primary,
                 ),
@@ -158,7 +161,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
               statuses.map((status) {
                 final isSelected = _selectedStatus == status;
                 return Padding(
-                  padding: EdgeInsets.only(right: 10.w),
+                  padding: EdgeInsetsDirectional.only(end: 10.w),
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
@@ -234,7 +237,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
               ),
               SizedBox(height: 20.h),
               Text(
-                'No requests found',
+                TranslationUtils.tr('ib_requests_screen_no_requests_found'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
@@ -243,7 +246,9 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
               ),
               SizedBox(height: 8.h),
               Text(
-                'There are no $_selectedStatus requests at the moment',
+                TranslationUtils.trArgs('ib_requests_no_status_requests', {
+                  'status': _selectedStatus,
+                }),
                 style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
                 textAlign: TextAlign.center,
               ),
@@ -257,7 +262,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
     final bottomPadding = 100.h;
 
     return ListView.builder(
-      padding: EdgeInsets.fromLTRB(16.w, 16.w, 16.w, bottomPadding),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 16.w, 16.w, bottomPadding),
       itemCount: filteredRequests.length,
       itemBuilder: (context, index) {
         final request = filteredRequests[index];
@@ -273,7 +278,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
     final assignedPlan =
         (request.assignedPlan ?? '').isNotEmpty
             ? request.assignedPlan!
-            : 'Not Assigned';
+            : TranslationUtils.tr('ib_not_assigned');
 
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
@@ -313,8 +318,8 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                         AppColors.primary.withOpacity(0.8),
                         AppColors.primary,
                       ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
                     ),
                     shape: BoxShape.circle,
                     boxShadow: [
@@ -399,7 +404,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                 _buildInfoGrid([
                   _buildInfoItem(
                     Icons.assignment_outlined,
-                    'Plan',
+                    TranslationUtils.tr('pmam_nav_plans'),
                     assignedPlan,
                   ),
                 ]),
@@ -430,7 +435,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                   color: AppColors.whiteColor,
                 ),
                 label: Text(
-                  'Change Plan',
+                  TranslationUtils.tr('pmam_manager_detail_screen_change_plan'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
@@ -538,7 +543,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Assign Plan',
+                          TranslationUtils.tr('ib_requests_screen_assign_plan'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w700,
@@ -557,7 +562,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                     SizedBox(height: 16.h),
 
                     // Structure type
-                    _requiredLabel('Structure Type'),
+                    _requiredLabel(TranslationUtils.tr('ib_structure_type')),
                     SizedBox(height: 8.h),
 
                     Container(
@@ -568,7 +573,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                       ),
                       alignment: Alignment.center,
                       child: Text(
-                        'Standard Group',
+                        TranslationUtils.tr('ib_requests_screen_standard_group'),
                         style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.whiteColor,
                           fontWeight: FontWeight.w600,
@@ -579,7 +584,9 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
 
                     SizedBox(height: 20.h),
 
-                    _requiredLabel('Select Standard Group'),
+                    _requiredLabel(
+                      TranslationUtils.tr('ib_select_standard_group'),
+                    ),
                     SizedBox(height: 8.h),
 
                     Obx(() {
@@ -620,7 +627,9 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                               color: AppColors.textPrimary,
                             ),
                             hint: Text(
-                              'Select Group',
+                              TranslationUtils.tr(
+                                'ib_requests_screen_select_group',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.textGrey,
                               ),
@@ -647,7 +656,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
 
                     SizedBox(height: 16.h),
 
-                    _requiredLabel('Approval Reason'),
+                    _requiredLabel(TranslationUtils.tr('ib_approval_reason')),
                     SizedBox(height: 8.h),
 
                     TextField(
@@ -655,7 +664,9 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                       controller: reasonController,
                       maxLines: 4,
                       decoration: InputDecoration(
-                        hintText: 'Please provide a reason...',
+                        hintText: TranslationUtils.tr(
+                          'ib_requests_screen_please_provide_reason',
+                        ),
                         hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.r),
@@ -679,7 +690,9 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                             if (selectedGroup == null ||
                                 reasonController.text.trim().isEmpty) {
                               CustomToastService.showError(
-                                message: 'Fill all required fields',
+                                message: TranslationUtils.tr(
+                                  'ib_requests_screen_fill_all_required_fields',
+                                ),
                               );
                               return;
                             }
@@ -700,7 +713,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                               _loadApprovalRequests();
                             }
                           },
-                          child: Text('Submit', style: AppTextStyles.textButton.copyWith(color: AppColors.whiteColor)),
+                          child: Text(TranslationUtils.tr('common_submit'), style: AppTextStyles.textButton.copyWith(color: AppColors.whiteColor)),
                         ),
                       ],
                     ),

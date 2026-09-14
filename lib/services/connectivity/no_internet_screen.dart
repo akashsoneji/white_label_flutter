@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/services/connectivity/connectivity_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/utils/svg_color_helper.dart';
 
 /// Full-screen "No Internet" overlay shown when device loses connectivity.
@@ -51,7 +52,7 @@ class NoInternetScreen extends StatelessWidget {
 
               // Title
               Text(
-                'No Internet!',
+                TranslationUtils.tr('no_internet_title'),
                 style: AppTextStyles.headingblack,
                 textAlign: TextAlign.center,
               ),
@@ -59,7 +60,7 @@ class NoInternetScreen extends StatelessWidget {
 
               // Message
               Text(
-                'Please check your connection and try again',
+                TranslationUtils.tr('no_internet_message'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 11.45.sp,
                   color: AppColors.textSecondary,
@@ -97,7 +98,7 @@ class NoInternetScreen extends StatelessWidget {
                       ),
                       SizedBox(width: 8.w),
                       Text(
-                        'Refresh',
+                        TranslationUtils.tr('common_refresh'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,

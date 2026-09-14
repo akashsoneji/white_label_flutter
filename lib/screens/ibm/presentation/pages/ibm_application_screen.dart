@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class IbmApplicationScreen extends StatelessWidget {
@@ -12,7 +13,10 @@ class IbmApplicationScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
       appBar: AppBar(
-        title: Text('Become a Partner', style: AppTextStyles.heading),
+        title: Text(
+          TranslationUtils.tr('ibm_become_a_partner'),
+          style: AppTextStyles.heading,
+        ),
         centerTitle: true,
         backgroundColor: AppColors.whiteColor,
         elevation: 0,
@@ -25,13 +29,13 @@ class IbmApplicationScreen extends StatelessWidget {
             Icon(Icons.handshake, size: 80.w, color: AppColors.primary),
             SizedBox(height: 24.h),
             Text(
-              'Partner with us and earn!',
+              TranslationUtils.tr('ibm_partner_with_us_and_earn'),
               style: AppTextStyles.heading.copyWith(fontSize: 20.sp),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 16.h),
             Text(
-              'Submit your request to become a partner today.',
+              TranslationUtils.tr('ibm_submit_request_to_become_partner'),
               style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
               textAlign: TextAlign.center,
             ),
@@ -49,10 +53,13 @@ class IbmApplicationScreen extends StatelessWidget {
                 onPressed: () {
                   // Implement partner request submission
                   Get.back();
-                  Get.snackbar('Success', 'Request submitted.');
+                  Get.snackbar(
+                    TranslationUtils.tr('create_account_success'),
+                    TranslationUtils.tr('ibm_request_submitted'),
+                  );
                 },
                 child: Text(
-                  'Submit Request',
+                  TranslationUtils.tr('id_upload_screen_submit_request'),
                   style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.whiteColor,
                     fontWeight: FontWeight.bold,

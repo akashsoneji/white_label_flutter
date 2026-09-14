@@ -254,7 +254,8 @@ class BonusController extends GetxController {
         }
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to load available bonuses',
+          message: response.message ??
+              TranslationUtils.tr('bonus_screen_failed_load_available'),
         );
       }
     } catch (e) {
@@ -317,7 +318,8 @@ class BonusController extends GetxController {
         }
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to load claim history',
+          message: response.message ??
+              TranslationUtils.tr('bonus_screen_failed_load_history'),
         );
       }
     } catch (e) {
@@ -347,7 +349,8 @@ class BonusController extends GetxController {
 
       if (response.success) {
         CustomToastService.showSuccess(
-          message: response.message ?? 'Bonus request submitted successfully!',
+          message: response.message ??
+              TranslationUtils.tr('bonus_screen_request_submitted'),
         );
         // Refresh both lists
         fetchAvailableBonuses();
@@ -355,7 +358,8 @@ class BonusController extends GetxController {
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to submit bonus claim.',
+          message: response.message ??
+              TranslationUtils.tr('bonus_screen_failed_submit_claim'),
         );
         return false;
       }
@@ -452,14 +456,14 @@ class BonusScreen extends StatelessWidget {
               controller: controller,
               index: 0,
               icon: Icons.card_giftcard_rounded,
-              label: 'Available Bonuses',
+              label: TranslationUtils.tr('bonus_screen_available_bonuses'),
             ),
             SizedBox(width: 8.w),
             _buildTabCard(
               controller: controller,
               index: 1,
               icon: Icons.history_rounded,
-              label: 'Claim History',
+              label: TranslationUtils.tr('bonus_screen_claim_history'),
             ),
           ],
         ),
@@ -601,7 +605,7 @@ class BonusScreen extends StatelessWidget {
                         ),
                         SizedBox(width: 8.w),
                         Text(
-                          'Active Bonus Campaigns',
+                          TranslationUtils.tr('bonus_screen_active_bonus_campaigns'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
@@ -612,7 +616,7 @@ class BonusScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Explore our active bonuses below. Make an eligible deposit to claim your reward!',
+                      TranslationUtils.tr('bonus_screen_explore_active_bonuses'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         color: AppColors.textSecondary,
@@ -631,7 +635,7 @@ class BonusScreen extends StatelessWidget {
 
             if (validDeposits.isNotEmpty) ...[
               Text(
-                'Eligible Deposits',
+                TranslationUtils.tr('bonus_screen_eligible_deposits'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -702,7 +706,7 @@ class BonusScreen extends StatelessWidget {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Deposit of \$${dep.amount}',
+                                          '${TranslationUtils.tr('bonus_screen_deposit_of')} \$${dep.amount}',
                                           style: AppTextStyles.bodyText
                                               .copyWith(
                                                 fontSize: 15.sp,
@@ -712,7 +716,7 @@ class BonusScreen extends StatelessWidget {
                                         ),
                                         SizedBox(height: 2.h),
                                         Text(
-                                          'Ref: ${dep.referenceNumber}  •  Account: ${dep.mt5AccountId}',
+                                          '${TranslationUtils.tr('bonus_screen_ref')}: ${dep.referenceNumber}  •  ${TranslationUtils.tr('settings_account')}: ${dep.mt5AccountId}',
                                           style: AppTextStyles.bodyText
                                               .copyWith(
                                                 fontSize: 12.sp,
@@ -745,7 +749,7 @@ class BonusScreen extends StatelessWidget {
                                         ),
                                         SizedBox(width: 4.w),
                                         Text(
-                                          '${eligibleList.length} ${eligibleList.length == 1 ? "Bonus" : "Bonuses"}',
+                                          '${eligibleList.length} ${eligibleList.length == 1 ? TranslationUtils.tr('dashboard_bonus') : TranslationUtils.tr('bonus_screen_bonuses')}',
                                           style: AppTextStyles.bodyText
                                               .copyWith(
                                                 fontSize: 11.sp,
@@ -826,7 +830,7 @@ class BonusScreen extends StatelessWidget {
                                                       ),
                                                       SizedBox(height: 2.h),
                                                       Text(
-                                                        '${bonus.bonusType.capitalizeFirst} Bonus',
+                                                        '${bonus.bonusType.capitalizeFirst} ${TranslationUtils.tr('dashboard_bonus')}',
                                                         style: AppTextStyles
                                                             .bodyText
                                                             .copyWith(
@@ -841,7 +845,7 @@ class BonusScreen extends StatelessWidget {
                                                       ),
                                                       SizedBox(height: 2.h),
                                                       Text(
-                                                        'Deposit Bonus available.',
+                                                        TranslationUtils.tr('bonus_screen_deposit_bonus_available'),
                                                         style: AppTextStyles
                                                             .bodyText
                                                             .copyWith(
@@ -869,7 +873,7 @@ class BonusScreen extends StatelessWidget {
                                                         ),
                                                   ),
                                                   child: Text(
-                                                    'REQUEST',
+                                                    TranslationUtils.tr('bonus_screen_request').toUpperCase(),
                                                     style: AppTextStyles
                                                         .bodyText
                                                         .copyWith(
@@ -888,7 +892,7 @@ class BonusScreen extends StatelessWidget {
                                             SizedBox(height: 12.h),
                                             // Allowed groups
                                             Text(
-                                              'ALLOWED GROUPS',
+                                              TranslationUtils.tr('bonus_screen_allowed_groups'),
                                               style: AppTextStyles.bodyText
                                                   .copyWith(
                                                     fontSize: 10.sp,
@@ -910,7 +914,7 @@ class BonusScreen extends StatelessWidget {
                                                     BorderRadius.circular(4.r),
                                               ),
                                               child: Text(
-                                                'All Groups',
+                                                TranslationUtils.tr('bonus_screen_all_groups'),
                                                 style: AppTextStyles.bodyText
                                                     .copyWith(
                                                       fontSize: 11.sp,
@@ -935,7 +939,7 @@ class BonusScreen extends StatelessWidget {
                                                       .spaceBetween,
                                               children: [
                                                 _buildDetailItem(
-                                                  label: 'MAX CAP',
+                                                  label: TranslationUtils.tr('bonus_screen_max_cap'),
                                                   value:
                                                       bonus.maxDepositCap !=
                                                                   null &&
@@ -944,10 +948,10 @@ class BonusScreen extends StatelessWidget {
                                                                   .toString()
                                                                   .isNotEmpty
                                                           ? '\$${bonus.maxDepositCap}'
-                                                          : 'None',
+                                                          : TranslationUtils.tr('common_none'),
                                                 ),
                                                 _buildDetailItem(
-                                                  label: 'MIN DEP',
+                                                  label: TranslationUtils.tr('bonus_screen_min_dep'),
                                                   value:
                                                       bonus.minDepositAmount !=
                                                                   null &&
@@ -956,10 +960,10 @@ class BonusScreen extends StatelessWidget {
                                                                   .toString()
                                                                   .isNotEmpty
                                                           ? '\$${bonus.minDepositAmount}'
-                                                          : 'Any',
+                                                          : TranslationUtils.tr('bonus_screen_any'),
                                                 ),
                                                 _buildDetailItem(
-                                                  label: 'DURATION',
+                                                  label: TranslationUtils.tr('bonus_screen_duration'),
                                                   value:
                                                       bonus.maxBonusDurationDays !=
                                                                   null &&
@@ -967,7 +971,7 @@ class BonusScreen extends StatelessWidget {
                                                                   .maxBonusDurationDays
                                                                   .toString()
                                                                   .isNotEmpty
-                                                          ? '${bonus.maxBonusDurationDays} days'
+                                                          ? '${bonus.maxBonusDurationDays} ${TranslationUtils.tr('time_days')}'
                                                           : '∞',
                                                 ),
                                               ],
@@ -999,7 +1003,7 @@ class BonusScreen extends StatelessWidget {
                                                   elevation: 0,
                                                 ),
                                                 child: Text(
-                                                  'Claim Reward',
+                                                  TranslationUtils.tr('bonus_screen_claim_reward'),
                                                   style: AppTextStyles.bodyText
                                                       .copyWith(
                                                         fontSize: 14.sp,
@@ -1070,7 +1074,7 @@ class BonusScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      'Max Bonus: ${bonus.bonusPercentage}% of Deposit',
+                      '${TranslationUtils.tr('bonus_screen_max_bonus')}: ${bonus.bonusPercentage}% ${TranslationUtils.tr('bonus_screen_of_deposit')}',
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -1079,7 +1083,7 @@ class BonusScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      'Deposit Bonus available.',
+                      TranslationUtils.tr('bonus_screen_deposit_bonus_available'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.textSecondary,
@@ -1095,7 +1099,7 @@ class BonusScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Text(
-                  'REQUEST',
+                  TranslationUtils.tr('bonus_screen_request').toUpperCase(),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w600,
@@ -1108,7 +1112,7 @@ class BonusScreen extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
           Text(
-            'ALLOWED GROUPS',
+            TranslationUtils.tr('bonus_screen_allowed_groups'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 10.sp,
               fontWeight: FontWeight.w600,
@@ -1124,7 +1128,7 @@ class BonusScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(4.r),
             ),
             child: Text(
-              'All Groups',
+              TranslationUtils.tr('bonus_screen_all_groups'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w600,
@@ -1139,27 +1143,27 @@ class BonusScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildDetailItem(
-                label: 'MAX CAP',
+                label: TranslationUtils.tr('bonus_screen_max_cap'),
                 value:
                     bonus.maxDepositCap != null &&
                             bonus.maxDepositCap.toString().isNotEmpty
                         ? '\$${bonus.maxDepositCap}'
-                        : 'None',
+                        : TranslationUtils.tr('common_none'),
               ),
               _buildDetailItem(
-                label: 'MIN DEP',
+                label: TranslationUtils.tr('bonus_screen_min_dep'),
                 value:
                     bonus.minDepositAmount != null &&
                             bonus.minDepositAmount.toString().isNotEmpty
                         ? '\$${bonus.minDepositAmount}'
-                        : 'Any',
+                        : TranslationUtils.tr('bonus_screen_any'),
               ),
               _buildDetailItem(
-                label: 'DURATION',
+                label: TranslationUtils.tr('bonus_screen_duration'),
                 value:
                     bonus.maxBonusDurationDays != null &&
                             bonus.maxBonusDurationDays.toString().isNotEmpty
-                        ? '${bonus.maxBonusDurationDays} days'
+                        ? '${bonus.maxBonusDurationDays} ${TranslationUtils.tr('time_days')}'
                         : '∞',
               ),
             ],
@@ -1201,7 +1205,7 @@ class BonusScreen extends StatelessWidget {
                 elevation: 0,
               ),
               label: Text(
-                'Deposit to Claim',
+                TranslationUtils.tr('bonus_screen_deposit_to_claim'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
@@ -1265,7 +1269,9 @@ class BonusScreen extends StatelessWidget {
               SizedBox(height: 120.h),
               _buildEmptyState(
                 iconPath: 'assets/svg/more/bonus.svg',
-                message: 'No bonus claims found in your history.',
+                message: TranslationUtils.tr(
+                  'bonus_screen_no_bonus_claims_found_in_your',
+                ),
               ),
             ],
           );
@@ -1351,7 +1357,7 @@ class BonusScreen extends StatelessWidget {
                               ),
                               SizedBox(height: 2.h),
                               Text(
-                                '${claim.bonusPercentage} ${claim.bonusType.capitalizeFirst} Bonus',
+                                '${claim.bonusPercentage} ${claim.bonusType.capitalizeFirst} ${TranslationUtils.tr('dashboard_bonus')}',
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w600,
@@ -1390,15 +1396,15 @@ class BonusScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _buildDetailItem(
-                          label: 'MT5 ACCOUNT',
+                          label: TranslationUtils.tr('bonus_screen_mt5_account'),
                           value: claim.mt5Account,
                         ),
                         _buildDetailItem(
-                          label: 'DEPOSIT',
+                          label: TranslationUtils.tr('common_deposit').toUpperCase(),
                           value: claim.depositAmount,
                         ),
                         _buildDetailItem(
-                          label: 'DEP REF',
+                          label: TranslationUtils.tr('bonus_screen_dep_ref'),
                           value: claim.depositRequestId,
                         ),
                       ],
@@ -1413,7 +1419,7 @@ class BonusScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Trading Progress',
+                            TranslationUtils.tr('bonus_screen_trading_progress'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
@@ -1452,7 +1458,7 @@ class BonusScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '${claim.currentLots} / ${claim.lotSize} Lots',
+                            '${claim.currentLots} / ${claim.lotSize} ${TranslationUtils.tr('general_lots')}',
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
@@ -1478,8 +1484,8 @@ class BonusScreen extends StatelessWidget {
                                         claim.remainingDays
                                             .toLowerCase()
                                             .contains('expired')
-                                    ? 'Expired'
-                                    : '${claim.remainingDays} left',
+                                    ? TranslationUtils.tr('bonus_screen_expired')
+                                    : '${claim.remainingDays} ${TranslationUtils.tr('bonus_screen_left')}',
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 11.sp,
                                   fontWeight: FontWeight.w700,
@@ -1501,7 +1507,7 @@ class BonusScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Remaining Time',
+                            TranslationUtils.tr('bonus_screen_remaining_time'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
@@ -1527,7 +1533,7 @@ class BonusScreen extends StatelessWidget {
                                         claim.remainingDays
                                             .toLowerCase()
                                             .contains('expired')
-                                    ? 'Expired'
+                                    ? TranslationUtils.tr('bonus_screen_expired')
                                     : claim.remainingDays,
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 11.sp,
@@ -1690,7 +1696,7 @@ class BonusScreen extends StatelessWidget {
           ),
           SizedBox(height: 20.h),
           Text(
-            'No Eligible Deposits Found',
+            TranslationUtils.tr('bonus_screen_no_eligible_deposits_found'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
@@ -1700,7 +1706,9 @@ class BonusScreen extends StatelessWidget {
           ),
           SizedBox(height: 8.h),
           Text(
-            'You have no recent deposits that are eligible for a bonus claim right now.',
+            TranslationUtils.tr(
+              'bonus_screen_you_have_no_recent_deposits_that',
+            ),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.sp,
               fontWeight: FontWeight.w400,
@@ -1743,7 +1751,7 @@ class BonusScreen extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'Make a Deposit',
+                TranslationUtils.tr('bonus_screen_make_deposit'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
@@ -1771,7 +1779,7 @@ class BonusScreen extends StatelessWidget {
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
-      barrierLabel: 'Dismiss',
+      barrierLabel: TranslationUtils.tr('trading_dismiss'),
       transitionDuration: const Duration(milliseconds: 250),
       pageBuilder: (context, anim1, anim2) {
         return Align(
@@ -1820,7 +1828,7 @@ class BonusScreen extends StatelessWidget {
                           ),
                           SizedBox(width: 10.w),
                           Text(
-                            'Bonus Confirmation',
+                            TranslationUtils.tr('bonus_screen_bonus_confirmation'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
@@ -1850,14 +1858,20 @@ class BonusScreen extends StatelessWidget {
                         height: 1.4,
                       ),
                       children: [
-                        TextSpan(text: 'You are about to claim the '),
+                        TextSpan(
+                          text:
+                              '${TranslationUtils.tr('bonus_screen_you_are_about_to_claim')} ',
+                        ),
                         TextSpan(
                           text: '${bonus.bonusPercentage}% ${bonus.bonusType}',
                           style: AppTextStyles.bodyText.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        TextSpan(text: ' bonus.'),
+                        TextSpan(
+                          text:
+                              ' ${TranslationUtils.tr('bonus_screen_bonus_lowercase')}.',
+                        ),
                       ],
                     ),
                   ),
@@ -1868,38 +1882,38 @@ class BonusScreen extends StatelessWidget {
                     children: [
                       Expanded(
                         child: _buildModalDetailBox(
-                          label: 'MAX CAP',
+                          label: TranslationUtils.tr('bonus_screen_max_cap'),
                           value:
                               bonus.maxDepositCap != null &&
                                       bonus.maxDepositCap.toString().isNotEmpty
                                   ? '\$${bonus.maxDepositCap}'
-                                  : 'Unlimited',
+                                  : TranslationUtils.tr('bonus_screen_unlimited'),
                         ),
                       ),
                       SizedBox(width: 8.w),
                       Expanded(
                         child: _buildModalDetailBox(
-                          label: 'DURATION',
+                          label: TranslationUtils.tr('bonus_screen_duration'),
                           value:
                               bonus.maxBonusDurationDays != null &&
                                       bonus.maxBonusDurationDays
                                           .toString()
                                           .isNotEmpty
-                                  ? '${bonus.maxBonusDurationDays} days'
-                                  : 'Unlimited',
+                                  ? '${bonus.maxBonusDurationDays} ${TranslationUtils.tr('time_days')}'
+                                  : TranslationUtils.tr('bonus_screen_unlimited'),
                         ),
                       ),
                       SizedBox(width: 8.w),
                       Expanded(
                         child: _buildModalDetailBox(
-                          label: 'MIN DEPOSIT',
+                          label: TranslationUtils.tr('bonus_screen_min_deposit'),
                           value:
                               bonus.minDepositAmount != null &&
                                       bonus.minDepositAmount
                                           .toString()
                                           .isNotEmpty
                                   ? '\$${bonus.minDepositAmount}'
-                                  : 'Any',
+                                  : TranslationUtils.tr('bonus_screen_any'),
                         ),
                       ),
                     ],
@@ -1908,7 +1922,7 @@ class BonusScreen extends StatelessWidget {
 
                   // Allowed accounts / groups
                   Text(
-                    'ALLOWED ACCOUNTS / GROUPS',
+                    TranslationUtils.tr('bonus_screen_allowed_accounts_groups'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 10.sp,
                       fontWeight: FontWeight.bold,
@@ -1928,7 +1942,7 @@ class BonusScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8.r),
                       border: Border.all(color: AppColors.border),
                     ),
-                    alignment: Alignment.centerLeft,
+                    alignment: AlignmentDirectional.centerStart,
                     child: Container(
                       padding: EdgeInsets.symmetric(
                         horizontal: 8.w,
@@ -1939,7 +1953,7 @@ class BonusScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                       child: Text(
-                        'All Groups',
+                        TranslationUtils.tr('bonus_screen_all_groups'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
@@ -1974,7 +1988,7 @@ class BonusScreen extends StatelessWidget {
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Text(
-                                  'Cancel',
+                                  TranslationUtils.tr('general_cancel'),
                                   maxLines: 1,
                                   style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 14.sp,
@@ -2035,7 +2049,7 @@ class BonusScreen extends StatelessWidget {
                                       : FittedBox(
                                         fit: BoxFit.scaleDown,
                                         child: Text(
-                                          'Confirm & Claim',
+                                          TranslationUtils.tr('bonus_screen_confirm_claim'),
                                           maxLines: 1,
                                           style: AppTextStyles.bodyText
                                               .copyWith(

@@ -3,6 +3,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/services/language_service.dart';
 import '../components/trader_card.dart';
 import '../traders_filter_screen.dart';
 
@@ -49,7 +50,7 @@ class _TradersTabState extends State<TradersTab> {
                     icon: SvgPicture.asset('assets/svg/ib_dashboard/home.svg'),
                   ),
                   Text(
-                    'Master Rating',
+                    TranslationUtils.tr('traders_tab_master_rating'),
                     style: AppTextStyles.bodyText.copyWith(fontSize: 18, fontWeight: FontWeight.w500),
                   ),
                   Row(
@@ -95,7 +96,7 @@ class _TradersTabState extends State<TradersTab> {
                       });
                     },
                     title: Text(
-                      'Risk Score',
+                      TranslationUtils.tr('traders_tab_risk_score'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
@@ -106,9 +107,9 @@ class _TradersTabState extends State<TradersTab> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: EdgeInsets.only(left: 15),
+                            padding: EdgeInsetsDirectional.only(start: 15),
                             child: Text(
-                              'Whom to show first',
+                              TranslationUtils.tr('traders_tab_whom_to_show_first'),
                               style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.textGrey,
                                 fontSize: 12,
@@ -117,7 +118,7 @@ class _TradersTabState extends State<TradersTab> {
                           ),
                           SizedBox(height: 8),
                           Padding(
-                            padding: EdgeInsets.only(left: 10.0),
+                            padding: EdgeInsetsDirectional.only(start: 10.0),
                             child: Wrap(
                               alignment: WrapAlignment.start,
                               spacing: 8,
@@ -125,18 +126,21 @@ class _TradersTabState extends State<TradersTab> {
                               children: [
                                 _buildFilterChip(
                                   'Risk score',
+                                  'traders_tab_sort_risk_score',
                                   _selectedShowFirst,
                                   (val) =>
                                       setState(() => _selectedShowFirst = val),
                                 ),
                                 _buildFilterChip(
                                   'Top gainers',
+                                  'traders_tab_sort_top_gainers',
                                   _selectedShowFirst,
                                   (val) =>
                                       setState(() => _selectedShowFirst = val),
                                 ),
                                 _buildFilterChip(
                                   'Most popular',
+                                  'traders_tab_sort_most_popular',
                                   _selectedShowFirst,
                                   (val) =>
                                       setState(() => _selectedShowFirst = val),
@@ -146,9 +150,9 @@ class _TradersTabState extends State<TradersTab> {
                           ),
                           SizedBox(height: 8),
                           Padding(
-                            padding: EdgeInsets.only(left: 15),
+                            padding: EdgeInsetsDirectional.only(start: 15),
                             child: Text(
-                              'For what time',
+                              TranslationUtils.tr('traders_tab_for_what_time'),
                               style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.textGrey,
                                 fontSize: 12,
@@ -159,7 +163,7 @@ class _TradersTabState extends State<TradersTab> {
                           ),
                           SizedBox(height: 8),
                           Padding(
-                            padding: EdgeInsets.only(left: 10),
+                            padding: EdgeInsetsDirectional.only(start: 10),
                             child: Wrap(
                               alignment: WrapAlignment.start,
                               spacing: 8,
@@ -167,26 +171,31 @@ class _TradersTabState extends State<TradersTab> {
                               children: [
                                 _buildFilterChip(
                                   '2 weeks',
+                                  'traders_tab_range_2_weeks',
                                   _selectedTime,
                                   (val) => setState(() => _selectedTime = val),
                                 ),
                                 _buildFilterChip(
                                   '1 month',
+                                  'traders_tab_range_1_month',
                                   _selectedTime,
                                   (val) => setState(() => _selectedTime = val),
                                 ),
                                 _buildFilterChip(
                                   '3 months',
+                                  'traders_tab_range_3_months',
                                   _selectedTime,
                                   (val) => setState(() => _selectedTime = val),
                                 ),
                                 _buildFilterChip(
                                   '6 months',
+                                  'traders_tab_range_6_months',
                                   _selectedTime,
                                   (val) => setState(() => _selectedTime = val),
                                 ),
                                 _buildFilterChip(
                                   'all time',
+                                  'traders_tab_range_all_time',
                                   _selectedTime,
                                   (val) => setState(() => _selectedTime = val),
                                 ),
@@ -242,13 +251,14 @@ class _TradersTabState extends State<TradersTab> {
   }
 
   Widget _buildFilterChip(
-    String label,
+    String value,
+    String labelKey,
     String selectedValue,
     Function(String) onSelect,
   ) {
-    bool isSelected = label == selectedValue;
+    bool isSelected = value == selectedValue;
     return GestureDetector(
-      onTap: () => onSelect(label),
+      onTap: () => onSelect(value),
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
         decoration: BoxDecoration(
@@ -259,7 +269,7 @@ class _TradersTabState extends State<TradersTab> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
-          label,
+          TranslationUtils.tr(labelKey),
           style: AppTextStyles.bodyText.copyWith(
             color: isSelected ? AppColors.whiteColor : AppColors.textPrimary,
             fontWeight: FontWeight.w400,

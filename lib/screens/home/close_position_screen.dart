@@ -10,6 +10,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/symbol_details_cache_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/app_switch_tile.dart';
@@ -344,8 +345,8 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
       final activeAccount = accountController.activeMT5Account;
       if (activeAccount == null) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'No active account found',
+          title: TranslationUtils.tr('general_error'),
+          message: TranslationUtils.tr('trade_no_active_account'),
         );
         return;
       }
@@ -378,8 +379,10 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
       // Validate that at least one TP/SL value is provided
       if (finalTakeProfit == null && finalStopLoss == null) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'Please provide at least one Take Profit or Stop Loss value',
+          title: TranslationUtils.tr('close_position_error'),
+          message: TranslationUtils.tr(
+            'close_position_screen_please_provide_at_least_one_take',
+          ),
         );
         return;
       }
@@ -406,8 +409,9 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
     } catch (e) {
       print('🚀 _editOrder: Error: $e');
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to update order: ${e.toString()}',
+        title: TranslationUtils.tr('close_position_error'),
+        message:
+            '${TranslationUtils.tr('close_position_screen_failed_to_update_order')}: ${e.toString()}',
       );
     } finally {
       setState(() {
@@ -478,8 +482,8 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
       final activeAccount = accountController.activeMT5Account;
       if (activeAccount == null) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'No active account found',
+          title: TranslationUtils.tr('general_error'),
+          message: TranslationUtils.tr('trade_no_active_account'),
         );
         return;
       }
@@ -506,8 +510,9 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
       }
     } catch (e) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to close position: ${e.toString()}',
+        title: TranslationUtils.tr('close_position_error'),
+        message:
+            '${TranslationUtils.tr('close_position_screen_failed_to_close_position')}: ${e.toString()}',
       );
     } finally {
       setState(() {
@@ -666,7 +671,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Close / Modify Position',
+                        TranslationUtils.tr('trade_close_modify_position'),
                         maxLines: 1,
                         overflow:
                             TextOverflow
@@ -679,7 +684,15 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        '${widget.position.action} ${widget.position.volume} $_displaySymbol at ${widget.position.openPrice}',
+                        TranslationUtils.trArgs(
+                          'close_position_action_volume_symbol_at_price',
+                          {
+                            'action': widget.position.action,
+                            'volume': '${widget.position.volume}',
+                            'symbol': _displaySymbol,
+                            'price': '${widget.position.openPrice}',
+                          },
+                        ),
                         maxLines: 1,
                         overflow:
                             TextOverflow
@@ -788,7 +801,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                 border: Border.all(color: AppColors.border),
               ),
               child: AppSwitchTile(
-                title: 'Chart',
+                title: TranslationUtils.tr('bottom_navigation_chart'),
                 value: showChart,
                 onChanged: (value) {
                   setState(() {
@@ -838,7 +851,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
           Column(
             children: [
               Text(
-                'Bid',
+                TranslationUtils.tr('meta_watchlist_bid'),
                 style: AppTextStyles.label.copyWith(
                   fontSize: 10.sp,
                   color: AppColors.textGrey,
@@ -865,7 +878,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
           Column(
             children: [
               Text(
-                'Ask',
+                TranslationUtils.tr('meta_watchlist_ask'),
                 style: AppTextStyles.label.copyWith(
                   fontSize: 10.sp,
                   color: AppColors.textGrey,
@@ -1033,7 +1046,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Close Partially',
+              TranslationUtils.tr('close_position_screen_close_partially'),
               style: AppTextStyles.label.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
@@ -1056,8 +1069,9 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          'Partial Close',
-
+                          TranslationUtils.tr(
+                            'close_position_screen_partial_close',
+                          ),
                           style: AppTextStyles.label.copyWith(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
@@ -1168,7 +1182,9 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                                   color: AppColors.textPrimary,
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: 'Enter lots',
+                                  hintText: TranslationUtils.tr(
+                                    'pending_order_enter_lots',
+                                  ),
                                   hintStyle: AppTextStyles.label.copyWith(
                                     fontSize: 12.sp,
                                     color: AppColors.textGrey,
@@ -1292,7 +1308,16 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
               border: Border.all(color: AppColors.primary.withOpacity(0.3)),
             ),
             child: Text(
-              'Selected: ${PrecisionHelper.formatVolume(closeVolume)} lots (${PrecisionHelper.calculatePercentage(closeVolume, lotSize)}%)',
+              TranslationUtils.trArgs(
+                'close_position_screen_selected_lots',
+                {
+                  'lots': PrecisionHelper.formatVolume(closeVolume),
+                  'percent': PrecisionHelper.calculatePercentage(
+                    closeVolume,
+                    lotSize,
+                  ).toString(),
+                },
+              ),
               style: AppTextStyles.label.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
@@ -1510,12 +1535,33 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
     );
   }
 
+  /// Display-only translation for TP/SL field labels. Raw label values are
+  /// still used for the `label == 'Take Profit'` logic checks.
+  String _fieldLabel(String label) {
+    switch (label) {
+      case 'Take Profit':
+        return TranslationUtils.tr('general_take_profit');
+      case 'Stop Loss':
+        return TranslationUtils.tr('general_stop_loss');
+      case 'Potential Profit at TP':
+        return TranslationUtils.tr('pending_order_potential_profit_at_tp');
+      case 'Potential Loss at SL':
+        return TranslationUtils.tr('pending_order_potential_loss_at_sl');
+      default:
+        return label;
+    }
+  }
+
   Widget _buildSwitchTile(
     String title,
     bool value, {
     required Function(bool) onChanged,
   }) {
-    return AppSwitchTile(title: title, value: value, onChanged: onChanged);
+    return AppSwitchTile(
+      title: _fieldLabel(title),
+      value: value,
+      onChanged: onChanged,
+    );
   }
 
   Widget _buildCurrentProfitLoss(double profitLoss, bool isPositive) {
@@ -1561,7 +1607,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
               ),
               SizedBox(width: 12.w),
               Text(
-                'Current P&L: \$${PrecisionHelper.formatPnL(profitLoss)}',
+                '${TranslationUtils.tr('close_position_screen_current_pnl')}: \$${PrecisionHelper.formatPnL(profitLoss)}',
                 style: AppTextStyles.label.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
@@ -1575,7 +1621,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Full Position:',
+                '${TranslationUtils.tr('close_position_screen_full_position')}:',
                 style: AppTextStyles.label.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
@@ -1600,7 +1646,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Closing:',
+                '${TranslationUtils.tr('close_position_screen_closing')}:',
                 style: AppTextStyles.label.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
@@ -1608,7 +1654,9 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                 ),
               ),
               Text(
-                '${PrecisionHelper.formatVolume(closeVolume)} lots',
+                TranslationUtils.trArgs('tw_lots_amount', {
+                  'lots': PrecisionHelper.formatVolume(closeVolume),
+                }),
                 style: AppTextStyles.label.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
@@ -1666,20 +1714,34 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
     String buttonText;
     if (hasTPSL && isSLTPModified) {
       // SL/TP has been modified - show "Modify POSITION"
-      buttonText = 'MODIFY POSITION';
+      buttonText =
+          TranslationUtils.tr('trade_screen_modify_position').toUpperCase();
     } else if (hasTPSL && !isSLTPModified) {
       // SL/TP enabled but not modified - show "Close Trade"
-      buttonText = 'CLOSE TRADE';
+      buttonText = TranslationUtils.tr('trade_close').toUpperCase();
     } else if (isPartialClose) {
+      final lots = PrecisionHelper.formatVolume(closeVolume);
       buttonText =
           isPositive
-              ? 'Close ${PrecisionHelper.formatVolume(closeVolume)} Lots with Profit +$formattedProfitLoss'
-              : 'Close ${PrecisionHelper.formatVolume(closeVolume)} Lots with Loss $formattedProfitLoss';
+              ? TranslationUtils.trArgs(
+                'close_position_screen_close_lots_with_profit',
+                {'lots': lots, 'amount': '+$formattedProfitLoss'},
+              )
+              : TranslationUtils.trArgs(
+                'close_position_screen_close_lots_with_loss',
+                {'lots': lots, 'amount': formattedProfitLoss},
+              );
     } else {
       buttonText =
           isPositive
-              ? 'Close with Profit +$formattedProfitLoss'
-              : 'Close with Loss $formattedProfitLoss';
+              ? TranslationUtils.trArgs(
+                'close_position_screen_close_with_profit',
+                {'amount': '+$formattedProfitLoss'},
+              )
+              : TranslationUtils.trArgs(
+                'close_position_screen_close_with_loss',
+                {'amount': formattedProfitLoss},
+              );
     }
 
     // Check if SL/TP values are valid (20 points from current price)
@@ -1717,7 +1779,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                     ),
                     SizedBox(width: 12.w),
                     Text(
-                      'Processing...',
+                      TranslationUtils.tr('pending_order_processing'),
                       style: AppTextStyles.label.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
@@ -2181,13 +2243,13 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
             : AppColors.error; // SL is always a loss, always show in red
 
     return Padding(
-      padding: EdgeInsets.only(top: 8.h, left: 12.w, right: 12.w),
+      padding: EdgeInsetsDirectional.only(top: 8.h, start: 12.w, end: 12.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Label - static, never rebuilds
           Text(
-            label,
+            _fieldLabel(label),
             style: AppTextStyles.label.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w400,

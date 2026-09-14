@@ -112,7 +112,9 @@ class AccountCreatedScreen extends StatelessWidget {
     return Column(
       children: [
         Text(
-          "Welcome to ${FlavorConfig.appNameDisplay}",
+          languageService.tr("account_created_screen_welcome_to_app", {
+            'app': FlavorConfig.appNameDisplay,
+          }),
           style: AppTextStyles.heading.copyWith(
             fontSize: 28.sp,
             fontWeight: FontWeight.w700,
@@ -148,7 +150,7 @@ class AccountCreatedScreen extends StatelessWidget {
           ),
           SizedBox(height: 20.h),
           VantagePrimaryButton(
-            text: 'Create Trading Account',
+            text: languageService.tr('account_created_screen_create_trading_account'),
             onPressed: () {
               Get.toNamed(
                 AppPages.CHOOSE_ACCOUNT,
@@ -193,7 +195,10 @@ class AccountCreatedScreen extends StatelessWidget {
               ),
               elevation: 0,
             ),
-            child: Text("Create Trading Account", style: AppTextStyles.button),
+            child: Text(
+              languageService.tr('account_created_screen_create_trading_account'),
+              style: AppTextStyles.button,
+            ),
           ),
         ),
         SizedBox(height: 12.h),

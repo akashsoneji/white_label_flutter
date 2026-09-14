@@ -5,6 +5,7 @@ import 'package:crm_app/models/trade_win/trade_win_past_win_model.dart';
 import 'package:crm_app/models/trade_win/trade_win_product_model.dart';
 import 'package:crm_app/models/trade_win/trade_win_stats_model.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class TradeWinController extends GetxController {
   final RxBool isLoading = false.obs;
@@ -128,13 +129,14 @@ class TradeWinController extends GetxController {
       );
 
       if (!response.success || response.data == null) {
-        errorMessage.value = response.message ?? 'Failed to load products';
+        errorMessage.value =
+            response.message ?? TranslationUtils.tr('tw_load_products_failed');
         return;
       }
 
       final root = _asMap(response.data);
       if (root == null) {
-        errorMessage.value = 'Invalid response';
+        errorMessage.value = TranslationUtils.tr('tw_invalid_response');
         return;
       }
 

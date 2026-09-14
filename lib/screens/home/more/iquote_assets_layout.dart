@@ -86,7 +86,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
           return;
         }
         final authenticated = await BiometricService.instance.authenticate(
-          reason: 'Authenticate to enable biometric login',
+          reason: TranslationUtils.tr('biometric_auth_reason'),
         );
         if (authenticated) {
           await SecureStorageService.setBiometricEnabled(true);
@@ -263,7 +263,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Log Out',
+                languageService?.tr('iquote_assets_log_out') ?? 'Log Out',
                 style: AppTextStyles.heading.copyWith(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w800,
@@ -661,9 +661,9 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                           ),
                         ),
                       ),
-                      Positioned(
+                      PositionedDirectional(
                         bottom: 0,
-                        right: 0,
+                        end: 0,
                         child: Container(
                           width: 12.r,
                           height: 12.r,
@@ -687,7 +687,9 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                             final displayName =
                                 name.trim().isNotEmpty
                                     ? name.trim()
-                                    : 'Sign in / Sign up';
+                                    : TranslationUtils.tr(
+                                      'iquote_assets_sign_in_sign_up',
+                                    );
                             return Text(
                               displayName,
                               maxLines: 1,
@@ -708,7 +710,9 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                             final subText =
                                 email.isNotEmpty
                                     ? email
-                                    : 'Manage your portfolio & accounts';
+                                    : TranslationUtils.tr(
+                                      'iquote_assets_manage_portfolio_accounts',
+                                    );
                             return Text(
                               subText,
                               maxLines: 1,
@@ -788,6 +792,9 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
   ) {
     final AuthController? authController =
         Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
+    final languageService = Get.isRegistered<LanguageService>()
+        ? Get.find<LanguageService>()
+        : null;
 
     return Obx(() {
       final isLoggedIn =
@@ -854,8 +861,8 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
             children: [
               Expanded(
                 child: _primaryActionCard(
-                  title: 'Deposit',
-                  subtitle: 'Instant Add Funds',
+                  title: languageService?.tr('iquote_assets_deposit') ?? 'Deposit',
+                  subtitle: languageService?.tr('iquote_assets_deposit_subtitle') ?? 'Instant Add Funds',
                   icon: Icons.add_circle_rounded,
                   gradient: const LinearGradient(
                     colors: [Color(0xFF10B981), Color(0xFF059669)],
@@ -866,8 +873,8 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
               SizedBox(width: 12.w),
               Expanded(
                 child: _primaryActionCard(
-                  title: 'Withdrawal',
-                  subtitle: 'Fast Payouts',
+                  title: languageService?.tr('iquote_assets_withdrawal') ?? 'Withdrawal',
+                  subtitle: languageService?.tr('iquote_assets_withdrawal_subtitle') ?? 'Fast Payouts',
                   icon: Icons.arrow_circle_up_rounded,
                   gradient: const LinearGradient(
                     colors: [Color(0xFFF97316), Color(0xFFEA580C)],
@@ -884,8 +891,8 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
             children: [
               Expanded(
                 child: _secondaryActionCard(
-                  title: 'Demo Trading',
-                  subtitle: 'Practice with \$10k',
+                  title: languageService?.tr('iquote_assets_demo_trading') ?? 'Demo Trading',
+                  subtitle: languageService?.tr('iquote_assets_demo_trading_subtitle') ?? 'Practice with \$10k',
                   icon: Icons.play_arrow_rounded,
                   iconColor: const Color(0xFFF59E0B),
                   cardBg: cardBg,
@@ -900,8 +907,8 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
               SizedBox(width: 12.w),
               Expanded(
                 child: _secondaryActionCard(
-                  title: 'Live Account',
-                  subtitle: 'Trade Real Markets',
+                  title: languageService?.tr('iquote_assets_live_account') ?? 'Live Account',
+                  subtitle: languageService?.tr('iquote_assets_live_account_subtitle') ?? 'Trade Real Markets',
                   icon: Icons.account_balance_wallet_rounded,
                   iconColor: const Color(0xFF10B981),
                   cardBg: cardBg,
@@ -1093,7 +1100,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
           icon: Icons.dashboard_rounded,
           iconColor: const Color(0xFF3B82F6),
           title: languageService?.tr('dashboard_title') ?? 'Trading Dashboard',
-          subtitle: 'Overview of balances & metrics',
+          subtitle: languageService?.tr('iquote_assets_dashboard_subtitle') ?? 'Overview of balances & metrics',
           textPrimary: textPrimary,
           onTap: () => showDashboardBottomSheet(context),
         ),
@@ -1105,7 +1112,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
           icon: Icons.account_balance_wallet_rounded,
           iconColor: const Color(0xFF10B981),
           title: languageService?.tr('general_finance') ?? 'Finance & Wallet',
-          subtitle: 'Transfer, history & methods',
+          subtitle: languageService?.tr('iquote_assets_finance_subtitle') ?? 'Transfer, history & methods',
           textPrimary: textPrimary,
           onTap: () => Get.toNamed(AppPages.FINANCE),
         ),
@@ -1117,8 +1124,9 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
           icon: Icons.handshake_rounded,
           iconColor: const Color(0xFFF97316),
           title: languageService?.tr('more_dashboard') ?? 'IB Partner Portal',
-          subtitle: 'Commissions & client tree',
-          badgeText: 'Earn',
+          subtitle: languageService?.tr('iquote_assets_ib_subtitle') ?? 'Commissions & client tree',
+          badgeText:
+              languageService?.tr('iquote_assets_badge_earn') ?? 'Earn',
           badgeColor: const Color(0xFFF97316),
           textPrimary: textPrimary,
           onTap: () async => await _handleSwitchToIB(),
@@ -1131,8 +1139,9 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
             icon: Icons.card_giftcard_rounded,
             iconColor: const Color(0xFFEC4899),
             title: languageService?.tr('general_promotional') ?? 'Promotions & Rewards',
-            subtitle: 'Bonuses, scratch cards & offers',
-            badgeText: 'Bonus',
+            subtitle: languageService?.tr('iquote_assets_promotions_subtitle') ?? 'Bonuses, scratch cards & offers',
+            badgeText:
+                languageService?.tr('iquote_assets_badge_bonus') ?? 'Bonus',
             badgeColor: const Color(0xFFEC4899),
             textPrimary: textPrimary,
             onTap: () => Get.to(
@@ -1149,8 +1158,9 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
             icon: Icons.auto_awesome_rounded,
             iconColor: const Color(0xFF6366F1),
             title: languageService?.tr('more_copy_trading') ?? 'Copy Trading',
-            subtitle: 'Follow top verified master traders',
-            badgeText: 'Pro',
+            subtitle: languageService?.tr('iquote_assets_copy_trading_subtitle') ?? 'Follow top verified master traders',
+            badgeText:
+                languageService?.tr('iquote_assets_badge_pro') ?? 'Pro',
             badgeColor: const Color(0xFF6366F1),
             textPrimary: textPrimary,
             onTap: () => Get.toNamed(AppPages.COPY_TRADING_MAIN),
@@ -1164,7 +1174,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
           icon: Icons.notifications_active_rounded,
           iconColor: const Color(0xFFF59E0B),
           title: languageService?.trf('general_notifications', 'Notifications') ?? 'Notifications',
-          subtitle: 'Price alerts & account updates',
+          subtitle: languageService?.tr('iquote_assets_notifications_subtitle') ?? 'Price alerts & account updates',
           textPrimary: textPrimary,
           onTap: () => Get.toNamed(AppPages.NOTIFICATIONS),
         ),
@@ -1176,8 +1186,8 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
           icon: Icons.emoji_events_rounded,
           iconColor: const Color(0xFFEAB308),
           title: languageService?.tr('more_demo_contest') ?? 'Trading Contests',
-          subtitle: 'Compete risk-free for real cash prizes',
-          badgeText: 'Win',
+          subtitle: languageService?.tr('iquote_assets_contests_subtitle') ?? 'Compete risk-free for real cash prizes',
+          badgeText: languageService?.tr('iquote_assets_badge_win') ?? 'Win',
           badgeColor: const Color(0xFFEAB308),
           textPrimary: textPrimary,
           onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
@@ -1251,7 +1261,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
             title: languageService?.tr('ticket_title') ??
                 languageService?.tr('support') ??
                 '24/7 Support & Helpdesk',
-            subtitle: 'Submit tickets & live assistance',
+            subtitle: languageService?.tr('iquote_assets_support_subtitle') ?? 'Submit tickets & live assistance',
             textPrimary: textPrimary,
             onTap: () => Get.toNamed(AppPages.TICKET_LIST),
           ),
@@ -1264,7 +1274,12 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                 : Icons.dark_mode_rounded,
             iconColor: const Color(0xFFF59E0B),
             title: languageService?.tr('theme') ?? 'Theme Appearance',
-            subtitle: AppColors.isDarkMode ? 'Dark Mode Active' : 'Light Mode Active',
+            subtitle:
+                AppColors.isDarkMode
+                    ? (languageService?.tr('iquote_assets_dark_mode_active') ??
+                        'Dark Mode Active')
+                    : (languageService?.tr('iquote_assets_light_mode_active') ??
+                        'Light Mode Active'),
             textPrimary: textPrimary,
             onTap: () => showThemeBottomSheet(context),
           ),
@@ -1279,7 +1294,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                 icon: Icons.touch_app_rounded,
                 iconColor: AppColors.primary,
                 title: Get.find<LanguageService>().tr('more_screen_one_click_trading'),
-                subtitle: 'Instant order execution without confirmation',
+                subtitle: languageService?.tr('iquote_assets_one_click_subtitle') ?? 'Instant order execution without confirmation',
                 textPrimary: textPrimary,
                 trailing: Switch.adaptive(
                   value: enabled,
@@ -1297,7 +1312,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
             icon: Icons.fingerprint_rounded,
             iconColor: const Color(0xFF06B6D4),
             title: languageService?.tr('biometric_login') ?? 'Biometric & Face ID',
-            subtitle: 'Secure fingerprint or face unlock',
+            subtitle: languageService?.tr('iquote_assets_biometric_subtitle') ?? 'Secure fingerprint or face unlock',
             textPrimary: textPrimary,
             trailing: Switch.adaptive(
               value: _isBiometricEnabled,
@@ -1313,7 +1328,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
             icon: Icons.lock_reset_rounded,
             iconColor: const Color(0xFFF97316),
             title: languageService?.tr('change_password') ?? 'Change Password',
-            subtitle: 'Update your security credentials',
+            subtitle: languageService?.tr('iquote_assets_change_password_subtitle') ?? 'Update your security credentials',
             textPrimary: textPrimary,
             onTap: () => Get.toNamed(AppPages.CHANGE_PASSWORD),
           ),
@@ -1324,9 +1339,23 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
             icon: Icons.security_rounded,
             iconColor: const Color(0xFF8B5CF6),
             title: languageService?.tr('two_factor_authentication') ?? 'Two-Factor Auth (2FA)',
-            subtitle: 'Additional security layer for withdrawals',
+            subtitle: languageService?.tr('iquote_assets_two_factor_subtitle') ?? 'Additional security layer for withdrawals',
             textPrimary: textPrimary,
             onTap: () => Get.toNamed(AppPages.TWO_FACTOR_AUTH),
+          ),
+          _buildDivider(),
+
+          // 7. Language
+          _buildModernOptionTile(
+            icon: Icons.language_rounded,
+            iconColor: AppColors.primary,
+            title: languageService?.tr('settings_language_title') ?? 'Language',
+            subtitle:
+                languageService?.getCurrentLanguageName() ??
+                LanguageService.supportedLanguages[LanguageService
+                    .defaultLanguage]!,
+            textPrimary: textPrimary,
+            onTap: () => Get.toNamed(AppPages.LANGUAGE_SELECTOR),
           ),
 
           if (isLoggedIn && authController != null) ...[
@@ -1337,7 +1366,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
               icon: Icons.delete_outline_rounded,
               iconColor: const Color(0xFFEF4444),
               title: languageService?.tr('delete_account') ?? 'Delete Account',
-              subtitle: 'Permanently close account and data',
+              subtitle: languageService?.tr('iquote_assets_delete_account_subtitle') ?? 'Permanently close account and data',
               textPrimary: const Color(0xFFEF4444),
               onTap: () => _showDeleteAccountDialog(context, authController),
             ),
@@ -1348,7 +1377,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
               icon: Icons.logout_rounded,
               iconColor: const Color(0xFFEF4444),
               title: languageService?.tr('more_logout') ?? 'Log Out',
-              subtitle: 'Sign out from this session',
+              subtitle: languageService?.tr('iquote_assets_logout_subtitle') ?? 'Sign out from this session',
               textPrimary: const Color(0xFFEF4444),
               onTap: () => _showLogoutDialog(context, authController),
             ),
@@ -1466,7 +1495,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
 
   Widget _buildDivider() {
     return Padding(
-      padding: EdgeInsets.only(left: 64.w, right: 14.w),
+      padding: EdgeInsetsDirectional.only(start: 64.w, end: 14.w),
       child: Divider(
         height: 1,
         thickness: 0.5,
@@ -1561,7 +1590,10 @@ class _VerifyAccountCard extends StatelessWidget {
                         SizedBox(width: 8.w),
                         Expanded(
                           child: Text(
-                            'Verify Your Profile',
+                            languageService?.tr(
+                                  'iquote_assets_verify_your_profile',
+                                ) ??
+                                'Verify Your Profile',
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 13.5.sp,
                               fontWeight: FontWeight.w800,
@@ -1581,7 +1613,10 @@ class _VerifyAccountCard extends StatelessWidget {
                     ),
                     SizedBox(height: 6.h),
                     Text(
-                      'Complete verification to unlock unlimited deposits and higher leverage.',
+                      languageService?.tr(
+                            'iquote_assets_verify_profile_subtitle',
+                          ) ??
+                          'Complete verification to unlock unlimited deposits and higher leverage.',
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: AppColors.textGrey,

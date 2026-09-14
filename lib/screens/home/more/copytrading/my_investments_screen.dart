@@ -13,6 +13,7 @@ import 'package:crm_app/controllers/copy_trading/copy_trading_master_details_con
     show CopyTradingPlan;
 import 'package:crm_app/controllers/copy_trading/copy_trading_hub_controller.dart';
 import 'package:crm_app/screens/home/trading_main_screen.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +38,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
     final msg = message.trim();
     if (msg.isEmpty || msg == 'null') return;
     CustomToastService.showError(
-      title: 'Error',
+      title: TranslationUtils.tr('general_error'),
       message: msg,
       duration: const Duration(milliseconds: 2500),
       position: SnackPosition.TOP,
@@ -95,7 +96,10 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
           onPressed: () => Get.offAllNamed(AppPages.TRADING),
         ),
         centerTitle: true,
-        title: Text('My Investments', style: AppTextStyles.screenTitle),
+        title: Text(
+          TranslationUtils.tr('my_investments_screen_my_investments'),
+          style: AppTextStyles.screenTitle,
+        ),
         automaticallyImplyLeading: false,
         actions: [
           // Padding(
@@ -169,7 +173,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
               children: [
                 if (err.isNotEmpty)
                   Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+                    padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 0),
                     child: _InlineError(
                       message: err,
                       onRetry: () => controller.load(showLoading: true),
@@ -216,8 +220,13 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
                       vertical: 4.r,
                     ),
                     tabs: [
-                      Tab(text: 'My Subscriptions (${list.length})'),
-                      const Tab(text: 'Trade History'),
+                      Tab(
+                        text: TranslationUtils.trArgs(
+                          'copy_trading_my_subscriptions_count',
+                          {'count': '${list.length}'},
+                        ),
+                      ),
+                      Tab(text: TranslationUtils.tr('trade_history')),
                     ],
                   ),
                 ),
@@ -262,7 +271,10 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
                           ),
                         ),
                         SizedBox(height: 6.h),
-                        Text('Loading more...', style: AppTextStyles.caption),
+                        Text(
+                          TranslationUtils.tr('trade_loading_more'),
+                          style: AppTextStyles.caption,
+                        ),
                       ],
                     ),
                   );
@@ -281,18 +293,20 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: Text('Add capital'),
+            title: Text(TranslationUtils.tr('investment_detail_add_capital')),
             content: TextField(
               controller: amountCtrl,
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(hintText: 'Amount (USD)'),
+              decoration: InputDecoration(
+                hintText: TranslationUtils.tr('investment_detail_amount_usd'),
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(null),
-                child: Text('Cancel'),
+                child: Text(TranslationUtils.tr('general_cancel')),
               ),
               TextButton(
                 onPressed: () {
@@ -301,7 +315,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
                   if (v == null || v <= 0) return;
                   Navigator.of(ctx).pop(v);
                 },
-                child: Text('Add'),
+                child: Text(TranslationUtils.tr('investment_detail_add')),
               ),
             ],
           ),
@@ -313,18 +327,30 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
       amount: amount,
     );
     if (!res.success) {
-      _toastError(res.message ?? 'Failed to add capital');
+      _toastError(
+        res.message ??
+            TranslationUtils.tr('investment_detail_failed_to_add_capital'),
+      );
     }
   }
 
   void _pause(int id) async {
     final res = await controller.pause(id);
-    if (!res.success) _toastError(res.message ?? 'Failed to pause');
+    if (!res.success) {
+      _toastError(
+        res.message ?? TranslationUtils.tr('investment_detail_failed_to_pause'),
+      );
+    }
   }
 
   void _resume(int id) async {
     final res = await controller.resume(id);
-    if (!res.success) _toastError(res.message ?? 'Failed to resume');
+    if (!res.success) {
+      _toastError(
+        res.message ??
+            TranslationUtils.tr('investment_detail_failed_to_resume'),
+      );
+    }
   }
 
   void _stop(int id) async {
@@ -332,23 +358,31 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: Text('Stop investment?'),
-            content: Text('This is permanent. You\'ll need to re-subscribe.'),
+            title: Text(
+              TranslationUtils.tr('investment_detail_stop_investment'),
+            ),
+            content: Text(
+              TranslationUtils.tr('investment_detail_this_is_permanent'),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: Text('Cancel'),
+                child: Text(TranslationUtils.tr('general_cancel')),
               ),
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(true),
-                child: Text('Stop'),
+                child: Text(TranslationUtils.tr('investment_detail_stop')),
               ),
             ],
           ),
     );
     if (confirmed != true) return;
     final res = await controller.stop(id);
-    if (!res.success) _toastError(res.message ?? 'Failed to stop');
+    if (!res.success) {
+      _toastError(
+        res.message ?? TranslationUtils.tr('investment_detail_failed_to_stop'),
+      );
+    }
   }
 
   void _view(int id) {
@@ -427,11 +461,11 @@ class _SummarySection extends StatelessWidget {
           children: [
             // Status chips
             Container(
-              padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 12.h),
+              padding: EdgeInsetsDirectional.fromSTEB(14.w, 12.h, 14.w, 12.h),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
                   colors: [
                     AppColors.primary.withValues(alpha: 0.10),
                     AppColors.primary.withValues(alpha: 0.04),
@@ -461,7 +495,7 @@ class _SummarySection extends StatelessWidget {
                       ),
                       SizedBox(width: 8.w),
                       Text(
-                        'My Investments',
+                        TranslationUtils.tr('my_investments_screen_my_investments'),
                         style: AppTextStyles.labelOnChartPendingOrderBold,
                       ),
                       const Spacer(),
@@ -475,7 +509,9 @@ class _SummarySection extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20.r),
                         ),
                         child: Text(
-                          '$active active',
+                          TranslationUtils.trArgs('copy_trading_count_active', {
+                            'count': '$active',
+                          }),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w600,
@@ -492,7 +528,7 @@ class _SummarySection extends StatelessWidget {
                     children: [
                       Expanded(
                         child: _SummaryMetricTile(
-                          label: 'Total Invested',
+                          label: TranslationUtils.tr('copy_trading_total_invested'),
                           value: '\$${totalCapital.toStringAsFixed(2)}',
                           icon: Icons.account_balance_wallet_outlined,
                           iconColor: AppColors.primary,
@@ -501,7 +537,7 @@ class _SummarySection extends StatelessWidget {
                       SizedBox(width: 10.w),
                       Expanded(
                         child: _SummaryMetricTile(
-                          label: 'Total P&L',
+                          label: TranslationUtils.tr('copy_trading_total_pnl'),
                           value: '\$${totalPnl.toStringAsFixed(2)}',
                           icon: Icons.trending_up,
                           iconColor:
@@ -517,7 +553,7 @@ class _SummarySection extends StatelessWidget {
                     children: [
                       Expanded(
                         child: _SummaryMetricTile(
-                          label: 'Active Investments',
+                          label: TranslationUtils.tr('copy_trading_active_investments'),
                           value: '$active',
                           icon: Icons.check_circle_outline,
                           iconColor: AppColors.green,
@@ -526,7 +562,7 @@ class _SummarySection extends StatelessWidget {
                       SizedBox(width: 10.w),
                       Expanded(
                         child: _SummaryMetricTile(
-                          label: 'Commissions Paid',
+                          label: TranslationUtils.tr('copy_trading_commissions_paid'),
                           value:
                               '-\$${totalCommission.abs().toStringAsFixed(2)}',
                           icon: Icons.payments_outlined,
@@ -686,7 +722,7 @@ class _InvestmentRow extends StatelessWidget {
   }
 
   static String _formatStatus(String s) {
-    if (s.isEmpty) return 'Unknown';
+    if (s.isEmpty) return TranslationUtils.tr('ib_status_unknown');
     return '${s[0].toUpperCase()}${s.substring(1).toLowerCase()}';
   }
 
@@ -871,21 +907,21 @@ class _InvestmentRow extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _FieldChip(
-                        label: 'Account',
+                        label: TranslationUtils.tr('transaction_history_account_label'),
                         value: item.accountNumber,
                       ),
                     ),
                     SizedBox(width: 8.w),
                     Expanded(
                       child: _FieldChip(
-                        label: 'Capital',
+                        label: TranslationUtils.tr('copy_trading_capital'),
                         value: '\$${item.capitalAmount.toStringAsFixed(2)}',
                       ),
                     ),
                     SizedBox(width: 8.w),
                     Expanded(
                       child: _FieldChip(
-                        label: 'Comm.',
+                        label: TranslationUtils.tr('copy_trading_comm_short'),
                         value:
                             '\$${item.totalCommissionPaid.toStringAsFixed(2)}',
                       ),
@@ -893,7 +929,7 @@ class _InvestmentRow extends StatelessWidget {
                     SizedBox(width: 8.w),
                     Expanded(
                       child: _FieldChip(
-                        label: 'Trades',
+                        label: TranslationUtils.tr('tw_trades'),
                         value: '${item.openTrades}',
                       ),
                     ),
@@ -906,7 +942,7 @@ class _InvestmentRow extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _SmallActionBtn(
-                        label: 'View',
+                        label: TranslationUtils.tr('ibm_view'),
                         icon: Icons.visibility_outlined,
                         color: AppColors.primary,
                         enabled: true,
@@ -916,7 +952,7 @@ class _InvestmentRow extends StatelessWidget {
                     SizedBox(width: 4.w),
                     Expanded(
                       child: _SmallActionBtn(
-                        label: 'Edit',
+                        label: TranslationUtils.tr('general_edit'),
                         icon: Icons.edit_outlined,
                         color: AppColors.textGrey,
                         enabled: canEdit,
@@ -927,7 +963,7 @@ class _InvestmentRow extends StatelessWidget {
                     if (canPause)
                       Expanded(
                         child: _SmallActionBtn(
-                          label: 'Pause',
+                          label: TranslationUtils.tr('my_plans_tab_pause'),
                           icon: Icons.pause,
                           color: AppColors.warning,
                           enabled: true,
@@ -937,7 +973,7 @@ class _InvestmentRow extends StatelessWidget {
                     else if (canResume)
                       Expanded(
                         child: _SmallActionBtn(
-                          label: 'Resume',
+                          label: TranslationUtils.tr('my_plans_tab_resume'),
                           icon: Icons.play_arrow,
                           color: AppColors.green,
                           enabled: true,
@@ -950,7 +986,7 @@ class _InvestmentRow extends StatelessWidget {
                     if (canStop)
                       Expanded(
                         child: _SmallActionBtn(
-                          label: 'Stop',
+                          label: TranslationUtils.tr('investment_detail_stop'),
                           icon: Icons.stop,
                           color: AppColors.error,
                           enabled: true,
@@ -1081,7 +1117,10 @@ class _TradeHistoryTab extends StatelessWidget {
               children: [
                 Icon(Icons.error_outline, size: 40.r, color: AppColors.error),
                 SizedBox(height: 12.h),
-                Text('Failed to load trades', style: AppTextStyles.black16600),
+                Text(
+                  TranslationUtils.tr('my_investments_screen_failed_to_load_trades'),
+                  style: AppTextStyles.black16600,
+                ),
                 SizedBox(height: 4.h),
                 Text(
                   err,
@@ -1094,7 +1133,7 @@ class _TradeHistoryTab extends StatelessWidget {
                 TextButton.icon(
                   onPressed: controller.loadTrades,
                   icon: Icon(Icons.refresh, size: 16),
-                  label: Text('Retry'),
+                  label: Text(TranslationUtils.tr('common_retry')),
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.primary,
                   ),
@@ -1116,10 +1155,13 @@ class _TradeHistoryTab extends StatelessWidget {
                 color: AppColors.textGrey.withOpacity(0.5),
               ),
               SizedBox(height: 12.h),
-              Text('No trades yet', style: AppTextStyles.black16600),
+              Text(
+                TranslationUtils.tr('master_dashboard_overview_tab_no_trades_yet'),
+                style: AppTextStyles.black16600,
+              ),
               SizedBox(height: 4.h),
               Text(
-                'Your trade history will appear here',
+                TranslationUtils.tr('my_investments_screen_your_trade_history_will_appear_here'),
                 style: AppTextStyles.caption,
               ),
             ],
@@ -1307,7 +1349,7 @@ class _TradeRowState extends State<_TradeRow>
                 children: [
                   Expanded(
                     child: _TField(
-                      label: 'Commission',
+                      label: TranslationUtils.tr('general_commission'),
                       value:
                           '\$${widget.item.commissionCharged.toDouble().toStringAsFixed(2)}',
                     ),
@@ -1315,7 +1357,7 @@ class _TradeRowState extends State<_TradeRow>
                   const Spacer(),
                   Expanded(
                     child: _TField(
-                      label: 'Net Credited',
+                      label: TranslationUtils.tr('copy_trading_net_credited'),
                       value:
                           '\$${widget.item.netCredited.toDouble().toStringAsFixed(2)}',
                     ),
@@ -1328,7 +1370,7 @@ class _TradeRowState extends State<_TradeRow>
                 children: [
                   Expanded(
                     child: _TField(
-                      label: 'Open Price',
+                      label: TranslationUtils.tr('open_price'),
                       value: widget.item.openPrice.toDouble().toStringAsFixed(
                         isXAU(widget.item.symbol) ? 2 : 5,
                       ),
@@ -1337,7 +1379,7 @@ class _TradeRowState extends State<_TradeRow>
                   const Spacer(),
                   Expanded(
                     child: _TField(
-                      label: 'Opened',
+                      label: TranslationUtils.tr('copy_trading_opened'),
                       value: _fmtDateTime(widget.item.openTime),
                     ),
                   ),
@@ -1349,7 +1391,7 @@ class _TradeRowState extends State<_TradeRow>
                 children: [
                   Expanded(
                     child: _TField(
-                      label: 'Close Price',
+                      label: TranslationUtils.tr('close_price'),
                       value: widget.item.closePrice.toDouble().toStringAsFixed(
                         isXAU(widget.item.symbol) ? 2 : 5,
                       ),
@@ -1358,7 +1400,7 @@ class _TradeRowState extends State<_TradeRow>
                   const Spacer(),
                   Expanded(
                     child: _TField(
-                      label: 'Closed',
+                      label: TranslationUtils.tr('ticket_status_closed'),
                       value: _fmtDateTime(widget.item.closeTime),
                     ),
                   ),
@@ -1430,10 +1472,13 @@ class _EmptyInvestmentsState extends StatelessWidget {
               ),
             ),
             SizedBox(height: 16.h),
-            Text('No subscriptions yet', style: AppTextStyles.headingblack),
+            Text(
+              TranslationUtils.tr('copy_trading_no_subscriptions_yet'),
+              style: AppTextStyles.headingblack,
+            ),
             SizedBox(height: 8.h),
             Text(
-              'You haven\'t copied any master traders yet. Explore the leaderboard to find traders to copy.',
+              TranslationUtils.tr('copy_trading_you_havent_copied_any_master_traders'),
               style: AppTextStyles.caption,
               textAlign: TextAlign.center,
             ),
@@ -1452,7 +1497,7 @@ class _EmptyInvestmentsState extends StatelessWidget {
               },
               icon: Icon(Icons.explore_outlined, size: 16.r,color: AppColors.whiteColor,),
               label: Text(
-                'Explore Masters',
+                TranslationUtils.tr('explore_masters_screen_explore_masters'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
@@ -1509,7 +1554,10 @@ class _InlineError extends StatelessWidget {
           TextButton(
             onPressed: onRetry,
             style: TextButton.styleFrom(padding: EdgeInsets.zero),
-            child: Text('Retry', style: AppTextStyles.textButton),
+            child: Text(
+              TranslationUtils.tr('common_retry'),
+              style: AppTextStyles.textButton,
+            ),
           ),
         ],
       ),

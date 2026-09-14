@@ -72,21 +72,26 @@ class _ContestCountdownTimerState extends State<ContestCountdownTimer> {
           fontFeatures: [FontFeature.tabularFigures()],
         );
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (var i = 0; i < parts.length; i++)
-          Padding(
-            padding: EdgeInsets.only(right: i == parts.length - 1 ? 0 : 6.w),
-            child: _CountdownCell(
-              label: parts[i].label,
-              value: parts[i].value,
-              accent: accent,
-              textStyle: textStyle,
-              compact: widget.compact,
+    // A countdown reads HH:MM:SS left-to-right in every locale, so the cell
+    // order and their spacing must not flip under RTL.
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < parts.length; i++)
+            Padding(
+              padding: EdgeInsets.only(right: i == parts.length - 1 ? 0 : 6.w),
+              child: _CountdownCell(
+                label: parts[i].label,
+                value: parts[i].value,
+                accent: accent,
+                textStyle: textStyle,
+                compact: widget.compact,
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 

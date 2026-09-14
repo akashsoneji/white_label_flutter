@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -103,7 +104,9 @@ class KycDocsController extends GetxController {
       // Enforce gating at controller level as a safety net
       if (!canUpload(documentType)) {
         CustomToastService.showInfo(
-          message: 'This document is optional or not allowed to upload now',
+          message: TranslationUtils.tr(
+            'kyc_docs_controller_this_document_is_optional_or_not',
+          ),
         );
         return;
       }
@@ -114,7 +117,9 @@ class KycDocsController extends GetxController {
         await _initializeCamera();
         if (_cameras == null || _cameras!.isEmpty) {
           CustomToastService.showError(
-            message: 'No camera available on this device.',
+            message: TranslationUtils.tr(
+              'deposit_instruction_controller_no_camera_available_on_this_device',
+            ),
           );
           return;
         }
@@ -164,7 +169,7 @@ class KycDocsController extends GetxController {
                     ),
                     SizedBox(height: 24.h),
                     Text(
-                      'Select Camera',
+                      TranslationUtils.tr('kyc_docs_controller_select_camera'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
@@ -174,7 +179,9 @@ class KycDocsController extends GetxController {
                     SizedBox(height: 24.h),
                     ListTile(
                       leading: Icon(Icons.camera_front),
-                      title: Text('Front Camera'),
+                      title: Text(
+                        TranslationUtils.tr('kyc_docs_controller_front_camera'),
+                      ),
                       onTap: () => Get.back(
                         result: _cameras!.firstWhere(
                           (c) =>
@@ -184,7 +191,9 @@ class KycDocsController extends GetxController {
                     ),
                     ListTile(
                       leading: Icon(Icons.camera_rear),
-                      title: Text('Back Camera'),
+                      title: Text(
+                        TranslationUtils.tr('kyc_docs_controller_back_camera'),
+                      ),
                       onTap: () => Get.back(
                         result: _cameras!.firstWhere(
                           (c) => c.lensDirection == CameraLensDirection.back,
@@ -248,13 +257,19 @@ class KycDocsController extends GetxController {
   Future<void> captureImage() async {
     if (cameraController == null || !cameraController!.value.isInitialized) {
       CustomToastService.showError(
-        message: 'Camera is not ready. Please wait.',
+        message: TranslationUtils.tr(
+          'deposit_instruction_controller_camera_is_not_ready_please_wait',
+        ),
       );
       return;
     }
 
     if (_currentDocumentType == null) {
-      CustomToastService.showError(message: 'Document type not set.');
+      CustomToastService.showError(
+        message: TranslationUtils.tr(
+          'kyc_docs_controller_document_type_not_set',
+        ),
+      );
       return;
     }
 
@@ -289,7 +304,9 @@ class KycDocsController extends GetxController {
           '⚠️ Large image detected: ${(fileSize / 1024).toStringAsFixed(2)} KB',
         );
         CustomToastService.showWarning(
-          message: 'Large image detected. Upload may take longer.',
+          message: TranslationUtils.tr(
+            'kyc_docs_controller_large_image_detected_upload_may_take',
+          ),
         );
       }
 
@@ -312,7 +329,11 @@ class KycDocsController extends GetxController {
       // Clear document type
       _currentDocumentType = null;
 
-      CustomToastService.showSuccess(message: 'Image captured successfully!');
+      CustomToastService.showSuccess(
+        message: TranslationUtils.tr(
+          'kyc_bank_controller_image_captured_successfully',
+        ),
+      );
     } catch (e) {
       print('❌ Error capturing image: $e');
       CustomToastService.showError(
@@ -346,7 +367,9 @@ class KycDocsController extends GetxController {
       // Enforce gating at controller level as a safety net
       if (!canUpload(documentType)) {
         CustomToastService.showInfo(
-          message: 'This document is optional or not allowed to upload now',
+          message: TranslationUtils.tr(
+            'kyc_docs_controller_this_document_is_optional_or_not',
+          ),
         );
         return;
       }
@@ -372,7 +395,9 @@ class KycDocsController extends GetxController {
             '⚠️ Large image detected: ${(fileSize / 1024).toStringAsFixed(2)} KB',
           );
           CustomToastService.showWarning(
-            message: 'Large image detected. Upload may take longer.',
+            message: TranslationUtils.tr(
+              'kyc_docs_controller_large_image_detected_upload_may_take',
+            ),
           );
         }
 
@@ -392,7 +417,11 @@ class KycDocsController extends GetxController {
         }
 
         // Don't auto-upload - wait for save button press
-        CustomToastService.showSuccess(message: 'Image selected successfully!');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr(
+            'kyc_docs_controller_image_selected_successfully',
+          ),
+        );
       }
     } catch (e) {
       print('❌ Error picking image from gallery: $e');
@@ -410,7 +439,9 @@ class KycDocsController extends GetxController {
       final response = await _repo.getKycStatus(token: token ?? '');
 
       if (!response.success) {
-        errorMessage.value = response.message ?? 'Failed to load KYC status';
+        errorMessage.value =
+            response.message ??
+            TranslationUtils.tr('kyc_docs_controller_failed_to_load_kyc_status');
         return;
       }
 
@@ -600,22 +631,22 @@ class KycDocsController extends GetxController {
         {
           'file': idProofFront.value,
           'type': 'id_proof_front',
-          'name': 'ID Proof Front',
+          'name': TranslationUtils.tr('kyc_id_proof_front'),
         },
         {
           'file': idProofBack.value,
           'type': 'id_proof_back',
-          'name': 'ID Proof Back',
+          'name': TranslationUtils.tr('kyc_id_proof_back'),
         },
         {
           'file': addressProofFront.value,
           'type': 'address_proof_front',
-          'name': 'Address Proof Front',
+          'name': TranslationUtils.tr('kyc_address_proof_front'),
         },
         {
           'file': addressProofBack.value,
           'type': 'address_proof_back',
-          'name': 'Address Proof Back',
+          'name': TranslationUtils.tr('kyc_address_proof_back'),
         },
       ];
 
@@ -638,12 +669,20 @@ class KycDocsController extends GetxController {
       await _loadKycStatus();
 
       if (attempted == 0) {
-        CustomToastService.showError(message: 'Please select a document first');
+        CustomToastService.showError(
+          message: TranslationUtils.tr(
+            'kyc_docs_controller_please_select_document_first',
+          ),
+        );
       } else if (succeeded == attempted) {
-        CustomToastService.showSuccess(message: 'Upload successful');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr('kyc_docs_controller_upload_successful'),
+        );
       } else {
         CustomToastService.showError(
-          message: 'Some documents failed to upload. Please re-upload.',
+          message: TranslationUtils.tr(
+            'kyc_docs_controller_some_documents_failed_to_upload_please',
+          ),
         );
       }
     } catch (e) {

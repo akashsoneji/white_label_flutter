@@ -1,6 +1,7 @@
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_master_dashboard_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/utils/app_logger.dart';
 import 'package:crm_app/widgets/app_select_field.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
@@ -70,7 +71,10 @@ class _CopyTradingCreatePlanScreenState
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
         centerTitle: true,
-        title: Text('Create New Plan', style: AppTextStyles.heading),
+        title: Text(
+          TranslationUtils.tr('copy_trading_create_plan_create_new_plan'),
+          style: AppTextStyles.heading,
+        ),
         leading: AppSvgBackButton(
           onPressed: () => Get.back(closeOverlays: true),
           iconWidth: 30.w,
@@ -78,7 +82,7 @@ class _CopyTradingCreatePlanScreenState
         ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 24.h),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 24.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -97,7 +101,7 @@ class _CopyTradingCreatePlanScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Trading Account *',
+                        TranslationUtils.tr('copy_trading_create_plan_trading_account'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: _mutedText,
@@ -126,8 +130,8 @@ class _CopyTradingCreatePlanScreenState
                         final accounts = _controller.eligibleAccounts;
                         return AppSelectField<int>(
                           value: _selectedEligibleAccountIndex,
-                          hint: '-- Select Account --',
-                          sheetTitle: 'Trading Account',
+                          hint: TranslationUtils.tr('copy_trading_create_plan_select_account_hint'),
+                          sheetTitle: TranslationUtils.tr('copy_trading_edit_plan_trading_account'),
                           enabled: accounts.isNotEmpty,
                           options: List.generate(accounts.length, (i) {
                             final a = accounts[i];
@@ -146,7 +150,7 @@ class _CopyTradingCreatePlanScreenState
                       }),
                       SizedBox(height: 4.h),
                       Text(
-                        'This is the master trading account for this plan only (copiers mirror trades from this account). You can use a different account on another plan.',
+                        TranslationUtils.tr('copy_trading_create_plan_this_is_the_master_trading_account'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           color: _mutedText,
@@ -155,7 +159,7 @@ class _CopyTradingCreatePlanScreenState
                       ),
                       SizedBox(height: 14.h),
                       Text(
-                        'Plan Name *',
+                        TranslationUtils.tr('copy_trading_create_plan_plan_name'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: _mutedText,
@@ -168,10 +172,10 @@ class _CopyTradingCreatePlanScreenState
                         validator:
                             (v) =>
                                 (v == null || v.trim().isEmpty)
-                                    ? 'Enter plan name'
+                                    ? TranslationUtils.tr('copy_trading_create_plan_enter_plan_name')
                                     : null,
                         decoration: InputDecoration(
-                          hintText: 'e.g. Conservative Growth Plan',
+                          hintText: TranslationUtils.tr('copy_trading_create_plan_conservative_growth_plan'),
                           hintStyle: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: _mutedText,
@@ -184,7 +188,7 @@ class _CopyTradingCreatePlanScreenState
                       if (_commissionType == 'subscription') ...[
                         SizedBox(height: 14.h),
                         Text(
-                          'Billing Period *',
+                          TranslationUtils.tr('copy_trading_create_plan_billing_period'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: _mutedText,
@@ -194,14 +198,20 @@ class _CopyTradingCreatePlanScreenState
                         SizedBox(height: 6.h),
                         AppSelectField<String>(
                           value: _subscriptionPeriod ?? 'monthly',
-                          hint: 'Select billing period',
-                          sheetTitle: 'Billing Period',
+                          hint: TranslationUtils.tr('copy_trading_plan_select_billing_period'),
+                          sheetTitle: TranslationUtils.tr('copy_trading_plan_billing_period_title'),
                           options: [
-                            AppSelectOption(value: 'weekly', title: 'Weekly'),
-                            AppSelectOption(value: 'monthly', title: 'Monthly'),
+                            AppSelectOption(
+                              value: 'weekly',
+                              title: TranslationUtils.tr('dc_range_weekly'),
+                            ),
+                            AppSelectOption(
+                              value: 'monthly',
+                              title: TranslationUtils.tr('dc_range_monthly'),
+                            ),
                             AppSelectOption(
                               value: 'quarterly',
-                              title: 'Quarterly',
+                              title: TranslationUtils.tr('copy_trading_plan_quarterly'),
                             ),
                           ],
                           onChanged:
@@ -214,7 +224,7 @@ class _CopyTradingCreatePlanScreenState
                       _buildGraceAndCapitalRow(),
                       SizedBox(height: 14.h),
                       Text(
-                        'Strategy Description',
+                        TranslationUtils.tr('master_plan_detail_screen_strategy_description'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: _mutedText,
@@ -226,7 +236,7 @@ class _CopyTradingCreatePlanScreenState
                         controller: _strategyCtrl,
                         maxLines: 3,
                         decoration: InputDecoration(
-                          hintText: 'Describe your trading strategy and risk approach.',
+                          hintText: TranslationUtils.tr('copy_trading_create_plan_describe_your_trading_strategy_and_risk'),
                           hintStyle: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: _mutedText,
@@ -235,7 +245,7 @@ class _CopyTradingCreatePlanScreenState
                       ),
                       SizedBox(height: 12.h),
                       Text(
-                        'Risk Information',
+                        TranslationUtils.tr('copy_trading_create_plan_risk_information'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: _mutedText,
@@ -247,7 +257,7 @@ class _CopyTradingCreatePlanScreenState
                         controller: _riskCtrl,
                         maxLines: 3,
                         decoration: InputDecoration(
-                          hintText: 'Describe potential drawdowns and risk level.',
+                          hintText: TranslationUtils.tr('copy_trading_create_plan_describe_potential_drawdowns_and_risk_level'),
                           hintStyle: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: _mutedText,
@@ -277,7 +287,7 @@ class _CopyTradingCreatePlanScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Commission Type *',
+              TranslationUtils.tr('copy_trading_create_plan_commission_type'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
@@ -287,16 +297,16 @@ class _CopyTradingCreatePlanScreenState
             SizedBox(height: 6.h),
             AppSelectField<String>(
               value: _commissionType,
-              hint: 'Select commission type',
-              sheetTitle: 'Commission Type',
+              hint: TranslationUtils.tr('copy_trading_plan_select_commission_type'),
+              sheetTitle: TranslationUtils.tr('copy_trading_plan_commission_type_title'),
               options: [
                 AppSelectOption(
                   value: 'per_trade',
-                  title: 'Per Trade (% commission)',
+                  title: TranslationUtils.tr('copy_trading_create_plan_per_trade_commission'),
                 ),
                 AppSelectOption(
                   value: 'subscription',
-                  title: 'Subscription (flat fee)',
+                  title: TranslationUtils.tr('copy_trading_create_plan_subscription_flat_fee'),
                 ),
               ],
               onChanged:
@@ -318,8 +328,8 @@ class _CopyTradingCreatePlanScreenState
           children: [
             Text(
               _commissionType == 'per_trade'
-                  ? 'Commission (%) *'
-                  : 'Subscription Fee (USD) *',
+                  ? TranslationUtils.tr('copy_trading_plan_commission_percent_required')
+                  : TranslationUtils.tr('copy_trading_plan_subscription_fee_usd_required'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
@@ -333,10 +343,13 @@ class _CopyTradingCreatePlanScreenState
                 decimal: true,
               ),
               validator:
-                  (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v) => (v == null || v.trim().isEmpty)
+                      ? TranslationUtils.tr('ibm_required')
+                      : null,
               decoration: InputDecoration(
-                hintText:
-                    _commissionType == 'per_trade' ? 'e.g. 30' : 'e.g. 50',
+                hintText: _commissionType == 'per_trade'
+                    ? TranslationUtils.tr('copy_trading_plan_eg_30')
+                    : TranslationUtils.tr('copy_trading_plan_eg_50'),
                 hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: _mutedText),
               ),
             ),
@@ -366,7 +379,7 @@ class _CopyTradingCreatePlanScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'No-Fee Grace Period (days)',
+              TranslationUtils.tr('copy_trading_create_plan_no_fee_grace_period_days'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
@@ -381,7 +394,7 @@ class _CopyTradingCreatePlanScreenState
             ),
             SizedBox(height: 4.h),
             Text(
-              'Copiers won\'t pay commission on trades within this grace period.',
+              TranslationUtils.tr('copy_trading_create_plan_copiers_won_pay_commission_on_trades'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 10.sp,
                 color: _mutedText,
@@ -395,7 +408,7 @@ class _CopyTradingCreatePlanScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Min. Capital (USD) *',
+              TranslationUtils.tr('copy_trading_create_plan_min_capital_usd'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
@@ -409,9 +422,11 @@ class _CopyTradingCreatePlanScreenState
                 decimal: true,
               ),
               validator:
-                  (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v) => (v == null || v.trim().isEmpty)
+                      ? TranslationUtils.tr('ibm_required')
+                      : null,
               decoration: InputDecoration(
-                hintText: 'e.g. 100',
+                hintText: TranslationUtils.tr('copy_trading_create_plan_100'),
                 hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: _mutedText),
               ),
             ),
@@ -441,7 +456,7 @@ class _CopyTradingCreatePlanScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Copy ratio',
+              TranslationUtils.tr('copy_trading_create_plan_copy_ratio'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
@@ -460,7 +475,7 @@ class _CopyTradingCreatePlanScreenState
             ),
             SizedBox(height: 4.h),
             Text(
-              'Default 1 — copier volume scales from this ratio.',
+              TranslationUtils.tr('copy_trading_create_plan_default_copier_volume_scales_from_this'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 10.sp,
                 color: _mutedText,
@@ -473,7 +488,7 @@ class _CopyTradingCreatePlanScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Max copiers',
+              TranslationUtils.tr('copy_trading_create_plan_max_copiers'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
@@ -485,7 +500,7 @@ class _CopyTradingCreatePlanScreenState
               controller: _maxCopiersCtrl,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                hintText: 'Unlimited if empty',
+                hintText: TranslationUtils.tr('copy_trading_create_plan_unlimited_if_empty'),
                 hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: _mutedText),
               ),
             ),
@@ -533,7 +548,7 @@ class _CopyTradingCreatePlanScreenState
           ),
         ),
         child: Text(
-          'Cancel',
+          TranslationUtils.tr('general_cancel'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
@@ -562,7 +577,7 @@ class _CopyTradingCreatePlanScreenState
             loading
                 ? CommonLoadingWidget(size: 22, color: AppColors.onColoredBackground)
                 : Text(
-                  'Create Plan',
+                  TranslationUtils.tr('my_plans_tab_create_plan'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
@@ -576,8 +591,8 @@ class _CopyTradingCreatePlanScreenState
   Future<void> _submit() async {
     if (_selectedEligibleAccountIndex == null) {
       Get.snackbar(
-        'Required',
-        'Select trading account',
+        TranslationUtils.tr('ibm_required'),
+        TranslationUtils.tr('pmam_manager_detail_screen_select_trading_account'),
         snackPosition: SnackPosition.BOTTOM,
       );
       return;
@@ -588,8 +603,8 @@ class _CopyTradingCreatePlanScreenState
     final idx = _selectedEligibleAccountIndex!;
     if (idx < 0 || idx >= _controller.eligibleAccounts.length) {
       Get.snackbar(
-        'Invalid',
-        'Select a valid trading account',
+        TranslationUtils.tr('copy_trading_plan_invalid'),
+        TranslationUtils.tr('copy_trading_plan_select_a_valid_trading_account'),
         snackPosition: SnackPosition.BOTTOM,
       );
       return;
@@ -599,8 +614,8 @@ class _CopyTradingCreatePlanScreenState
     final minCap = num.tryParse(_minCapitalCtrl.text.trim());
     if (commissionValue == null || minCap == null) {
       Get.snackbar(
-        'Invalid',
-        'Enter valid numeric values',
+        TranslationUtils.tr('copy_trading_plan_invalid'),
+        TranslationUtils.tr('copy_trading_plan_enter_valid_numeric_values'),
         snackPosition: SnackPosition.BOTTOM,
       );
       return;
@@ -633,13 +648,13 @@ class _CopyTradingCreatePlanScreenState
     if (res.success) {
       Get.back();
       Get.snackbar(
-        'Created',
-        res.message ?? 'Plan created',
+        TranslationUtils.tr('ticket_created'),
+        res.message ?? TranslationUtils.tr('master_plan_detail_screen_plan_created'),
         snackPosition: SnackPosition.BOTTOM,
       );
     } else {
       Get.snackbar(
-        'Failed',
+        TranslationUtils.tr('transaction_history_failed'),
         res.message ?? _controller.errorMessage.value,
         snackPosition: SnackPosition.BOTTOM,
       );

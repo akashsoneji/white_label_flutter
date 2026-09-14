@@ -127,15 +127,15 @@ class _RiyadexCreateAccountScreenState
     if (_emailController.text.trim().isEmpty ||
         !AuthFormValidation.isValidEmail(_emailController.text.trim())) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Please enter a valid email address',
+        title: TranslationUtils.tr('general_error'),
+        message: TranslationUtils.tr('forgot_password_Please_enter_a_valid_email'),
       );
       return;
     }
     if (_passwordController.text.length < 8) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Password must be at least 8 characters',
+        title: TranslationUtils.tr('general_error'),
+        message: TranslationUtils.tr('create_new_password_validation_length'),
       );
       return;
     }
@@ -144,15 +144,15 @@ class _RiyadexCreateAccountScreenState
           _lastNameController.text.trim().isEmpty ||
           _phoneController.text.trim().isEmpty) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'Please fill in all required fields',
+          title: TranslationUtils.tr('general_error'),
+          message: TranslationUtils.tr('tw_fill_all_fields'),
         );
         return;
       }
       if (!_isPhoneValid) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'Please enter a valid phone number',
+          title: TranslationUtils.tr('general_error'),
+          message: TranslationUtils.tr('create_account_validation_phone'),
         );
         return;
       }
@@ -160,7 +160,7 @@ class _RiyadexCreateAccountScreenState
 
     if (!_controller.allowedToRegister.value) {
       CustomToastService.showError(
-        title: 'Error',
+        title: TranslationUtils.tr('general_error'),
         message: _controller.restrictedMessage.value,
       );
       return;
@@ -266,7 +266,7 @@ class _RiyadexCreateAccountScreenState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              "Welcome to Riyadex",
+              TranslationUtils.tr('riyadex_create_account_welcome_to_riyadex'),
               style: AppTextStyles.bodyText.copyWith(
                 color: VantageAuthTheme.text,
                 fontSize: 24.sp,
@@ -324,7 +324,7 @@ class _RiyadexCreateAccountScreenState
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    "Country / Region of Residence",
+                    TranslationUtils.tr('riyadex_create_account_country_region_of_residence'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       color: VantageAuthTheme.text,
@@ -354,7 +354,7 @@ class _RiyadexCreateAccountScreenState
                           if (country != null) SizedBox(width: 12.w),
                           Expanded(
                             child: Text(
-                              country?.name ?? "Select Country",
+                              country?.name ?? TranslationUtils.tr('edit_profile_select_country'),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 color: VantageAuthTheme.text,
@@ -409,7 +409,7 @@ class _RiyadexCreateAccountScreenState
                         children: [
                           Expanded(
                             child: VantagePillTextField(
-                              hintText: "First Name",
+                              hintText: TranslationUtils.tr('create_account_screen_first_name'),
                               controller: _firstNameController,
                               keyboardType: TextInputType.name,
                             ),
@@ -417,7 +417,7 @@ class _RiyadexCreateAccountScreenState
                           SizedBox(width: 16.w),
                           Expanded(
                             child: VantagePillTextField(
-                              hintText: "Last Name",
+                              hintText: TranslationUtils.tr('create_account_screen_last_name'),
                               controller: _lastNameController,
                               keyboardType: TextInputType.name,
                             ),
@@ -428,7 +428,7 @@ class _RiyadexCreateAccountScreenState
                     ],
 
                     VantagePillTextField(
-                      hintText: "Email address",
+                      hintText: TranslationUtils.tr('tw_email'),
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                     ),
@@ -436,7 +436,7 @@ class _RiyadexCreateAccountScreenState
 
                     if (!_controller.isMinimal.value) ...[
                       VantagePillTextField(
-                        hintText: "Phone number",
+                        hintText: TranslationUtils.tr('create_account_screen_phone_number'),
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
                         prefixIcon: GestureDetector(
@@ -480,7 +480,7 @@ class _RiyadexCreateAccountScreenState
                     ],
 
                     VantagePillTextField(
-                      hintText: "Create your account password",
+                      hintText: TranslationUtils.tr('riyadex_create_account_create_your_account_password'),
                       controller: _passwordController,
 
                       obscureText: !_isPasswordVisible,
@@ -525,7 +525,7 @@ class _RiyadexCreateAccountScreenState
                     // ),
                     // SizedBox(height: 24.h),
                     VantagePrimaryButton(
-                      text: "Register",
+                      text: TranslationUtils.tr('login_register'),
                       onPressed: _handleRegister,
                       isLoading: _isSubmitting,
                     ),
@@ -640,7 +640,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
           ),
           SizedBox(height: 16.h),
           Text(
-            "Select Country",
+            TranslationUtils.tr('edit_profile_select_country'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -652,7 +652,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: VantagePillTextField(
               controller: _searchController,
-              hintText: "Search country",
+              hintText: TranslationUtils.tr('riyadex_create_account_search_country'),
               onChanged: _filter,
               prefixIcon: Icon(Icons.search, color: VantageAuthTheme.muted),
             ),
@@ -709,16 +709,25 @@ class _PasswordRulesWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _RuleRow(text: "Between 8-15 characters", isMet: hasLength),
+        _RuleRow(
+          text: TranslationUtils.tr('riyadex_create_account_between_8_15_characters'),
+          isMet: hasLength,
+        ),
         SizedBox(height: 4.h),
         _RuleRow(
-          text: "At least one upper and one lower case letter",
+          text: TranslationUtils.tr('riyadex_create_account_at_least_one_upper_and_lower'),
           isMet: hasUpperLower,
         ),
         SizedBox(height: 4.h),
-        _RuleRow(text: "At least one number", isMet: hasNumber),
+        _RuleRow(
+          text: TranslationUtils.tr('validation_password_number'),
+          isMet: hasNumber,
+        ),
         SizedBox(height: 4.h),
-        _RuleRow(text: "At least one special character", isMet: hasSpecial),
+        _RuleRow(
+          text: TranslationUtils.tr('validation_password_special'),
+          isMet: hasSpecial,
+        ),
       ],
     );
   }

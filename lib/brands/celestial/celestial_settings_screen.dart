@@ -170,7 +170,8 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
       return;
     }
     final ok = await BiometricService.instance
-        .authenticate(reason: 'Enable biometric login');
+        .authenticate(
+            reason: TranslationUtils.tr('biometric_enable_checkbox'));
     if (!ok) return;
 
     await SecureStorageService.setBiometricEnabled(true);
@@ -223,7 +224,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
 
               // ── Header title ──────────────────────────────────────────────
               Padding(
-                padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
+                padding: EdgeInsetsDirectional.only(start: 4.w, bottom: 12.h),
                 child: Text(languageService.tr('settings_title'),
                     style: CelTheme.title(context)),
               ),
@@ -241,25 +242,27 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
               SizedBox(height: 16.h),
 
               // ── Financial quick-action grid ───────────────────────────────
-              _sectionLabel(context, 'Financial'),
+              _sectionLabel(context, TranslationUtils.tr('general_financial')),
               SizedBox(height: 8.h),
               _buildFinancialGrid(context),
               SizedBox(height: 16.h),
 
               // ── Trading Settings ──────────────────────────────────────────
-              _sectionLabel(context, 'Trading Settings'),
+              _sectionLabel(
+                  context, TranslationUtils.tr('general_tradind_settings')),
               SizedBox(height: 8.h),
               Obx(() => _buildMenuList(context, _tradingSettingsItems(context))),
               SizedBox(height: 16.h),
 
               // ── Security & Preferences ────────────────────────────────────
-              _sectionLabel(context, 'Security & Preferences'),
+              _sectionLabel(context,
+                  TranslationUtils.tr('meta_settings_security_preferences')),
               SizedBox(height: 8.h),
               _buildMenuList(context, _securityItems(context)),
               SizedBox(height: 16.h),
 
               // ── Account ───────────────────────────────────────────────────
-              _sectionLabel(context, 'Account'),
+              _sectionLabel(context, TranslationUtils.tr('settings_account')),
               SizedBox(height: 8.h),
               _buildMenuList(context, _accountItems(context, auth)),
               SizedBox(height: 16.h),
@@ -280,7 +283,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
 
   Widget _sectionLabel(BuildContext c, String label) {
     return Padding(
-      padding: EdgeInsets.only(left: 4.w),
+      padding: EdgeInsetsDirectional.only(start: 4.w),
       child: Text(
         label.toUpperCase(),
         style: AppTextStyles.bodyText.copyWith(
@@ -298,7 +301,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
   // ─────────────────────────────────────────────────────────────────────────
 
   Widget _buildProfileCard(BuildContext c, AuthController auth) {
-    final name = auth.userFullName ?? 'User';
+    final name = auth.userFullName ?? TranslationUtils.tr('ib_user');
     final email = auth.userEmail ?? '';
     final initial =
         name.isNotEmpty ? name[0].toUpperCase() : 'U';
@@ -789,7 +792,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
               _buildMenuRow(c, item),
               if (idx < items.length - 1)
                 Padding(
-                  padding: EdgeInsets.only(left: 52.w),
+                  padding: EdgeInsetsDirectional.only(start: 52.w),
                   child: Divider(
                     height: 1,
                     color: CelTheme.divider(c),
@@ -874,7 +877,9 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 200),
           alignment:
-              value ? Alignment.centerRight : Alignment.centerLeft,
+              value
+                  ? AlignmentDirectional.centerEnd
+                  : AlignmentDirectional.centerStart,
           child: Container(
             margin: EdgeInsets.all(2.5.w),
             width: 19.w,
@@ -981,7 +986,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                   Expanded(
                     child: _dialogButton(
                       c,
-                      label: 'No',
+                      label: languageService.tr('celestial_settings_dialog_no'),
                       isPrimary: false,
                       onTap: () => Get.back(closeOverlays: true),
                     ),
@@ -1097,7 +1102,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                   Expanded(
                     child: _dialogButton(
                       c,
-                      label: 'No',
+                      label: languageService.tr('celestial_settings_dialog_no'),
                       isPrimary: false,
                       onTap: () => Get.back(closeOverlays: true),
                     ),

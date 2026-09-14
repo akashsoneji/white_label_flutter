@@ -133,7 +133,7 @@ class _ContestList extends StatelessWidget {
       color: AppColors.primary,
       onRefresh: controller.refreshPull,
       child: ListView.separated(
-        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 16.h, 16.w, 32.h),
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: contests.length,
         separatorBuilder: (_, __) => SizedBox(height: 14.h),
@@ -150,7 +150,7 @@ class _ContestList extends StatelessWidget {
                 );
               } else if (!c.acceptingEntries) {
                 CustomToastService.showInfo(
-                  message: 'This contest has ended.',
+                  message: TranslationUtils.tr('dc_contest_has_ended'),
                 );
               } else {
                 Get.toNamed(

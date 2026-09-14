@@ -420,11 +420,15 @@ class IQuoteChartController extends GetxController {
       if (ok) {
         lastVolume.value = volume;
         final cleanSymbol = symbol.split('.').first.toUpperCase();
-        final typeName = orderType.requiresPrice 
-            ? orderType.displayName 
-            : (orderType.isBuy ? 'Buy' : 'Sell');
-        
-        final titleStr = orderType.requiresPrice ? 'Pending order placed' : 'Market order placed';
+        final typeName = orderType.requiresPrice
+            ? orderType.displayName
+            : (orderType.isBuy
+                ? _lang.tr('general_buy')
+                : _lang.tr('general_sell'));
+
+        final titleStr = orderType.requiresPrice
+            ? _lang.tr('iquote_chart_pending_order_placed')
+            : _lang.tr('iquote_chart_market_order_placed');
         final messageStr = '$cleanSymbol $typeName ${volume.toStringAsFixed(2)}';
 
         CustomToastService.showSuccess(
@@ -440,7 +444,7 @@ class IQuoteChartController extends GetxController {
 
       final errorMsg =
           _trading.errorMessage.isEmpty
-              ? 'Failed to place order.'
+              ? _lang.tr('iquote_chart_failed_to_place_order')
               : _trading.errorMessage;
       CustomToastService.showError(message: errorMsg);
       return (ok: false, message: errorMsg, orderType: orderType);

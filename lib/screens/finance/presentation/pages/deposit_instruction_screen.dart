@@ -86,9 +86,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
 
     bankDetail = widget.object['payment_gateway'];
     if (widget.object['type'].toString().toLowerCase() == 'bank') {
-      titleString = 'Bank Transfer';
+      titleString = TranslationUtils.tr('deposit_instr_bank_transfer');
     } else if (widget.object['type'].toString().toLowerCase() == 'local') {
-      titleString = 'Local Transfer';
+      titleString = TranslationUtils.tr('deposit_instr_local_transfer');
     } else if (widget.object['type'].toString().toLowerCase() == 'cregis') {
       titleString = widget.object['display_name']?.toString() ?? 'Cregis';
       _initCregisNetworks();
@@ -392,7 +392,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 side: BorderSide.none,
               ),
               title: Text(
-                'Instruction',
+                languageService.tr('deposit_instruction_screen_instruction'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -402,33 +402,51 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               childrenPadding: EdgeInsets.all(16),
               children: [
                 _buildInstructionItem(
-                  'Use Given bank details to make payment.',
+                  languageService.tr(
+                    'deposit_instruction_screen_use_given_bank_details_to_make',
+                  ),
                 ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'You need to take a screenshot of successful payment.',
+                  languageService.tr(
+                    'deposit_instruction_screen_you_need_to_take_a_screenshot',
+                  ),
                 ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'Where UTR / transaction Number is clearly visible.',
+                  languageService.tr(
+                    'deposit_instruction_screen_where_utr_transaction_number_is_clearly',
+                  ),
                 ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'Upload screenshot in given upload field.',
+                  languageService.tr(
+                    'deposit_instruction_screen_upload_screenshot_in_given_upload_field',
+                  ),
                 ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'Press submit button to submit your deposit request.',
+                  languageService.tr(
+                    'deposit_instruction_screen_press_submit_button_to_submit_your',
+                  ),
                 ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'Your payment will be credited into respective account.',
+                  languageService.tr(
+                    'deposit_instruction_screen_your_payment_will_be_credited_into',
+                  ),
                 ),
                 SizedBox(height: 8),
-                _buildInstructionItem('Once reflected in our bank account.'),
+                _buildInstructionItem(
+                  languageService.tr(
+                    'deposit_instruction_screen_once_reflected_in_our_bank_account',
+                  ),
+                ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'Transaction limit may vary as per your bank.',
+                  languageService.tr(
+                    'deposit_instruction_screen_transaction_limit_may_vary_as_per',
+                  ),
                 ),
               ],
             ),
@@ -439,7 +457,10 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           // Bank Name
           if (bankDetail?['bank_name'] != null &&
               bankDetail!['bank_name'].toString().isNotEmpty) ...[
-            _buildBankDetailRow('Bank Name', bankDetail!['bank_name']),
+            _buildBankDetailRow(
+              languageService.tr('kyc_bank_name'),
+              bankDetail!['bank_name'],
+            ),
             SizedBox(height: 16),
           ],
 
@@ -447,7 +468,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           if (bankDetail?['holder_name'] != null &&
               bankDetail!['holder_name'].toString().isNotEmpty) ...[
             _buildBankDetailRow(
-              'Bank Holder Name',
+              languageService.tr(
+                'deposit_instruction_screen_bank_holder_name',
+              ),
               bankDetail!['holder_name'].toString(),
             ),
             SizedBox(height: 16),
@@ -457,7 +480,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           if (bankDetail?['bank_account_no'] != null &&
               bankDetail!['bank_account_no'].toString().isNotEmpty) ...[
             _buildBankDetailRow(
-              'Account Number',
+              languageService.tr('wallet_account_number'),
               bankDetail!['bank_account_no'].toString(),
             ),
             SizedBox(height: 16),
@@ -467,7 +490,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           if (bankDetail?['ifsc_iban'] != null &&
               bankDetail!['ifsc_iban'].toString().isNotEmpty) ...[
             _buildBankDetailRow(
-              'IFSC Code',
+              languageService.tr('deposit_instruction_screen_ifsc_code'),
               bankDetail!['ifsc_iban'].toString(),
             ),
             SizedBox(height: 24),
@@ -554,7 +577,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         ),
                         SizedBox(height: 12),
                         Text(
-                          'Upload file',
+                          languageService.tr(
+                            'deposit_instruction_screen_upload_file',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16,
                             color: Colors.grey[600],
@@ -594,7 +619,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
         Row(
           children: [
             Text(
-              'Transaction ID / UTR',
+              TranslationUtils.tr(
+                'deposit_instruction_screen_transaction_id_utr',
+              ),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
@@ -619,7 +646,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             color: AppColors.textPrimary,
           ),
           decoration: InputDecoration(
-            hintText: 'Enter UTR or transaction reference',
+            hintText: TranslationUtils.tr(
+              'deposit_instruction_screen_enter_utr_or_transaction_reference',
+            ),
             hintStyle: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               color: Colors.grey,
@@ -648,7 +677,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
         ),
         SizedBox(height: 8),
         Text(
-          'Transaction ID is filled automatically when you upload your payment screenshot.',
+          TranslationUtils.tr(
+            'deposit_instruction_screen_transaction_id_is_filled_automatically_when',
+          ),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 11.sp,
             color: Colors.grey,
@@ -681,7 +712,10 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 Clipboard.setData(ClipboardData(text: value));
                 // Get.snackbar('Copied', '$label copied to clipboard');
                 CustomToastService.showSuccess(
-                  message: '$label copied to clipboard',
+                message: TranslationUtils.trArgs(
+                  'deposit_instruction_screen_label_copied_to_clipboard',
+                  {'label': label},
+                ),
                   title: languageService.tr('deposit_instruction_copied'),
                 );
               },
@@ -729,7 +763,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 side: BorderSide.none,
               ),
               title: Text(
-                'Instruction',
+                languageService.tr('deposit_instruction_screen_instruction'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -739,23 +773,33 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               childrenPadding: EdgeInsets.all(16),
               children: [
                 _buildInstructionItem(
-                  'Use Below Give QR Code to make payment via UPI.',
+                  languageService.tr(
+                    'deposit_instruction_screen_use_below_give_qr_code_to',
+                  ),
                 ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'Alternatively, enter your UPI ID to make payment.',
+                  languageService.tr(
+                    'deposit_instruction_screen_alternatively_enter_your_upi_id_to',
+                  ),
                 ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'Enter Amount that you want to transfer and make payment.',
+                  languageService.tr(
+                    'deposit_instruction_screen_enter_amount_that_you_want_to',
+                  ),
                 ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'Press submit button to submit your deposit request.',
+                  languageService.tr(
+                    'deposit_instruction_screen_press_submit_button_to_submit_your',
+                  ),
                 ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'Your payment will be credited into respective account once reflected in company\'s account.',
+                  languageService.tr(
+                    'deposit_instruction_screen_your_payment_will_be_credited_into_once',
+                  ),
                 ),
               ],
             ),
@@ -766,7 +810,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           // QR Code Section (if available)
           if (qrCodePath != null && qrCodePath!.isNotEmpty) ...[
             Text(
-              'QR Code',
+              languageService.tr('deposit_instruction_screen_qr_code'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14,
                 color: Colors.grey,
@@ -782,7 +826,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           if (bankDetail?['crypto_address'] != null &&
               bankDetail!['crypto_address'].toString().isNotEmpty) ...[
             Text(
-              'Deposit Address',
+              languageService.tr('deposit_instruction_screen_deposit_address'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14,
                 color: Colors.grey,
@@ -817,7 +861,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         ),
                       );
                       CustomToastService.showSuccess(
-                        message: "Address copied to clipboard",
+                message: languageService.tr(
+                  'cregis_address_screen_address_copied_to_clipboard',
+                ),
                       );
                     },
                     child: Container(
@@ -878,7 +924,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         ),
                         SizedBox(height: 12),
                         Text(
-                          'Upload file',
+                          languageService.tr(
+                            'deposit_instruction_screen_upload_file',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16,
                             color: Colors.grey[600],
@@ -939,7 +987,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 side: BorderSide.none,
               ),
               title: Text(
-                'Instruction',
+                languageService.tr('deposit_instruction_screen_instruction'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -949,23 +997,33 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               childrenPadding: EdgeInsets.all(16),
               children: [
                 _buildInstructionItem(
-                  'Use Below Give QR Code to make payment via UPI.',
+                  languageService.tr(
+                    'deposit_instruction_screen_use_below_give_qr_code_to',
+                  ),
                 ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'Alternatively, enter your UPI ID to make payment.',
+                  languageService.tr(
+                    'deposit_instruction_screen_alternatively_enter_your_upi_id_to',
+                  ),
                 ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'Enter Amount that you want to transfer and make payment.',
+                  languageService.tr(
+                    'deposit_instruction_screen_enter_amount_that_you_want_to',
+                  ),
                 ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'Press submit button to submit your deposit request.',
+                  languageService.tr(
+                    'deposit_instruction_screen_press_submit_button_to_submit_your',
+                  ),
                 ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'Your payment will be credited into respective account once reflected in company\'s account.',
+                  languageService.tr(
+                    'deposit_instruction_screen_your_payment_will_be_credited_into_once',
+                  ),
                 ),
               ],
             ),
@@ -976,7 +1034,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           // QR Code Section (if available)
           if (qrCodePath != null && qrCodePath!.isNotEmpty) ...[
             Text(
-              'QR Code',
+              languageService.tr('deposit_instruction_screen_qr_code'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14,
                 color: Colors.grey,
@@ -992,7 +1050,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           if (bankDetail?['upi_address'] != null &&
               bankDetail!['upi_address'].toString().isNotEmpty) ...[
             _buildBankDetailRow(
-              'Scan UPI',
+              languageService.tr('deposit_instruction_screen_scan_upi'),
               bankDetail!['upi_address'].toString(),
             ),
             SizedBox(height: 16),
@@ -1042,7 +1100,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         ),
                         SizedBox(height: 12),
                         Text(
-                          'Upload file',
+                          languageService.tr(
+                            'deposit_instruction_screen_upload_file',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16,
                             color: Colors.grey[600],
@@ -1088,7 +1148,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                     if ((type == 'bank' || requireUtr) &&
                         transactionNumberController.text.trim().isEmpty) {
                       CustomToastService.showError(
-                        message: 'Please enter transaction number / UTR',
+                        message: TranslationUtils.tr(
+                          'deposit_instruction_screen_please_enter_transaction_number_utr',
+                        ),
                       );
                       return;
                     }
@@ -1167,7 +1229,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 side: BorderSide.none,
               ),
               title: Text(
-                'Crypto deposit',
+              languageService.tr('deposit_instruction_screen_crypto_deposit'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -1176,17 +1238,23 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               ),
               childrenPadding: EdgeInsets.all(16),
               children: [
-                _buildInstructionItem('Choose a network and amount.'),
+            _buildInstructionItem(
+              languageService.tr(
+                'deposit_instruction_screen_choose_a_network_and_amount',
+              ),
+            ),
                 SizedBox(height: 8),
                 _buildInstructionItem(
-                  'We will generate a unique deposit address for this payment.',
+              languageService.tr(
+                'deposit_instruction_screen_we_will_generate_a_unique_deposit',
+              ),
                 ),
               ],
             ),
           ),
           SizedBox(height: 24),
           Text(
-            'Network',
+              languageService.tr('deposit_instruction_screen_network'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 14,
               color: AppColors.textGrey,
@@ -1208,7 +1276,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   border: Border.all(color: AppColors.border),
                 ),
                 child: Text(
-                  'Loading networks...',
+                        languageService.tr(
+                          'deposit_instruction_screen_loading_networks',
+                        ),
                   style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                 ),
               );
@@ -1230,7 +1300,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                     Expanded(
                       child: Text(
                         controller.selectedCregisNetwork.value.isEmpty
-                            ? 'Select Network'
+                          ? languageService.tr('kyc_crypto_network_hint')
                             : _formatNetworkName(
                               controller.selectedCregisNetwork.value,
                             ),
@@ -1273,7 +1343,17 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Only send ${_getNetworkCurrency(controller.selectedCregisNetwork.value)} on ${_formatNetworkName(controller.selectedCregisNetwork.value)}. Sending other assets may result in loss.',
+                    TranslationUtils.trArgs(
+                      'deposit_instruction_screen_only_send_currency_on_network',
+                      {
+                        'currency': _getNetworkCurrency(
+                          controller.selectedCregisNetwork.value,
+                        ),
+                        'network': _formatNetworkName(
+                          controller.selectedCregisNetwork.value,
+                        ),
+                      },
+                    ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12,
                         color: Colors.red.shade700,
@@ -1302,7 +1382,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Payment page ready',
+                          TranslationUtils.tr(
+                            'deposit_instruction_screen_payment_page_ready',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -1311,7 +1393,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Tap Confirm to open the payment page in your browser.',
+                          TranslationUtils.tr(
+                            'deposit_instruction_screen_tap_confirm_to_open_the_payment',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12,
                             color: AppColors.textGrey,
@@ -1337,7 +1421,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   SizedBox(height: 24),
                 ],
                 Text(
-                  'Deposit Address',
+                languageService.tr(
+                  'deposit_instruction_screen_deposit_address',
+                ),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14,
                     color: AppColors.textGrey,
@@ -1376,7 +1462,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                             ),
                           );
                           CustomToastService.showSuccess(
-                            message: 'Address copied to clipboard',
+                message: languageService.tr(
+                  'cregis_address_screen_address_copied_to_clipboard',
+                ),
                           );
                         },
                         child: Container(
@@ -1410,7 +1498,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'Payment verification timed out. Check Transaction History.',
+                  TranslationUtils.tr(
+                    'deposit_instruction_screen_payment_verification_timed_out_check_transaction',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(fontSize: 13, color: Colors.orange.shade800),
                 ),
               );
@@ -1437,7 +1527,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Waiting for payment... polling…',
+                        TranslationUtils.tr(
+                          'deposit_instruction_screen_waiting_for_payment_polling',
+                        ),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13,
                           color: Colors.blue.shade800,
@@ -1558,10 +1650,14 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
                   : Text(
                     hasCheckoutUrl
-                        ? 'Open link to payment'
+                        ? languageService.tr(
+                          'deposit_instruction_screen_open_link_to_payment',
+                        )
                         : hasAddress
                         ? languageService.tr('deposit_confirm_deposit')
-                        : 'Generate Address',
+                        : languageService.tr(
+                          'deposit_instruction_screen_generate_address',
+                        ),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       height: 1.71,
@@ -1579,7 +1675,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          margin: EdgeInsets.only(top: 8, right: 8),
+          margin: EdgeInsetsDirectional.only(top: 8, end: 8),
           width: 4,
           height: 4,
           decoration: BoxDecoration(

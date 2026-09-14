@@ -41,9 +41,11 @@ extension _ExpirationX on _Expiration {
         _Expiration.gtc => 'GTC',
       };
   String get label => switch (this) {
-        _Expiration.today => 'Today',
-        _Expiration.specified => 'Specified',
-        _Expiration.specifiedDay => 'Specified day',
+        _Expiration.today => TranslationUtils.tr('dc_range_today'),
+        _Expiration.specified =>
+          TranslationUtils.tr('meta_new_order_specified'),
+        _Expiration.specifiedDay =>
+          TranslationUtils.tr('meta_new_order_specified_day'),
         _Expiration.gtc => 'GTC',
       };
 }
@@ -221,19 +223,19 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
     switch (t) {
       case OrderType.buyMarket:
       case OrderType.sellMarket:
-        return 'Market Execution';
+        return TranslationUtils.tr('pending_order_market_execution_label');
       case OrderType.buyLimit:
-        return 'Buy Limit';
+        return TranslationUtils.tr('general_buy_limit');
       case OrderType.sellLimit:
-        return 'Sell Limit';
+        return TranslationUtils.tr('general_sell_limit');
       case OrderType.buyStop:
-        return 'Buy Stop';
+        return TranslationUtils.tr('general_buy_stop');
       case OrderType.sellStop:
-        return 'Sell Stop';
+        return TranslationUtils.tr('general_sell_stop');
       case OrderType.buyStopLimit:
-        return 'Buy Stop Limit';
+        return TranslationUtils.tr('general_buy_stop_limit');
       case OrderType.sellStopLimit:
-        return 'Sell Stop Limit';
+        return TranslationUtils.tr('general_sell_stop_limit');
     }
   }
 
@@ -329,7 +331,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
           arguments: {
             'orderData': {
               'status': true,
-              'message': 'Order placed',
+              'message': TranslationUtils.tr('pending_order_order_placed'),
               'data': {
                 'order_id': null,
                 'position_id': null,
@@ -358,7 +360,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
           title: Get.find<LanguageService>().tr('meta_neworder_order_failed'),
           message: _trading.errorMessage.isNotEmpty
               ? _trading.errorMessage
-              : 'Unable to place order',
+              : TranslationUtils.tr('meta_new_order_unable_to_place_order'),
         );
       }
     } catch (e) {
@@ -379,12 +381,24 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
 
   String _symbolDisplayName() {
     final s = _symbol;
-    if (s.startsWith('XAU')) return 'Gold vs US Dollar';
-    if (s.startsWith('XAG')) return 'Silver vs US Dollar';
-    if (s.startsWith('EURUSD')) return 'Euro vs US Dollar';
-    if (s.startsWith('GBPUSD')) return 'Pound vs US Dollar';
-    if (s.startsWith('USDJPY')) return 'US Dollar vs Yen';
-    if (s.startsWith('BTCUSD')) return 'Bitcoin vs US Dollar';
+    if (s.startsWith('XAU')) {
+      return TranslationUtils.tr('meta_new_order_gold_vs_us_dollar');
+    }
+    if (s.startsWith('XAG')) {
+      return TranslationUtils.tr('meta_new_order_silver_vs_us_dollar');
+    }
+    if (s.startsWith('EURUSD')) {
+      return TranslationUtils.tr('meta_new_order_euro_vs_us_dollar');
+    }
+    if (s.startsWith('GBPUSD')) {
+      return TranslationUtils.tr('meta_new_order_pound_vs_us_dollar');
+    }
+    if (s.startsWith('USDJPY')) {
+      return TranslationUtils.tr('meta_new_order_us_dollar_vs_yen');
+    }
+    if (s.startsWith('BTCUSD')) {
+      return TranslationUtils.tr('meta_new_order_bitcoin_vs_us_dollar');
+    }
     return s;
   }
 
@@ -552,7 +566,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Price: ',
+                  TranslationUtils.tr('meta_new_order_screen_price'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 15.sp,
                     color: AppColors.textGrey,
@@ -623,7 +637,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Stop Limit price: ',
+                  TranslationUtils.tr('meta_new_order_screen_stop_limit_price'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 15.sp,
                     color: AppColors.textGrey,
@@ -826,8 +840,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
       color: AppColors.whiteColor,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       child: Text(
-        'Attention! The trade will be executed at market conditions, '
-        'difference with requested price may be significant!',
+        TranslationUtils.tr('meta_close_position_market_warning'),
         textAlign: TextAlign.center,
         style: AppTextStyles.bodyText.copyWith(
           fontSize: 12.sp,

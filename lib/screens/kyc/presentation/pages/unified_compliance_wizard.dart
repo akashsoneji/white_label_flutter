@@ -63,7 +63,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             automaticallyImplyLeading: false,
             centerTitle: true,
             title: Text(
-              'KYC Verification',
+              TranslationUtils.tr('kyc_verification'),
               style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.textPrimary,
                 fontSize: 16.sp,
@@ -103,7 +103,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       controller.isSchemaLoading.value
                           ? Center(
                             child: CommonLoadingWidget(
-                              message: 'Loading details...',
+                              message: TranslationUtils.tr(
+                                'unified_compliance_wizard_loading_details',
+                              ),
                               size: 40.0,
                               color: AppColors.primary,
                             ),
@@ -141,7 +143,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           title: Column(
             children: [
               Align(
-                alignment: Alignment.topRight,
+                alignment: AlignmentDirectional.topEnd,
                 child: GestureDetector(
                   onTap: () {
                     Navigator.of(context).pop();
@@ -168,11 +170,16 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 color: AppColors.primary,
               ),
               SizedBox(height: 16.h),
-              Text('Verify Later?', style: AppTextStyles.black16600),
+              Text(
+                TranslationUtils.tr('unified_compliance_wizard_verify_later'),
+                style: AppTextStyles.black16600,
+              ),
             ],
           ),
           content: Text(
-            'You can continue later, but you won\'t get all benefits until verification is complete',
+            TranslationUtils.tr(
+              'unified_compliance_wizard_you_can_continue_later_but_you',
+            ),
             style: AppTextStyles.grey14400h57,
             textAlign: TextAlign.center,
           ),
@@ -195,7 +202,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                         padding: EdgeInsets.symmetric(vertical: 12.h),
                       ),
                       child: Text(
-                        'Verify\nLater',
+                        TranslationUtils.tr(
+                          'unified_compliance_wizard_verify_later_button',
+                        ),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w700,
@@ -221,7 +230,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       elevation: 0,
                     ),
                     child: Text(
-                      'Continue',
+                      TranslationUtils.tr('account_created_continue'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w700,
@@ -316,24 +325,50 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         children: [
           Row(
             children: [
-              _buildStepNode(0, '1', 'Profile', step >= 0),
+              _buildStepNode(
+                0,
+                '1',
+                TranslationUtils.tr('global_drawer_profile'),
+                step >= 0,
+              ),
               _buildStepLine(step >= 1),
-              _buildStepNode(1, '2', 'Documents', step >= 1),
+              _buildStepNode(
+                1,
+                '2',
+                TranslationUtils.tr('unified_compliance_wizard_documents'),
+                step >= 1,
+              ),
               _buildStepLine(step >= 2),
-              _buildStepNode(2, '3', 'Review', step >= 2),
+              _buildStepNode(
+                2,
+                '3',
+                TranslationUtils.tr('unified_compliance_wizard_review'),
+                step >= 2,
+              ),
               _buildStepLine(step >= 3),
-              _buildStepNode(3, '4', 'Complete', step >= 3),
+              _buildStepNode(
+                3,
+                '4',
+                TranslationUtils.tr('unified_compliance_wizard_complete'),
+                step >= 3,
+              ),
             ],
           ),
           SizedBox(height: 12.h),
           Text(
             step == 0
-                ? 'Complete Your Profile'
+                ? TranslationUtils.tr(
+                  'unified_compliance_wizard_complete_your_profile',
+                )
                 : step == 1
-                ? 'Upload Documents'
+                ? TranslationUtils.tr('kyc_upload_documents')
                 : step == 2
-                ? 'Review and Submit'
-                : 'Verification Submitted',
+                ? TranslationUtils.tr(
+                  'unified_compliance_wizard_review_and_submit',
+                )
+                : TranslationUtils.tr(
+                  'unified_compliance_wizard_verification_submitted',
+                ),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 15.sp,
               fontWeight: FontWeight.w800,
@@ -343,12 +378,20 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           SizedBox(height: 2.h),
           Text(
             step == 0
-                ? 'Please provide your personal details to continue'
+                ? TranslationUtils.tr(
+                  'unified_compliance_wizard_please_provide_your_personal_details_to',
+                )
                 : step == 1
-                ? 'Please upload front and back pictures of verification proofs'
+                ? TranslationUtils.tr(
+                  'unified_compliance_wizard_please_upload_front_and_back_pictures',
+                )
                 : step == 2
-                ? 'Confirm details before finishing'
-                : 'Your details have been successfully saved',
+                ? TranslationUtils.tr(
+                  'unified_compliance_wizard_confirm_details_before_finishing',
+                )
+                : TranslationUtils.tr(
+                  'unified_compliance_wizard_your_details_have_been_successfully_saved',
+                ),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 11.sp,
               color: AppColors.textGrey,
@@ -430,7 +473,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
   Widget _buildStepLine(bool isDone) {
     return Expanded(
       child: Padding(
-        padding: EdgeInsets.only(left: 4.w, right: 4.w, bottom: 16.h),
+        padding: EdgeInsetsDirectional.only(start: 4.w, end: 4.w, bottom: 16.h),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           height: 2.h,
@@ -476,7 +519,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    'Profile details loaded dynamically from client database.',
+                    TranslationUtils.tr(
+                      'unified_compliance_wizard_profile_details_loaded_dynamically_from_client',
+                    ),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 11.5.sp,
                       color: const Color(0xFF15803D),
@@ -491,12 +536,14 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
 
           // Card 1: Basic Profile Information
           _buildPremiumSectionCard(
-            title: 'Basic Profile Information',
+            title: TranslationUtils.tr(
+              'unified_compliance_wizard_basic_profile_information',
+            ),
             icon: Icons.person_pin_rounded,
             children: [
               _buildFormInput(
                 'email',
-                'Email Address',
+                TranslationUtils.tr('tw_email'),
                 isRequired: true,
                 readOnly: true,
                 prefixIcon: Icons.email_outlined,
@@ -504,7 +551,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 14.h),
               _buildFormInput(
                 'mobile',
-                'Mobile Number',
+                TranslationUtils.tr('edit_profile_mobile_number'),
                 isRequired: true,
                 isPhone: true,
                 prefixIcon: Icons.phone_android_outlined,
@@ -512,43 +559,72 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 14.h),
               _buildFormInput(
                 'first_name',
-                'First Name',
+                TranslationUtils.tr('create_account_screen_first_name'),
                 isRequired: true,
                 prefixIcon: Icons.badge_outlined,
               ),
               SizedBox(height: 14.h),
               _buildFormInput(
                 'last_name',
-                'Last Name',
+                TranslationUtils.tr('create_account_screen_last_name'),
                 isRequired: true,
                 prefixIcon: Icons.badge_outlined,
               ),
               SizedBox(height: 14.h),
               _buildOptionsDropdownField(
-                label: 'Title Selector',
+                label: TranslationUtils.tr(
+                  'unified_compliance_wizard_title_selector',
+                ),
                 fieldKey: 'title',
                 options: [
                   {'value': 'Mr', 'label': 'Mr'},
-                  {'value': 'Mrs', 'label': 'Mrs'},
+                  {
+                    'value': 'Mrs',
+                    'label': TranslationUtils.tr(
+                      'unified_compliance_wizard_mrs',
+                    ),
+                  },
                   {'value': 'Ms', 'label': 'Ms'},
                   {'value': 'Dr', 'label': 'Dr'},
-                  {'value': 'Other', 'label': 'Other'},
+                  {
+                    'value': 'Other',
+                    'label': TranslationUtils.tr(
+                      'unified_compliance_wizard_other',
+                    ),
+                  },
                 ],
               ),
               SizedBox(height: 14.h),
               _buildOptionsDropdownField(
-                label: 'Gender Selector',
+                label: TranslationUtils.tr(
+                  'unified_compliance_wizard_gender_selector',
+                ),
                 fieldKey: 'gender',
                 options: [
-                  {'value': 'male', 'label': '♂ Male'},
-                  {'value': 'female', 'label': '♀ Female'},
-                  {'value': 'other', 'label': 'Other'},
+                  {
+                    'value': 'male',
+                    'label':
+                        '♂ ${TranslationUtils.tr('unified_compliance_wizard_male')}',
+                  },
+                  {
+                    'value': 'female',
+                    'label':
+                        '♀ ${TranslationUtils.tr('unified_compliance_wizard_female')}',
+                  },
+                  {
+                    'value': 'other',
+                    'label': TranslationUtils.tr(
+                      'unified_compliance_wizard_other',
+                    ),
+                  },
                 ],
               ),
               SizedBox(height: 14.h),
               _buildDatePickerInput(
                 'dob',
-                'Date of Birth (DD-MM-YYYY)',
+                TranslationUtils.tr(
+                  'unified_compliance_wizard_date_of_birth_dd_mm_yyyy',
+                ),
                 isRequired: true,
                 prefixIcon: Icons.calendar_today_outlined,
               ),
@@ -559,11 +635,13 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
 
           // Card 2: Residential Address
           _buildPremiumSectionCard(
-            title: 'Residential Address',
+            title: TranslationUtils.tr(
+              'unified_compliance_wizard_residential_address',
+            ),
             icon: Icons.map_rounded,
             children: [
               _buildLocationDropdown(
-                label: 'Country',
+                label: TranslationUtils.tr('register_country'),
                 type: 'country',
                 prefixIcon: Icons.public_rounded,
                 isRequired: true,
@@ -571,21 +649,23 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               ),
               SizedBox(height: 14.h),
               _buildLocationDropdown(
-                label: 'Nationality',
+                label: TranslationUtils.tr(
+                  'unified_compliance_wizard_nationality',
+                ),
                 type: 'nationality',
                 prefixIcon: Icons.flag_outlined,
                 isRequired: true,
               ),
               SizedBox(height: 14.h),
               _buildLocationDropdown(
-                label: 'State',
+                label: TranslationUtils.tr('edit_profile_state'),
                 type: 'state',
                 prefixIcon: Icons.landscape_outlined,
                 isRequired: true,
               ),
               SizedBox(height: 14.h),
               _buildLocationDropdown(
-                label: 'City',
+                label: TranslationUtils.tr('edit_profile_city'),
                 type: 'city',
                 prefixIcon: Icons.location_city_outlined,
                 isRequired: true,
@@ -593,20 +673,22 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 14.h),
               _buildFormInput(
                 'address_1',
-                'Address Line 1',
+                TranslationUtils.tr('unified_compliance_wizard_address_line_1'),
                 isRequired: true,
                 prefixIcon: Icons.location_on_outlined,
               ),
               SizedBox(height: 14.h),
               _buildFormInput(
                 'address_2',
-                'Address Line 2 (Optional)',
+                TranslationUtils.tr(
+                  'unified_compliance_wizard_address_line_2_optional',
+                ),
                 prefixIcon: Icons.location_on_outlined,
               ),
               SizedBox(height: 14.h),
               _buildFormInput(
                 'postcode',
-                'Pincode / ZIP',
+                TranslationUtils.tr('unified_compliance_wizard_pincode_zip'),
                 isRequired: true,
                 prefixIcon: Icons.pin_drop_outlined,
               ),
@@ -617,7 +699,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
 
           // Card 3: Compliance & Questionnaire
           _buildPremiumSectionCard(
-            title: 'Compliance Information',
+            title: TranslationUtils.tr(
+              'unified_compliance_wizard_compliance_information',
+            ),
             icon: Icons.gavel_rounded,
             children: [_buildComplianceSchemaFields()],
           ),
@@ -741,7 +825,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       (opt) => opt['value']?.toString() == currentVal,
                     )?['label']
                     ?.toString() ??
-                'Select...';
+                TranslationUtils.tr('unified_compliance_wizard_select');
             return Padding(
               padding: EdgeInsets.only(bottom: 16.h),
               child: Column(
@@ -827,7 +911,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     (opt) => opt['value']?.toString() == currentVal,
                   )?['label']
                   ?.toString() ??
-              'Select Option...';
+              TranslationUtils.tr('unified_compliance_wizard_select_option');
 
           return Padding(
             padding: EdgeInsets.only(bottom: 16.h),
@@ -909,7 +993,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                   fontWeight: FontWeight.w600,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Enter details...',
+                  hintText: TranslationUtils.tr(
+                    'unified_compliance_wizard_enter_details',
+                  ),
                   hintStyle: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textSecondary,
                     fontSize: 12.sp,
@@ -947,7 +1033,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 ),
                 validator: (value) {
                   if (isRequired && (value == null || value.trim().isEmpty)) {
-                    return 'Field is required';
+                    return TranslationUtils.tr(
+                      'unified_compliance_wizard_field_is_required',
+                    );
                   }
                   return null;
                 },
@@ -977,8 +1065,8 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  margin: EdgeInsets.only(
-                    right: opt == options.last ? 0 : 10.w,
+                  margin: EdgeInsetsDirectional.only(
+                    end: opt == options.last ? 0 : 10.w,
                   ),
                   padding: EdgeInsets.symmetric(vertical: 12.h),
                   decoration: BoxDecoration(
@@ -1056,7 +1144,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(width: 10.w),
               Expanded(
                 child: Text(
-                  'Your profile details have been saved. Please upload the required documents.',
+                  TranslationUtils.tr(
+                    'unified_compliance_wizard_your_profile_details_have_been_saved',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     color: const Color(0xFF15803D),
@@ -1070,7 +1160,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         SizedBox(height: 20.h),
 
         Text(
-          'Upload Verification Documents',
+          TranslationUtils.tr(
+            'unified_compliance_wizard_upload_verification_documents',
+          ),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 15.sp,
             fontWeight: FontWeight.bold,
@@ -1079,7 +1171,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         ),
         SizedBox(height: 2.h),
         Text(
-          'Supported formats: JPG, PNG, PDF (Max 15MB each)',
+          TranslationUtils.tr(
+            'unified_compliance_wizard_supported_formats_jpg_png_pdf_max',
+          ),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 11.sp,
             color: AppColors.textGrey,
@@ -1090,8 +1184,12 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
 
         // Upload Card 1: Identity Proof
         _buildUploadCard(
-          title: 'Identity Document',
-          subtitle: 'Passport, National ID or Driver\'s License',
+          title: TranslationUtils.tr(
+            'unified_compliance_wizard_identity_document',
+          ),
+          subtitle: TranslationUtils.tr(
+            'unified_compliance_wizard_passport_national_id_or_driver_license',
+          ),
           frontKey: 'identity_front',
           backKey: 'identity_back',
           frontFile: controller.idProofFront.value,
@@ -1101,8 +1199,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
 
         // Upload Card 2: Address Proof
         _buildUploadCard(
-          title: 'Address Proof',
-          subtitle: 'Utility bill, Bank statement, or official letter',
+          title: TranslationUtils.tr('kyc_address_proof'),
+          subtitle: TranslationUtils.tr(
+            'unified_compliance_wizard_utility_bill_bank_statement_or_official',
+          ),
           frontKey: 'address_front',
           backKey: 'address_back',
           frontFile: controller.addressProofFront.value,
@@ -1174,7 +1274,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             children: [
               Expanded(
                 child: _buildUploadBox(
-                  label: 'Front Side',
+                  label: TranslationUtils.tr('id_upload_front_side'),
                   key: frontKey,
                   file: frontFile,
                   isRequired: true,
@@ -1183,7 +1283,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(width: 12.w),
               Expanded(
                 child: _buildUploadBox(
-                  label: 'Back Side',
+                  label: TranslationUtils.tr('id_upload_back_side'),
                   key: backKey,
                   file: backFile,
                   isRequired: false,
@@ -1261,9 +1361,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     ),
                   ),
 
-                Positioned(
+                PositionedDirectional(
                   top: 6.h,
-                  right: 6.w,
+                  end: 6.w,
                   child: GestureDetector(
                     onTap: () {
                       controller.clearDocument(key);
@@ -1340,7 +1440,11 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                       child: Text(
-                        isRequired ? 'Required' : 'Optional',
+                        isRequired
+                            ? TranslationUtils.tr(
+                              'unified_compliance_wizard_required',
+                            )
+                            : TranslationUtils.tr('kyc_docs_screen_optional'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 9.sp,
                           fontWeight: FontWeight.w800,
@@ -1371,7 +1475,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Upload Details Summary',
+            TranslationUtils.tr(
+              'unified_compliance_wizard_upload_details_summary',
+            ),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.sp,
               fontWeight: FontWeight.bold,
@@ -1383,7 +1489,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Required Documents Selected:',
+                TranslationUtils.tr(
+                  'unified_compliance_wizard_required_documents_selected',
+                ),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   color: AppColors.textSecondary,
@@ -1404,7 +1512,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Optional Documents Selected:',
+                TranslationUtils.tr(
+                  'unified_compliance_wizard_optional_documents_selected',
+                ),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   color: AppColors.textSecondary,
@@ -1425,7 +1535,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Total Combined Upload Size:',
+                TranslationUtils.tr(
+                  'unified_compliance_wizard_total_combined_upload_size',
+                ),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   color: AppColors.textSecondary,
@@ -1469,7 +1581,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
-                  'Please confirm that all details entered below are 100% accurate and match your uploaded documents.',
+                  TranslationUtils.tr(
+                    'unified_compliance_wizard_please_confirm_that_all_details_entered',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11.5.sp,
                     color: AppColors.primary,
@@ -1484,39 +1598,49 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         SizedBox(height: 20.h),
 
         // Profile & Address Card
-        _buildReviewSectionCard('Profile & Address Details', {
-          'Name':
+        _buildReviewSectionCard(
+          TranslationUtils.tr(
+            'unified_compliance_wizard_profile_address_details',
+          ),
+          {
+          TranslationUtils.tr('unified_compliance_wizard_name'):
               '${controller.formAnswers['first_name'] ?? ''} ${controller.formAnswers['last_name'] ?? ''}'
                   .trim(),
-          'Email': controller.formAnswers['email']?.toString() ?? '',
-          'Mobile': controller.formAnswers['mobile']?.toString() ?? '',
-          'Gender / Date of Birth':
+          TranslationUtils.tr('create_account_screen_email'):
+              controller.formAnswers['email']?.toString() ?? '',
+          TranslationUtils.tr('unified_compliance_wizard_mobile'):
+              controller.formAnswers['mobile']?.toString() ?? '',
+          TranslationUtils.tr(
+                'unified_compliance_wizard_gender_date_of_birth',
+              ):
               '${controller.formAnswers['gender']?.toString().toUpperCase() ?? ''} (${controller.formAnswers['dob'] ?? ''})',
-          'Address':
+          TranslationUtils.tr('edit_profile_address'):
               '${controller.formAnswers['address_1'] ?? ''}, ${controller.formAnswers['address_2'] ?? ''}'
                   .trim(),
-          'City / State':
+          TranslationUtils.tr('unified_compliance_wizard_city_state'):
               '${controller.formAnswers['city_name'] ?? ''}, ${controller.formAnswers['state_name'] ?? ''}',
-          'Country / Pincode':
+          TranslationUtils.tr('unified_compliance_wizard_country_pincode'):
               '${controller.formAnswers['country_name'] ?? ''} - ${controller.formAnswers['postcode'] ?? ''}',
         }),
         SizedBox(height: 20.h),
 
         // Visual Documents Card
         _buildPremiumSectionCard(
-          title: 'Identity Documents Proof',
+          title: TranslationUtils.tr(
+            'unified_compliance_wizard_identity_documents_proof',
+          ),
           icon: Icons.badge_outlined,
           children: [
             Row(
               children: [
                 _buildDocumentReviewTile(
-                  'ID Proof Front',
+                  TranslationUtils.tr('kyc_id_proof_front'),
                   controller.idProofFront.value,
                   true,
                 ),
                 SizedBox(width: 10.w),
                 _buildDocumentReviewTile(
-                  'ID Proof Back',
+                  TranslationUtils.tr('kyc_id_proof_back'),
                   controller.idProofBack.value,
                   false,
                 ),
@@ -1527,19 +1651,21 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         SizedBox(height: 20.h),
 
         _buildPremiumSectionCard(
-          title: 'Address Documents Proof',
+          title: TranslationUtils.tr(
+            'unified_compliance_wizard_address_documents_proof',
+          ),
           icon: Icons.home_work_outlined,
           children: [
             Row(
               children: [
                 _buildDocumentReviewTile(
-                  'Address Front',
+                  TranslationUtils.tr('unified_compliance_wizard_address_front'),
                   controller.addressProofFront.value,
                   true,
                 ),
                 SizedBox(width: 10.w),
                 _buildDocumentReviewTile(
-                  'Address Back',
+                  TranslationUtils.tr('unified_compliance_wizard_address_back'),
                   controller.addressProofBack.value,
                   false,
                 ),
@@ -1605,7 +1731,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                             .split('.')
                             .last
                             .toUpperCase()
-                        : 'Not Uploaded',
+                        : TranslationUtils.tr(
+                          'unified_compliance_wizard_not_uploaded',
+                        ),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 9.sp,
                       fontWeight: FontWeight.w800,
@@ -1733,7 +1861,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           ),
           SizedBox(height: 20.h),
           Text(
-            "Verification Request Submitted!",
+            TranslationUtils.tr(
+              'unified_compliance_wizard_verification_request_submitted',
+            ),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 17.sp,
               fontWeight: FontWeight.w800,
@@ -1744,7 +1874,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           ),
           SizedBox(height: 8.h),
           Text(
-            "Your profile details and documents are now being reviewed by our compliance team.",
+            TranslationUtils.tr(
+              'unified_compliance_wizard_your_profile_details_and_documents_are',
+            ),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               color: AppColors.textGrey,
@@ -1767,7 +1899,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Verification Timeline Progress',
+                  TranslationUtils.tr(
+                    'unified_compliance_wizard_verification_timeline_progress',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.bold,
@@ -1776,26 +1910,42 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 ),
                 SizedBox(height: 16.h),
                 _buildTimelineStep(
-                  label: 'Profile Information Submitted',
-                  desc: 'Regulation questionnaire saved successfully.',
+                  label: TranslationUtils.tr(
+                    'unified_compliance_wizard_profile_information_submitted',
+                  ),
+                  desc: TranslationUtils.tr(
+                    'compliance_controller_regulation_questionnaire_saved_successfully',
+                  ),
                   isCompleted: true,
                   isActive: false,
                 ),
                 _buildTimelineStep(
-                  label: 'KYC Document Proofs Uploaded',
-                  desc: 'Identity and address proof attached.',
+                  label: TranslationUtils.tr(
+                    'unified_compliance_wizard_kyc_document_proofs_uploaded',
+                  ),
+                  desc: TranslationUtils.tr(
+                    'unified_compliance_wizard_identity_and_address_proof_attached',
+                  ),
                   isCompleted: true,
                   isActive: false,
                 ),
                 _buildTimelineStep(
-                  label: 'Account Under Compliance Review',
-                  desc: 'Average verification time: 2-4 business hours.',
+                  label: TranslationUtils.tr(
+                    'unified_compliance_wizard_account_under_compliance_review',
+                  ),
+                  desc: TranslationUtils.tr(
+                    'unified_compliance_wizard_average_verification_time_2_4_business',
+                  ),
                   isCompleted: false,
                   isActive: true,
                 ),
                 _buildTimelineStep(
-                  label: 'Verification Approved',
-                  desc: 'Access deposit, transfer and trading features.',
+                  label: TranslationUtils.tr(
+                    'unified_compliance_wizard_verification_approved',
+                  ),
+                  desc: TranslationUtils.tr(
+                    'unified_compliance_wizard_access_deposit_transfer_and_trading_features',
+                  ),
                   isCompleted: false,
                   isActive: false,
                   isLast: true,
@@ -1821,7 +1971,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 elevation: 0,
               ),
               child: Text(
-                "Done",
+                TranslationUtils.tr('navigation_done'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
@@ -1936,9 +2086,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
     return SafeArea(
       bottom: true,
       child: Container(
-        padding: EdgeInsets.only(
-          left: 16.w,
-          right: 16.w,
+        padding: EdgeInsetsDirectional.only(
+          start: 16.w,
+          end: 16.w,
           top: 12.h,
           bottom: 12.h,
         ),
@@ -1985,7 +2135,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                               color: Colors.white,
                             )
                             : Text(
-                              'Update Profile & Continue',
+                              TranslationUtils.tr(
+                                'unified_compliance_wizard_update_profile_continue',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w700,
@@ -2014,7 +2166,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                   ),
                 ),
                 child: Text(
-                  'Back',
+                  TranslationUtils.tr('legal_docs_back'),
                   style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 13.sp,
@@ -2044,7 +2196,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       elevation: 0,
                     ),
                     child: Text(
-                      'Continue to Review',
+                      TranslationUtils.tr(
+                        'unified_compliance_wizard_continue_to_review',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
@@ -2071,7 +2225,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                   ),
                 ),
                 child: Text(
-                  'Edit Info',
+                  TranslationUtils.tr('unified_compliance_wizard_edit_info'),
                   style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 13.sp,
@@ -2109,7 +2263,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                               color: Colors.white,
                             )
                             : Text(
-                              'Confirm & Submit',
+                              TranslationUtils.tr(
+                                'unified_compliance_wizard_confirm_submit',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w700,
@@ -2166,7 +2322,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
-            hintText: readOnly ? '' : 'Enter...',
+            hintText:
+                readOnly
+                    ? ''
+                    : TranslationUtils.tr('unified_compliance_wizard_enter'),
             hintStyle: AppTextStyles.bodyText.copyWith(
               color: AppColors.textSecondary,
               fontSize: 12.sp,
@@ -2208,7 +2367,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                             height: 20.h,
                             width: 1.w,
                             color: AppColors.border,
-                            margin: EdgeInsets.only(left: 4.w, right: 4.w),
+                            margin: EdgeInsetsDirectional.only(start: 4.w, end: 4.w),
                           ),
                         ],
                       ),
@@ -2240,7 +2399,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           ),
           validator: (value) {
             if (isRequired && (value == null || value.trim().isEmpty)) {
-              return 'Required';
+              return TranslationUtils.tr('unified_compliance_wizard_required');
             }
             return null;
           },
@@ -2249,7 +2408,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           Obx(() {
             if (controller.isCheckingMobile.value) {
               return Padding(
-                padding: EdgeInsets.only(top: 4.h, left: 4.w),
+                padding: EdgeInsetsDirectional.only(top: 4.h, start: 4.w),
                 child: Row(
                   children: [
                     SizedBox(
@@ -2262,7 +2421,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     ),
                     SizedBox(width: 6.w),
                     Text(
-                      'Checking availability...',
+                      TranslationUtils.tr(
+                        'unified_compliance_wizard_checking_availability',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: AppColors.textGrey,
@@ -2275,7 +2436,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             if (!controller.isMobileAvailable.value &&
                 controller.mobileError.value.isNotEmpty) {
               return Padding(
-                padding: EdgeInsets.only(top: 4.h, left: 4.w),
+                padding: EdgeInsetsDirectional.only(top: 4.h, start: 4.w),
                 child: Text(
                   controller.mobileError.value,
                   style: AppTextStyles.bodyText.copyWith(
@@ -2307,7 +2468,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         options
             .firstWhereOrNull((opt) => opt['value'] == currentVal)?['label']
             ?.toString() ??
-        'Select...';
+        TranslationUtils.tr('unified_compliance_wizard_select');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2419,7 +2580,11 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                   child: Obx(() {
                     final v = controller.formAnswers[key]?.toString() ?? '';
                     return Text(
-                      v.isNotEmpty ? v : 'Select Date of Birth',
+                      v.isNotEmpty
+                          ? v
+                          : TranslationUtils.tr(
+                            'unified_compliance_wizard_select_date_of_birth',
+                          ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         color:
@@ -2586,7 +2751,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 ? () => _showStateOptions()
                 : () {
                   CustomToastService.showWarning(
-                    message: 'Please select a country first.',
+                    message: TranslationUtils.tr(
+                      'unified_compliance_wizard_please_select_country_first',
+                    ),
                   );
                 };
       } else if (type == 'city') {
@@ -2598,7 +2765,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 ? () => _showCityOptions()
                 : () {
                   CustomToastService.showWarning(
-                    message: 'Please select a state first.',
+                    message: TranslationUtils.tr(
+                      'unified_compliance_wizard_please_select_state_first',
+                    ),
                   );
                 };
       }
@@ -2623,7 +2792,11 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
-                      displayValue.isNotEmpty ? displayValue : 'Select...',
+                      displayValue.isNotEmpty
+                          ? displayValue
+                          : TranslationUtils.tr(
+                            'unified_compliance_wizard_select',
+                          ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.5.sp,
                         color: (displayValue.isEmpty || readOnly)
@@ -2683,7 +2856,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Select Country',
+                TranslationUtils.tr('edit_profile_select_country'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -2698,7 +2871,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                   fontSize: 13.sp,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Search countries...',
+                  hintText: TranslationUtils.tr('edit_profile_search_countries'),
                   hintStyle: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textSecondary,
                     fontSize: 12.sp,
@@ -2799,7 +2972,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Select Nationality',
+                TranslationUtils.tr(
+                  'unified_compliance_wizard_select_nationality',
+                ),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -2814,7 +2989,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                   fontSize: 13.sp,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Search nationalities...',
+                  hintText: TranslationUtils.tr(
+                    'unified_compliance_wizard_search_nationalities',
+                  ),
                   hintStyle: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textSecondary,
                     fontSize: 12.sp,
@@ -2921,7 +3098,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Select State',
+                TranslationUtils.tr('edit_profile_select_state'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -2936,7 +3113,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                   fontSize: 13.sp,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Search states...',
+                  hintText: TranslationUtils.tr('edit_profile_search_states'),
                   hintStyle: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textSecondary,
                     fontSize: 12.sp,
@@ -3033,7 +3210,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Select City',
+                TranslationUtils.tr('edit_profile_select_city'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -3048,7 +3225,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                   fontSize: 13.sp,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Search cities...',
+                  hintText: TranslationUtils.tr('edit_profile_search_cities'),
                   hintStyle: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textSecondary,
                     fontSize: 12.sp,

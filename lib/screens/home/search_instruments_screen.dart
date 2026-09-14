@@ -254,7 +254,7 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
               final isSelected =
                   category == _searchController2.currentCategory.value;
               return Padding(
-                padding: EdgeInsets.only(right: 8.w),
+                padding: EdgeInsetsDirectional.only(end: 8.w),
                 child: GestureDetector(
                   onTap: () => _searchController2.filterByCategory(category),
                   child: Container(
@@ -321,7 +321,7 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
           children: [
             Container(
               width: 45.w,
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: _buildFlagIcon(symbol.displaySymbol),
             ),
             SizedBox(width: 12.w),
@@ -367,7 +367,7 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
                   );
                 },
                 child: Padding(
-                  padding: EdgeInsets.only(left: 8.w),
+                  padding: EdgeInsetsDirectional.only(start: 8.w),
                   child: Icon(
                     isFavorite
                         ? Icons.check_circle
@@ -429,7 +429,7 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
               size: 64.h, color: AppColors.textGrey),
           SizedBox(height: 16.h),
           Text(
-            'No favourites added',
+            languageService.tr('search_instruments_screen_no_favourites_added'),
             style: AppTextStyles.heading.copyWith(
               fontSize: 13.sp,
               fontWeight: FontWeight.w400,
@@ -438,7 +438,9 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Add symbols from the Quote tab',
+            languageService.tr(
+              'search_instruments_screen_add_symbols_from_the_quote_tab',
+            ),
             style: AppTextStyles.subheading.copyWith(
               color: AppColors.textGrey,
               fontSize: 12.sp,

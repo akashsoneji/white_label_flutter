@@ -19,6 +19,7 @@ import 'package:crm_app/screens/finance/presentation/pages/withdrawal_screen.dar
 
 import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
 import 'package:crm_app/services/account_cache_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/websocket_endpoint_helper.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
@@ -365,7 +366,10 @@ class DashboardController extends GetxController {
         if (mt5Accounts.isEmpty) {
           hasMT5Accounts.value = false;
         }
-        final errorMsg = response.message ?? 'Failed to fetch MT5 accounts';
+        final errorMsg = response.message ??
+            TranslationUtils.tr(
+              'dashboard_controller_failed_to_fetch_mt5_accounts',
+            );
         errorMessage.value = errorMsg;
         print(
           'Failed to fetch MT5 accounts from dashboard controller: $errorMsg',
@@ -486,7 +490,10 @@ class DashboardController extends GetxController {
         // API call failed
         hasMT5Accounts.value = false;
         isLoadingMT5Accounts.value = false;
-        final errorMsg = response.message ?? 'Failed to change primary account';
+        final errorMsg = response.message ??
+            TranslationUtils.tr(
+              'dashboard_controller_failed_to_change_primary_account',
+            );
         errorMessage.value = errorMsg;
         print(
           'Failed to fetch MT5 accounts from dashboard controller: $errorMsg',
@@ -721,7 +728,10 @@ class DashboardController extends GetxController {
         // Return the account data including account number
         return response.data;
       } else {
-        final errorMsg = response.message ?? 'Failed to create MT5 account';
+        final errorMsg = response.message ??
+            TranslationUtils.tr(
+              'dashboard_controller_failed_to_create_mt5_account',
+            );
         errorMessage.value = errorMsg;
         print('DashboardController: Failed to create MT5 account: $errorMsg');
         CustomToastService.showError(message: errorMsg);

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
 import 'package:crm_app/screens/kyc/view_models/kyc_bank_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import '../../../../widgets/common_loading_widget.dart';
 import '../../../../widgets/custom_toast.dart';
 
@@ -82,7 +83,7 @@ class _KycBankCameraScreenState extends State<KycBankCameraScreen> {
             onPressed: _closeCamera,
           ),
           title:   Text(
-            'Take Proof Photo',
+            TranslationUtils.tr('kyc_bank_camera_screen_take_proof_photo'),
             style: AppTextStyles.bodyText.copyWith(color: AppColors.whiteColor),
           ),
         ),
@@ -116,8 +117,9 @@ class _KycBankCameraScreenState extends State<KycBankCameraScreen> {
                     Future.delayed(const Duration(milliseconds: 500), () {
                       if (mounted && !_isDisposed) {
                         CustomToastService.showError(
-                          message:
-                              'Camera initialization failed. Please try again.',
+                          message: TranslationUtils.tr(
+                            'kyc_bank_camera_screen_camera_initialization_failed_please_try_again',
+                          ),
                         );
                         _closeCamera();
                       }

@@ -3,6 +3,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/ib/presentation/pages/ib_structure_screen.dart';
 import 'package:crm_app/screens/ib/presentation/pages/my_structure_screen.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -38,7 +39,7 @@ class IbCombinedStructureScreen extends StatelessWidget {
           //   iconHeight: 30.h,
           // ),
           title: Text(
-            'Structure',
+            TranslationUtils.tr('ib_nav_structure'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -54,9 +55,9 @@ class IbCombinedStructureScreen extends StatelessWidget {
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
             ),
-            tabs: const [
-              Tab(text: "My Structure"),
-              Tab(text: "Sub IB Structure"),
+            tabs: [
+              Tab(text: TranslationUtils.tr('my_structure_screen_my_structure')),
+              Tab(text: TranslationUtils.tr('ib_sub_ib_structure')),
             ],
           ),
         ),

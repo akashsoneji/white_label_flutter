@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/services/auth_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/utils/trl_helper.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
@@ -86,11 +87,16 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
                 children: [
                   // Header
                   Padding(
-                    padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 16.h),
+                    padding: EdgeInsetsDirectional.fromSTEB(
+                      24.w,
+                      24.h,
+                      24.w,
+                      16.h,
+                    ),
                     child: Row(
                       children: [
                         Text(
-                          'Select Leverage',
+                          TranslationUtils.tr('change_leverage_screen_select_leverage'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w600,
@@ -177,7 +183,9 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
 
   Future<void> _submitLeverageChange() async {
     if (_selectedLeverage == null) {
-      CustomToastService.showError(message: 'Please select a leverage value');
+      CustomToastService.showError(
+        message: TranslationUtils.tr('change_leverage_please_select_leverage'),
+      );
       return;
     }
 
@@ -215,7 +223,9 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: const AppBackButton(),
-        title: Text('Change Leverage'),
+        title: Text(
+          TranslationUtils.tr('change_leverage_screen_change_leverage'),
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -237,7 +247,7 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
                   Icon(Icons.account_circle, color: AppColors.primary),
                   SizedBox(width: 12.w),
                   Text(
-                    'Account: ${widget.accountNumber}',
+                    '${TranslationUtils.tr('change_leverage_account_label')}: ${widget.accountNumber}',
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
@@ -251,7 +261,7 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
 
             // Leverage Dropdown
             Text(
-              'Select Leverage',
+              TranslationUtils.tr('change_leverage_screen_select_leverage'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
@@ -279,7 +289,9 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
                 ),
               ),
               decoration: InputDecoration(
-                hintText: 'Select leverage',
+                hintText: TranslationUtils.tr(
+                  'change_leverage_screen_select_leverage',
+                ),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16.w,
                   vertical: 16.h,
@@ -326,7 +338,9 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
                           ),
                         )
                         : Text(
-                          'Change Leverage',
+                          TranslationUtils.tr(
+                            'change_leverage_screen_change_leverage',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/utils/precision_helper.dart';
@@ -241,7 +242,9 @@ class WalletController extends GetxController {
   Future<void> depositWallet() async {
     if (transferFromAccount.value.isEmpty) {
       CustomToastService.showError(
-        message: 'Please select Transfer From',
+        message: TranslationUtils.tr(
+          'wallet_controller_please_select_transfer_from',
+        ),
       );
       return;
     }
@@ -249,7 +252,7 @@ class WalletController extends GetxController {
     final rawText = amountController.text.trim();
     if (rawText.isEmpty) {
       CustomToastService.showError(
-        message: 'Please enter amount',
+        message: TranslationUtils.tr('internal_transfer_enter_amount'),
       );
       return;
     }
@@ -260,7 +263,7 @@ class WalletController extends GetxController {
     final parsedAmount = PrecisionHelper.parseDouble(cleanedText);
     if (parsedAmount <= 0.0) {
       CustomToastService.showError(
-        message: 'Amount must be greater than 0.00',
+        message: TranslationUtils.tr('wallet_validation_amount_positive'),
       );
       return;
     }
@@ -274,8 +277,10 @@ class WalletController extends GetxController {
     } catch (e) {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Failed to initiate deposit',
-          title: 'Error',
+          message: TranslationUtils.tr(
+            'wallet_controller_failed_to_initiate_deposit',
+          ),
+          title: TranslationUtils.tr('close_position_error'),
         );
       }
     } finally {
@@ -301,13 +306,16 @@ class WalletController extends GetxController {
 
         if (!isValid) {
           CustomToastService.showError(
-            message: 'Insufficient balance for this transfer',
+            message: TranslationUtils.tr(
+              'wallet_controller_insufficient_balance_for_this_transfer',
+            ),
           );
         }
         return isValid;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to check balance',
+          message: response.message ??
+              TranslationUtils.tr('wallet_controller_failed_to_check_balance'),
         );
         return false;
       }
@@ -335,15 +343,20 @@ class WalletController extends GetxController {
 
       if (response.success && response.data != null) {
         isOtpSent.value = true;
-        otpMessage.value = response.data['message'] ?? 'OTP sent successfully';
+        otpMessage.value = response.data['message'] ??
+            TranslationUtils.tr('wallet_controller_otp_sent_successfully');
         CustomToastService.showSuccess(
-          message: 'OTP sent successfully',
+          message: TranslationUtils.tr(
+            'wallet_controller_otp_sent_successfully',
+          ),
         );
         return true;
       } else {
-        otpMessage.value = response.message ?? 'Failed to send OTP';
+        otpMessage.value = response.message ??
+            TranslationUtils.tr('auth_controller_failed_to_send_otp');
         CustomToastService.showError(
-          message: response.message ?? 'Failed to send OTP',
+          message: response.message ??
+              TranslationUtils.tr('auth_controller_failed_to_send_otp'),
         );
         return false;
       }
@@ -368,21 +381,23 @@ class WalletController extends GetxController {
   ) async {
     if (otp.isEmpty) {
       CustomToastService.showError(
-        message: 'Please enter OTP',
+        message: TranslationUtils.tr('kyc_bank_controller_please_enter_otp'),
       );
       return false;
     }
 
     if (fromAccountId.isEmpty || toAccountId.isEmpty) {
       CustomToastService.showError(
-        message: 'Please select both From and To accounts',
+        message: TranslationUtils.tr(
+          'wallet_controller_please_select_both_from_and_to',
+        ),
       );
       return false;
     }
 
     if (amount.isEmpty) {
       CustomToastService.showError(
-        message: 'Please enter amount',
+        message: TranslationUtils.tr('internal_transfer_enter_amount'),
       );
       return false;
     }
@@ -404,7 +419,9 @@ class WalletController extends GetxController {
 
       if (response.success && response.data != null) {
         CustomToastService.showSuccess(
-          message: 'Transfer completed successfully',
+          message: TranslationUtils.tr(
+            'wallet_controller_transfer_completed_successfully',
+          ),
         );
 
         // Refresh wallet data to get updated balances
@@ -416,7 +433,8 @@ class WalletController extends GetxController {
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Transfer failed',
+          message: response.message ??
+              TranslationUtils.tr('wallet_controller_transfer_failed'),
         );
         return false;
       }
@@ -448,14 +466,16 @@ class WalletController extends GetxController {
     // Common validation
     if (transferFromAccount.value.isEmpty) {
       CustomToastService.showError(
-        message: 'Please select Transfer From',
+        message: TranslationUtils.tr(
+          'wallet_controller_please_select_transfer_from',
+        ),
       );
       return false;
     }
 
     if (amount.value.isEmpty) {
       CustomToastService.showError(
-        message: 'Please Enter amount',
+        message: TranslationUtils.tr('wallet_controller_please_enter_amount'),
       );
       return false;
     }
@@ -481,12 +501,15 @@ class WalletController extends GetxController {
         print('✅ OTP sent successfully');
         isOtpSent.value = true;
         // successMessage.value = 'OTP sent successfully';
-        CustomToastService.showSuccess(message: 'OTP sent');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr('wallet_controller_otp_sent'),
+        );
       } else {
         // errorMessage.value = response.message ?? 'Failed to send OTP';
         print('❌ Failed to send OTP: ${response.message}');
         CustomToastService.showError(
-          message: response.message ?? 'Failed to send OTP',
+          message: response.message ??
+              TranslationUtils.tr('auth_controller_failed_to_send_otp'),
         );
       }
     } catch (e) {

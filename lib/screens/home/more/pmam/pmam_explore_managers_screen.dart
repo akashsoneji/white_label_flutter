@@ -7,6 +7,7 @@ import '../../../../constants/color.dart';
 import '../../../../controllers/pmam/pmam_controller.dart';
 import '../../../../models/pmam_model.dart';
 import '../../../../routes/app_pages.dart';
+import 'package:crm_app/services/language_service.dart';
 
 /// Mobile-first "Explore Fund Managers" screen.
 ///
@@ -136,7 +137,8 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
         backgroundColor: AppColors.card,
         elevation: 0,
         title: Text(
-          'Explore Fund Managers',
+          TranslationUtils.tr(
+              'pmam_explore_managers_screen_explore_fund_managers'),
           style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 16.sp,
@@ -163,38 +165,38 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
         : list.fold<double>(0, (s, m) => s + m.avgCommission) / list.length;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 4.h),
+      padding: EdgeInsetsDirectional.fromSTEB(12.w, 12.h, 12.w, 4.h),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         child: Row(
           children: [
             _heroCard(
-              label: 'Available\nManagers',
+              label: TranslationUtils.tr('pmam_available_managers'),
               value: '$total',
-              sub: 'Browse all',
+              sub: TranslationUtils.tr('pmam_browse_all'),
               icon: Icons.grid_view_rounded,
             ),
             SizedBox(width: 10.w),
             _heroCard(
-              label: 'Community\nAUM',
+              label: TranslationUtils.tr('pmam_community_aum'),
               value: _fmtMoney(aum, compact: true),
-              sub: 'Total locked',
+              sub: TranslationUtils.tr('pmam_total_locked'),
               icon: Icons.account_balance_wallet_rounded,
             ),
             SizedBox(width: 10.w),
             _heroCard(
-              label: 'Avg Gain',
+              label: TranslationUtils.tr('pmam_avg_gain'),
               value: '${gain >= 0 ? '+' : ''}${gain.toStringAsFixed(2)}%',
               valueColor: gain >= 0 ? AppColors.green : AppColors.error,
-              sub: 'Performance',
+              sub: TranslationUtils.tr('portfolio_performance'),
               icon: Icons.trending_up_rounded,
             ),
             SizedBox(width: 10.w),
             _heroCard(
-              label: 'Avg\nCommission',
+              label: TranslationUtils.tr('pmam_avg_commission'),
               value: '${commission.toStringAsFixed(2)}%',
-              sub: 'Platform avg',
+              sub: TranslationUtils.tr('pmam_platform_avg'),
               icon: Icons.percent_rounded,
             ),
           ],
@@ -296,7 +298,8 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
         style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 13.sp),
         decoration: InputDecoration(
           isDense: true,
-          hintText: 'Search manager name or code…',
+          hintText: TranslationUtils.tr(
+              'pmam_explore_managers_screen_search_manager_name_or_code'),
           hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 13.sp),
           prefixIcon: Icon(
             Icons.search,
@@ -327,20 +330,20 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
 
   Widget _buildFilterRow() {
     final filters = [
-      ('all', 'All', _c.managersList.length),
+      ('all', TranslationUtils.tr('common_all'), _c.managersList.length),
       (
         'enrolled',
-        'Enrolled',
+        TranslationUtils.tr('dc_enrolled'),
         _c.managersList.where((m) => m.isEnrolled).length,
       ),
       (
         'low_fee',
-        'Low Fee',
+        TranslationUtils.tr('pmam_low_fee'),
         _c.managersList.where((m) => m.avgCommission <= 15).length,
       ),
       (
         'featured',
-        'Active',
+        TranslationUtils.tr('chart_active'),
         _c.managersList.where((m) => m.totalAum > 0).length,
       ),
     ];
@@ -421,14 +424,14 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
     String sortLabel() {
       switch (_sortKey) {
         case 'aum':
-          return 'AUM';
+          return TranslationUtils.tr('pmam_aum');
         case 'investors':
-          return 'Investors';
+          return TranslationUtils.tr('pmam_nav_investors');
         case 'commission':
-          return 'Commission';
+          return TranslationUtils.tr('general_commission');
         case 'gain':
         default:
-          return 'Gain %';
+          return TranslationUtils.tr('pmam_gain_percent');
       }
     }
 
@@ -452,7 +455,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
                   Icon(Icons.sort, size: 14.sp, color: AppColors.textGrey),
                   SizedBox(width: 6.w),
                   Text(
-                    'Sort: ${sortLabel()}',
+                    '${TranslationUtils.tr('pmam_sort')}: ${sortLabel()}',
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
@@ -502,10 +505,26 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
 
   void _showSortSheet() {
     final options = [
-      ('gain', 'Gain %', Icons.trending_up_rounded),
-      ('aum', 'AUM', Icons.account_balance_wallet_rounded),
-      ('investors', 'Investors', Icons.group_rounded),
-      ('commission', 'Commission', Icons.percent_rounded),
+      (
+        'gain',
+        TranslationUtils.tr('pmam_gain_percent'),
+        Icons.trending_up_rounded
+      ),
+      (
+        'aum',
+        TranslationUtils.tr('pmam_aum'),
+        Icons.account_balance_wallet_rounded
+      ),
+      (
+        'investors',
+        TranslationUtils.tr('pmam_nav_investors'),
+        Icons.group_rounded
+      ),
+      (
+        'commission',
+        TranslationUtils.tr('general_commission'),
+        Icons.percent_rounded
+      ),
     ];
     showModalBottomSheet(
       context: context,
@@ -532,7 +551,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
               child: Row(
                 children: [
                   Text(
-                    'Sort by',
+                    TranslationUtils.tr('instruments_screen_sort_by'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
@@ -549,7 +568,9 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
                       _sortDesc ? Icons.arrow_downward : Icons.arrow_upward,
                       size: 14.sp,
                     ),
-                    label: Text(_sortDesc ? 'Highest first' : 'Lowest first'),
+                    label: Text(_sortDesc
+                        ? TranslationUtils.tr('pmam_highest_first')
+                        : TranslationUtils.tr('pmam_lowest_first')),
                   ),
                 ],
               ),
@@ -640,7 +661,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
           ),
           SizedBox(height: 16.h),
           Text(
-            'No managers found',
+            TranslationUtils.tr('pmam_explore_managers_screen_no_managers_found'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
@@ -649,7 +670,8 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
           ),
           SizedBox(height: 6.h),
           Text(
-            'Try adjusting your filters or search.',
+            TranslationUtils.tr(
+                'pmam_explore_managers_screen_try_adjusting_your_filters_or_search'),
             textAlign: TextAlign.center,
             style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textGrey),
           ),
@@ -681,27 +703,27 @@ class _ManagerCard extends StatelessWidget {
     final c = manager.avgCommission;
     if (c >= 35) {
       return (
-        label: 'RISK 4',
+        label: TranslationUtils.tr('pmam_risk_4'),
         bg: const Color(0xFFFFEDD5),
         fg: const Color(0xFFC2410C),
       );
     }
     if (c >= 20) {
       return (
-        label: 'RISK 3',
+        label: TranslationUtils.tr('pmam_risk_3'),
         bg: const Color(0xFFFEF9C3),
         fg: const Color(0xFFA16207),
       );
     }
     if (c >= 10) {
       return (
-        label: 'RISK 2',
+        label: TranslationUtils.tr('pmam_risk_2'),
         bg: const Color(0xFFDBEAFE),
         fg: const Color(0xFF1D4ED8),
       );
     }
     return (
-      label: 'RISK 1',
+      label: TranslationUtils.tr('pmam_risk_1'),
       bg: const Color(0xFFDCFCE7),
       fg: const Color(0xFF15803D),
     );
@@ -709,16 +731,23 @@ class _ManagerCard extends StatelessWidget {
 
   String _activeFor() {
     final raw = manager.memberSince;
-    if (raw == null || raw.isEmpty) return 'Active';
+    if (raw == null || raw.isEmpty) return TranslationUtils.tr('chart_active');
     try {
       final d = DateTime.parse(raw);
       final days = DateTime.now().difference(d).inDays;
-      if (days <= 0) return 'New';
-      if (days < 30) return 'Active ${days}D';
-      if (days < 365) return 'Active ${(days / 30).floor()}M';
-      return 'Active ${(days / 365).floor()}Y';
+      if (days <= 0) return TranslationUtils.tr('ibm_new');
+      if (days < 30) {
+        return TranslationUtils.trArgs(
+            'pmam_active_days', {'days': '$days'});
+      }
+      if (days < 365) {
+        return TranslationUtils.trArgs(
+            'pmam_active_months', {'months': '${(days / 30).floor()}'});
+      }
+      return TranslationUtils.trArgs(
+          'pmam_active_years', {'years': '${(days / 365).floor()}'});
     } catch (_) {
-      return 'Active';
+      return TranslationUtils.tr('chart_active');
     }
   }
 
@@ -827,14 +856,14 @@ class _ManagerCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _metric(
-                      'TOTAL GAIN',
+                      TranslationUtils.tr('copy_trading_total_gain'),
                       '${gain >= 0 ? '+' : ''}${gain.toStringAsFixed(0)}%',
                       gainColor,
                     ),
                   ),
                   Expanded(
                     child: _metric(
-                      'MAX DRAWDOWN',
+                      TranslationUtils.tr('pmam_max_drawdown_caps'),
                       '-${manager.maxDrawdown.toStringAsFixed(0)}%',
                       AppColors.error,
                     ),
@@ -846,14 +875,14 @@ class _ManagerCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _metric(
-                      'TOTAL P&L',
+                      TranslationUtils.tr('pmam_total_pnl_caps'),
                       '+\$${manager.totalAum.toStringAsFixed(2)}',
                       AppColors.green,
                     ),
                   ),
                   Expanded(
                     child: _metric(
-                      'MIN INVESTMENT',
+                      TranslationUtils.tr('pmam_min_investment_caps'),
                       _minInvestment(),
                       AppColors.textPrimary,
                       bold: true,
@@ -870,7 +899,7 @@ class _ManagerCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        'Fee: ',
+                        '${TranslationUtils.tr('pmam_explore_managers_screen_fee')} ',
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           color: AppColors.textGrey,
@@ -944,7 +973,10 @@ class _ManagerCard extends StatelessWidget {
                         SizedBox(width: 6.w),
                       ],
                       Text(
-                        hasInvestment ? 'My Investment' : 'View Details',
+                        hasInvestment
+                            ? TranslationUtils.tr('pmam_my_investment')
+                            : TranslationUtils.tr(
+                                'my_clients_screen_view_details'),
                         style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.onColoredBackground,
                           fontSize: 11.sp,

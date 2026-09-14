@@ -12,6 +12,7 @@ import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/home/more/copytrading/subscribe_to_plan_screen.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_master_details_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class MyCopiesScreen extends StatefulWidget {
   const MyCopiesScreen({super.key});
@@ -67,7 +68,10 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
         centerTitle: true,
-        title: Text('My Copiers', style: AppTextStyles.screenTitle),
+        title: Text(
+          TranslationUtils.tr('my_copies_screen_my_copiers'),
+          style: AppTextStyles.screenTitle,
+        ),
         leading: IconButton(
           icon: SvgPicture.asset(
             'assets/svg/ib_dashboard/home.svg',
@@ -124,7 +128,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                               color: AppColors.textPrimary,
                             ),
                             decoration: InputDecoration(
-                              hintText: 'Search copier...',
+                              hintText: TranslationUtils.tr('my_copies_screen_search_copier'),
                               hintStyle: AppTextStyles.bodyText.copyWith(
                                 fontSize: 12.sp,
                                 color: AppColors.textGrey,
@@ -159,7 +163,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                             child: DropdownButton<int?>(
                               value: controller.planFilter.value,
                               hint: Text(
-                                'All plans',
+                                TranslationUtils.tr('my_copies_screen_all_plans'),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   color: AppColors.textGrey,
@@ -184,7 +188,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                                 DropdownMenuItem<int?>(
                                   value: null,
                                   child: Text(
-                                    'All plans',
+                                    TranslationUtils.tr('my_copies_screen_all_plans'),
                                     style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp),
                                   ),
                                 ),
@@ -253,7 +257,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                                 backgroundColor: AppColors.brandPrimary,
                               ),
                               child: Text(
-                                'Retry',
+                                TranslationUtils.tr('common_retry'),
                                 style: AppTextStyles.bodyText.copyWith(color: AppColors.onColoredBackground),
                               ),
                             ),
@@ -270,7 +274,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                         padding: EdgeInsets.symmetric(vertical: 100.h),
                         alignment: Alignment.center,
                         child: Text(
-                          'No copiers found matching filters.',
+                          TranslationUtils.tr('my_copies_screen_no_copiers_found_matching_filters'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             color: AppColors.textGrey,
@@ -283,7 +287,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                   listChild = ListView.separated(
                     controller: _scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 80.h),
+                    padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 80.h),
                     itemCount:
                         allCopiers.length +
                         (controller.isLoadingMore.value ? 1 : 0),
@@ -335,21 +339,21 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
       children: [
         _summaryBox(
           boxWidth,
-          'TOTAL COPIERS',
+          TranslationUtils.tr('copy_trading_total_copiers_upper'),
           controller.summaryTotal.value.toString(),
-          'All statuses combined',
+          TranslationUtils.tr('copy_trading_all_statuses_combined'),
         ),
         _summaryBox(
           boxWidth,
-          'CAPITAL ALLOCATED',
+          TranslationUtils.tr('copy_trading_capital_allocated_upper'),
           '\$${controller.summaryTotalCapital.value.toStringAsFixed(2)}',
-          'Across all copiers (portfolio)',
+          TranslationUtils.tr('copy_trading_across_all_copiers_portfolio'),
         ),
         _summaryBox(
           boxWidth,
-          'COMBINED P&L',
+          TranslationUtils.tr('copy_trading_combined_pnl_upper'),
           '\$${controller.summaryTotalPnl.value.toStringAsFixed(2)}',
-          'Lifetime copier P&L',
+          TranslationUtils.tr('copy_trading_lifetime_copier_pnl'),
           valueColor:
               controller.summaryTotalPnl.value >= 0
                   ? AppColors.green
@@ -357,9 +361,9 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
         ),
         _summaryBox(
           boxWidth,
-          'COMMISSION PAID TO YOU',
+          TranslationUtils.tr('copy_trading_commission_paid_to_you_upper'),
           '\$${controller.summaryTotalCommissionPaid.value.toStringAsFixed(2)}',
-          'Lifetime from copiers',
+          TranslationUtils.tr('copy_trading_lifetime_from_copiers'),
         ),
       ],
     );
@@ -425,35 +429,35 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
       child: Row(
         children: [
           _statusTabItem(
-            'All',
+            TranslationUtils.tr('common_all'),
             'all',
             controller.summaryTotal.value,
             activeStatus,
           ),
           SizedBox(width: 6.w),
           _statusTabItem(
-            'Active',
+            TranslationUtils.tr('wallet_active'),
             'active',
             controller.summaryActive.value,
             activeStatus,
           ),
           SizedBox(width: 6.w),
           _statusTabItem(
-            'Pending',
+            TranslationUtils.tr('transaction_history_pending'),
             'pending',
             controller.summaryPending.value,
             activeStatus,
           ),
           SizedBox(width: 6.w),
           _statusTabItem(
-            'Paused',
+            TranslationUtils.tr('copy_trading_paused'),
             'paused',
             controller.summaryPaused.value,
             activeStatus,
           ),
           SizedBox(width: 6.w),
           _statusTabItem(
-            'Stopped / Removed',
+            TranslationUtils.tr('copy_trading_stopped_removed'),
             'stopped',
             controller.summaryStoppedOrRemoved.value,
             activeStatus,
@@ -660,37 +664,41 @@ class _CopierCardItem extends StatelessWidget {
               children: [
                 _metricBox(
                   cellWidth,
-                  'CAPITAL ALLOCATED',
+                  TranslationUtils.tr('copy_trading_capital_allocated_upper'),
                   '\$${item.capitalAmount.toStringAsFixed(2)}',
                 ),
                 _metricBox(
                   cellWidth,
-                  'COMBINED P&L',
+                  TranslationUtils.tr('copy_trading_combined_pnl_upper'),
                   '\$${item.totalPnl.toStringAsFixed(2)}',
                   valueColor:
                       item.totalPnl >= 0 ? AppColors.green : AppColors.error,
                 ),
                 _metricBox(
                   cellWidth,
-                  'COMMISSION PAID',
+                  TranslationUtils.tr('copy_trading_commission_paid_upper'),
                   '\$${item.totalCommissionPaid.toStringAsFixed(2)}',
                 ),
                 _metricBox(
                   cellWidth,
-                  'OPEN TRADES',
+                  TranslationUtils.tr('copy_trading_open_trades_upper'),
                   item.openTradesCount.toString(),
                 ),
                 _metricBox(
                   cellWidth,
-                  'METHOD',
+                  TranslationUtils.tr('copy_trading_method_upper'),
                   item.sizingMethod.replaceAll('_', ' ').toUpperCase(),
                 ),
                 _metricBox(
                   cellWidth,
-                  'LAST UPDATE',
+                  TranslationUtils.tr('copy_trading_last_update_upper'),
                   _formatDate(item.updatedAt),
                 ),
-                _metricBox(cellWidth, 'ACCOUNT', item.accountNumber),
+                _metricBox(
+                  cellWidth,
+                  TranslationUtils.tr('copy_trading_account_upper'),
+                  item.accountNumber,
+                ),
               ],
             ),
           ),
@@ -737,7 +745,7 @@ class _CopierCardItem extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'Edit Settings',
+                    TranslationUtils.tr('my_copies_screen_edit_settings'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w700,
@@ -756,7 +764,9 @@ class _CopierCardItem extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      isPaused ? 'Resume' : 'Pause',
+                      isPaused
+                          ? TranslationUtils.tr('my_plans_tab_resume')
+                          : TranslationUtils.tr('my_plans_tab_pause'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w700,
@@ -782,7 +792,7 @@ class _CopierCardItem extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'Stop Copy',
+                      TranslationUtils.tr('my_copies_screen_stop_copy'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w700,
@@ -843,12 +853,12 @@ class _CopierCardItem extends StatelessWidget {
   void _togglePauseResume(BuildContext context) {
     final actionText =
         item.status.toLowerCase() == 'paused'
-            ? 'Resume copying'
-            : 'Pause copying';
+            ? TranslationUtils.tr('my_plans_tab_resume_copying')
+            : TranslationUtils.tr('my_plans_tab_pause_copying');
     final confirmationMessage =
         item.status.toLowerCase() == 'paused'
-            ? 'Are you sure you want to resume copying for this investor?'
-            : 'Are you sure you want to pause copying for this investor? Copying will be suspended.';
+            ? TranslationUtils.tr('copy_trading_confirm_resume_copying_investor')
+            : TranslationUtils.tr('copy_trading_confirm_pause_copying_investor');
 
     showDialog(
       context: context,
@@ -859,7 +869,7 @@ class _CopierCardItem extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: Text('Cancel'),
+                child: Text(TranslationUtils.tr('general_cancel')),
               ),
               TextButton(
                 onPressed: () async {
@@ -870,20 +880,28 @@ class _CopierCardItem extends StatelessWidget {
                           : await controller.pause(item.id);
                   if (res.success) {
                     CustomToastService.showSuccess(
-                      title: 'Success',
-                      message: res.message ?? 'State updated successfully',
+                      title: TranslationUtils.tr('general_success'),
+                      message:
+                          res.message ??
+                          TranslationUtils.tr(
+                            'my_plans_tab_state_updated_successfully',
+                          ),
                     );
                   } else {
                     CustomToastService.showError(
-                      title: 'Failed',
+                      title: TranslationUtils.tr('transaction_history_failed'),
                       message:
                           res.message ??
-                          'Failed to update copier copying state',
+                          TranslationUtils.tr(
+                            'copy_trading_failed_to_update_copier_state',
+                          ),
                     );
                   }
                 },
                 child: Text(
-                  item.status.toLowerCase() == 'paused' ? 'Resume' : 'Pause',
+                  item.status.toLowerCase() == 'paused'
+                      ? TranslationUtils.tr('my_plans_tab_resume')
+                      : TranslationUtils.tr('my_plans_tab_pause'),
                   style: AppTextStyles.bodyText.copyWith(
                     color:
                         item.status.toLowerCase() == 'paused'
@@ -902,14 +920,14 @@ class _CopierCardItem extends StatelessWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: Text('Stop Copy'),
+            title: Text(TranslationUtils.tr('my_copies_screen_stop_copy')),
             content: Text(
-              'Are you sure you want to permanently stop copying for this investor? This action cannot be undone.',
+              TranslationUtils.tr('my_copies_screen_are_you_sure_you_want_to'),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: Text('Cancel'),
+                child: Text(TranslationUtils.tr('general_cancel')),
               ),
               TextButton(
                 onPressed: () async {
@@ -917,20 +935,34 @@ class _CopierCardItem extends StatelessWidget {
                   final res = await controller.stop(item.id);
                   if (res.success) {
                     CustomToastService.showSuccess(
-                      title: 'Success',
-                      message: res.message ?? 'Copier stopped successfully',
+                      title: TranslationUtils.tr('general_success'),
+                      message:
+                          res.message ??
+                          TranslationUtils.tr(
+                            'copy_trading_copier_stopped_successfully',
+                          ),
                     );
                   } else {
                     CustomToastService.showError(
-                      title: 'Failed',
-                      message: res.message ?? 'Failed to stop copier',
+                      title: TranslationUtils.tr('transaction_history_failed'),
+                      message:
+                          res.message ??
+                          TranslationUtils.tr(
+                            'copy_trading_failed_to_stop_copier',
+                          ),
                     );
                   }
                 },
-                child: Text('Stop', style: AppTextStyles.bodyText.copyWith(color: AppColors.error)),
+                child: Text(
+                  TranslationUtils.tr('investment_detail_stop'),
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: AppColors.error,
+                  ),
+                ),
               ),
             ],
           ),
     );
   }
+
 }

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:crm_app/services/pmam_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/models/pmam_model.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class PmamController extends GetxController {
   // ── Loading / Error ──
@@ -115,17 +116,23 @@ class PmamController extends GetxController {
       if (response.success) {
         managerStatus.value = 'pending';
         CustomToastService.showSuccess(
-          message: 'Manager application submitted successfully!',
+          message: TranslationUtils.tr(
+            'pmam_manager_application_submitted_successfully',
+          ),
         );
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to submit application',
+          message:
+              response.message ??
+              TranslationUtils.tr('copy_trading_failed_to_submit_application'),
         );
         return false;
       }
     } catch (e) {
-      CustomToastService.showError(message: 'Error: $e');
+      CustomToastService.showError(
+        message: '${TranslationUtils.tr('close_position_error')}: $e',
+      );
       return false;
     } finally {
       isLoading.value = false;
@@ -157,7 +164,9 @@ class PmamController extends GetxController {
         dashboardStats.value = data;
         _hydrateFromOverview(data);
       } else {
-        errorMessage.value = overviewResp.message ?? 'Failed to load dashboard';
+        errorMessage.value =
+            overviewResp.message ??
+            TranslationUtils.tr('pmam_failed_to_load_dashboard');
         _hydrateFromOverview(const {});
       }
     } catch (e) {
@@ -322,9 +331,18 @@ class PmamController extends GetxController {
       final resp = await PmamService.pausePlan(planId);
       if (resp.success) {
         _patchPlanStatus(planId, status: 'paused', isPaused: true);
-        return (ok: true, message: resp.message ?? 'Plan paused successfully.');
+        return (
+          ok: true,
+          message:
+              resp.message ??
+              TranslationUtils.tr('pmam_plan_paused_successfully'),
+        );
       }
-      return (ok: false, message: resp.message ?? 'Failed to pause plan.');
+      return (
+        ok: false,
+        message:
+            resp.message ?? TranslationUtils.tr('pmam_failed_to_pause_plan'),
+      );
     } catch (e) {
       return (ok: false, message: e.toString());
     }
@@ -346,10 +364,16 @@ class PmamController extends GetxController {
         );
         return (
           ok: true,
-          message: resp.message ?? 'Plan resumed successfully.',
+          message:
+              resp.message ??
+              TranslationUtils.tr('pmam_plan_resumed_successfully'),
         );
       }
-      return (ok: false, message: resp.message ?? 'Failed to resume plan.');
+      return (
+        ok: false,
+        message:
+            resp.message ?? TranslationUtils.tr('pmam_failed_to_resume_plan'),
+      );
     } catch (e) {
       return (ok: false, message: e.toString());
     }
@@ -366,9 +390,18 @@ class PmamController extends GetxController {
       final resp = await PmamService.updatePlan(planId, body);
       if (resp.success) {
         _patchPlanFields(planId, body);
-        return (ok: true, message: resp.message ?? 'Plan updated successfully.');
+        return (
+          ok: true,
+          message:
+              resp.message ??
+              TranslationUtils.tr('pmam_plan_updated_successfully'),
+        );
       }
-      return (ok: false, message: resp.message ?? 'Failed to update plan.');
+      return (
+        ok: false,
+        message:
+            resp.message ?? TranslationUtils.tr('pmam_failed_to_update_plan'),
+      );
     } catch (e) {
       return (ok: false, message: e.toString());
     }
@@ -407,18 +440,24 @@ class PmamController extends GetxController {
       final response = await PmamService.createPlan(body);
       if (response.success) {
         CustomToastService.showSuccess(
-          message: response.message ?? 'Plan created successfully!',
+          message:
+              response.message ??
+              TranslationUtils.tr('pmam_plan_created_successfully'),
         );
         await loadManagerDashboard();
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to create plan',
+          message:
+              response.message ??
+              TranslationUtils.tr('copy_trading_failed_to_create_plan'),
         );
         return false;
       }
     } catch (e) {
-      CustomToastService.showError(message: 'Error: $e');
+      CustomToastService.showError(
+        message: '${TranslationUtils.tr('close_position_error')}: $e',
+      );
       return false;
     } finally {
       isCreatePlanLoading.value = false;
@@ -431,18 +470,22 @@ class PmamController extends GetxController {
       final response = await PmamService.inactivatePlan(planId);
       if (response.success) {
         CustomToastService.showSuccess(
-          message: 'Plan inactivated successfully',
+          message: TranslationUtils.tr('pmam_plan_inactivated_successfully'),
         );
         await loadManagerDashboard();
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Cannot inactivate plan',
+          message:
+              response.message ??
+              TranslationUtils.tr('pmam_cannot_inactivate_plan'),
         );
         return false;
       }
     } catch (e) {
-      CustomToastService.showError(message: 'Error: $e');
+      CustomToastService.showError(
+        message: '${TranslationUtils.tr('close_position_error')}: $e',
+      );
       return false;
     } finally {
       isLoading.value = false;
@@ -495,19 +538,25 @@ class PmamController extends GetxController {
     try {
       final response = await PmamService.approveInvestorRequest(requestId);
       if (response.success) {
-        CustomToastService.showSuccess(message: 'Investor request approved');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr('pmam_investor_request_approved'),
+        );
         if (selectedPlanId.value > 0) {
           await loadInvestorRequests(selectedPlanId.value);
         }
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to approve',
+          message:
+              response.message ??
+              TranslationUtils.tr('pmam_failed_to_approve'),
         );
         return false;
       }
     } catch (e) {
-      CustomToastService.showError(message: 'Error: $e');
+      CustomToastService.showError(
+        message: '${TranslationUtils.tr('close_position_error')}: $e',
+      );
       return false;
     }
   }
@@ -516,19 +565,24 @@ class PmamController extends GetxController {
     try {
       final response = await PmamService.rejectInvestorRequest(requestId);
       if (response.success) {
-        CustomToastService.showSuccess(message: 'Investor request rejected');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr('pmam_investor_request_rejected'),
+        );
         if (selectedPlanId.value > 0) {
           await loadInvestorRequests(selectedPlanId.value);
         }
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to reject',
+          message:
+              response.message ?? TranslationUtils.tr('pmam_failed_to_reject'),
         );
         return false;
       }
     } catch (e) {
-      CustomToastService.showError(message: 'Error: $e');
+      CustomToastService.showError(
+        message: '${TranslationUtils.tr('close_position_error')}: $e',
+      );
       return false;
     }
   }
@@ -600,7 +654,8 @@ class PmamController extends GetxController {
           );
         }
       } else if (!plansResp.success) {
-        errorMessage.value = plansResp.message ?? 'Failed to load plans';
+        errorMessage.value =
+            plansResp.message ?? TranslationUtils.tr('ibm_failed_to_load_plans');
       }
 
       final enrollResp = results[1];
@@ -614,7 +669,8 @@ class PmamController extends GetxController {
         }
       } else if (!enrollResp.success) {
         errorMessage.value =
-            enrollResp.message ?? 'Failed to load enrollments';
+            enrollResp.message ??
+            TranslationUtils.tr('pmam_failed_to_load_enrollments');
       }
 
       final allocResp = results[2];
@@ -628,7 +684,8 @@ class PmamController extends GetxController {
         }
       } else if (!allocResp.success) {
         errorMessage.value =
-            allocResp.message ?? 'Failed to load open allocations';
+            allocResp.message ??
+            TranslationUtils.tr('pmam_failed_to_load_open_allocations');
       }
 
       final entriesResp = results[3];
@@ -663,7 +720,8 @@ class PmamController extends GetxController {
         myInvestments.assignAll(rows); // keep legacy binding safe
       } else if (!entriesResp.success) {
         errorMessage.value =
-            entriesResp.message ?? 'Failed to load fund entries';
+            entriesResp.message ??
+            TranslationUtils.tr('pmam_failed_to_load_fund_entries');
       }
 
       if (planId != null && results.length > 4) {
@@ -678,7 +736,10 @@ class PmamController extends GetxController {
           }
         } else if (!accountsResp.success) {
           errorMessage.value =
-              accountsResp.message ?? 'Failed to load eligible accounts';
+              accountsResp.message ??
+              TranslationUtils.tr(
+                'copy_trading_failed_to_load_eligible_accounts',
+              );
         }
       }
     } catch (e) {
@@ -699,16 +760,21 @@ class PmamController extends GetxController {
         'amount': amount,
       });
       if (resp.success) {
-        CustomToastService.showSuccess(message: resp.message ?? 'Deposit added');
+        CustomToastService.showSuccess(
+          message: resp.message ?? TranslationUtils.tr('pmam_deposit_added'),
+        );
         await loadInvestorPortal();
         return true;
       }
       CustomToastService.showError(
-        message: resp.message ?? 'Failed to add funds',
+        message:
+            resp.message ?? TranslationUtils.tr('pmam_failed_to_add_funds'),
       );
       return false;
     } catch (e) {
-      CustomToastService.showError(message: 'Error: $e');
+      CustomToastService.showError(
+        message: '${TranslationUtils.tr('close_position_error')}: $e',
+      );
       return false;
     } finally {
       isLoading.value = false;
@@ -838,7 +904,9 @@ class PmamController extends GetxController {
       tradesNetPnl.value = 0;
       tradesCommission.value = 0;
       tradesSettledPnl.value = 0;
-      CustomToastService.showError(message: 'Error: $e');
+      CustomToastService.showError(
+        message: '${TranslationUtils.tr('close_position_error')}: $e',
+      );
       if (kDebugMode) debugPrint('[PMAM] getManagerTrades exception: $e');
     } finally {
       isTradesLoading.value = false;
@@ -859,18 +927,22 @@ class PmamController extends GetxController {
       });
       if (response.success) {
         CustomToastService.showSuccess(
-          message: 'Join request submitted! Waiting for manager approval.',
+          message: TranslationUtils.tr('pmam_join_request_submitted'),
         );
         await loadInvestorPortal(planId: planId);
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to submit join request',
+          message:
+              response.message ??
+              TranslationUtils.tr('pmam_failed_to_submit_join_request'),
         );
         return false;
       }
     } catch (e) {
-      CustomToastService.showError(message: 'Error: $e');
+      CustomToastService.showError(
+        message: '${TranslationUtils.tr('close_position_error')}: $e',
+      );
       return false;
     } finally {
       isLoading.value = false;
@@ -886,17 +958,23 @@ class PmamController extends GetxController {
       isLoading.value = true;
       final response = await PmamService.unsubscribe(investorId);
       if (response.success) {
-        CustomToastService.showSuccess(message: 'Unsubscribe request accepted');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr('pmam_unsubscribe_request_accepted'),
+        );
         await loadInvestorPortal();
         return true;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to unsubscribe',
+          message:
+              response.message ??
+              TranslationUtils.tr('pmam_failed_to_unsubscribe'),
         );
         return false;
       }
     } catch (e) {
-      CustomToastService.showError(message: 'Error: $e');
+      CustomToastService.showError(
+        message: '${TranslationUtils.tr('close_position_error')}: $e',
+      );
       return false;
     } finally {
       isLoading.value = false;

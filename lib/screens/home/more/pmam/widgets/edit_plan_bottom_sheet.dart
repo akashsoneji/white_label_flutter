@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/services/language_service.dart';
 import '../../../../../constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -118,7 +119,9 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
     setState(() => _saving = false);
 
     Get.snackbar(
-      result.ok ? 'Success' : 'Error',
+      result.ok
+          ? TranslationUtils.tr('general_success')
+          : TranslationUtils.tr('general_error'),
       result.message,
       backgroundColor: result.ok
           ? AppColors.green.withValues(alpha: 0.95)
@@ -144,14 +147,14 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.r),
       ),
-      titlePadding: EdgeInsets.fromLTRB(20.w, 16.h, 8.w, 8.h),
-      contentPadding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 0),
-      actionsPadding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 12.h),
+      titlePadding: EdgeInsetsDirectional.fromSTEB(20.w, 16.h, 8.w, 8.h),
+      contentPadding: EdgeInsetsDirectional.fromSTEB(20.w, 8.h, 20.w, 0),
+      actionsPadding: EdgeInsetsDirectional.fromSTEB(12.w, 8.h, 12.w, 12.h),
       title: Row(
         children: [
           Expanded(
             child: Text(
-              'Edit plan',
+              TranslationUtils.tr('edit_plan_bottom_sheet_edit_plan'),
               style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.primary,
                 fontSize: 17.sp,
@@ -178,19 +181,22 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
                   _buildLockBanner(),
                   SizedBox(height: 16.h),
                 ],
-                _buildLabel('Plan name', required: true),
+                _buildLabel(TranslationUtils.tr('pmam_edit_plan_plan_name'),
+                    required: true),
                 SizedBox(height: 6.h),
                 _buildField(
                   controller: _name,
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) {
-                      return 'Plan name is required';
+                      return TranslationUtils.tr(
+                          'pmam_edit_plan_plan_name_is_required');
                     }
                     return null;
                   },
                 ),
                 SizedBox(height: 14.h),
-                _buildLabel('Strategy description'),
+                _buildLabel(TranslationUtils.tr(
+                    'master_plan_detail_screen_strategy_description')),
                 SizedBox(height: 6.h),
                 _buildField(
                   controller: _strategy,
@@ -198,7 +204,8 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
                   minLines: 3,
                 ),
                 SizedBox(height: 14.h),
-                _buildLabel('Risk information'),
+                _buildLabel(TranslationUtils.tr(
+                    'copy_trading_create_plan_risk_information')),
                 SizedBox(height: 6.h),
                 _buildField(
                   controller: _risk,
@@ -207,7 +214,8 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
                 ),
                 if (!_hasActiveInvestors) ...[
                   SizedBox(height: 14.h),
-                  _buildLabel('Commission %'),
+                  _buildLabel(
+                      TranslationUtils.tr('pmam_edit_plan_commission_percent')),
                   SizedBox(height: 6.h),
                   _buildField(
                     controller: _commission,
@@ -217,7 +225,8 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
                     suffix: '%',
                   ),
                   SizedBox(height: 14.h),
-                  _buildLabel('Minimum investment'),
+                  _buildLabel(TranslationUtils.tr(
+                      'trader_details_screen_minimum_investment')),
                   SizedBox(height: 6.h),
                   _buildField(
                     controller: _minInvestment,
@@ -244,7 +253,7 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
             foregroundColor: AppColors.textPrimary,
           ),
           child: Text(
-            'Cancel',
+            TranslationUtils.tr('general_cancel'),
             style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w600),
           ),
         ),
@@ -269,7 +278,7 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
                   ),
                 )
               : Text(
-                  'Save changes',
+                  TranslationUtils.tr('edit_plan_bottom_sheet_save_changes'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
@@ -294,9 +303,7 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
             SizedBox(width: 8.w),
             Expanded(
               child: Text(
-                'This plan has active investors. You can update the name '
-                'and descriptions only. To change commission or minimum '
-                'investment, all investors must unsubscribe first.',
+                TranslationUtils.tr('pmam_edit_plan_active_investors_lock'),
                 style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.error,
                   fontSize: 12.sp,

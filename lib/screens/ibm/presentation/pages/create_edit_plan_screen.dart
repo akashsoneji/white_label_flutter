@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ibm/data/ibm_api_provider.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 
 class CreateEditPlanScreen extends StatefulWidget {
@@ -63,7 +64,9 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
         if (res.success && res.data != null) {
           _parseData(res.data);
         } else {
-          _error = res.message ?? 'Failed to load plan details';
+          _error =
+              res.message ??
+              TranslationUtils.tr('ibm_failed_to_load_plan_details');
         }
       } else {
         // Create Mode
@@ -262,13 +265,17 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
   Future<void> _submit() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      CustomToastService.showError(message: 'Please enter a plan name');
+      CustomToastService.showError(
+        message: TranslationUtils.tr('ibm_please_enter_a_plan_name'),
+      );
       _tabController.animateTo(0);
       return;
     }
 
     if (_selectedGroups.isEmpty) {
-      CustomToastService.showError(message: 'Please add at least one group');
+      CustomToastService.showError(
+        message: TranslationUtils.tr('ibm_please_add_at_least_one_group'),
+      );
       return;
     }
 
@@ -352,8 +359,8 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
         CustomToastService.showSuccess(
           message:
               widget.planId == null
-                  ? 'Plan created successfully'
-                  : 'Plan updated successfully',
+                  ? TranslationUtils.tr('ibm_plan_created_successfully')
+                  : TranslationUtils.tr('ibm_plan_updated_successfully'),
         );
         if (Get.isRegistered<IbmController>()) {
           Get.find<IbmController>().fetchPlans();
@@ -361,7 +368,10 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
         }
         Get.back(result: true);
       } else {
-        CustomToastService.showError(message: res.message ?? 'Failed to save plan');
+        CustomToastService.showError(
+          message:
+              res.message ?? TranslationUtils.tr('ibm_failed_to_save_plan'),
+        );
       }
     } catch (e) {
       CustomToastService.showError(message: 'Error saving plan: $e');
@@ -387,10 +397,10 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
       appBar: AppBar(
         title: Text(
           widget.readOnly
-              ? 'View Partner Plan'
+              ? TranslationUtils.tr('ibm_view_partner_plan')
               : (widget.planId == null
-                  ? 'Create Partner Plan'
-                  : 'Edit Partner Plan'),
+                  ? TranslationUtils.tr('ibm_create_partner_plan')
+                  : TranslationUtils.tr('ibm_edit_partner_plan')),
           style: TextStyle(color: AppColors.textPrimary, fontSize: 18.sp),
         ),
         backgroundColor: AppColors.whiteColor,
@@ -403,9 +413,9 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                 labelColor: AppColors.primary,
                 unselectedLabelColor: AppColors.textSecondary,
                 indicatorColor: AppColors.primary,
-                tabs: const [
-                  Tab(text: '1 • Details'),
-                  Tab(text: '2 • Groups & Rates'),
+                tabs: [
+                  Tab(text: TranslationUtils.tr('ibm_step_1_details')),
+                  Tab(text: TranslationUtils.tr('ibm_step_2_groups_rates')),
                 ],
               ),
       ),
@@ -450,7 +460,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                       onPressed: () => Get.back(),
                       style: TextButton.styleFrom(minimumSize: Size.zero),
                       child: Text(
-                        'Cancel',
+                        TranslationUtils.tr('account_management_cancel'),
                         style: TextStyle(color: AppColors.textSecondary),
                       ),
                     ),
@@ -491,8 +501,10 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                               )
                               : Text(
                                 _tabController.index == 0
-                                    ? 'Next: Groups & Rates'
-                                    : 'Save Plan',
+                                    ? TranslationUtils.tr(
+                                      'ibm_next_groups_and_rates',
+                                    )
+                                    : TranslationUtils.tr('ibm_save_plan'),
                                 style: TextStyle(
                                   color: AppColors.whiteColor,
                                   fontWeight: FontWeight.bold,
@@ -520,7 +532,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Plan name *',
+            TranslationUtils.tr('copy_trading_create_plan_plan_name'),
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
           ),
           SizedBox(height: 8.h),
@@ -537,11 +549,14 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
               ),
             ),
             validator:
-                (val) => val == null || val.trim().isEmpty ? 'Required' : null,
+                (val) =>
+                    val == null || val.trim().isEmpty
+                        ? TranslationUtils.tr('ibm_required')
+                        : null,
           ),
           SizedBox(height: 24.h),
           Text(
-            'Description',
+            TranslationUtils.tr('common_description'),
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
           ),
           SizedBox(height: 8.h),
@@ -561,13 +576,15 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
           ),
           SizedBox(height: 24.h),
           Text(
-            'Status',
+            TranslationUtils.tr('common_status'),
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
           ),
           SizedBox(height: 8.h),
           SwitchListTile(
             title: Text(
-              _isActive ? 'Active' : 'Inactive',
+              _isActive
+                  ? TranslationUtils.tr('chart_active')
+                  : TranslationUtils.tr('wallet_inactive'),
               style: TextStyle(fontSize: 14.sp),
             ),
             value: _isActive,
@@ -602,7 +619,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
-              'Rates shown in Parent cap are the maximum you can give. You can only use groups your master plan includes.',
+              TranslationUtils.tr('ibm_rates_shown_in_parent_cap'),
               style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary),
             ),
           ),
@@ -627,7 +644,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
               padding: EdgeInsets.all(24.w),
               child: Center(
                 child: Text(
-                  'No groups available',
+                  TranslationUtils.tr('ibm_no_groups_available'),
                   style: TextStyle(color: AppColors.textSecondary),
                 ),
               ),
@@ -655,7 +672,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
               _availableCaps.isEmpty
                   ? Center(
                     child: Text(
-                      'No groups available',
+                      TranslationUtils.tr('ibm_no_groups_available'),
                       style: TextStyle(color: AppColors.textSecondary),
                     ),
                   )
@@ -725,7 +742,9 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                           color: AppColors.textPrimary,
                         ),
                         label: Text(
-                          isExpanded ? 'Close' : 'Set rates',
+                          isExpanded
+                              ? TranslationUtils.tr('bank_list_close')
+                              : TranslationUtils.tr('ibm_set_rates'),
                           style: TextStyle(color: AppColors.textPrimary),
                         ),
                       ),
@@ -738,9 +757,9 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                           },
                           style: TextButton.styleFrom(minimumSize: Size.zero),
                           icon: Icon(Icons.close, size: 16.w, color: Colors.red),
-                          label: const Text(
-                            'Remove',
-                            style: TextStyle(color: Colors.red),
+                          label: Text(
+                            TranslationUtils.tr('general_remove'),
+                            style: const TextStyle(color: Colors.red),
                           ),
                         ),
                     ],
@@ -764,7 +783,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                       color: AppColors.textPrimary,
                     ),
                     label: Text(
-                      'Add',
+                      TranslationUtils.tr('account_management_add'),
                       style: TextStyle(color: AppColors.textPrimary),
                     ),
                   ),
@@ -800,7 +819,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'REBATE PER INSTRUMENT TYPE',
+            TranslationUtils.tr('ibm_rebate_per_instrument_type'),
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 11.sp,
@@ -828,7 +847,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                 Expanded(
                   flex: 2,
                   child: Text(
-                    'PARENT CAP',
+                    TranslationUtils.tr('ibm_parent_cap'),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 10.sp,
@@ -840,7 +859,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                 Expanded(
                   flex: 3,
                   child: Text(
-                    'YOUR RATE',
+                    TranslationUtils.tr('ibm_your_rate'),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 10.sp,
@@ -852,8 +871,8 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                 Expanded(
                   flex: 2,
                   child: Text(
-                    'YOU KEEP',
-                    textAlign: TextAlign.right,
+                    TranslationUtils.tr('ibm_you_keep'),
+                    textAlign: TextAlign.end,
                     style: TextStyle(
                       fontSize: 10.sp,
                       fontWeight: FontWeight.bold,
@@ -867,7 +886,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
 
           if (categories.isEmpty)
             Text(
-              'No instrument categories found.',
+              TranslationUtils.tr('ibm_no_instrument_categories_found'),
               style: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
             )
           else
@@ -882,7 +901,9 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                   cat['category'] ??
                   cat['name'] ??
                   cat['category_name'] ??
-                  'Category $catId';
+                  TranslationUtils.trArgs('ibm_category_numbered', {
+                    'number': '$catId',
+                  });
               final double parentCap =
                   double.tryParse(
                     cat['max_allowed']?.toString() ??
@@ -975,7 +996,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
           if (symbolRates.isNotEmpty) ...[
             SizedBox(height: 20.h),
             Text(
-              'REBATE PER SYMBOL (OVERRIDES INSTRUMENT TYPE)',
+              TranslationUtils.tr('ibm_rebate_per_symbol'),
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 11.sp,
@@ -1002,7 +1023,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                   Expanded(
                     flex: 2,
                     child: Text(
-                      'PARENT CAP',
+                      TranslationUtils.tr('ibm_parent_cap'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10.sp,
@@ -1014,7 +1035,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                   Expanded(
                     flex: 3,
                     child: Text(
-                      'YOUR RATE',
+                      TranslationUtils.tr('ibm_your_rate'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10.sp,
@@ -1026,7 +1047,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                   Expanded(
                     flex: 2,
                     child: Text(
-                      'YOU KEEP',
+                      TranslationUtils.tr('ibm_you_keep'),
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         fontSize: 10.sp,
@@ -1137,7 +1158,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
 
           SizedBox(height: 20.h),
           Text(
-            'BLOCK SYMBOLS (SUB-IB WON\'T EARN ON THESE)',
+            TranslationUtils.tr('ibm_block_symbols'),
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 11.sp,
@@ -1159,7 +1180,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                     child: TextField(
                       controller: blockController,
                       decoration: InputDecoration(
-                        hintText: 'Symbol name e.g. BTCUSD',
+                        hintText: TranslationUtils.tr('ibm_symbol_name_hint'),
                         hintStyle: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
@@ -1180,7 +1201,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                     }
                   },
                   icon: Icon(Icons.block, size: 14.w, color: Colors.white),
-                  label: const Text('Block'),
+                  label: Text(TranslationUtils.tr('ibm_block')),
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size.zero,
                     backgroundColor: AppColors.primary,
@@ -1192,7 +1213,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
             ),
             SizedBox(height: 4.h),
             Text(
-              'Symbols are matched by name. Leave empty if you don\'t want to add restrictions.',
+              TranslationUtils.tr('ibm_symbols_matched_by_name'),
               style: TextStyle(fontSize: 10.sp, color: AppColors.textSecondary),
             ),
           ],

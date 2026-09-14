@@ -148,7 +148,7 @@ class _HistoryList extends StatelessWidget {
       onRefresh: () =>
           Get.find<DemoContestController>().refreshPull(),
       child: ListView.separated(
-        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 16.h, 16.w, 32.h),
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: entries.length,
         separatorBuilder: (_, __) => SizedBox(height: 14.h),
@@ -190,12 +190,12 @@ class _WinnersTab extends StatelessWidget {
       color: AppColors.primary,
       onRefresh: () => Get.find<DemoContestController>().refreshPull(),
       child: ListView(
-        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 16.h, 16.w, 32.h),
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           if (winners.isNotEmpty) ...[
             Padding(
-              padding: EdgeInsets.only(left: 4.w, bottom: 10.h),
+              padding: EdgeInsetsDirectional.only(start: 4.w, bottom: 10.h),
               child: Text(
                 languageService.tr('dc_your_wins'),
                 style: AppTextStyles.bodyText.copyWith(
@@ -219,7 +219,7 @@ class _WinnersTab extends StatelessWidget {
           ],
           if (pastWinners.isNotEmpty) ...[
             Padding(
-              padding: EdgeInsets.only(left: 4.w, bottom: 10.h),
+              padding: EdgeInsetsDirectional.only(start: 4.w, bottom: 10.h),
               child: Text(
                 languageService.tr('dc_recent_winners'),
                 style: AppTextStyles.bodyText.copyWith(

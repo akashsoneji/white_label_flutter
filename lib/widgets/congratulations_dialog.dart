@@ -9,6 +9,7 @@ import 'package:crm_app/screens/common/view_models/app_notification_controller.d
 import 'package:crm_app/screens/finance/presentation/pages/deposit_screen.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import '../services/account_websocket_service.dart';
+import '../services/language_service.dart';
 
 class CongratulationsDialog extends StatelessWidget {
   final String accountNumber;
@@ -74,7 +75,7 @@ class CongratulationsDialog extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(24.w, 36.h, 24.w, 24.h),
+              padding: EdgeInsetsDirectional.fromSTEB(24.w, 36.h, 24.w, 24.h),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -167,11 +168,16 @@ class CongratulationsDialog extends StatelessWidget {
                                       if (Get.isRegistered<
                                         AppNotificationController
                                       >()) {
+                                        final lang =
+                                            Get.find<LanguageService>();
                                         Get.find<AppNotificationController>()
                                             .showSuccess(
-                                              message:
-                                                  'Account number copied to clipboard',
-                                              title: 'Copied!',
+                                              message: lang.tr(
+                                                'congratulations_dialog_account_number_copied_to_clipboard',
+                                              ),
+                                              title: lang.tr(
+                                                'congratulations_dialog_copied',
+                                              ),
                                             );
                                       }
                                     },
@@ -339,9 +345,9 @@ class CongratulationsDialog extends StatelessWidget {
             ),
 
             // Close Button (Top Right)
-            Positioned(
+            PositionedDirectional(
               top: 16.h,
-              right: 16.w,
+              end: 16.w,
               child: GestureDetector(
                 onTap: _refreshAccountsAndNavigateBack,
                 child: Container(

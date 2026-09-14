@@ -40,7 +40,7 @@ class _BankListScreenState extends State<BankListScreen> {
         elevation: 0,
         leading: const AppBackButton(),
         title: Text(
-          'Withdrawal Method',
+          languageService.tr('withdrawal_withdrawalMethod'),
           style: AppTextStyles.heading.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -124,7 +124,7 @@ class _BankListScreenState extends State<BankListScreen> {
             ),
             SizedBox(height: 24.h),
             Text(
-              'No Withdrawal Methods',
+              languageService.tr('bank_list_screen_no_withdrawal_methods'),
               style: AppTextStyles.heading.copyWith(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w600,
@@ -133,7 +133,9 @@ class _BankListScreenState extends State<BankListScreen> {
             ),
             SizedBox(height: 8.h),
             Text(
-              'You haven\'t added any withdrawal methods yet.\nAdd your first withdrawal method to get started.',
+              languageService.tr(
+                'bank_list_screen_you_haven_added_any_withdrawal_methods',
+              ),
               textAlign: TextAlign.center,
               style: AppTextStyles.subheading.copyWith(
                 fontSize: 14.sp,
@@ -170,7 +172,7 @@ class _BankListScreenState extends State<BankListScreen> {
                 padding: EdgeInsets.zero,
               ),
               child: Text(
-                'Add Withdrawal Method',
+                languageService.tr('bank_list_screen_add_withdrawal_method'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
@@ -322,26 +324,47 @@ class _BankListScreenState extends State<BankListScreen> {
     if (methodType == 'bank') {
       // Bank method: show bankName, bankAccountNo, ifscIban, holderName, currency, relationship
       if (_hasValue(method.bankName)) {
-        detailRows.add(_buildDetailRow('Bank Name', method.bankName!));
+        detailRows.add(
+          _buildDetailRow(
+            languageService.tr('bank_list_screen_bank_name'),
+            method.bankName!,
+          ),
+        );
       }
       if (_hasValue(method.bankAccountNo)) {
         detailRows.add(
-          _buildDetailRow('Bank Account No.', method.bankAccountNo!),
+          _buildDetailRow(
+            languageService.tr('bank_list_screen_bank_account_no'),
+            method.bankAccountNo!,
+          ),
         );
       }
       if (_hasValue(method.ifscIban)) {
-        detailRows.add(_buildDetailRow('IBAN/IFSC Code', method.ifscIban!));
+        detailRows.add(
+          _buildDetailRow(
+            languageService.tr('bank_list_screen_iban_ifsc_code'),
+            method.ifscIban!,
+          ),
+        );
       }
     } else if (methodType == 'upi') {
       // UPI method: show upiAddress, holderName, currency, relationship
       if (_hasValue(method.upiAddress)) {
-        detailRows.add(_buildDetailRow('UPI Address', method.upiAddress!));
+        detailRows.add(
+          _buildDetailRow(
+            languageService.tr('bank_list_screen_upi_address'),
+            method.upiAddress!,
+          ),
+        );
       }
     } else if (methodType == 'crypto') {
       // Crypto method: show cryptoAddress, holderName, currency, relationship
       if (_hasValue(method.cryptoAddress)) {
         detailRows.add(
-          _buildDetailRow('Crypto Address', method.cryptoAddress!),
+          _buildDetailRow(
+            languageService.tr('bank_list_screen_crypto_address'),
+            method.cryptoAddress!,
+          ),
         );
       }
     }
@@ -349,14 +372,27 @@ class _BankListScreenState extends State<BankListScreen> {
     // Common fields for all methods
     if (_hasValue(method.holderName)) {
       detailRows.add(
-        _buildDetailRow('Account Holder Name', method.holderName!),
+        _buildDetailRow(
+          languageService.tr('bank_list_screen_account_holder_name'),
+          method.holderName!,
+        ),
       );
     }
     if (_hasValue(method.currency)) {
-      detailRows.add(_buildDetailRow('Currency', method.currency!));
+      detailRows.add(
+        _buildDetailRow(
+          languageService.tr('common_currency'),
+          method.currency!,
+        ),
+      );
     }
     if (_hasValue(method.cryptoNetwork)) {
-      detailRows.add(_buildDetailRow('Network', method.cryptoNetwork!));
+      detailRows.add(
+        _buildDetailRow(
+          languageService.tr('bank_list_screen_network'),
+          method.cryptoNetwork!,
+        ),
+      );
     }
 
     // Proof image — fetched with auth header, tap to open full-screen view.
@@ -368,7 +404,7 @@ class _BankListScreenState extends State<BankListScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Proof',
+                languageService.tr('bank_list_screen_proof'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
@@ -458,13 +494,15 @@ class _BankListScreenState extends State<BankListScreen> {
             accountNo.length > 4
                 ? accountNo.substring(accountNo.length - 4)
                 : accountNo;
-        return '${method.bankName ?? 'Bank'} - $last4';
+        return '${method.bankName ?? languageService.tr('withdrawal_bank')} - $last4';
       case 'upi':
         return 'UPI';
       case 'crypto':
         return 'Crypto';
       default:
-        final methodName = method.withdrawalMethod ?? 'Unknown';
+        final methodName =
+            method.withdrawalMethod ??
+            languageService.tr('bank_list_screen_unknown');
         return methodName[0].toUpperCase() + methodName.substring(1);
     }
   }
@@ -502,7 +540,7 @@ class _ProofImageViewer extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
         title: Text(
-          'Proof',
+          TranslationUtils.tr('bank_list_screen_proof'),
           style: AppTextStyles.bodyText.copyWith(color: Colors.white),
         ),
       ),

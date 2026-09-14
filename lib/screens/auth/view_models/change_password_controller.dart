@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/services/auth_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
@@ -45,7 +46,7 @@ class ChangePasswordController extends GetxController {
       if (response.success) {
         final message =
             response.data?['message'] ??
-            'Password changed successfully. Please login again.';
+            TranslationUtils.tr('change_password_controller_password_changed_login_again');
         _setSuccess(message);
 
         // Check if re-login is required
@@ -56,10 +57,10 @@ class ChangePasswordController extends GetxController {
           await _clearAllDataAndNavigateToLogin();
         }
       } else {
-        _setError(response.message ?? 'Failed to change password');
+        _setError(response.message ?? TranslationUtils.tr('change_password_controller_failed_to_change_password'));
       }
     } catch (e) {
-      _setError('Error changing password: $e');
+      _setError('${TranslationUtils.tr('change_password_controller_error_changing_password')}: $e');
       if (kDebugMode) print('ChangePasswordController: $e');
     } finally {
       _setLoading(false);

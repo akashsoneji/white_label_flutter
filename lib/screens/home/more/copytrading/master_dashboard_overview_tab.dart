@@ -1,7 +1,10 @@
+import 'dart:ui' as ui show TextDirection;
+
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_master_dashboard_controller.dart';
 import 'package:crm_app/models/copy_trading_dashboard_overview.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -94,7 +97,7 @@ class MasterDashboardOverviewTab extends StatelessWidget {
                               ),
                               SizedBox(width: 6),
                               Text(
-                                'Updating…',
+                                TranslationUtils.tr('master_dashboard_overview_tab_updating'),
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: theme.textTheme.bodySmall?.color
                                       ?.withValues(alpha: 0.6),
@@ -192,6 +195,14 @@ String _fmtDateOrLabel(String? iso, String? label) {
 // Range pills
 // ===========================================================================
 
+/// Maps a raw range preset (kept untranslated because it is sent to the API
+/// and compared against `overviewRange`) onto its localized display label.
+String _rangeChipLabel(String raw) => switch (raw) {
+  'Today' => TranslationUtils.tr('dc_range_today'),
+  'All' => TranslationUtils.tr('common_all'),
+  _ => raw,
+};
+
 class _RangePills extends StatelessWidget {
   const _RangePills({
     required this.chips,
@@ -233,7 +244,7 @@ class _RangePills extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  chip,
+                  _rangeChipLabel(chip),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color:
@@ -271,42 +282,48 @@ class _KpiGrid extends StatelessWidget {
 
     final cards = <Widget>[
       _KpiCard(
-        label: 'TOTAL AUM',
+        label: TranslationUtils.tr('pmam_manager_dashboard_screen_total_aum'),
         accent: const Color(0xFF2C5FFB),
         accentSoft: const Color(0xFFE8EEFF),
         value: _fmtMoney(aum.current),
         pill: _TrendPill(value: aum.deltaPct),
-        sub: 'Assets under management',
+        sub: TranslationUtils.tr('copy_trading_assets_under_management'),
         spark: aum.series.values,
       ),
       _KpiCard(
-        label: 'ACTIVE COPIERS',
+        label: TranslationUtils.tr('copy_trading_active_copiers_upper'),
         accent: const Color(0xFF00BFA6),
         accentSoft: const Color(0xFFD7F6F0),
         value: '${copiers.current}',
         pill: _TrendPill(value: copiers.delta, signed: true, isInt: true),
-        sub:
-            'Net new in window: ${copiers.delta > 0 ? '+' : ''}${copiers.delta}',
+        sub: TranslationUtils.trArgs('copy_trading_net_new_in_window', {
+          'value': '${copiers.delta > 0 ? '+' : ''}${copiers.delta}',
+        }),
         spark: copiers.series.values,
       ),
       _KpiCard(
-        label: 'MY EARNINGS',
+        label: TranslationUtils.tr('copy_trading_my_earnings_upper'),
         accent: const Color(0xFF1DB954),
         accentSoft: const Color(0xFFE6F8EE),
         value: _fmtMoney(earnings.current),
         sub:
             earnings.nextPayoutDate.isEmpty
-                ? 'Lifetime total credited'
-                : 'Next payout: ${_fmtMoney(earnings.nextPayoutAmount)} on ${_fmtDate(earnings.nextPayoutDate)}',
+                ? TranslationUtils.tr('copy_trading_lifetime_total_credited')
+                : TranslationUtils.trArgs('copy_trading_next_payout_on', {
+                  'amount': _fmtMoney(earnings.nextPayoutAmount),
+                  'date': _fmtDate(earnings.nextPayoutDate),
+                }),
         spark: earnings.series.values,
       ),
       _KpiCard(
-        label: 'MASTER ROI',
+        label: TranslationUtils.tr('copy_trading_master_roi_upper'),
         accent: const Color(0xFFF79009),
         accentSoft: const Color(0xFFFFF1E0),
         value: '${roi.currentPct.toStringAsFixed(2)}%',
         pill: _TrendPill(value: roi.currentPct, suffix: '%'),
-        sub: 'Benchmark: ${roi.benchmarkPct.isEmpty ? '—' : roi.benchmarkPct}',
+        sub: TranslationUtils.trArgs('copy_trading_benchmark_value', {
+          'value': roi.benchmarkPct.isEmpty ? '—' : roi.benchmarkPct,
+        }),
         spark: roi.series.values,
       ),
     ];
@@ -624,7 +641,7 @@ class _PerformanceChartCardState extends State<_PerformanceChartCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Performance overview',
+            TranslationUtils.tr('master_dashboard_overview_tab_performance_overview'),
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.textGrey,
@@ -636,21 +653,21 @@ class _PerformanceChartCardState extends State<_PerformanceChartCard> {
             child: Row(
               children: [
                 _ChartToggle(
-                  label: 'Equity',
+                  label: TranslationUtils.tr('general_equity'),
                   selected: _series == 'equity',
                   color: const Color(0xFF2C5FFB),
                   onTap: () => setState(() => _series = 'equity'),
                 ),
                 SizedBox(width: 8),
                 _ChartToggle(
-                  label: 'AUM',
+                  label: TranslationUtils.tr('pmam_aum'),
                   selected: _series == 'aum',
                   color: const Color(0xFF00BFA6),
                   onTap: () => setState(() => _series = 'aum'),
                 ),
                 SizedBox(width: 8),
                 _ChartToggle(
-                  label: 'Net P/L',
+                  label: TranslationUtils.tr('meta_trade_net_pl'),
                   selected: _series == 'pnl',
                   color: const Color(0xFF1DB954),
                   onTap: () => setState(() => _series = 'pnl'),
@@ -672,7 +689,7 @@ class _PerformanceChartCardState extends State<_PerformanceChartCard> {
                     )
                     : Center(
                       child: Text(
-                        'No performance data for this range',
+                        TranslationUtils.tr('master_dashboard_overview_tab_no_performance_data_for_this_range'),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.textTheme.bodySmall?.color?.withValues(
                             alpha: 0.6,
@@ -829,21 +846,21 @@ class _ChartXAxis extends StatelessWidget {
   String _short(String raw) {
     final dt = DateTime.tryParse(raw);
     if (dt == null) return raw;
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+    const monthKeys = [
+      'month_short_jan',
+      'month_short_feb',
+      'month_short_mar',
+      'month_short_apr',
+      'month_short_may',
+      'month_short_jun',
+      'month_short_jul',
+      'month_short_aug',
+      'month_short_sep',
+      'month_short_oct',
+      'month_short_nov',
+      'month_short_dec',
     ];
-    final mm = months[dt.month - 1];
+    final mm = TranslationUtils.tr(monthKeys[dt.month - 1]);
     final dd = dt.day.toString().padLeft(2, '0');
     return '$mm $dd';
   }
@@ -917,7 +934,7 @@ class _CopierHealthCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Copier health',
+            TranslationUtils.tr('master_dashboard_overview_tab_copier_health'),
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -955,19 +972,19 @@ class _CopierHealthCard extends StatelessWidget {
                   children: [
                     _LegendDot(
                       color: const Color(0xFF1DB954),
-                      label: 'Active',
+                      label: TranslationUtils.tr('wallet_active'),
                       value: health.active,
                     ),
                     SizedBox(height: 6),
                     _LegendDot(
                       color: const Color(0xFFF79009),
-                      label: 'Paused',
+                      label: TranslationUtils.tr('copy_trading_paused'),
                       value: health.paused,
                     ),
                     SizedBox(height: 6),
                     _LegendDot(
                       color: const Color(0xFFE5484D),
-                      label: 'Stopped',
+                      label: TranslationUtils.tr('copy_trading_stopped'),
                       value: health.stopped,
                     ),
                   ],
@@ -980,25 +997,25 @@ class _CopierHealthCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _CopierStat(
-                  label: 'NEW (WINDOW)',
+                  label: TranslationUtils.tr('copy_trading_new_window_upper'),
                   value: '${health.newInWindow}',
                 ),
               ),
               Expanded(
                 child: _CopierStat(
-                  label: 'CHURNED',
+                  label: TranslationUtils.tr('copy_trading_churned_upper'),
                   value: '${health.churnedInWindow}',
                 ),
               ),
               Expanded(
                 child: _CopierStat(
-                  label: 'AVG AGE',
+                  label: TranslationUtils.tr('copy_trading_avg_age_upper'),
                   value: _avgAgeLabel(health.avgAgeDays),
                 ),
               ),
               Expanded(
                 child: _CopierStat(
-                  label: 'RETENTION',
+                  label: TranslationUtils.tr('copy_trading_retention_upper'),
                   value: '${health.retentionPct.toStringAsFixed(0)}%',
                 ),
               ),
@@ -1138,7 +1155,7 @@ class _PlanPerformanceCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Plan performance',
+            TranslationUtils.tr('master_dashboard_overview_tab_plan_performance'),
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -1149,7 +1166,7 @@ class _PlanPerformanceCard extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
               child: Text(
-                'No plans yet',
+                TranslationUtils.tr('master_dashboard_overview_tab_no_plans_yet'),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.textTheme.bodyMedium?.color?.withValues(
                     alpha: 0.6,
@@ -1222,13 +1239,16 @@ class _PlanRow extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Text(
-              '${positive ? '+' : ''}${plan.roiPct.toStringAsFixed(2)}%',
-              textAlign: TextAlign.right,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: _roiColor,
-                fontFeatures: [FontFeature.tabularFigures()],
+            child: Directionality(
+              textDirection: ui.TextDirection.ltr,
+              child: Text(
+                '${positive ? '+' : ''}${plan.roiPct.toStringAsFixed(2)}%',
+                textAlign: TextAlign.end,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: _roiColor,
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
               ),
             ),
           ),
@@ -1256,7 +1276,7 @@ class _PayoutsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Payouts',
+            TranslationUtils.tr('ibm_payouts'),
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -1267,14 +1287,14 @@ class _PayoutsCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _PayoutStat(
-                  label: 'EARNED (WINDOW)',
+                  label: TranslationUtils.tr('copy_trading_earned_window_upper'),
                   value: _fmtMoney(payouts.earnedInWindow),
                 ),
               ),
               SizedBox(width: 10),
               Expanded(
                 child: _PayoutStat(
-                  label: 'PENDING',
+                  label: TranslationUtils.tr('copy_trading_pending_upper'),
                   value: _fmtMoney(payouts.pending),
                 ),
               ),
@@ -1282,7 +1302,7 @@ class _PayoutsCard extends StatelessWidget {
           ),
           SizedBox(height: 14),
           Text(
-            'UPCOMING',
+            TranslationUtils.tr('copy_trading_upcoming_upper'),
             style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w700,
               letterSpacing: 0.6,
@@ -1294,7 +1314,7 @@ class _PayoutsCard extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 6),
               child: Text(
-                'No upcoming payouts.',
+                TranslationUtils.tr('master_dashboard_overview_tab_no_upcoming_payouts'),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: AppColors.textPrimary,
                 ),
@@ -1304,7 +1324,7 @@ class _PayoutsCard extends StatelessWidget {
             ...payouts.upcoming.map((u) => _PayoutRow(item: u)),
           SizedBox(height: 10),
           Text(
-            'RECENT',
+            TranslationUtils.tr('copy_trading_recent_upper'),
             style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w700,
               letterSpacing: 0.6,
@@ -1316,7 +1336,7 @@ class _PayoutsCard extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 6),
               child: Text(
-                'No recent payouts.',
+                TranslationUtils.tr('master_dashboard_overview_tab_no_recent_payouts'),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.textTheme.bodySmall?.color?.withValues(
                     alpha: 0.6,
@@ -1441,7 +1461,7 @@ class _RecentTradesCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Recent trades',
+                  TranslationUtils.tr('master_dashboard_overview_tab_recent_trades'),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -1449,7 +1469,7 @@ class _RecentTradesCard extends StatelessWidget {
                 ),
               ),
               Text(
-                'Auto-refresh 15s',
+                TranslationUtils.tr('master_dashboard_overview_tab_auto_refresh_15s'),
                 style: AppTextStyles.bodyText.copyWith(
                   color: Color(0xFF2C5FFB),
                   fontSize: 12,
@@ -1463,7 +1483,7 @@ class _RecentTradesCard extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
               child: Text(
-                'No trades yet',
+                TranslationUtils.tr('master_dashboard_overview_tab_no_trades_yet'),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.textTheme.bodyMedium?.color?.withValues(
                     alpha: 0.6,
@@ -1595,7 +1615,7 @@ class _RiskAlertsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Risk alerts',
+            TranslationUtils.tr('master_dashboard_overview_tab_risk_alerts'),
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -1619,7 +1639,7 @@ class _RiskAlertsCard extends StatelessWidget {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'All clear. No risk alerts in this range.',
+                      TranslationUtils.tr('master_dashboard_overview_tab_all_clear_no_risk_alerts_in'),
                       style: theme.textTheme.bodyMedium,
                     ),
                   ),
@@ -1758,12 +1778,16 @@ class _EmptyState extends StatelessWidget {
           children: [
             Icon(Icons.bar_chart_rounded, size: 48),
             SizedBox(height: 8),
-            Text('No overview data available'),
+            Text(
+              TranslationUtils.tr(
+                'master_dashboard_overview_tab_no_overview_data_available',
+              ),
+            ),
             SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: Icon(Icons.refresh_rounded),
-              label: Text('Retry'),
+              label: Text(TranslationUtils.tr('common_retry')),
             ),
           ],
         ),

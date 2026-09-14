@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 import 'dart:async';
 import '../../routes/app_pages.dart';
 import '../../constants/color.dart';
+import '../../services/language_service.dart';
 import '../../widgets/app_back_button.dart';
 
 class OrderConfirmationScreen extends StatefulWidget {
@@ -142,11 +143,11 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   String _getOrderTypeDisplay() {
     final type = widget.orderType.toLowerCase();
     if (type == 'buy' || type == '0' || type == '2' || type == '4') {
-      return 'market buy';
+      return TranslationUtils.tr('order_confirmation_market_buy');
     } else if (type == 'sell' || type == '1' || type == '3' || type == '5') {
-      return 'market sell';
+      return TranslationUtils.tr('order_confirmation_market_sell');
     }
-    return 'market order';
+    return TranslationUtils.tr('general_market_order');
   }
 
   String _getSymbolDisplay() {
@@ -158,13 +159,14 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     final symbol = _getSymbolDisplay();
     // Map common symbols to descriptions
     final descriptions = {
-      'EURUSD': 'Euro vs US Dollar',
-      'GBPUSD': 'British Pound vs US Dollar',
-      'USDJPY': 'US Dollar vs Japanese Yen',
-      'XAUUSD': 'Gold vs US Dollar',
-      'ES35': 'ES35 Index',
+      'EURUSD': TranslationUtils.tr('symbol_desc_eurusd'),
+      'GBPUSD': TranslationUtils.tr('symbol_desc_gbpusd'),
+      'USDJPY': TranslationUtils.tr('symbol_desc_usdjpy'),
+      'XAUUSD': TranslationUtils.tr('symbol_desc_xauusd'),
+      'ES35': TranslationUtils.tr('symbol_desc_es35'),
     };
-    return descriptions[symbol] ?? '$symbol Pair';
+    return descriptions[symbol] ??
+        TranslationUtils.trArgs('symbol_desc_pair', {'symbol': symbol});
   }
 
   @override
@@ -199,7 +201,9 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     // Handle both double and string types
     final priceDisplay =
         widget.isPlacing
-            ? 'Placing...' // Show loading state
+            ? TranslationUtils.tr(
+              'order_confirmation_placing',
+            ) // Show loading state
             : (() {
               // ALWAYS extract fresh from orderData first (most reliable source)
               final orderDataPrice =
@@ -312,7 +316,9 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                       // Order details
                       Text(
                         widget.isPlacing
-                            ? 'Placing order...'
+                            ? TranslationUtils.tr(
+                              'order_confirmation_placing_order',
+                            )
                             : '#$orderTicket ${_getOrderTypeDisplay()} ${widget.volume.toStringAsFixed(2)} ${widget.symbol} at',
                         textAlign: TextAlign.center,
                         style: AppTextStyles.bodyText.copyWith(
@@ -350,7 +356,10 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                         SizedBox(height: 32.h),
                         // Auto-navigate countdown
                         Text(
-                          'Redirecting to trade screen in $_remainingSeconds seconds...',
+                          TranslationUtils.trArgs(
+                            'order_confirmation_redirecting_in_seconds',
+                            {'seconds': '$_remainingSeconds'},
+                          ),
                           textAlign: TextAlign.center,
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,

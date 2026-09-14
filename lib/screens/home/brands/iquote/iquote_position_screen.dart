@@ -205,7 +205,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
 
         return Container(
           width: double.infinity,
-          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
+padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 12.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -426,8 +426,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         buildItem('trade_metric_profit', profit.toStringAsFixed(2)),
         buildItem('trade_metric_deposit', deposit.toStringAsFixed(2)),
         buildItem('trade_metric_withdrawal', withdrawal.toStringAsFixed(2)),
-        buildItem('Swap', swap.toStringAsFixed(2)),
-        buildItem('Commissions', commission.toStringAsFixed(2)),
+        buildItem('general_swap', swap.toStringAsFixed(2)),
+        buildItem('iquote_position_commissions', commission.toStringAsFixed(2)),
         buildItem('trade_metric_balance', balance.toStringAsFixed(2)),
       ];
     } else {
@@ -466,7 +466,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         child: Row(
           children: [
             Text(
-              'From Real',
+              TranslationUtils.tr('iquote_position_from_real'),
               style: TextStyle(color: AppColors.textPrimary, fontSize: 12.sp),
             ),
             SizedBox(width: 12.w),
@@ -534,21 +534,21 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         return Row(
           children: [
             _tabText(
-              'Position',
+              TranslationUtils.tr('nav_position'),
               selected == 0,
               () => tradingController.setSelectedTab(0),
               count: positionCount,
             ),
             SizedBox(width: 28.w),
             _tabText(
-              'Pending',
+              TranslationUtils.tr('iquote_position_pending'),
               selected == 1,
               () => tradingController.setSelectedTab(1),
               count: pendingCount,
             ),
             SizedBox(width: 28.w),
             _tabText(
-              'History',
+              TranslationUtils.tr('dashboard_history'),
               selected == 2,
               () => tradingController.setSelectedTab(2),
             ),
@@ -664,13 +664,13 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
           final periodLabel = _periodLabel(period, start, end);
           final summary = <String>[
             periodLabel,
-            if (direction != 'All') direction,
+            if (direction != 'All') _directionLabel(direction),
             if (!hasAllSymbols && symbolCount > 0)
-              '$symbolCount symbol${symbolCount == 1 ? '' : 's'}',
+              '$symbolCount ${symbolCount == 1 ? TranslationUtils.tr('iquote_position_symbol') : TranslationUtils.tr('iquote_position_symbols')}',
           ].join('  •  ');
 
           return Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 6.h),
+padding: EdgeInsetsDirectional.fromSTEB(16.w, 10.h, 16.w, 6.h),
             child: InkWell(
               onTap: _openHistoryFilterSheet,
               borderRadius: BorderRadius.circular(12.r),
@@ -709,7 +709,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                           Row(
                             children: [
                               Text(
-                                'History filter',
+                                TranslationUtils.tr(
+                                  'iquote_position_history_filter',
+                                ),
                                 style: TextStyle(
                                   color: AppColors.textSecondary,
                                   fontSize: 11.sp,
@@ -769,31 +771,46 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     });
   }
 
+  /// Display-only label for a raw direction filter value ('Buy'/'Sell'/'All').
+  String _directionLabel(String direction) {
+    switch (direction) {
+      case 'Buy':
+        return TranslationUtils.tr('general_buy');
+      case 'Sell':
+        return TranslationUtils.tr('general_sell');
+      default:
+        return TranslationUtils.tr('common_all');
+    }
+  }
+
   String _periodLabel(String period, DateTime? start, DateTime? end) {
     switch (period) {
       case 'week':
-        return 'Last 7 days';
+        return TranslationUtils.tr('ibm_last_7_days');
       case 'month':
-        return 'Last month';
+        return TranslationUtils.tr('iquote_position_last_month');
       case 'threeMonth':
-        return 'Last 3 months';
+        return TranslationUtils.tr('iquote_position_last_3_months');
       case 'custom':
         if (start != null && end != null) {
           return '${_shortDate(start)} — ${_shortDate(end)}';
         }
-        return 'Custom range';
+        return TranslationUtils.tr('ibm_custom_range');
       case 'today':
       default:
-        return 'Today';
+        return TranslationUtils.tr('dc_range_today');
     }
   }
 
   String _shortDate(DateTime d) {
     const m = [
-      'Jan','Feb','Mar','Apr','May','Jun',
-      'Jul','Aug','Sep','Oct','Nov','Dec'
+      'month_short_jan','month_short_feb','month_short_mar',
+      'month_short_apr','month_short_may','month_short_jun',
+      'month_short_jul','month_short_aug','month_short_sep',
+      'month_short_oct','month_short_nov','month_short_dec'
     ];
-    return '${d.day.toString().padLeft(2, '0')} ${m[(d.month - 1).clamp(0, 11)]}';
+    final month = TranslationUtils.tr(m[(d.month - 1).clamp(0, 11)]);
+    return '${d.day.toString().padLeft(2, '0')} $month';
   }
 
   void _openHistoryFilterSheet() {
@@ -846,7 +863,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
           },
           child: ListView.separated(
             controller: _scrollController,
-            padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 90.h),
+padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 90.h),
             itemCount:
                 positions.length +
                 (controller.hasMoreHistoryPages && selectedTab == 2 ? 1 : 0),
@@ -889,10 +906,10 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     final tab = tradingController.selectedTab;
     final message =
         tab == 1
-            ? 'No Pending Orders'
+            ? TranslationUtils.tr('iquote_position_no_pending_orders')
             : tab == 2
-            ? 'No Trade History'
-            : 'No Open Positions';
+            ? TranslationUtils.tr('iquote_position_no_trade_history')
+            : TranslationUtils.tr('pmam_fund_manager_view_no_open_positions');
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -960,7 +977,11 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 closeTime: position.closeTime,
                 closePrice: position.currentPrice,
                 closingMethod:
-                    position.closeTime.isNotEmpty ? 'Closed by Trader' : '',
+                    position.closeTime.isNotEmpty
+                        ? TranslationUtils.tr(
+                          'iquote_position_closed_by_trader',
+                        )
+                        : '',
                 swap: PrecisionHelper.formatPnL(position.swap),
                 commission: position.commission.toString(),
                 takeProfit: position.takeProfit,
@@ -981,7 +1002,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         }
       },
       child: Container(
-        padding: EdgeInsets.fromLTRB(10.w, 5.h, 4.w, 5.h),
+padding: EdgeInsetsDirectional.fromSTEB(10.w, 5.h, 4.w, 5.h),
         decoration: BoxDecoration(
           color: _cardColor,
           borderRadius: BorderRadius.circular(8.r),
@@ -1000,7 +1021,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                     borderRadius: BorderRadius.circular(3.r),
                   ),
                   child: Text(
-                    isBuy ? 'Buy' : 'Sell',
+                    isBuy
+                        ? TranslationUtils.tr('general_buy')
+                        : TranslationUtils.tr('general_sell'),
                     style: TextStyle(
                       color: isBuy ? _green : _red,
                       fontSize: 9.sp,
@@ -1048,7 +1071,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                       }
                     },
                     child: Padding(
-                      padding: EdgeInsets.only(left: 4.w, right: 2.w),
+padding: EdgeInsetsDirectional.only(start: 4.w, end: 2.w),
                       child: Icon(
                         Icons.close_rounded,
                         color: AppColors.textPrimary,
@@ -1242,14 +1265,18 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: const Text('Close Position'),
+                title: Text(
+                  TranslationUtils.tr('iquote_position_close_position'),
+                ),
                 onTap: () {
                   Get.back();
                   Get.to(() => ClosePositionScreen(position: position));
                 },
               ),
               ListTile(
-                title: const Text('Edit Order'),
+                title: Text(
+                  TranslationUtils.tr('edit_order_screen_edit_order'),
+                ),
                 onTap: () {
                   Get.back();
                   Get.to(() => EditOrderScreen(position: position));
@@ -1298,7 +1325,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   Padding(
                     padding: EdgeInsets.all(16.w),
                     child: Text(
-                      'Which positions would you like to close at market prices?',
+                      TranslationUtils.tr('iquote_position_close_which_prompt'),
                       style: AppTextStyles.heading.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w500,
@@ -1317,7 +1344,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                             _buildCloseOption(
                               tradingController,
                               'all_currently_open',
-                              'All currently open',
+                              TranslationUtils.tr(
+                                'iquote_position_all_currently_open',
+                              ),
                               () => tradingController.getTotalProfitLoss(),
                               selectedOption == 'all_currently_open',
                               (value) => setState(() => selectedOption = value),
@@ -1325,7 +1354,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                             _buildCloseOption(
                               tradingController,
                               'all_profitable',
-                              'All profitable',
+                              TranslationUtils.tr(
+                                'iquote_position_all_profitable',
+                              ),
                               () => tradingController
                                   .getTotalProfitableProfitLoss(),
                               selectedOption == 'all_profitable',
@@ -1334,7 +1365,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                             _buildCloseOption(
                               tradingController,
                               'all_losing',
-                              'All losing',
+                              TranslationUtils.tr('iquote_position_all_losing'),
                               () => tradingController.getTotalLosingProfitLoss(),
                               selectedOption == 'all_losing',
                               (value) => setState(() => selectedOption = value),
@@ -1342,7 +1373,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                             _buildCloseOption(
                               tradingController,
                               'all_long',
-                              'All Long',
+                              TranslationUtils.tr('iquote_position_all_long'),
                               () => tradingController.getTotalLongProfitLoss(),
                               selectedOption == 'all_long',
                               (value) => setState(() => selectedOption = value),
@@ -1350,7 +1381,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                             _buildCloseOption(
                               tradingController,
                               'all_short',
-                              'All Short',
+                              TranslationUtils.tr('iquote_position_all_short'),
                               () => tradingController.getTotalShortProfitLoss(),
                               selectedOption == 'all_short',
                               (value) => setState(() => selectedOption = value),
@@ -1362,7 +1393,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   ),
                   SafeArea(
                     child: Padding(
-                      padding: EdgeInsets.only(left: 16.w, right: 16.w),
+padding: EdgeInsetsDirectional.only(start: 16.w, end: 16.w),
                       child: Row(
                         children: [
                           Expanded(
@@ -1378,7 +1409,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                                 minimumSize: Size(double.infinity, 40.h),
                               ),
                               child: Text(
-                                'Cancel',
+                                TranslationUtils.tr('account_management_cancel'),
                                 style: AppTextStyles.label.copyWith(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w600,
@@ -1402,12 +1433,19 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                               if (isPendingTab) {
                                 final count =
                                     tradingController.pendingPositions.length;
+                                final orderWord = count != 1
+                                    ? TranslationUtils.tr(
+                                        'iquote_position_orders',
+                                      )
+                                    : TranslationUtils.tr(
+                                        'iquote_position_order',
+                                      );
                                 buttonText =
-                                    'Confirm ($count order${count != 1 ? 's' : ''})';
+                                    '${TranslationUtils.tr('confirm')} ($count $orderWord)';
                               } else {
-                                buttonText = isPositive
-                                    ? 'Confirm (+\$${PrecisionHelper.formatPnL(pnl)})'
-                                    : 'Confirm (\$${PrecisionHelper.formatPnL(pnl)})';
+                                final sign = isPositive ? '+' : '';
+                                buttonText =
+                                    '${TranslationUtils.tr('confirm')} ($sign\$${PrecisionHelper.formatPnL(pnl)})';
                               }
 
                               return ElevatedButton(
@@ -1568,8 +1606,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
 
     if (activeAccount == null) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'No active account found',
+        title: TranslationUtils.tr('general_error'),
+        message: TranslationUtils.tr('trade_no_active_account'),
       );
       return;
     }
@@ -1618,8 +1656,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     } catch (e) {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Failed to close positions: ${e.toString()}',
-          title: 'Error',
+          message:
+              '${TranslationUtils.tr('iquote_position_failed_to_close_positions')}: ${e.toString()}',
+          title: TranslationUtils.tr('general_error'),
         );
       }
     }
@@ -1653,13 +1692,16 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Padding(
-                padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 16.h),
+padding: EdgeInsetsDirectional.fromSTEB(18.w, 18.h, 18.w, 16.h),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Close $symbol positions at market price?',
+                      TranslationUtils.trArgs(
+                        'iquote_position_close_symbol_at_market',
+                        {'symbol': symbol},
+                      ),
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 16.sp,
@@ -1681,7 +1723,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                             borderRadius: BorderRadius.circular(4.r),
                           ),
                           child: Text(
-                            isBuy ? 'Buy' : 'Sell',
+                            isBuy
+                                ? TranslationUtils.tr('general_buy')
+                                : TranslationUtils.tr('general_sell'),
                             style: TextStyle(
                               color: isBuy ? _green : _red,
                               fontSize: 12.sp,
@@ -1705,7 +1749,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                     Row(
                       children: [
                         Text(
-                          '${fresh.volume}Lot',
+                          '${fresh.volume}${TranslationUtils.tr('scratch_card_screen_lot')}',
                           style: TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 13.sp,
@@ -1763,7 +1807,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                                 ),
                               ),
                               child: Text(
-                                'Cancel',
+                                TranslationUtils.tr('account_management_cancel'),
                                 style: TextStyle(
                                   color: _accent,
                                   fontSize: 14.sp,
@@ -1791,7 +1835,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                                 elevation: 0,
                               ),
                               child: Text(
-                                'Confirm',
+                                TranslationUtils.tr('confirm'),
                                 style: TextStyle(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w700,
@@ -1823,8 +1867,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       final activeAccount = accountController.activeMT5Account;
       if (activeAccount == null) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'No active account found',
+          title: TranslationUtils.tr('general_error'),
+          message: TranslationUtils.tr('trade_no_active_account'),
         );
         return;
       }
@@ -1835,8 +1879,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       );
     } catch (e) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to close position: $e',
+        title: TranslationUtils.tr('general_error'),
+        message:
+            '${TranslationUtils.tr('iquote_position_failed_to_close_position')}: $e',
       );
     }
   }
@@ -1864,10 +1909,10 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             children: [
               // Title
               Padding(
-                padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 14.h),
+padding: EdgeInsetsDirectional.fromSTEB(18.w, 18.h, 18.w, 14.h),
                 child: Center(
                   child: Text(
-                    'Cancel pending',
+                    TranslationUtils.tr('iquote_position_cancel_pending'),
                     style: TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 16.sp,
@@ -1878,12 +1923,14 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
               ),
               Divider(color: AppColors.divider, height: 1),
               Padding(
-                padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 16.h),
+padding: EdgeInsetsDirectional.fromSTEB(18.w, 16.h, 18.w, 16.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'You will cancel Pending Order',
+                      TranslationUtils.tr(
+                        'iquote_position_you_will_cancel_pending_order',
+                      ),
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 14.sp,
@@ -1907,7 +1954,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                                 ),
                               ),
                               child: Text(
-                                'Cancel',
+                                TranslationUtils.tr('account_management_cancel'),
                                 style: TextStyle(
                                   color: _accent,
                                   fontSize: 14.sp,
@@ -1941,7 +1988,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Text(
-                                  'Cancel pending',
+                                  TranslationUtils.tr(
+                                    'iquote_position_cancel_pending',
+                                  ),
                                   maxLines: 1,
                                   softWrap: false,
                                   overflow: TextOverflow.visible,
@@ -1975,8 +2024,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       final activeAccount = accountController.activeMT5Account;
       if (activeAccount == null) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'No active account found',
+          title: TranslationUtils.tr('general_error'),
+          message: TranslationUtils.tr('trade_no_active_account'),
         );
         return;
       }
@@ -1987,8 +2036,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       );
     } catch (e) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to cancel order: $e',
+        title: TranslationUtils.tr('general_error'),
+        message:
+            '${TranslationUtils.tr('iquote_position_failed_to_cancel_order')}: $e',
       );
     }
   }
@@ -2035,7 +2085,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 20.h),
+padding: EdgeInsetsDirectional.fromSTEB(14.w, 10.h, 14.w, 20.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -2057,7 +2107,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
                 ];
                 if (accounts.isEmpty) {
                   return Text(
-                    'No accounts linked',
+                    TranslationUtils.tr('iquote_position_no_accounts_linked'),
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 14.sp,
@@ -2153,7 +2203,7 @@ class _AccountRow extends StatelessWidget {
       borderRadius: BorderRadius.circular(10.r),
       child: Container(
         margin: EdgeInsets.only(bottom: 10.h),
-        padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 10.h),
+padding: EdgeInsetsDirectional.fromSTEB(10.w, 10.h, 10.w, 10.h),
         decoration: BoxDecoration(
           color:
               isActive ? AppColors.primary.withOpacity(0.10) : AppColors.card,
@@ -2237,7 +2287,7 @@ class _AccountRow extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'Eq: \$${equity.toStringAsFixed(2)} • P&L: ${profit >= 0 ? '+' : '-'}\$${profit.abs().toStringAsFixed(2)}',
+                  '${TranslationUtils.tr('iquote_position_eq_short')}: \$${equity.toStringAsFixed(2)} • ${TranslationUtils.tr('iquote_position_pnl_short')}: ${profit >= 0 ? '+' : '-'}\$${profit.abs().toStringAsFixed(2)}',
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 12.sp,
@@ -2289,7 +2339,7 @@ class _AccountRow extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          'Deposit',
+                          TranslationUtils.tr('common_deposit'),
                           style: TextStyle(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w700,
@@ -2315,7 +2365,7 @@ class _AccountRow extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          'Withdraw',
+                          TranslationUtils.tr('dashboard_withdraw'),
                           style: TextStyle(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w700,
@@ -2341,7 +2391,7 @@ class _AccountRow extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'Switch',
+                    TranslationUtils.tr('iquote_position_switch'),
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w700,

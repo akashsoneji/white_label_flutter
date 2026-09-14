@@ -90,7 +90,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
         }
 
         return SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(
+          padding: EdgeInsetsDirectional.fromSTEB(
             16.w,
             8.h,
             16.w,
@@ -229,8 +229,8 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                   color: AppColors.primary,
                 ),
               ),
-              Positioned(
-                right: 0,
+              PositionedDirectional(
+                end: 0,
                 bottom: 0,
                 child: Container(
                   padding: EdgeInsets.all(2.w),
@@ -318,7 +318,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(left: 4.w, bottom: 8.h),
+          padding: EdgeInsetsDirectional.only(start: 4.w, bottom: 8.h),
           child: Text(
             title.toUpperCase(),
             style: AppTextStyles.bodyText.copyWith(

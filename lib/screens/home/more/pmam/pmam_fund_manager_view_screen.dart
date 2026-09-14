@@ -11,6 +11,7 @@ import '../../../../controllers/pmam/pmam_controller.dart';
 import '../../../../widgets/app_select_field.dart';
 import '../../../../widgets/common_loading_widget.dart';
 import '../../../../widgets/app_svg_back_button.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class PmamFundManagerViewScreen extends StatefulWidget {
   const PmamFundManagerViewScreen({super.key});
@@ -179,8 +180,8 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
   void _showInvestSheet(BuildContext btnCtx) {
     if (_selectedPlan == null) {
       Get.snackbar(
-        'Not Available',
-        'This manager has no active plans to invest in.',
+        TranslationUtils.tr('general_not_available'),
+        TranslationUtils.tr('pmam_no_active_plans_to_invest'),
         backgroundColor: Colors.orange,
         colorText: AppColors.onColoredBackground,
       );
@@ -253,12 +254,13 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                 children: [
                   // ── Header ──
                   Padding(
-                    padding: EdgeInsets.fromLTRB(20.w, 16.h, 12.w, 12.h),
+                    padding: EdgeInsetsDirectional.fromSTEB(20.w, 16.h, 12.w, 12.h),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Invest in Plan',
+                            TranslationUtils.tr(
+                                'pmam_fund_manager_view_invest_in_plan'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w800,
@@ -288,7 +290,8 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                       children: [
                         // ── Select Plan ──
                         Text(
-                          'Select Plan',
+                          TranslationUtils.tr(
+                              'pmam_fund_manager_view_select_plan'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
@@ -299,8 +302,9 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                         if (_plans.length > 1)
                           AppSelectField<Map<String, dynamic>>(
                             value: sheetPlan,
-                            hint: 'Select a plan',
-                            sheetTitle: 'Select Plan',
+                          hint: TranslationUtils.tr('pmam_select_a_plan'),
+                          sheetTitle: TranslationUtils.tr(
+                              'pmam_fund_manager_view_select_plan'),
                             backgroundColor: AppColors.card,
                             valueEquals: (a, b) =>
                                 a['id'].toString() == b['id'].toString(),
@@ -311,7 +315,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                               return AppSelectOption<Map<String, dynamic>>(
                                 value: p,
                                 title:
-                                    '$pName - ${pComm.toStringAsFixed(2)}% Commission',
+        '$pName - ${pComm.toStringAsFixed(2)}% ${TranslationUtils.tr('general_commission')}',
                               );
                             }).toList(),
                             onChanged: (val) {
@@ -341,7 +345,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                               color: AppColors.onColoredBackground,
                             ),
                             child: Text(
-                              '$planName - ${commission.toStringAsFixed(2)}% Commission',
+        '$planName - ${commission.toStringAsFixed(2)}% ${TranslationUtils.tr('general_commission')}',
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w500,
@@ -353,7 +357,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                           ),
                         SizedBox(height: 6.h),
                         Text(
-                          'Min. Investment: \$${minInvest.toStringAsFixed(2)}',
+                                  '${TranslationUtils.tr('pmam_manager_detail_screen_min_investment')}: \$${minInvest.toStringAsFixed(2)}',
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
@@ -363,7 +367,8 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
 
                         // ── Trading Account ──
                         Text(
-                          'Trading Account',
+                          TranslationUtils.tr(
+                              'copy_trading_edit_plan_trading_account'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
@@ -384,8 +389,10 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                         else
                           AppSelectField<Map<String, dynamic>>(
                             value: selectedAccount,
-                            hint: 'Select Account',
-                            sheetTitle: 'Select Trading Account',
+                                hint: TranslationUtils.tr(
+                                    'create_account_select_account'),
+                                sheetTitle: TranslationUtils.tr(
+                                    'pmam_manager_detail_screen_select_trading_account'),
                             backgroundColor: AppColors.card,
                             valueEquals: (a, b) => a['id'] == b['id'],
                             options: _ctrl.eligibleAccounts.map((acc) {
@@ -404,7 +411,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                               return AppSelectOption<Map<String, dynamic>>(
                                 value: acc,
                                 title:
-                                    '$no — Balance: \$${bal.toStringAsFixed(2)} (Available: \$${avail.toStringAsFixed(2)})',
+                                    '$no — ${TranslationUtils.tr('dashboard_balance')}: \$${bal.toStringAsFixed(2)} (${TranslationUtils.tr('ibm_available')}: \$${avail.toStringAsFixed(2)})',
                               );
                             }).toList(),
                             onChanged: (val) {
@@ -426,7 +433,8 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                                 SizedBox(width: 6.w),
                                 Expanded(
                                   child: Text(
-                                    'Insufficient balance for this plan.',
+                            TranslationUtils.tr(
+                                'pmam_fund_manager_view_insufficient_balance_for_this_plan'),
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 11.sp,
                                       color: AppColors.error,
@@ -449,7 +457,8 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                               ),
                               children: [
                                 TextSpan(
-                                  text: 'Full balance will be invested: ',
+                                  text: TranslationUtils.tr(
+                                      'pmam_full_balance_will_be_invested'),
                                 ),
                                 TextSpan(
                                   text: '\$${availBalance.toStringAsFixed(2)}',
@@ -475,20 +484,25 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _summaryRow('Plan', planName, isFirst: true),
+                                _summaryRow(
+                                    TranslationUtils.tr('pmam_plan_label'),
+                                    planName,
+                                    isFirst: true),
                                 _summaryDivider(),
                                 _summaryRow(
-                                  'Commission',
+                                  TranslationUtils.tr('general_commission'),
                                   '${commission.toStringAsFixed(2)}%',
                                 ),
                                 _summaryDivider(),
                                 _summaryRow(
-                                  'Min. Investment',
+                                  TranslationUtils.tr(
+                                      'pmam_manager_detail_screen_min_investment'),
                                   '\$${minInvest.toStringAsFixed(2)}',
                                 ),
                                 _summaryDivider(),
                                 _summaryRow(
-                                  'Investment Amount',
+                                  TranslationUtils.tr(
+                                      'pmam_investment_amount'),
                                   '\$${availBalance.toStringAsFixed(2)}',
                                   valueColor: AppColors.textPrimary,
                                   isLast: true,
@@ -523,7 +537,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                                 padding: EdgeInsets.symmetric(vertical: 13.h),
                               ),
                               child: Text(
-                                'Cancel',
+                                TranslationUtils.tr('account_management_cancel'),
                                 style: AppTextStyles.bodyText.copyWith(
                                   color: AppColors.textPrimary,
                                   fontSize: 14.sp,
@@ -562,7 +576,8 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                                 elevation: 0,
                               ),
                               child: Text(
-                                'Confirm Investment',
+                                      TranslationUtils.tr(
+                                          'pmam_fund_manager_view_confirm_investment'),
                                 style: AppTextStyles.bodyText.copyWith(
                                   color: AppColors.isDarkMode
                                       ? AppColors.pureBlack
@@ -635,7 +650,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
           iconHeight: 30.h,
         ),
         title: Text(
-          'Fund Manager',
+          TranslationUtils.tr('pmam_fund_manager_view_fund_manager'),
           style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 16.sp,
@@ -680,14 +695,16 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
 
     double commission = 0;
     double minInv = 0;
-    String risk = 'Risk 1';
+    String risk = TranslationUtils.tr('pmam_risk_1_title');
     double drawdown = 0;
     String description = '';
 
     if (_selectedPlan != null) {
       commission = _num(_selectedPlan!['commission_percentage']);
       minInv = _num(_selectedPlan!['minimum_investment']);
-      risk = (_selectedPlan!['risk_information'] ?? 'Risk 1').toString();
+      risk = (_selectedPlan!['risk_information'] ??
+              TranslationUtils.tr('pmam_risk_1_title'))
+          .toString();
       description = (_selectedPlan!['strategy_description'] ?? '').toString();
       if (_selectedPlan!['performance'] is Map) {
         drawdown = _num(_selectedPlan!['performance']['max_drawdown']);
@@ -719,8 +736,8 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          Positioned(
-                            left: 3.w,
+                          PositionedDirectional(
+                            start: 3.w,
                             top: 1.h,
                             child: CircleAvatar(
                               radius: 22.r,
@@ -786,7 +803,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  'FUND MANAGER',
+                                  TranslationUtils.tr('pmam_fund_manager_caps'),
                                   style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 9.sp,
                                     fontWeight: FontWeight.w700,
@@ -796,8 +813,10 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                               ),
                               Text(
                                 since.isNotEmpty
-                                    ? 'Member since $since'
-                                    : 'Verified Manager',
+                                    ? TranslationUtils.trArgs(
+                                        'pmam_member_since', {'date': since})
+                                    : TranslationUtils.tr(
+                                        'pmam_verified_manager'),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTextStyles.bodyText.copyWith(
@@ -831,7 +850,9 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                           ),
                           SizedBox(width: 3.w),
                           Text(
-                            risk.isNotEmpty ? risk : 'Moderate Risk',
+                            risk.isNotEmpty
+                                ? risk
+                                : TranslationUtils.tr('pmam_moderate_risk'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 9.sp,
                               fontWeight: FontWeight.bold,
@@ -869,7 +890,10 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     child: Text(
-                      hasInvestment ? 'My Investment' : 'INVEST NOW',
+                      hasInvestment
+                          ? TranslationUtils.tr('pmam_my_investment')
+                          : TranslationUtils.tr(
+                              'pmam_manager_detail_screen_invest_now'),
                       style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.isDarkMode
                             ? AppColors.pureBlack
@@ -882,9 +906,9 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                 ),
                 SizedBox(height: 2.h),
                 Align(
-                  alignment: Alignment.centerRight,
+                  alignment: AlignmentDirectional.centerEnd,
                   child: Text(
-                    'Min. Investment: \$${minInv.toStringAsFixed(0)}',
+                    '${TranslationUtils.tr('pmam_manager_detail_screen_min_investment')}: \$${minInv.toStringAsFixed(0)}',
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 9.sp,
                       color: AppColors.textGrey,
@@ -900,7 +924,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
             child: Row(
               children: [
                 _buildTopMetric(
-                  'GAIN',
+                  TranslationUtils.tr('pmam_gain_caps'),
                   '${profit.toStringAsFixed(1)}%',
                   profit >= 0
                       ? const Color(0xFF10B981)
@@ -908,37 +932,37 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                 ),
                 _buildMetricDivider(),
                 _buildTopMetric(
-                  'TOTAL P&L',
+                  TranslationUtils.tr('pmam_total_pnl_caps'),
                   _money(pnl),
                   pnl >= 0 ? const Color(0xFF10B981) : const Color(0xFFEF4444),
                 ),
                 _buildMetricDivider(),
                 _buildTopMetric(
-                  'TOTAL AUM',
+                  TranslationUtils.tr('pmam_total_aum_caps'),
                   _money(aum),
                   AppColors.textPrimary,
                 ),
                 _buildMetricDivider(),
                 _buildTopMetric(
-                  'INVESTORS',
+                  TranslationUtils.tr('pmam_investors_caps'),
                   '$investors',
                   AppColors.textPrimary,
                 ),
                 _buildMetricDivider(),
                 _buildTopMetric(
-                  'COMMISSION',
+                  TranslationUtils.tr('pmam_commission_caps'),
                   '${commission.toStringAsFixed(2)}%',
                   AppColors.textPrimary,
                 ),
                 _buildMetricDivider(),
                 _buildTopMetric(
-                  'FLOATING PROFIT',
+                  TranslationUtils.tr('trader_details_screen_floating_profit'),
                   '\$0',
                   const Color(0xFF10B981),
                 ),
                 _buildMetricDivider(),
                 _buildTopMetric(
-                  'MAX DRAWDOWN',
+                  TranslationUtils.tr('pmam_max_drawdown_caps'),
                   '-${drawdown.toStringAsFixed(2)}%',
                   const Color(0xFFEF4444),
                 ),
@@ -1030,7 +1054,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Performance',
+                TranslationUtils.tr('portfolio_performance'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w800,
@@ -1043,7 +1067,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                   children: ['1W', '1M', '3M', '6M', '1Y', 'All'].map((e) {
                     final isSelected = e == '1M';
                     return Container(
-                      margin: EdgeInsets.only(left: 3.w),
+                      margin: EdgeInsetsDirectional.only(start: 3.w),
                       padding: EdgeInsets.symmetric(
                         horizontal: 7.w,
                         vertical: 3.h,
@@ -1099,7 +1123,10 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                       reservedSize: 22,
                       interval: 1,
                       getTitlesWidget: (value, meta) {
-                        if (value == 0) return _bottomTitle('Start');
+                        if (value == 0) {
+                          return _bottomTitle(
+                              TranslationUtils.tr('transaction_history_start'));
+                        }
                         if (value == 3) return _bottomTitle('2026-04-10');
                         if (value == 6) return _bottomTitle('2026-04-13');
                         if (value == 9) return _bottomTitle('2026-04-16');
@@ -1193,7 +1220,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Open Positions',
+                  TranslationUtils.tr('dashboard_open_positions'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w800,
@@ -1207,7 +1234,8 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    '${_openPositions.length} live',
+                    TranslationUtils.trArgs('pmam_count_live',
+                        {'count': '${_openPositions.length}'}),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 9.sp,
                       fontWeight: FontWeight.bold,
@@ -1229,7 +1257,8 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
               padding: EdgeInsets.all(16.h),
               child: Center(
                 child: Text(
-                  'No open positions',
+                  TranslationUtils.tr(
+                      'pmam_fund_manager_view_no_open_positions'),
                   style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
                 ),
               ),
@@ -1239,11 +1268,24 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
               child: Row(
                 children: [
-                  Expanded(flex: 3, child: _colHeader('Symbol')),
-                  Expanded(flex: 2, child: _colHeader('Type')),
-                  Expanded(flex: 3, child: _colHeader('Lot')),
-                  Expanded(flex: 4, child: _colHeader('Open Price')),
-                  Expanded(flex: 4, child: _colHeader('Open Time')),
+                  Expanded(
+                      flex: 3,
+                      child: _colHeader(
+                          TranslationUtils.tr('meta_watchlist_symbol'))),
+                  Expanded(
+                      flex: 2,
+                      child: _colHeader(TranslationUtils.tr('common_type'))),
+                  Expanded(
+                      flex: 3,
+                      child: _colHeader(
+                          TranslationUtils.tr('scratch_card_screen_lot'))),
+                  Expanded(
+                      flex: 4,
+                      child: _colHeader(
+                          TranslationUtils.tr('trading_order_open_price'))),
+                  Expanded(
+                      flex: 4,
+                      child: _colHeader(TranslationUtils.tr('open_time'))),
                 ],
               ),
             ),
@@ -1312,7 +1354,9 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                       Expanded(
                         flex: 3,
                         child: Text(
-                          '${lot.toStringAsFixed(2)} lot',
+                          TranslationUtils.trArgs('pmam_lot_suffix', {
+                            'lots': lot.toStringAsFixed(2),
+                          }),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 10.sp,
                             color: AppColors.textGrey,
@@ -1360,7 +1404,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                   padding: EdgeInsets.all(12.w),
                   alignment: Alignment.center,
                   child: Text(
-                    'View All',
+                    TranslationUtils.tr('pmam_fund_manager_view_view_all'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w700,
@@ -1392,7 +1436,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Trade History',
+                  TranslationUtils.tr('my_clients_screen_trade_history'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w800,
@@ -1406,7 +1450,8 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    '${_trades.length} trades',
+                    TranslationUtils.trArgs(
+                        'pmam_count_trades', {'count': '${_trades.length}'}),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 9.sp,
                       fontWeight: FontWeight.bold,
@@ -1422,11 +1467,23 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             child: Row(
               children: [
-                Expanded(flex: 3, child: _colHeader('Symbol')),
-                Expanded(flex: 2, child: _colHeader('Type')),
-                Expanded(flex: 2, child: _colHeader('P&L')),
-                Expanded(flex: 3, child: _colHeader('Close Time')),
-                Expanded(flex: 2, child: _colHeader('Duration')),
+                Expanded(
+                    flex: 3,
+                    child:
+                        _colHeader(TranslationUtils.tr('meta_watchlist_symbol'))),
+                Expanded(
+                    flex: 2,
+                    child: _colHeader(TranslationUtils.tr('common_type'))),
+                Expanded(
+                    flex: 2, child: _colHeader(TranslationUtils.tr('pmam_pnl'))),
+                Expanded(
+                    flex: 3,
+                    child: _colHeader(TranslationUtils.tr(
+                        'pmam_investor_portal_screen_close_time'))),
+                Expanded(
+                    flex: 2,
+                    child: _colHeader(
+                        TranslationUtils.tr('bonus_screen_duration'))),
               ],
             ),
           ),
@@ -1439,7 +1496,9 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
           else if (_trades.isEmpty)
             Padding(
               padding: EdgeInsets.all(16.h),
-              child: Center(child: Text('No trades available')),
+              child: Center(
+                  child: Text(TranslationUtils.tr(
+                      'pmam_fund_manager_view_no_trades_available'))),
             )
           else
             ListView.separated(
@@ -1468,7 +1527,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                 padding: EdgeInsets.symmetric(vertical: 8.h),
                 alignment: Alignment.center,
                 child: Text(
-                  'View All',
+                  TranslationUtils.tr('pmam_fund_manager_view_view_all'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w700,
@@ -1612,7 +1671,8 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
             ),
             SizedBox(height: 12.h),
             Text(
-              'Manager not found',
+                  TranslationUtils.tr(
+                      'pmam_fund_manager_view_manager_not_found'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
@@ -1622,8 +1682,9 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
             SizedBox(height: 6.h),
             Text(
               _managerCode.isEmpty
-                  ? 'No manager id was provided.'
-                  : 'Unable to load profile for $_managerCode.',
+                      ? TranslationUtils.tr('pmam_no_manager_id_provided')
+                      : TranslationUtils.trArgs('pmam_unable_to_load_profile',
+                          {'code': _managerCode}),
               textAlign: TextAlign.center,
               style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
             ),

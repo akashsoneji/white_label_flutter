@@ -45,6 +45,28 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
     });
   }
 
+  /// Display-only label for a raw period id. The raw values stay as-is because
+  /// `_applyPeriod` switches on them.
+  String _periodLabelText(String label) {
+    switch (label) {
+      case 'Last Week':
+        return TranslationUtils.tr('transaction_history_period_last_week');
+      case 'Last Month':
+        return TranslationUtils.tr('iquote_position_last_month');
+      case 'Last Three Months':
+        return TranslationUtils.tr('celestial_history_last_three_months');
+      case 'Last Six Months':
+        return TranslationUtils.tr('celestial_history_last_six_months');
+      case 'Last Year':
+        return TranslationUtils.tr('celestial_history_last_year');
+      case 'All History':
+        return TranslationUtils.tr('celestial_history_all_history');
+      case 'Today':
+      default:
+        return TranslationUtils.tr('dc_range_today');
+    }
+  }
+
   // ── Period → timestamps ────────────────────────────────────────────────────
   void _applyPeriod(String label) {
     final now   = DateTime.now().toUtc();
@@ -112,7 +134,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
   // ── Header + period picker ─────────────────────────────────────────────────
   Widget _header(BuildContext c) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 4.h),
       child: Row(
         children: [
           Text(Get.find<LanguageService>().tr('celestial_history_title'), style: CelTheme.title(c)),
@@ -131,7 +153,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
                   Icon(Icons.calendar_today_rounded,
                       size: 13.sp, color: CelTheme.subText(c)),
                   SizedBox(width: 5.w),
-                  Text(_periodLabel,
+                  Text(_periodLabelText(_periodLabel),
                       style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.mainText(c),
                           fontSize: 12.sp,
@@ -163,7 +185,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
           children: options.map((o) {
             final active = o == _periodLabel;
             return ListTile(
-              title: Text(o,
+              title: Text(_periodLabelText(o),
                   style: AppTextStyles.bodyText.copyWith(
                       color: active ? CelTheme.buy(c) : CelTheme.mainText(c),
                       fontWeight:
@@ -206,17 +228,20 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
       }
 
       return Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 6.h),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 6.h, 16.w, 6.h),
         child: Column(
           children: [
             Row(
               children: [
                 Expanded(
-                    child: cell('Deposit', _n(t?.deposit))),
+                    child: cell(TranslationUtils.tr('common_deposit'),
+                        _n(t?.deposit))),
                 Expanded(
-                    child: cell('Withdrawal', _n(t?.withdrawal))),
+                    child: cell(TranslationUtils.tr('general_withdrawal'),
+                        _n(t?.withdrawal))),
                 Expanded(
-                    child: cell('Profit', _n(profit),
+                    child: cell(TranslationUtils.tr('dashboard_profit'),
+                        _n(profit),
                         color: profit < 0
                             ? CelTheme.sell(c)
                             : CelTheme.tpGreen)),
@@ -225,9 +250,15 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
             SizedBox(height: 8.h),
             Row(
               children: [
-                Expanded(child: cell('Balance', _n(t?.balance))),
-                Expanded(child: cell('Swap', _n(t?.swap))),
-                Expanded(child: cell('Commission', _n(t?.commission))),
+                Expanded(
+                    child: cell(TranslationUtils.tr('dashboard_balance'),
+                        _n(t?.balance))),
+                Expanded(
+                    child: cell(
+                        TranslationUtils.tr('general_swap'), _n(t?.swap))),
+                Expanded(
+                    child: cell(TranslationUtils.tr('general_commission'),
+                        _n(t?.commission))),
               ],
             ),
           ],
@@ -255,7 +286,9 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
             children: [
               Icon(Icons.history, size: 56.sp, color: CelTheme.subText(c)),
               SizedBox(height: 8.h),
-              Text(Get.find<LanguageService>().tr('celestial_history_no_period', {'period': '$_periodLabel'}),
+              Text(
+                  Get.find<LanguageService>().tr('celestial_history_no_period',
+                      {'period': _periodLabelText(_periodLabel)}),
                   style: AppTextStyles.bodyText.copyWith(
                       color: CelTheme.subText(c),
                       fontSize: 14.sp,

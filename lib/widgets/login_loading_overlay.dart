@@ -3,16 +3,17 @@ import '../constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../constants/color.dart';
+import 'package:crm_app/services/language_service.dart';
 
 /// Custom loading overlay for login screen
 class LoginLoadingOverlay extends StatelessWidget {
-  final String message;
+  final String? message;
   final double size;
   final Color? color;
 
   const LoginLoadingOverlay({
     super.key,
-    this.message = "Logging in...",
+    this.message,
     this.size = 60.0,
     this.color,
   });
@@ -46,7 +47,8 @@ class LoginLoadingOverlay extends StatelessWidget {
               ),
               SizedBox(height: 16.h),
               Text(
-                message,
+                message ??
+                    TranslationUtils.tr('login_loading_overlay_logging_in'),
                 style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.textPrimary,
                   fontSize: 16.sp,

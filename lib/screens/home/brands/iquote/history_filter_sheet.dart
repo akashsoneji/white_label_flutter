@@ -59,18 +59,32 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
   Color get _bg => AppColors.background;
   Color get _card => AppColors.card;
 
+  /// `label` holds a translation key, resolved at render time so these lists
+  /// can stay `const`. `id` stays a raw logic value sent to the controller.
   static const List<_PeriodOption> _periods = [
-    _PeriodOption('today', 'Today', Icons.today_outlined),
-    _PeriodOption('week', '7 Days', Icons.date_range_outlined),
-    _PeriodOption('month', '1 Month', Icons.calendar_month_outlined),
-    _PeriodOption('threeMonth', '3 Months', Icons.event_note_outlined),
-    _PeriodOption('custom', 'Custom', Icons.tune_outlined),
+    _PeriodOption('today', 'dc_range_today', Icons.today_outlined),
+    _PeriodOption('week', 'ibm_range_7_days', Icons.date_range_outlined),
+    _PeriodOption(
+      'month',
+      'traders_tab_range_1_month',
+      Icons.calendar_month_outlined,
+    ),
+    _PeriodOption(
+      'threeMonth',
+      'traders_tab_range_3_months',
+      Icons.event_note_outlined,
+    ),
+    _PeriodOption(
+      'custom',
+      'transaction_history_period_custom',
+      Icons.tune_outlined,
+    ),
   ];
 
   static const List<_DirectionOption> _directions = [
-    _DirectionOption('All', 'All', Icons.swap_vert),
-    _DirectionOption('Buy', 'Buy', Icons.trending_up),
-    _DirectionOption('Sell', 'Sell', Icons.trending_down),
+    _DirectionOption('All', 'common_all', Icons.swap_vert),
+    _DirectionOption('Buy', 'general_buy', Icons.trending_up),
+    _DirectionOption('Sell', 'general_sell', Icons.trending_down),
   ];
 
   @override
@@ -142,11 +156,13 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
           Divider(height: 1, color: AppColors.divider),
           Flexible(
             child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 16.h),
+              padding: EdgeInsetsDirectional.fromSTEB(20.w, 16.h, 20.w, 16.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _sectionLabel('Period'),
+                  _sectionLabel(
+                    TranslationUtils.tr('transaction_history_period_label'),
+                  ),
                   SizedBox(height: 10.h),
                   _buildPeriodChips(),
                   if (_period == 'custom') ...[
@@ -154,14 +170,16 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
                     _buildCustomRange(),
                   ],
                   SizedBox(height: 22.h),
-                  _sectionLabel('Direction'),
+                  _sectionLabel(TranslationUtils.tr('trade_direction')),
                   SizedBox(height: 10.h),
                   _buildDirectionSegments(),
                   SizedBox(height: 22.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _sectionLabel('Symbols'),
+                      _sectionLabel(
+                        TranslationUtils.tr('history_filter_symbols'),
+                      ),
                       _buildSelectAllToggle(symbols),
                     ],
                   ),
@@ -174,8 +192,13 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
                       child: Center(
                         child: Text(
                           _search.isEmpty
-                              ? 'No symbols available'
-                              : 'No symbols match "$_search"',
+                              ? TranslationUtils.tr(
+                                'history_filter_no_symbols_available',
+                              )
+                              : TranslationUtils.trArgs(
+                                'history_filter_no_symbols_match',
+                                {'query': _search},
+                              ),
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 13.sp,
@@ -213,7 +236,7 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(20.w, 8.h, 12.w, 12.h),
+      padding: EdgeInsetsDirectional.fromSTEB(20.w, 8.h, 12.w, 12.h),
       child: Row(
         children: [
           Container(
@@ -230,7 +253,7 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Filter History',
+                  TranslationUtils.tr('history_filter_filter_history'),
                   style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 16.sp,
@@ -240,8 +263,13 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
                 SizedBox(height: 2.h),
                 Text(
                   _activeFilterCount == 0
-                      ? 'Refine your closed trades view'
-                      : '$_activeFilterCount filter${_activeFilterCount == 1 ? '' : 's'} active',
+                      ? TranslationUtils.tr('history_filter_refine_subtitle')
+                      : TranslationUtils.trArgs(
+                        _activeFilterCount == 1
+                            ? 'history_filter_count_active_one'
+                            : 'history_filter_count_active_other',
+                        {'count': '$_activeFilterCount'},
+                      ),
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 11.sp,
@@ -306,7 +334,7 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
                 ),
                 SizedBox(width: 6.w),
                 Text(
-                  opt.label,
+                  TranslationUtils.tr(opt.label),
                   style: TextStyle(
                     color: active ? Colors.white : AppColors.textPrimary,
                     fontSize: 13.sp,
@@ -323,7 +351,7 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
 
   Widget _buildCustomRange() {
     String fmt(DateTime? d) => d == null
-        ? 'Select'
+        ? TranslationUtils.tr('common_select')
         : '${d.day.toString().padLeft(2, '0')} ${_monthShort(d.month)} ${d.year}';
 
     Widget field(String label, DateTime? value, VoidCallback onTap) {
@@ -376,9 +404,17 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
 
     return Row(
       children: [
-        field('From', _customStart, () => _pickCustomRange(pickStart: true)),
+        field(
+          TranslationUtils.tr('tw_from_account'),
+          _customStart,
+          () => _pickCustomRange(pickStart: true),
+        ),
         SizedBox(width: 10.w),
-        field('To', _customEnd, () => _pickCustomRange(pickStart: false)),
+        field(
+          TranslationUtils.tr('history_filter_to'),
+          _customEnd,
+          () => _pickCustomRange(pickStart: false),
+        ),
       ],
     );
   }
@@ -454,7 +490,7 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
                     ),
                     SizedBox(width: 6.w),
                     Text(
-                      opt.label,
+                      TranslationUtils.tr(opt.label),
                       style: TextStyle(
                         color: active ? Colors.white : AppColors.textPrimary,
                         fontSize: 13.sp,
@@ -500,7 +536,9 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
             ),
             SizedBox(width: 4.w),
             Text(
-              selectAll ? 'All selected' : 'Select all',
+              selectAll
+                  ? TranslationUtils.tr('history_filter_all_selected')
+                  : TranslationUtils.tr('general_select_all'),
               style: TextStyle(
                 color: selectAll ? _accent : AppColors.textSecondary,
                 fontSize: 12.sp,
@@ -594,7 +632,7 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
 
   Widget _buildActionBar() {
     return Container(
-      padding: EdgeInsets.fromLTRB(
+      padding: EdgeInsetsDirectional.fromSTEB(
         20.w,
         12.h,
         20.w,
@@ -622,7 +660,7 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
                 padding: EdgeInsets.symmetric(vertical: 14.h),
               ),
               child: Text(
-                'Reset',
+                TranslationUtils.tr('common_reset'),
                 style: TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 14.sp,
@@ -664,7 +702,9 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Apply Filters',
+                    TranslationUtils.tr(
+                      'internal_transfer_history_screen_apply_filters',
+                    ),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14.sp,
@@ -701,10 +741,12 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
 
   String _monthShort(int m) {
     const names = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'month_short_jan', 'month_short_feb', 'month_short_mar',
+      'month_short_apr', 'month_short_may', 'month_short_jun',
+      'month_short_jul', 'month_short_aug', 'month_short_sep',
+      'month_short_oct', 'month_short_nov', 'month_short_dec',
     ];
-    return names[(m - 1).clamp(0, 11)];
+    return TranslationUtils.tr(names[(m - 1).clamp(0, 11)]);
   }
 }
 

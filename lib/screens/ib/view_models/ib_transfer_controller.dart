@@ -1,6 +1,7 @@
 import 'package:crm_app/core/network/api_response.dart';
 import 'package:crm_app/models/ib_transfer_models.dart';
 import 'package:crm_app/screens/ib/data/repositories/ib_repository.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:get/get.dart';
 
@@ -72,18 +73,18 @@ class IbTransferController extends GetxController {
       };
       final ApiResponse response = await _repo.storeIbTransfer(payload: payload);
       if (response.success) {
-        CustomToastService.showSuccess(message: response.message ?? 'Transfer request submitted successfully.');
+        CustomToastService.showSuccess(message: response.message ?? TranslationUtils.tr('ib_transfer_request_submitted_successfully'));
         // Refresh balance and history
         fetchInitData();
         fetchHistory(refresh: true);
         return true;
       } else {
-        CustomToastService.showError(message: response.message ?? 'Failed to submit transfer request.');
+        CustomToastService.showError(message: response.message ?? TranslationUtils.tr('ib_transfer_failed_to_submit_request'));
         return false;
       }
     } catch (e) {
       print('Error submitting transfer: \$e');
-      CustomToastService.showError(message: 'An error occurred while submitting the request.');
+      CustomToastService.showError(message: TranslationUtils.tr('ib_transfer_error_submitting_request'));
       return false;
     } finally {
       isSubmitting.value = false;
@@ -132,17 +133,17 @@ class IbTransferController extends GetxController {
       isCancelling.value = true;
       final ApiResponse response = await _repo.cancelIbTransfer(transferId: transferId);
       if (response.success) {
-        CustomToastService.showSuccess(message: response.message ?? 'Transfer cancelled successfully.');
+        CustomToastService.showSuccess(message: response.message ?? TranslationUtils.tr('ib_transfer_cancelled_successfully'));
         fetchHistory(refresh: true);
         fetchInitData();
         return true;
       } else {
-        CustomToastService.showError(message: response.message ?? 'Failed to cancel transfer.');
+        CustomToastService.showError(message: response.message ?? TranslationUtils.tr('ib_transfer_failed_to_cancel'));
         return false;
       }
     } catch (e) {
       print('Error cancelling transfer: \$e');
-      CustomToastService.showError(message: 'An error occurred while cancelling the request.');
+      CustomToastService.showError(message: TranslationUtils.tr('ib_transfer_error_cancelling_request'));
       return false;
     } finally {
       isCancelling.value = false;

@@ -17,7 +17,7 @@ class VantagePendingOrderQuotePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(right: 12.w),
+      margin: EdgeInsetsDirectional.only(end: 12.w),
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
@@ -27,7 +27,10 @@ class VantagePendingOrderQuotePill extends StatelessWidget {
       child: Obx(() {
         final bid = chartSocketController.getBidPrice() ?? 0.0;
         final ask = chartSocketController.getAskPrice() ?? 0.0;
-        return Row(
+        // Bid / ask are numeric quotes — keep them left-to-right in Arabic.
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             _QuoteCell(
@@ -48,6 +51,7 @@ class VantagePendingOrderQuotePill extends StatelessWidget {
               valueColor: AppColors.primary,
             ),
           ],
+          ),
         );
       }),
     );

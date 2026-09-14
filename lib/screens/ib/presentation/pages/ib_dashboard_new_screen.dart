@@ -10,6 +10,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:crm_app/models/ib_models.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'dart:async';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -53,11 +54,11 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
   String _getPeriodLabel(CommissionPeriod period) {
     switch (period) {
       case CommissionPeriod.thisMonth:
-        return 'This Month';
+        return TranslationUtils.tr('time_this_month');
       case CommissionPeriod.thisQuarter:
-        return 'This Quarter';
+        return TranslationUtils.tr('ib_this_quarter');
       case CommissionPeriod.thisYear:
-        return 'This Year';
+        return TranslationUtils.tr('time_this_year');
     }
   }
 
@@ -106,7 +107,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
         title: Text(
-          'IB Dashboard',
+          TranslationUtils.tr('more_dashboard'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -130,7 +131,9 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
         if (ibController.isLoading.value) {
           return Center(
             child: CommonLoadingWidget(
-              message: 'Loading dashboard...',
+              message: TranslationUtils.tr(
+                'ib_dashboard_new_screen_loading_dashboard',
+              ),
               size: 50.0,
               color: AppColors.primary,
             ),
@@ -153,7 +156,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
             ),
             slivers: [
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+                padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 0),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     Obx(() {
@@ -171,13 +174,17 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
                     ),
                     SizedBox(height: 20.h),
                     _buildSectionHeader(
-                      title: 'Commission Summary',
+                      title: TranslationUtils.tr(
+                        'ib_dashboard_new_screen_commission_summary',
+                      ),
                       trailing: _buildPeriodDropdown(),
                     ),
                     SizedBox(height: 12.h),
                     _buildCommissionGrid(),
                     SizedBox(height: 16.h),
-                    _buildSectionHeader(title: 'Overview'),
+                    _buildSectionHeader(
+                      title: TranslationUtils.tr('common_overview'),
+                    ),
                     SizedBox(height: 8.h),
                   ]),
                 ),
@@ -254,7 +261,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'My Reference Links',
+                TranslationUtils.tr('ib_dashboard_new_screen_my_reference_links'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
@@ -274,7 +281,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
           if (referenceUrl != null && referenceUrl.isNotEmpty) ...[
             SizedBox(height: 10.h),
             Container(
-              padding: EdgeInsets.fromLTRB(10.w, 10.h, 6.w, 10.h),
+              padding: EdgeInsetsDirectional.fromSTEB(10.w, 10.h, 6.w, 10.h),
               decoration: BoxDecoration(
                 color: AppColors.cardBackGround,
                 borderRadius: BorderRadius.circular(10.r),
@@ -319,7 +326,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
                             ),
                             SizedBox(width: 3.w),
                             Text(
-                              'Share Link',
+                              TranslationUtils.tr('invite_friend_screen_share_link'),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w600,
@@ -389,7 +396,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
       children: [
         Expanded(
           child: _buildCommissionTile(
-            label: 'My Commission',
+            label: TranslationUtils.tr('ib_my_commission'),
             amount: myCommission,
             isPrimary: true,
           ),
@@ -397,7 +404,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
         SizedBox(width: 12.w),
         Expanded(
           child: _buildCommissionTile(
-            label: 'Sub-IB Commission',
+            label: TranslationUtils.tr('ib_sub_ib_commission'),
             amount: subIbCommission,
             isPrimary: false,
           ),
@@ -475,7 +482,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
     // 3×3 grid — order matches reference UI (left → right, top → bottom).
     return [
       _buildStatTile(
-        title: 'Total Clients',
+        title: TranslationUtils.tr('ib_dashboard_new_screen_total_clients'),
         value: (stats.totalClients ?? 0).toString(),
         onTap:
             widget.onNavigateToTab != null
@@ -483,37 +490,37 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
                 : null,
       ),
       _buildStatTile(
-        title: 'Total Lot',
+        title: TranslationUtils.tr('ib_dashboard_new_screen_total_lot'),
         value: (stats.totalLots ?? 0).toStringAsFixed(2),
       ),
       _buildStatTile(
-        title: 'Total Equity',
+        title: TranslationUtils.tr('ib_dashboard_new_screen_total_equity'),
         value: '\$${(stats.totalEquity ?? 0).toStringAsFixed(2)}',
       ),
       _buildStatTile(
-        title: 'Total Rebate',
+        title: TranslationUtils.tr('ib_dashboard_new_screen_total_rebate'),
         value: '\$${totalRebate.toStringAsFixed(2)}',
       ),
       _buildStatTile(
-        title: 'Rebate Withdrawal',
+        title: TranslationUtils.tr('ib_dashboard_new_screen_rebate_withdrawal'),
         value: '\$${(stats.ibWithdrawalRebate ?? 0).toStringAsFixed(2)}',
       ),
       _buildStatTile(
-        title: 'Available Rebate',
+        title: TranslationUtils.tr('ib_dashboard_new_screen_available_rebate'),
         value: '\$${availableRebate.toStringAsFixed(2)}',
         highlight: true,
       ),
 
       _buildStatTile(
-        title: 'Total Deposit',
+        title: TranslationUtils.tr('ib_dashboard_new_screen_total_deposit'),
         value: '\$${(stats.totalDeposited ?? 0).toStringAsFixed(2)}',
       ),
       _buildStatTile(
-        title: 'Total Withdrawal',
+        title: TranslationUtils.tr('ib_dashboard_new_screen_total_withdrawal'),
         value: '\$${(stats.totalWithdrawal ?? 0).toStringAsFixed(2)}',
       ),
       _buildStatTile(
-        title: 'Pending Request',
+        title: TranslationUtils.tr('ib_dashboard_new_screen_pending_request'),
         value: (stats.ibPendingRequests ?? 0).toString(),
         onTap:
             widget.onNavigateToTab != null && !isTraditional
@@ -541,7 +548,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
             border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
           ),
           child: Padding(
-            padding: EdgeInsets.fromLTRB(8.w, 8.h, 6.w, 8.h),
+            padding: EdgeInsetsDirectional.fromSTEB(8.w, 8.h, 6.w, 8.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -575,7 +582,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
                     ),
                     if (onTap != null)
                       Padding(
-                        padding: EdgeInsets.only(left: 2.w, bottom: 1.h),
+                        padding: EdgeInsetsDirectional.only(start: 2.w, bottom: 1.h),
                         child: Icon(
                           Icons.chevron_right_rounded,
                           size: 16.sp,

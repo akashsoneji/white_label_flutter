@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart' show CustomToastService;
 import 'package:crm_app/widgets/congratulations_dialog.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
@@ -121,16 +122,18 @@ class CreateTradingAccountController extends GetxController {
     if (depositAmount.value.isEmpty) {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please enter deposit amount',
-          title: 'Error',
+          message: TranslationUtils.tr(
+            'create_trading_account_controller_please_enter_deposit_amount',
+          ),
+          title: TranslationUtils.tr('general_error'),
         );
       }
       return;
     }
     if (investorPassword.value == tradingPassword.value) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Investor password and trading password cannot be the same.',
+        title: TranslationUtils.tr('close_position_error'),
+        message: TranslationUtils.tr('create_trading_account_controller_investor_password_and_trading_password_cannot'),
       );
       return;
     }
@@ -138,8 +141,8 @@ class CreateTradingAccountController extends GetxController {
     if (tradingPassword.value.isEmpty || tradingPassword.value == 'xxxxxxxxx') {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please enter trading password',
-          title: 'Error',
+          message: TranslationUtils.tr('create_trading_account_controller_please_enter_trading_password'),
+          title: TranslationUtils.tr('close_position_error'),
         );
       }
       return;
@@ -149,8 +152,8 @@ class CreateTradingAccountController extends GetxController {
         investorPassword.value == 'xxxxxxxxx') {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please enter investor password',
-          title: 'Error',
+          message: TranslationUtils.tr('create_trading_account_controller_please_enter_investor_password'),
+          title: TranslationUtils.tr('close_position_error'),
         );
       }
       return;
@@ -192,8 +195,8 @@ class CreateTradingAccountController extends GetxController {
         // Show success message
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showSuccess(
-            message: 'Account created successfully!',
-            title: 'Success',
+            message: TranslationUtils.tr('create_account_success_created'),
+            title: TranslationUtils.tr('create_account_success'),
           );
         }
 
@@ -204,7 +207,7 @@ class CreateTradingAccountController extends GetxController {
           CongratulationsDialog(
             accountNumber:
                 accountData['data']['account_number']?.toString() ??
-                'New Account',
+                TranslationUtils.tr('dashboard_new_account_title'),
             serverName: accountData['data']['group_name']?.toString() ?? '-',
             accountType:
                 accountData['data']['account_type']?.toString() ?? 'live',
@@ -229,16 +232,16 @@ class CreateTradingAccountController extends GetxController {
     // Basic validation
     if (depositAmount.value.isEmpty) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Please enter deposit amount',
+        title: TranslationUtils.tr('close_position_error'),
+        message: TranslationUtils.tr('create_trading_account_controller_please_enter_deposit_amount'),
       );
       return;
     }
 
     if (tradingPassword.value.isEmpty || tradingPassword.value == 'xxxxxxxxx') {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Please enter trading password',
+        title: TranslationUtils.tr('close_position_error'),
+        message: TranslationUtils.tr('create_trading_account_controller_please_enter_trading_password'),
       );
       return;
     }
@@ -246,15 +249,15 @@ class CreateTradingAccountController extends GetxController {
     if (investorPassword.value.isEmpty ||
         investorPassword.value == 'xxxxxxxxx') {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Please enter investor password',
+        title: TranslationUtils.tr('close_position_error'),
+        message: TranslationUtils.tr('create_trading_account_controller_please_enter_investor_password'),
       );
       return;
     }
     if (investorPassword.value == tradingPassword.value) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Investor password and trading password cannot be the same.',
+        title: TranslationUtils.tr('close_position_error'),
+        message: TranslationUtils.tr('create_trading_account_controller_investor_password_and_trading_password_cannot'),
       );
       return;
     }
@@ -289,8 +292,8 @@ class CreateTradingAccountController extends GetxController {
       if (accountData != null) {
         // Show success message
         CustomToastService.showSuccess(
-          title: 'Success',
-          message: 'Account created successfully!',
+          title: TranslationUtils.tr('create_account_success'),
+          message: TranslationUtils.tr('create_account_success_created'),
         );
 
         // // Show congratulations popup with real account data
@@ -310,18 +313,18 @@ class CreateTradingAccountController extends GetxController {
       } else {
         // Show error message
         CustomToastService.showError(
-          title: 'Error',
+          title: TranslationUtils.tr('close_position_error'),
           message:
               accountController.errorMessage.isNotEmpty
                   ? accountController.errorMessage
-                  : 'Failed to create account. Please try again.',
+                  : TranslationUtils.tr('create_trading_account_controller_failed_to_create_account_please_try'),
         );
       }
     } catch (e) {
       print('Error creating account: $e');
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to create account. Please try again.',
+        title: TranslationUtils.tr('close_position_error'),
+        message: TranslationUtils.tr('create_trading_account_controller_failed_to_create_account_please_try'),
       );
     } finally {
       isLoading.value = false;

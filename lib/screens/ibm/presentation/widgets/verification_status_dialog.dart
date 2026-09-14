@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class VerificationStatusDialog extends StatelessWidget {
   final dynamic stageCompletion;
@@ -45,14 +46,14 @@ class VerificationStatusDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Align(
-              alignment: Alignment.topRight,
+              alignment: AlignmentDirectional.topEnd,
               child: IconButton(
                 icon: Icon(Icons.close, color: AppColors.textPrimary),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
             Text(
-              'Verification Status',
+              TranslationUtils.tr('kyc_verification_verification_status'),
               style: AppTextStyles.heading.copyWith(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
@@ -61,7 +62,7 @@ class VerificationStatusDialog extends StatelessWidget {
             ),
             SizedBox(height: 8.h),
             Text(
-              'Complete all steps to join our IB program',
+              TranslationUtils.tr('ibm_complete_all_steps_ib_program'),
               style: TextStyle(color: AppColors.textGrey, fontSize: 13.sp),
               textAlign: TextAlign.center,
             ),
@@ -69,11 +70,17 @@ class VerificationStatusDialog extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: _buildStatusBox('Email Verification', emailVerified),
+                  child: _buildStatusBox(
+                    TranslationUtils.tr('email_verification'),
+                    emailVerified,
+                  ),
                 ),
                 SizedBox(width: 12.w),
                 Expanded(
-                  child: _buildStatusBox('Mobile Verification', mobileVerified),
+                  child: _buildStatusBox(
+                    TranslationUtils.tr('mobile_verification'),
+                    mobileVerified,
+                  ),
                 ),
               ],
             ),
@@ -82,12 +89,19 @@ class VerificationStatusDialog extends StatelessWidget {
               children: [
                 Expanded(
                   child: _buildStatusBox(
-                    'Personal Information',
+                    TranslationUtils.tr('edit_profile_personal_info'),
                     personalDetails,
                   ),
                 ),
                 SizedBox(width: 12.w),
-                Expanded(child: _buildAppStatusBox('IB Application', ibStatus)),
+                Expanded(
+                  child: _buildAppStatusBox(
+                    TranslationUtils.tr(
+                      'partnership_program_screen_ib_application',
+                    ),
+                    ibStatus,
+                  ),
+                ),
               ],
             ),
             SizedBox(height: 24.h),
@@ -107,7 +121,7 @@ class VerificationStatusDialog extends StatelessWidget {
                   ),
                   SizedBox(width: 12.w),
                   Text(
-                    'I accept the IB Terms and Conditions',
+                    TranslationUtils.tr('ibm_accept_ib_terms_and_conditions'),
                     style: TextStyle(
                       color: Colors.grey.shade600,
                       fontSize: 12.sp,
@@ -127,7 +141,7 @@ class VerificationStatusDialog extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Text(
-                  'Application Submitted',
+                  TranslationUtils.tr('ibm_application_submitted'),
                   style: TextStyle(
                     color: AppColors.whiteColor,
                     fontWeight: FontWeight.bold,
@@ -185,7 +199,9 @@ class VerificationStatusDialog extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                   child: Text(
-                    isCompleted ? 'Completed' : 'Pending',
+                    isCompleted
+                        ? TranslationUtils.tr('completed')
+                        : TranslationUtils.tr('kyc_verification_pending'),
                     style: TextStyle(
                       color: AppColors.whiteColor,
                       fontSize: 9.sp,
@@ -245,7 +261,9 @@ class VerificationStatusDialog extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                   child: Text(
-                    isInReview ? 'In Review' : 'Pending',
+                    isInReview
+                        ? TranslationUtils.tr('ibm_in_review')
+                        : TranslationUtils.tr('kyc_verification_pending'),
                     style: TextStyle(
                       color: AppColors.whiteColor,
                       fontSize: 9.sp,

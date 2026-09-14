@@ -5,6 +5,7 @@ import 'package:crm_app/models/settings_profile_model.dart' as profile_model;
 import 'package:get/get.dart' as g;
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/account_cache_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/kyc/view_models/compliance_controller.dart';
 
@@ -113,7 +114,7 @@ class AuthController extends GetxController {
       return userData;
     } catch (e) {
       print('AuthController: Error getting user data: $e');
-      _setError('Failed to get user data: $e');
+      _setError('${TranslationUtils.tr('auth_controller_failed_to_get_user_data')}: $e');
       return null;
     }
   }
@@ -176,7 +177,7 @@ class AuthController extends GetxController {
 
         final loginResponse = loginResult.loginResponse;
         if (loginResponse == null) {
-          _setError('Login failed. Please try again.');
+          _setError(TranslationUtils.tr('toast_login_error'));
           return;
         }
 
@@ -227,7 +228,7 @@ class AuthController extends GetxController {
             final enrolled = await BiometricService.instance.isEnrolled();
             if (supported && enrolled) {
               final ok = await BiometricService.instance.authenticate(
-                reason: 'Confirm biometric to enable login.',
+                reason: TranslationUtils.tr('auth_controller_confirm_biometric_to_enable_login'),
               );
               if (ok) {
                 try {
@@ -460,13 +461,13 @@ class AuthController extends GetxController {
         final errorMessage =
             response.message?.isNotEmpty == true
                 ? response.message!
-                : 'Login failed. Please check your credentials and try again.';
+                : TranslationUtils.tr('auth_login_failed_credentials');
 
         print('   Setting error message: $errorMessage');
         _setError(errorMessage);
       }
     } catch (e) {
-      _setError('Login error: $e');
+      _setError('${TranslationUtils.tr('auth_controller_login_error')}: $e');
     } finally {
       _setLoading(false);
     }
@@ -491,11 +492,11 @@ class AuthController extends GetxController {
         final errorMessage =
             response.message?.isNotEmpty == true
                 ? response.message!
-                : 'OTP verification failed. Please try again.';
+                : TranslationUtils.tr('auth_controller_otp_verification_failed_try_again');
         _setError(errorMessage);
       }
     } catch (e) {
-      _setError('OTP verification error: $e');
+      _setError('${TranslationUtils.tr('auth_controller_otp_verification_error')}: $e');
     } finally {
       _setLoading(false);
     }
@@ -548,7 +549,7 @@ class AuthController extends GetxController {
         final enrolled = await BiometricService.instance.isEnrolled();
         if (supported && enrolled) {
           final ok = await BiometricService.instance.authenticate(
-            reason: 'Confirm biometric to enable login.',
+            reason: TranslationUtils.tr('auth_controller_confirm_biometric_to_enable_login'),
           );
           if (ok) {
             try {
@@ -676,24 +677,33 @@ class AuthController extends GetxController {
         final message = _resolveApiMessage(
           data: response.data,
           responseMessage: response.message,
-          fallback: 'Registration initiated successfully',
+          fallback: TranslationUtils.tr('auth_controller_registration_initiated_successfully'),
         );
-        CustomToastService.showSuccess(message: message, title: 'Success');
+        CustomToastService.showSuccess(
+          message: message,
+          title: TranslationUtils.tr('general_success'),
+        );
         return true;
       } else {
         final errorMessage = _resolveApiMessage(
           data: response.data,
           responseMessage: response.message,
-          fallback: 'Registration failed',
+          fallback: TranslationUtils.tr('auth_registration_failed'),
         );
         _errorMessage.value = errorMessage;
-        CustomToastService.showError(message: errorMessage, title: 'Error');
+        CustomToastService.showError(
+          message: errorMessage,
+          title: TranslationUtils.tr('general_error'),
+        );
         return false;
       }
     } catch (e) {
-      final errorMessage = 'Registration error: $e';
+      final errorMessage = '${TranslationUtils.tr('auth_controller_registration_error')}: $e';
       _errorMessage.value = errorMessage;
-      CustomToastService.showError(message: errorMessage, title: 'Error');
+      CustomToastService.showError(
+        message: errorMessage,
+        title: TranslationUtils.tr('general_error'),
+      );
       return false;
     } finally {
       _setLoading(false);
@@ -896,12 +906,17 @@ class AuthController extends GetxController {
 
           final message = response.data!.message.trim().isNotEmpty
               ? response.data!.message
-              : 'Registration completed successfully';
-          CustomToastService.showSuccess(message: message, title: 'Success');
+              : TranslationUtils.tr('auth_controller_registration_completed_successfully');
+          CustomToastService.showSuccess(
+            message: message,
+            title: TranslationUtils.tr('general_success'),
+          );
         } else {
           CustomToastService.showError(
-            message: 'Invalid response structure from server',
-            title: 'Error',
+            message: TranslationUtils.tr(
+              'auth_controller_invalid_response_structure_from_server',
+            ),
+            title: TranslationUtils.tr('general_error'),
           );
 
           return false;
@@ -910,18 +925,24 @@ class AuthController extends GetxController {
         final errorMessage = _resolveApiMessage(
           data: response.data,
           responseMessage: response.message,
-          fallback: 'Registration failed',
+          fallback: TranslationUtils.tr('auth_registration_failed'),
         );
         _errorMessage.value = errorMessage;
-        CustomToastService.showError(message: errorMessage, title: 'Error');
+        CustomToastService.showError(
+          message: errorMessage,
+          title: TranslationUtils.tr('general_error'),
+        );
         return false;
       }
 
       return true;
     } catch (e) {
-      final errorMessage = 'Registration error: $e';
+      final errorMessage = '${TranslationUtils.tr('auth_controller_registration_error')}: $e';
       _errorMessage.value = errorMessage;
-      CustomToastService.showError(message: errorMessage, title: 'Error');
+      CustomToastService.showError(
+        message: errorMessage,
+        title: TranslationUtils.tr('general_error'),
+      );
       return false;
     } finally {
       _setLoading(false);
@@ -939,20 +960,20 @@ class AuthController extends GetxController {
       if (response.success && response.data != null) {
         _otpSentEmail.value = email;
         _otpSentMessage.value =
-            response.data!['message'] ?? 'OTP sent successfully';
+            response.data!['message'] ?? TranslationUtils.tr('auth_controller_otp_sent_successfully');
 
         CustomToastService.showSuccess(
           message: _otpSentMessage.value,
-          title: 'Success',
+          title: TranslationUtils.tr('general_success'),
         );
 
         return true;
       } else {
-        _setError(response.message ?? 'Failed to send OTP');
+        _setError(response.message ?? TranslationUtils.tr('auth_controller_failed_to_send_otp'));
         return false;
       }
     } catch (e) {
-      _setError('Send OTP error: $e');
+      _setError('${TranslationUtils.tr('auth_controller_send_otp_error')}: $e');
       return false;
     } finally {
       _setLoading(false);
@@ -1038,17 +1059,19 @@ class AuthController extends GetxController {
 
       if (response.success && response.data != null) {
         CustomToastService.showSuccess(
-          message: 'Password reset successfully',
-          title: 'Success',
+          message: TranslationUtils.tr(
+            'auth_controller_password_reset_successfully',
+          ),
+          title: TranslationUtils.tr('general_success'),
         );
 
         // Navigate to login screen
         Get.offAllNamed(AppPages.LOGIN);
       } else {
-        _setError(response.message ?? 'Password reset failed');
+        _setError(response.message ?? TranslationUtils.tr('auth_controller_password_reset_failed'));
       }
     } catch (e) {
-      _setError('Reset password error: $e');
+      _setError('${TranslationUtils.tr('auth_controller_reset_password_error')}: $e');
     } finally {
       _setLoading(false);
     }
@@ -1257,16 +1280,18 @@ class AuthController extends GetxController {
         print('AuthController: Delete account failed - ${response.message}');
         // Show error toast before navigation
         CustomToastService.showError(
-          title: 'Error',
-          message: response.message ?? 'Something went wrong',
+          title: TranslationUtils.tr('general_error'),
+          message: response.message ?? TranslationUtils.tr('general_something_went_wrong'),
         );
       }
     } catch (e) {
       // Don't show error UI after navigation - just log it
       print('AuthController: Delete account error: $e');
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to delete account',
+        title: TranslationUtils.tr('general_error'),
+        message: TranslationUtils.tr(
+          'auth_controller_failed_to_delete_account',
+        ),
       );
     } finally {
       _setLoading(false);
@@ -1312,6 +1337,7 @@ class AuthController extends GetxController {
               final message = messageRaw.toLowerCase();
 
               final isExplicitUnauthorized =
+                  message.contains('unauthenticated') ||
                   message.contains('unauthorized') ||
                   message.contains('session expired') ||
                   message.contains('session has expired') ||
@@ -1451,14 +1477,17 @@ class AuthController extends GetxController {
         return profileData;
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to load profile',
+          message: response.message ?? TranslationUtils.tr('auth_controller_failed_to_load_profile'),
         );
         return null;
       }
     } catch (e, t) {
       print('AuthController: Error getting profile: $e');
       print('AuthController: Error getting profile: $t');
-      CustomToastService.showError(message: 'Failed to load profile: $e');
+      CustomToastService.showError(
+        message:
+            '${TranslationUtils.tr('auth_controller_failed_to_load_profile')}: $e',
+      );
       return null;
     } finally {
       _isLoading.value = false;
@@ -1567,7 +1596,7 @@ class AuthController extends GetxController {
       if (response.success) {
         // Show success toast
         CustomToastService.showSuccess(
-          message: response.message ?? 'Profile updated successfully!',
+          message: response.message ?? TranslationUtils.tr('auth_controller_profile_updated_successfully'),
         );
 
         // Navigate to next page
@@ -1575,12 +1604,15 @@ class AuthController extends GetxController {
       } else {
         // Show error toast
         CustomToastService.showError(
-          message: response.message ?? 'Failed to update profile',
+          message: response.message ?? TranslationUtils.tr('auth_controller_failed_to_update_profile'),
         );
       }
     } catch (e) {
       print('AuthController: Error updating profile: $e');
-      CustomToastService.showError(message: 'Failed to update profile: $e');
+      CustomToastService.showError(
+        message:
+            '${TranslationUtils.tr('auth_controller_failed_to_update_profile')}: $e',
+      );
     } finally {
       _isLoading.value = false;
     }
@@ -1601,7 +1633,10 @@ class AuthController extends GetxController {
       final status = map?['status'];
       final message = map?['message'] ?? 'Something went wrong';
       if (status == true) {
-        CustomToastService.showSuccess(message: message, title: 'Success');
+        CustomToastService.showSuccess(
+          message: message,
+          title: TranslationUtils.tr('general_success'),
+        );
 
         // Go back to previous screen
         Get.toNamed(AppPages.LOGIN);
@@ -1612,7 +1647,7 @@ class AuthController extends GetxController {
     } catch (e, t) {
       print("CATCH FORGOT PASSOWRD STATUS ${e}");
       print("CATCH TT FORGOT PASSOWRD STATUS ${t}");
-      _setError('Forgot password error: $e');
+      _setError('${TranslationUtils.tr('auth_controller_forgot_password_error')}: $e');
     } finally {
       _setLoading(false); // hide activity indicator
     }
@@ -1633,25 +1668,36 @@ class AuthController extends GetxController {
           final errorMessage =
               data['message']?.toString() ??
               response.message ??
-              'Failed to send OTP';
-          CustomToastService.showError(title: 'Error', message: errorMessage);
+              TranslationUtils.tr('auth_controller_failed_to_send_otp');
+          CustomToastService.showError(
+            title: TranslationUtils.tr('general_error'),
+            message: errorMessage,
+          );
           return;
         }
 
         final message =
-            data['message']?.toString() ?? 'OTP sent to your email.';
-        CustomToastService.showSuccess(message: message, title: 'Success');
+            data['message']?.toString() ??
+            TranslationUtils.tr('auth_controller_otp_sent_to_your_email');
+        CustomToastService.showSuccess(
+          message: message,
+          title: TranslationUtils.tr('general_success'),
+        );
 
         // Navigate to verify code screen with email
         Get.toNamed(AppPages.VERIFY_CODE, arguments: email);
       } else {
-        final errorMessage = response.message ?? 'Failed to send OTP';
-        CustomToastService.showError(title: 'Error', message: errorMessage);
+        final errorMessage = response.message ?? TranslationUtils.tr('auth_controller_failed_to_send_otp');
+        CustomToastService.showError(
+          title: TranslationUtils.tr('general_error'),
+          message: errorMessage,
+        );
       }
     } catch (e) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to send OTP: $e',
+        title: TranslationUtils.tr('general_error'),
+        message:
+            '${TranslationUtils.tr('auth_controller_failed_to_send_otp')}: $e',
       );
     } finally {
       _setLoading(false);
@@ -1669,8 +1715,11 @@ class AuthController extends GetxController {
       final response = await _verifyPasswordResetOtp(email: email, otp: otp);
 
       if (response.success && response.data != null) {
-        final message = response.data?['message'] ?? 'OTP verified.';
-        CustomToastService.showSuccess(message: message, title: 'Success');
+        final message = response.data?['message'] ?? TranslationUtils.tr('auth_controller_otp_verified');
+        CustomToastService.showSuccess(
+          message: message,
+          title: TranslationUtils.tr('general_success'),
+        );
 
         // Navigate to create new password screen with email and otp
         Get.toNamed(
@@ -1678,13 +1727,15 @@ class AuthController extends GetxController {
           arguments: {'email': email, 'otp': otp},
         );
       } else {
-        final errorMessage = response.message ?? 'OTP verification failed';
+        final errorMessage = response.message ?? TranslationUtils.tr('auth_otp_verification_failed');
         CustomToastService.showError(message: errorMessage);
         _setError(errorMessage);
       }
     } catch (e) {
-      _setError('Verify OTP error: $e');
-      CustomToastService.showError(message: 'OTP verification failed: $e');
+      _setError('${TranslationUtils.tr('auth_controller_otp_verification_error')}: $e');
+      CustomToastService.showError(
+        message: '${TranslationUtils.tr('auth_otp_verification_failed')}: $e',
+      );
     } finally {
       _setLoading(false);
     }
@@ -1709,19 +1760,26 @@ class AuthController extends GetxController {
 
       if (response.success && response.data != null) {
         final message =
-            response.data?['message'] ?? 'Password reset successfully';
-        CustomToastService.showSuccess(message: message, title: 'Success');
+            response.data?['message'] ??
+            TranslationUtils.tr('auth_controller_password_reset_successfully');
+        CustomToastService.showSuccess(
+          message: message,
+          title: TranslationUtils.tr('general_success'),
+        );
 
         // Navigate to login screen
         Get.offAllNamed(AppPages.LOGIN);
       } else {
-        final errorMessage = response.message ?? 'Password reset failed';
+        final errorMessage = response.message ?? TranslationUtils.tr('auth_controller_password_reset_failed');
         CustomToastService.showError(message: errorMessage);
         _setError(errorMessage);
       }
     } catch (e) {
-      _setError('Reset password error: $e');
-      CustomToastService.showError(message: 'Password reset failed: $e');
+      _setError('${TranslationUtils.tr('auth_controller_reset_password_error')}: $e');
+      CustomToastService.showError(
+        message:
+            '${TranslationUtils.tr('auth_controller_password_reset_failed')}: $e',
+      );
     } finally {
       _setLoading(false);
     }

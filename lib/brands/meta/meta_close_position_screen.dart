@@ -382,7 +382,10 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Close position #${p.orderId}',
+              TranslationUtils.trArgs(
+                'meta_close_position_title',
+                {'orderId': '${p.orderId}'},
+              ),
               style: AppTextStyles.bodyText.copyWith(
                 color: MetaTheme.mainText(c),
                 fontSize: 15.sp,
@@ -406,7 +409,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 6.h),
+              padding: EdgeInsetsDirectional.fromSTEB(16.w, 14.h, 16.w, 6.h),
               child: Row(
                 children: [
                   Text(
@@ -469,7 +472,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
             ),
             if (!isPartial)
               Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0),
+                padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 0),
                 child: Text(
                   Get.find<LanguageService>().tr('meta_close_partial_hint'),
                   style: AppTextStyles.bodyText.copyWith(
@@ -481,7 +484,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
               ),
 
             Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 16.h),
+              padding: EdgeInsetsDirectional.fromSTEB(16.w, 18.h, 16.w, 16.h),
               child: Obx(() {
                 final live = _resolveBidAsk();
                 return Row(
@@ -524,7 +527,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
             ),
 
             Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 4.h),
+              padding: EdgeInsetsDirectional.fromSTEB(16.w, 14.h, 16.w, 4.h),
               child: Container(
                 padding:
                     EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
@@ -593,10 +596,9 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
             ),
 
             Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 16.h),
+              padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 16.h),
               child: Text(
-                'Attention! The trade will be executed at market conditions, '
-                'difference with requested price may be significant!',
+                TranslationUtils.tr('meta_close_position_market_warning'),
                 style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.subText(c),
                   fontSize: 12.sp,
@@ -609,7 +611,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
             SizedBox(height: 12.h),
 
             Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 24.h),
+              padding: EdgeInsetsDirectional.fromSTEB(16.w, 0, 16.w, 24.h),
               child: SizedBox(
                 width: double.infinity,
                 height: 44.h,
@@ -645,10 +647,16 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
                         else ...[
                           Text(
                             isPartial
-                                ? 'PARTIAL CLOSE'
+                                ? TranslationUtils.tr(
+                                    'close_position_screen_partial_close',
+                                  )
                                 : (isLoss
-                                    ? 'CLOSE WITH LOSS'
-                                    : 'CLOSE WITH PROFIT'),
+                                    ? TranslationUtils.tr(
+                                        'meta_close_position_close_with_loss',
+                                      )
+                                    : TranslationUtils.tr(
+                                        'meta_close_position_close_with_profit',
+                                      )),
                             style: AppTextStyles.bodyText.copyWith(
                               color: btnColor,
                               fontSize: 14.sp,

@@ -160,7 +160,7 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
         ),
         Expanded(
           child: Padding(
-            padding: EdgeInsets.only(top: 3.h, left: 5.h),
+            padding: EdgeInsetsDirectional.only(top: 3.h, start: 5.h),
             child: Text(
               languageService.tr("legal_documents_subtitle"),
               style: AppTextStyles.bodyText.copyWith(
@@ -252,12 +252,12 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
         final errorMessage =
             authController.errorMessage.isNotEmpty
                 ? authController.errorMessage
-                : 'Registration failed. Please check your information and try again.';
+                : TranslationUtils.tr('legal_documents_registration_failed_check_information');
         _showError(errorMessage);
       }
     } catch (e) {
       _hideLoadingDialog();
-      _showError('Registration failed: $e');
+      _showError('${TranslationUtils.tr('auth_registration_failed')}: $e');
     }
   }
 
@@ -266,7 +266,7 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
       _showOtpVerificationBottomSheet();
     } catch (e) {
       _hideLoadingDialog();
-      _showError('Failed to send OTP: $e');
+      _showError('${TranslationUtils.tr('auth_controller_failed_to_send_otp')}: $e');
     }
   }
 
@@ -285,19 +285,21 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
       if (registrationSuccess) {
         _clearOtpFields?.call();
         CustomToastService.showSuccess(
-          title: 'Success',
-          message: 'OTP resent successfully. Please check your email.',
+          title: TranslationUtils.tr('general_success'),
+          message: TranslationUtils.tr(
+            'legal_documents_screen_otp_resent_successfully_please_check_your',
+          ),
         );
       } else {
         final errorMessage =
             authController.errorMessage.isNotEmpty
                 ? authController.errorMessage
-                : 'Failed to resend OTP. Please try again.';
+                : TranslationUtils.tr('legal_documents_failed_to_resend_otp_try_again');
         _showError(errorMessage);
       }
     } catch (e) {
       _hideLoadingDialog();
-      _showError('Failed to resend OTP: $e');
+      _showError('${TranslationUtils.tr('legal_documents_failed_to_resend_otp')}: $e');
     }
   }
 
@@ -351,12 +353,12 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
         final errorMessage =
             authController.errorMessage.isNotEmpty
                 ? authController.errorMessage
-                : 'OTP verification failed. Please try again.';
+                : TranslationUtils.tr('auth_controller_otp_verification_failed_try_again');
         _showError(errorMessage);
       }
     } catch (e) {
       _hideLoadingDialog();
-      _showError('OTP verification failed: $e');
+      _showError('${TranslationUtils.tr('auth_otp_verification_failed')}: $e');
     }
   }
 
@@ -371,7 +373,10 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
   }
 
   void _showError(String message) {
-    CustomToastService.showError(title: 'Error', message: message);
+    CustomToastService.showError(
+      title: TranslationUtils.tr('general_error'),
+      message: message,
+    );
   }
 }
 

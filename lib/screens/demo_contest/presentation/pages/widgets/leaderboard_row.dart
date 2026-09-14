@@ -1,6 +1,7 @@
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/models/demo_contest/leaderboard_entry_model.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -48,12 +49,15 @@ class LeaderboardRow extends StatelessWidget {
                 width: 36.w,
                 child: Center(
                   child: medal ??
-                      Text(
-                        '${entry.rank}',
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Text(
+                          '${entry.rank}',
+                          style: AppTextStyles.bodyText.copyWith(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
                 ),
@@ -106,7 +110,7 @@ class LeaderboardRow extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          '🏅 ${entry.tradesCount} trades',
+                          '🏅 ${entry.tradesCount} ${TranslationUtils.tr('tw_trades')}',
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
@@ -114,7 +118,7 @@ class LeaderboardRow extends StatelessWidget {
                         ),
                         SizedBox(width: 8.w),
                         Text(
-                          '· ${(entry.winRate * 100).toStringAsFixed(0)}% WR',
+                          '· ${(entry.winRate * 100).toStringAsFixed(0)}% ${TranslationUtils.tr('dc_win_rate_short')}',
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
@@ -126,27 +130,30 @@ class LeaderboardRow extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 8.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '${entry.pnlPercent >= 0 ? '+' : ''}${entry.pnlPercent.toStringAsFixed(2)}%',
-                    style: AppTextStyles.bodyText.copyWith(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: pnlColor,
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${entry.pnlPercent >= 0 ? '+' : ''}${entry.pnlPercent.toStringAsFixed(2)}%',
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: pnlColor,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    '\$${entry.pnl.toStringAsFixed(0)}',
-                    style: AppTextStyles.bodyText.copyWith(
-                      fontSize: 11.sp,
-                      color: AppColors.textGrey,
-                      fontWeight: FontWeight.w500,
+                    SizedBox(height: 2.h),
+                    Text(
+                      '\$${entry.pnl.toStringAsFixed(0)}',
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontSize: 11.sp,
+                        color: AppColors.textGrey,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

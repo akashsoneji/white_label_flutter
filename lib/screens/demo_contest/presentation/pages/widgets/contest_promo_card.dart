@@ -1,6 +1,7 @@
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/models/demo_contest/demo_contest_model.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -28,10 +29,10 @@ class ContestPromoCard extends StatelessWidget {
             ? AppColors.warning
             : AppColors.textGrey;
     final tagLabel = live
-        ? '● LIVE'
+        ? '● ${TranslationUtils.tr('dc_live')}'
         : upcoming
-            ? 'UPCOMING'
-            : 'ENDED';
+            ? TranslationUtils.tr('dc_tab_upcoming').toUpperCase()
+            : TranslationUtils.tr('dc_status_ended').toUpperCase();
 
     return Material(
       color: Colors.transparent,
@@ -132,7 +133,7 @@ class ContestPromoCard extends StatelessWidget {
               ),
               SizedBox(height: 12.h),
               Padding(
-                padding: EdgeInsets.only(left: 2.w),
+                padding: EdgeInsetsDirectional.only(start: 2.w),
                 child: Text(
                   contest.description,
                   maxLines: 2,
@@ -154,12 +155,12 @@ class ContestPromoCard extends StatelessWidget {
                   SizedBox(width: 8.w),
                   _StatPill(
                     emoji: '💰',
-                    label: '\$${(contest.prizes.isNotEmpty ? contest.prizes.first.amount : 0).toStringAsFixed(0)} prize',
+                    label: '\$${(contest.prizes.isNotEmpty ? contest.prizes.first.amount : 0).toStringAsFixed(0)} ${TranslationUtils.tr('dc_prize_suffix')}',
                   ),
                   SizedBox(width: 8.w),
                   _StatPill(
                     emoji: '📈',
-                    label: '\$${_formatK(contest.startingBalance)} start',
+                    label: '\$${_formatK(contest.startingBalance)} ${TranslationUtils.tr('dc_start_suffix')}',
                   ),
                 ],
               ),

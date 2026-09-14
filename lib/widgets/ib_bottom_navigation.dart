@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class IbBottomNavigation extends StatelessWidget {
   final int currentIndex;
@@ -21,7 +22,11 @@ class IbBottomNavigation extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 12.h),
+        padding: EdgeInsetsDirectional.only(
+          start: 16.w,
+          end: 16.w,
+          bottom: 12.h,
+        ),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(32.r),
@@ -55,40 +60,42 @@ class IbBottomNavigation extends StatelessWidget {
                       0,
                       "assets/svg/ib_dashboard/dashboard.svg",
                       "assets/svg/ib_dashboard/dashboard_bold.svg",
-                      "Dashboard",
+                      TranslationUtils.tr('copy_trading_nav_dashboard'),
                     ),
                     if (isTraditional)
                       _buildNavItem(
                         1,
                         "assets/svg/ib_dashboard/coin.svg",
                         "assets/svg/ib_dashboard/coin_bold.svg",
-                        "My Structure",
+                        TranslationUtils.tr('my_structure_screen_my_structure'),
                       )
                     else
                       _buildNavItem(
                         1,
                         "assets/svg/ib_dashboard/coin.svg",
                         "assets/svg/ib_dashboard/coin_bold.svg",
-                        "Structure",
+                        TranslationUtils.tr('ib_nav_structure'),
                       ),
                     _buildNavItem(
                       2,
                       "assets/svg/ib_dashboard/myclient.svg",
                       "assets/svg/ib_dashboard/myclient_bold.svg",
-                      isTraditional ? "My Network" : "Clients",
+                      isTraditional
+                          ? TranslationUtils.tr('ib_nav_my_network')
+                          : TranslationUtils.tr('ib_nav_clients'),
                     ),
                     if (!isTraditional)
                       _buildNavItem(
                         3,
                         "assets/svg/ib_dashboard/marketing.svg",
                         "assets/svg/ib_dashboard/marketing_bold.svg",
-                        "Requests",
+                        TranslationUtils.tr('ib_nav_requests'),
                       ),
                     _buildNavItem(
                       isTraditional ? 3 : 4,
                       "assets/svg/ib_dashboard/coin.svg",
                       "assets/svg/ib_dashboard/coin_bold.svg",
-                      "Transfer Comm",
+                      TranslationUtils.tr('ib_nav_transfer_comm'),
                     ),
                   ],
                 ),

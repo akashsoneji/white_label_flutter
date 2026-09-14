@@ -11,6 +11,7 @@ import 'package:crm_app/brand_switcher.dart';
 
 import 'package:crm_app/screens/ibm/presentation/widgets/ibm_top_header.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class IbmManagerPortalScreen extends StatefulWidget {
   const IbmManagerPortalScreen({super.key});
@@ -63,7 +64,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
       final now = DateTime.now();
       final DateTime? start = await showDatePicker(
         context: context,
-        helpText: 'Select start date',
+        helpText: TranslationUtils.tr('ibm_select_start_date'),
         initialDate: (customFrom != null ? DateTime.tryParse(customFrom!) : null) ??
             now.subtract(const Duration(days: 30)),
         firstDate: DateTime(2000),
@@ -82,7 +83,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
       if (start == null) return;
       final DateTime? end = await showDatePicker(
         context: context,
-        helpText: 'Select end date',
+        helpText: TranslationUtils.tr('ibm_select_end_date'),
         initialDate: start,
         firstDate: start,
         lastDate: now,
@@ -136,7 +137,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
       appBar: IbmTopHeader(
-        title: 'IB Manager Portal',
+        title: TranslationUtils.tr('ibm_ib_manager_portal'),
         showBackButton: false,
         hideWallet: true,
         extraActions: [_buildHeaderCurrencySwitch()],
@@ -169,7 +170,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                         from: customFrom,
                         to: customTo,
                       ),
-                  child: const Text('Retry'),
+                  child: Text(TranslationUtils.tr('edit_profile_retry')),
                 ),
               ],
             ),
@@ -282,9 +283,9 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
       children: [
         _buildToggleGroup(
           options: {
-            'total': 'Total',
-            'network': 'Network',
-            'direct': 'Direct',
+            'total': TranslationUtils.tr('common_total'),
+            'network': TranslationUtils.tr('ibm_nav_network'),
+            'direct': TranslationUtils.tr('ibm_direct'),
           },
           selectedValue: selectedScope,
           onChanged: _onScopeChanged,
@@ -294,10 +295,10 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
         Expanded(
           child: _buildToggleGroup(
             options: {
-              'today': 'Today',
+              'today': TranslationUtils.tr('dc_range_today'),
               '7d': '7D',
               '30d': '30D',
-              'all': 'All',
+              'all': TranslationUtils.tr('common_all'),
             },
             selectedValue: selectedPeriod,
             onChanged: _onPeriodChanged,
@@ -332,7 +333,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
 
   Widget _buildHeaderCurrencySwitch() {
     return Padding(
-      padding: EdgeInsets.only(right: 12.w),
+      padding: EdgeInsetsDirectional.only(end: 12.w),
       child: Obx(() {
         final currencies = controller.dashboardData['currencies'];
         final List list = currencies is List ? currencies : const [];
@@ -496,9 +497,13 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                 icon: Icons.people_alt_rounded,
                 iconBg: AppColors.iconBgPrimary,
                 iconColor: AppColors.primary,
-                label: 'Total Clients',
+                label: TranslationUtils.tr(
+                  'ib_dashboard_new_screen_total_clients',
+                ),
                 value: '$totalClients',
-                hint: '$newInPeriod new this period',
+                hint: TranslationUtils.trArgs('ibm_new_this_period', {
+                  'count': '$newInPeriod',
+                }),
               ),
             ),
             SizedBox(width: 10.w),
@@ -507,9 +512,9 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                 icon: Icons.trending_up_rounded,
                 iconBg: const Color(0xFF00C48C).withValues(alpha: 0.12),
                 iconColor: const Color(0xFF00C48C),
-                label: 'Active Traders',
+                label: TranslationUtils.tr('ibm_active_traders'),
                 value: '$activeTraders',
-                hint: 'traded this period',
+                hint: TranslationUtils.tr('ibm_traded_this_period'),
               ),
             ),
             SizedBox(width: 10.w),
@@ -518,9 +523,11 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                 icon: Icons.account_tree_rounded,
                 iconBg: AppColors.iconBgPrimary,
                 iconColor: AppColors.primary,
-                label: 'Sub-IBs',
+                label: TranslationUtils.tr('ibm_sub_ibs'),
                 value: '$totalSubIbs',
-                hint: '$directPartners direct',
+                hint: TranslationUtils.trArgs('ibm_n_direct', {
+                  'count': '$directPartners',
+                }),
               ),
             ),
           ],
@@ -536,15 +543,15 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
 
   Widget _buildHeroEarnedCard(double commission) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 18.h),
+      padding: EdgeInsetsDirectional.fromSTEB(20.w, 18.h, 20.w, 18.h),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             AppColors.primary,
             AppColors.primary.withValues(alpha: 0.78),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
         ),
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
@@ -571,7 +578,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
               SizedBox(width: 10.w),
               Expanded(
                 child: Text(
-                  'Earned this period',
+                  TranslationUtils.tr('ibm_earned_this_period'),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -587,7 +594,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           SizedBox(height: 12.h),
           FittedBox(
             fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
+            alignment: AlignmentDirectional.centerStart,
             child: Text(
               _fmt(commission),
               maxLines: 1,
@@ -648,12 +655,12 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   Widget _buildRebateCard(double rebate) {
     const accent = Color(0xFF00C48C);
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 18.h),
+      padding: EdgeInsetsDirectional.fromSTEB(20.w, 18.h, 20.w, 18.h),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [accent, accent.withValues(alpha: 0.78)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
         ),
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
@@ -681,7 +688,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
               SizedBox(width: 10.w),
               Expanded(
                 child: Text(
-                  'Available rebate',
+                  TranslationUtils.tr('ib_dashboard_new_screen_available_rebate'),
                   style: TextStyle(
                     color: AppColors.whiteColor.withValues(alpha: 0.9),
                     fontSize: 12.sp,
@@ -695,7 +702,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           SizedBox(height: 12.h),
           FittedBox(
             fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
+            alignment: AlignmentDirectional.centerStart,
             child: Text(
               _fmt(rebate),
               maxLines: 1,
@@ -715,7 +722,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                   color: AppColors.whiteColor.withValues(alpha: 0.85)),
               SizedBox(width: 4.w),
               Text(
-                'Unpaid balance',
+                  TranslationUtils.tr('ibm_unpaid_balance'),
                 style: TextStyle(
                   color: AppColors.whiteColor.withValues(alpha: 0.85),
                   fontSize: 11.sp,
@@ -758,7 +765,9 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                   ),
                 ),
                 child: Text(
-                  'Request payout',
+                    TranslationUtils.tr(
+                      'commission_history_screen_request_payout',
+                    ),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
@@ -821,7 +830,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             children: [
               Expanded(
                 child: Text(
-                  'Default Referral Link',
+            TranslationUtils.tr('ibm_default_referral_link'),
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
@@ -859,7 +868,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                     border: Border.all(color: AppColors.primary),
                   ),
                   child: Text(
-                    'Custom links',
+              TranslationUtils.tr('ibm_custom_links'),
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
@@ -906,7 +915,9 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                   onPressed: () {
                     Clipboard.setData(ClipboardData(text: referralUrl));
                     CustomToastService.showSuccess(
-                        message: 'Referral link copied!');
+                        message: TranslationUtils.tr(
+                          'ibm_referral_link_copied_short',
+                        ));
                   },
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -922,20 +933,20 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   String _periodLabel() {
     switch (selectedPeriod) {
       case 'today':
-        return 'Today';
+        return TranslationUtils.tr('dc_range_today');
       case '7d':
-        return 'Last 7 days';
+        return TranslationUtils.tr('ibm_last_7_days');
       case '30d':
-        return 'Last 30 days';
+        return TranslationUtils.tr('ibm_last_30_days');
       case 'this_month':
-        return 'Month to date';
+        return TranslationUtils.tr('ibm_month_to_date');
       case 'all':
-        return 'All time';
+        return TranslationUtils.tr('ibm_range_all_time');
       case 'custom':
         if (customFrom != null && customTo != null) return '$customFrom → $customTo';
-        return 'Custom range';
+        return TranslationUtils.tr('ibm_custom_range');
       default:
-        return 'Selected period';
+        return TranslationUtils.tr('ibm_selected_period');
     }
   }
 
@@ -1015,7 +1026,7 @@ Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, do
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'MONEY FLOW',
+                TranslationUtils.tr('ibm_money_flow_upper'),
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.bold,
@@ -1030,7 +1041,7 @@ Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, do
                   borderRadius: BorderRadius.circular(6.r),
                 ),
                 child: Text(
-                  'This period',
+                  TranslationUtils.tr('ibm_this_period'),
                   style: TextStyle(
                     fontSize: 9.sp,
                     color: AppColors.textSecondary,
@@ -1045,7 +1056,7 @@ Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, do
             children: [
               Expanded(
                 child: _buildColoredMiniStat(
-                  label: 'Deposits',
+                  label: TranslationUtils.tr('transaction_history_deposits'),
                   value: _fmt(deposits),
                   icon: Icons.south_west_rounded,
                   color: depositsColor,
@@ -1054,7 +1065,7 @@ Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, do
               SizedBox(width: 10.w),
               Expanded(
                 child: _buildColoredMiniStat(
-                  label: 'Withdrawals',
+                  label: TranslationUtils.tr('transaction_history_withdrawals'),
                   value: _fmt(withdrawals),
                   icon: Icons.north_east_rounded,
                   color: withdrawalsColor,
@@ -1067,17 +1078,17 @@ Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, do
             children: [
               Expanded(
                 child: _buildColoredMiniStat(
-                  label: 'Client Equity',
+                  label: TranslationUtils.tr('ibm_client_equity'),
                   value: _fmt(equity),
                   icon: Icons.account_balance_rounded,
                   color: AppColors.primary,
-                  trailingText: 'Client Equity',
+                  trailingText: TranslationUtils.tr('ibm_client_equity'),
                 ),
               ),
               SizedBox(width: 10.w),
               Expanded(
                 child: _buildColoredMiniStat(
-                  label: 'Net flow',
+                  label: TranslationUtils.tr('ibm_net_flow'),
                   value: '${netPositive ? '+' : ''}${_fmt(netFlow)}',
                   icon: netPositive
                       ? Icons.trending_up_rounded
@@ -1167,17 +1178,17 @@ Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, do
           SizedBox(height: 12.h),
           Row(
             children: [
-              Expanded(child: _buildMiniStat(label: 'Total Lots', value: lots.toStringAsFixed(2), icon: Icons.bar_chart_rounded)),
+              Expanded(child: _buildMiniStat(label: TranslationUtils.tr('tw_total_lots'), value: lots.toStringAsFixed(2), icon: Icons.bar_chart_rounded)),
               SizedBox(width: 10.w),
-              Expanded(child: _buildMiniStat(label: 'Trades', value: '$trades', icon: Icons.swap_horiz_rounded)),
+              Expanded(child: _buildMiniStat(label: TranslationUtils.tr('tw_trades'), value: '$trades', icon: Icons.swap_horiz_rounded)),
             ],
           ),
           SizedBox(height: 10.h),
           Row(
             children: [
-              Expanded(child: _buildMiniStat(label: 'Per Lot', value: _fmt(perLot), icon: Icons.percent_rounded)),
+              Expanded(child: _buildMiniStat(label: TranslationUtils.tr('ibm_per_lot'), value: _fmt(perLot), icon: Icons.percent_rounded)),
               SizedBox(width: 10.w),
-              Expanded(child: _buildMiniStat(label: 'Avg Lots/Trader', value: avgLotSize.toStringAsFixed(2), icon: Icons.straighten_rounded)),
+              Expanded(child: _buildMiniStat(label: TranslationUtils.tr('ibm_avg_lots_per_trader'), value: avgLotSize.toStringAsFixed(2), icon: Icons.straighten_rounded)),
             ],
           ),
         ],
@@ -1249,7 +1260,7 @@ Widget _buildCommissionSummary(Map wallet) {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Commission Summary',
+                TranslationUtils.tr('ib_dashboard_new_screen_commission_summary'),
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
@@ -1257,7 +1268,7 @@ Widget _buildCommissionSummary(Map wallet) {
                 ),
               ),
               Text(
-                'USD · lifetime',
+                TranslationUtils.tr('ibm_usd_lifetime'),
                 style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
               ),
             ],
@@ -1295,21 +1306,21 @@ Widget _buildCommissionSummary(Map wallet) {
             children: [
               Expanded(
                 child: _buildLegendItem(
-                  label: 'Paid',
+                  label: TranslationUtils.tr('ibm_paid'),
                   value: paid,
                   color: AppColors.primary,
                 ),
               ),
               Expanded(
                 child: _buildLegendItem(
-                  label: 'Pending',
+                  label: TranslationUtils.tr('kyc_verification_pending'),
                   value: pending,
                   color: const Color(0xFFFFB547),
                 ),
               ),
               Expanded(
                 child: _buildLegendItem(
-                  label: 'Available',
+                  label: TranslationUtils.tr('ibm_available'),
                   value: available,
                   color: const Color(0xFF00C48C),
                   highlight: true,
@@ -1327,7 +1338,7 @@ Widget _buildCommissionSummary(Map wallet) {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Total earned',
+                TranslationUtils.tr('ibm_total_earned'),
                 style: TextStyle(
                   fontSize: 11.sp,
                   color: AppColors.textSecondary,
@@ -1404,8 +1415,8 @@ Widget _buildCommissionSummary(Map wallet) {
             : '0';
 
     return _buildSectionCard(
-      'Client Funnel',
-      'from your referral links',
+      TranslationUtils.tr('ibm_client_funnel'),
+      TranslationUtils.tr('ibm_from_your_referral_links'),
       SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
@@ -1413,29 +1424,38 @@ Widget _buildCommissionSummary(Map wallet) {
           children: [
             SizedBox(
               width: 120.w,
-              child: _buildSimpleStat('Link clicks', '$visits'),
+              child: _buildSimpleStat(
+                TranslationUtils.tr('ibm_link_clicks'),
+                '$visits',
+              ),
             ),
             SizedBox(
               width: 120.w,
               child: _buildSimpleStat(
-                'Different people',
+                TranslationUtils.tr('ibm_different_people'),
                 '$uniqueVisits\n$uniquePercent%',
               ),
             ),
             SizedBox(
               width: 120.w,
               child: _buildSimpleStat(
-                'Signed up',
+                TranslationUtils.tr('ibm_signed_up'),
                 '$signUps\n$signupsPercent%',
               ),
             ),
             SizedBox(
               width: 120.w,
-              child: _buildSimpleStat('Opened account', '$accounts'),
+              child: _buildSimpleStat(
+                TranslationUtils.tr('ibm_opened_account'),
+                '$accounts',
+              ),
             ),
             SizedBox(
               width: 120.w,
-              child: _buildSimpleStat('Funded it', '$funded'),
+              child: _buildSimpleStat(
+                TranslationUtils.tr('ibm_funded_it'),
+                '$funded',
+              ),
             ),
           ],
         ),
@@ -1447,18 +1467,18 @@ Widget _buildCommissionSummary(Map wallet) {
     List rows = rowsList is List ? rowsList : [];
     if (rows.isEmpty) {
       return _buildSectionCard(
-        'Sub-IB Performance',
-        'View all',
+        TranslationUtils.tr('ibm_sub_ib_performance'),
+        TranslationUtils.tr('pmam_fund_manager_view_view_all'),
         Text(
-          'Nobody is below you yet.',
+          TranslationUtils.tr('ibm_nobody_is_below_you_yet'),
           style: TextStyle(color: AppColors.textGrey),
         ),
       );
     }
 
     return _buildSectionCard(
-      'Sub-IB Performance',
-      'View all',
+      TranslationUtils.tr('ibm_sub_ib_performance'),
+      TranslationUtils.tr('pmam_fund_manager_view_view_all'),
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1529,7 +1549,9 @@ Widget _buildCommissionSummary(Map wallet) {
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Text(
-                  isActive ? 'Low' : 'Inactive',
+                  isActive
+                      ? TranslationUtils.tr('ticket_priority_low')
+                      : TranslationUtils.tr('wallet_inactive'),
                   style: TextStyle(color: badgeColor, fontSize: 10.sp),
                 ),
               ),
@@ -1543,7 +1565,7 @@ Widget _buildCommissionSummary(Map wallet) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Net deposit',
+                    TranslationUtils.tr('ibm_net_deposit'),
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 10.sp,
@@ -1563,7 +1585,7 @@ Widget _buildCommissionSummary(Map wallet) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'You earned',
+                    TranslationUtils.tr('ibm_you_earned'),
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 10.sp,
@@ -1583,7 +1605,11 @@ Widget _buildCommissionSummary(Map wallet) {
           ),
           SizedBox(height: 8.h),
           Text(
-            '$clients clients   $active active   ${lots.toStringAsFixed(2)} lots',
+            TranslationUtils.trArgs('ibm_clients_active_lots_line', {
+              'clients': '$clients',
+              'active': '$active',
+              'lots': lots.toStringAsFixed(2),
+            }),
             style: TextStyle(color: AppColors.textGrey, fontSize: 10.sp),
           ),
         ],
@@ -1619,47 +1645,55 @@ Widget _buildCommissionSummary(Map wallet) {
         children: [
           _buildActivityCard(
             Icons.arrow_downward,
-            'Deposits',
-            'pending & approved',
-            _buildActivityListContent(deposits, 'No new deposits', true),
+            TranslationUtils.tr('transaction_history_deposits'),
+            TranslationUtils.tr('ibm_pending_and_approved'),
+            _buildActivityListContent(
+              deposits,
+              TranslationUtils.tr('ibm_no_new_deposits'),
+              true,
+            ),
             Colors.green,
           ),
           _buildActivityCard(
             Icons.arrow_upward,
-            'Withdrawals',
-            'pending & approved',
+            TranslationUtils.tr('transaction_history_withdrawals'),
+            TranslationUtils.tr('ibm_pending_and_approved'),
             _buildActivityListContent(
               withdrawals,
-              'Nobody has withdrawn.',
+              TranslationUtils.tr('ibm_nobody_has_withdrawn'),
               false,
             ),
             Colors.red,
           ),
           _buildActivityCard(
             Icons.account_balance,
-            'Payouts',
-            'you & your downline',
+            TranslationUtils.tr('ibm_payouts'),
+            TranslationUtils.tr('ibm_you_and_your_downline'),
             _buildActivityListContent(
               payouts,
-              'No payout has been taken yet.',
+              TranslationUtils.tr('ibm_no_payout_taken_yet'),
               false,
             ),
             AppColors.primary,
           ),
           _buildActivityCard(
             Icons.person_add,
-            'New accounts',
-            'whole downline',
-            _buildActivityListContent(accounts, 'No new accounts.', true),
+            TranslationUtils.tr('ibm_new_accounts'),
+            TranslationUtils.tr('ibm_whole_downline'),
+            _buildActivityListContent(
+              accounts,
+              TranslationUtils.tr('ibm_no_new_accounts'),
+              true,
+            ),
             Colors.blue,
           ),
           _buildActivityCard(
             Icons.group,
-            'Sub-IB requests',
-            'waiting on you',
+            TranslationUtils.tr('ibm_sub_ib_requests'),
+            TranslationUtils.tr('ibm_waiting_on_you'),
             _buildActivityListContent(
               pendingRequests,
-              'Nobody is waiting for an answer.',
+              TranslationUtils.tr('ibm_nobody_is_waiting_for_answer'),
               true,
             ),
             Colors.grey,
@@ -1678,7 +1712,7 @@ Widget _buildCommissionSummary(Map wallet) {
   ) {
     return Container(
       width: 220.w,
-      margin: EdgeInsets.only(right: 12.w),
+      margin: EdgeInsetsDirectional.only(end: 12.w),
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: AppColors.card,

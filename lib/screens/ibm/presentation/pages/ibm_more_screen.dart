@@ -44,7 +44,7 @@ class IbmMoreScreen extends StatelessWidget {
         ),
           ),
           title: Text(
-            'More',
+            languageService.tr('general_more'),
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
@@ -55,7 +55,7 @@ class IbmMoreScreen extends StatelessWidget {
             Obx(() {
               final balance = controller.walletBalance;
               return Padding(
-                padding: EdgeInsets.only(right: 16.w),
+                padding: EdgeInsetsDirectional.only(end: 16.w),
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                   decoration: BoxDecoration(
@@ -71,12 +71,15 @@ class IbmMoreScreen extends StatelessWidget {
                         color: AppColors.textPrimary,
                       ),
                       SizedBox(width: 4.w),
-                      Text(
-                        '\$$balance',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Text(
+                          '\$$balance',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
                     ],
@@ -114,8 +117,12 @@ class IbmMoreScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                   tabs: [
-                    Tab(text: languageService.tr('Marketing')),
-                    Tab(text: languageService.tr('Settings')),
+                    Tab(
+                      text: languageService.tr(
+                        'settings_notifications_marketing',
+                      ),
+                    ),
+                    Tab(text: languageService.tr('bottom_navigation_settings')),
                   ],
                 ),
               ),

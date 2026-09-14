@@ -41,7 +41,11 @@ class TradeWinBottomNavigation extends StatelessWidget {
 
     return SafeArea(
       child: Padding(
-        padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 8.h),
+        padding: EdgeInsetsDirectional.only(
+          start: 16.w,
+          end: 16.w,
+          bottom: 8.h,
+        ),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(32.r),

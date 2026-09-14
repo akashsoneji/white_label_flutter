@@ -81,7 +81,9 @@ class VantageMoreQuickActionsGrid extends StatelessWidget {
               final item = entry.value;
               return Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(right: idx == items.length - 1 ? 0 : 8.w),
+                  padding: EdgeInsetsDirectional.only(
+                    end: idx == items.length - 1 ? 0 : 8.w,
+                  ),
                   child: _VantageQuickActionTile(item: item),
                 ),
               );
@@ -257,7 +259,10 @@ class _VantageMiniToggle extends StatelessWidget {
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
-          alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+          alignment:
+              value
+                  ? AlignmentDirectional.centerEnd
+                  : AlignmentDirectional.centerStart,
           child: Container(
             width: 16.w,
             height: 16.w,

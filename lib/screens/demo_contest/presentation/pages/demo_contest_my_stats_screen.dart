@@ -68,7 +68,7 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
         _contest = contest;
         _stats = stats;
         if (_stats == null) {
-          _error = 'Could not load your contest stats.';
+          _error = TranslationUtils.tr('dc_could_not_load_stats');
         }
         _loading = false;
       });
@@ -109,7 +109,7 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
                   onRefresh: _loadStats,
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 32.h),
+                    padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 32.h),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -209,7 +209,7 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
             Icon(Icons.error_outline, size: 48.sp, color: AppColors.textGrey),
             SizedBox(height: 12.h),
             Text(
-              _error ?? 'Something went wrong',
+              _error ?? TranslationUtils.tr('general_something_went_wrong'),
               textAlign: TextAlign.center,
               style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.textGrey,
@@ -226,7 +226,7 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
                 ),
               ),
               onPressed: _loadStats,
-              child: const Text('Retry'),
+              child: Text(TranslationUtils.tr('edit_profile_retry')),
             ),
           ],
         ),
@@ -287,7 +287,7 @@ class _RankingBanner extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'You are ranked #${stats.rank}',
+                        '${TranslationUtils.tr('dc_you_are_ranked')} #${stats.rank}',
                         style: AppTextStyles.bodyText.copyWith(
                           color: isDark ? Colors.white : const Color(0xFF1E1B4B),
                           fontSize: 14.5.sp,
@@ -300,7 +300,7 @@ class _RankingBanner extends StatelessWidget {
                 ),
                 SizedBox(height: 3.h),
                 Text(
-                  'Keep trading and maintain proper risk management to secure or improve your position!',
+                  TranslationUtils.tr('dc_keep_trading_tip'),
                   style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textGrey,
                     fontSize: 11.sp,
@@ -343,7 +343,7 @@ class _LivePill extends StatelessWidget {
           ),
           SizedBox(width: 4.w),
           Text(
-            'LIVE',
+            TranslationUtils.tr('dc_live').toUpperCase(),
             style: TextStyle(
               color: const Color(0xFF16A34A),
               fontSize: 10.sp,
@@ -395,7 +395,7 @@ class _ParticipateAgainBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'You Can Participate Again!',
+                  TranslationUtils.tr('dc_you_can_participate_again'),
                   style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 13.5.sp,
@@ -410,7 +410,7 @@ class _ParticipateAgainBanner extends StatelessWidget {
                       fontSize: 11.sp,
                     ),
                     children: [
-                      const TextSpan(text: "You've used "),
+                      TextSpan(text: '${TranslationUtils.tr('dc_youve_used')} '),
                       TextSpan(
                         text: '${contest.myEnrollmentsCount} of ${contest.maxParticipations}',
                         style: TextStyle(
@@ -418,11 +418,13 @@ class _ParticipateAgainBanner extends StatelessWidget {
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      const TextSpan(text: ' allowed participations. '),
+                      TextSpan(
+                          text:
+                              ' ${TranslationUtils.tr('dc_allowed_participations')} '),
                       TextSpan(
                         text: contest.enrollmentType == 'free'
-                            ? 'This is a free re-entry.'
-                            : 'Entry fee applies.',
+                            ? TranslationUtils.tr('dc_free_re_entry')
+                            : TranslationUtils.tr('dc_entry_fee_applies'),
                         style: TextStyle(
                           color: contest.enrollmentType == 'free'
                               ? const Color(0xFF16A34A)
@@ -443,7 +445,7 @@ class _ParticipateAgainBanner extends StatelessWidget {
             },
             icon: Icon(Icons.add, size: 14.sp, color: Colors.white),
             label: Text(
-              'Participate Again',
+              TranslationUtils.tr('dc_participate_again'),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 11.sp,
@@ -607,9 +609,9 @@ class _HeroContestCard extends StatelessWidget {
               Expanded(
                 child: _HeroMetric(
                   icon: Icons.people_outline,
-                  label: 'PARTICIPANTS',
+                  label: TranslationUtils.tr('dc_participants').toUpperCase(),
                   value: '$totalParticipants / $maxParticipants',
-                  sub: '$filledPercent% Filled',
+                  sub: '$filledPercent% ${TranslationUtils.tr('dc_filled')}',
                 ),
               ),
               Container(
@@ -620,9 +622,9 @@ class _HeroContestCard extends StatelessWidget {
               Expanded(
                 child: _HeroMetric(
                   icon: Icons.emoji_events_outlined,
-                  label: 'PRIZE POOL',
+                  label: TranslationUtils.tr('dc_prize_pool').toUpperCase(),
                   value: '\$$poolPrize',
-                  sub: 'Total Prize Pool',
+                  sub: TranslationUtils.tr('dc_total_prize_pool'),
                 ),
               ),
               Container(
@@ -633,9 +635,9 @@ class _HeroContestCard extends StatelessWidget {
               Expanded(
                 child: _HeroMetric(
                   icon: Icons.access_time_rounded,
-                  label: 'DAYS LEFT',
-                  value: '${stats.daysLeft} Days',
-                  sub: 'to go',
+                  label: TranslationUtils.tr('dc_days_left').toUpperCase(),
+                  value: '${stats.daysLeft} ${TranslationUtils.tr('dc_days')}',
+                  sub: TranslationUtils.tr('dc_to_go'),
                 ),
               ),
             ],
@@ -735,10 +737,10 @@ class _StatsGrid extends StatelessWidget {
                 iconBg: isDark ? const Color(0xFF2A1535) : const Color(0xFFFAF5FF),
                 icon: Icons.military_tech_outlined,
                 iconColor: const Color(0xFF7C3AED),
-                label: 'Your Rank',
+                label: TranslationUtils.tr('dc_your_rank'),
                 value: '#${stats.rank}',
                 valueColor: AppColors.textPrimary,
-                subtext: 'Current standing',
+                subtext: TranslationUtils.tr('dc_current_standing'),
               ),
             ),
             SizedBox(width: 12.w),
@@ -748,10 +750,10 @@ class _StatsGrid extends StatelessWidget {
                 iconBg: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.3) : const Color(0xFFDCFCE7),
                 icon: isProfit ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
                 iconColor: returnColor,
-                label: 'Your Return',
+                label: TranslationUtils.tr('dc_your_return'),
                 value: p.returnDisplay,
                 valueColor: returnColor,
-                subtext: 'Performance',
+                subtext: TranslationUtils.tr('portfolio_performance'),
               ),
             ),
           ],
@@ -765,10 +767,10 @@ class _StatsGrid extends StatelessWidget {
                 iconBg: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                 icon: Icons.account_balance_wallet_outlined,
                 iconColor: isDark ? Colors.white70 : const Color(0xFF334155),
-                label: 'Your Equity',
+                label: TranslationUtils.tr('dc_your_equity'),
                 value: '\$${_money(p.currentEquity)}',
                 valueColor: AppColors.textPrimary,
-                subtext: 'Total account value',
+                subtext: TranslationUtils.tr('dc_total_account_value'),
               ),
             ),
             SizedBox(width: 12.w),
@@ -778,10 +780,10 @@ class _StatsGrid extends StatelessWidget {
                 iconBg: isDark ? const Color(0xFF1E1B4B) : const Color(0xFFEDE9FE),
                 icon: Icons.access_time_rounded,
                 iconColor: const Color(0xFF7C3AED),
-                label: 'Days Left',
+                label: TranslationUtils.tr('dc_days_left'),
                 value: '${stats.daysLeft}',
                 valueColor: AppColors.textPrimary,
-                subtext: 'Remaining time',
+                subtext: TranslationUtils.tr('dc_remaining_time'),
               ),
             ),
           ],
@@ -895,12 +897,12 @@ class _TradingRulesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final rules = contest?.rules ?? [];
     final fallbackRules = [
-      ('Max Leverage', contest?.tradingMaxLeverage.isNotEmpty == true ? contest!.tradingMaxLeverage : '1:200'),
-      ('Min Trade Duration', '3 min'),
-      ('Max Open Positions', '5'),
-      ('Allowed Instruments', 'All Instruments'),
-      ('Max Lots Per Trade', '10'),
-      ('Timezone', 'Dubai Time (UTC+4)'),
+      (TranslationUtils.tr('dc_max_leverage'), contest?.tradingMaxLeverage.isNotEmpty == true ? contest!.tradingMaxLeverage : '1:200'),
+      (TranslationUtils.tr('dc_min_trade_duration'), '3 ${TranslationUtils.tr('dc_minutes_short')}'),
+      (TranslationUtils.tr('dc_max_open_positions'), '5'),
+      (TranslationUtils.tr('dc_allowed_instruments'), TranslationUtils.tr('dc_all_instruments')),
+      (TranslationUtils.tr('dc_max_lots_per_trade'), '10'),
+      (TranslationUtils.tr('dc_timezone'), TranslationUtils.tr('dc_dubai_time')),
     ];
 
     final displayRules = rules.isNotEmpty
@@ -938,7 +940,7 @@ class _TradingRulesCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Trading Rules',
+                      TranslationUtils.tr('dc_trading_rules'),
                       style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.textPrimary,
                         fontSize: 14.sp,
@@ -947,7 +949,7 @@ class _TradingRulesCard extends StatelessWidget {
                     ),
                     SizedBox(height: 1.h),
                     Text(
-                      'Rules that apply during the contest period.',
+                      TranslationUtils.tr('dc_rules_apply_during_contest'),
                       style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.textGrey,
                         fontSize: 10.5.sp,
@@ -1036,9 +1038,9 @@ class _PrizeStructureCard extends StatelessWidget {
     final prizes = contest?.prizes ?? [];
 
     final fallbackPrizes = [
-      ContestPrize(label: '1st Place', amount: 5000),
-      ContestPrize(label: '2nd Place', amount: 2500),
-      ContestPrize(label: '3rd Place', amount: 1000),
+      ContestPrize(label: TranslationUtils.tr('dc_first_place'), amount: 5000),
+      ContestPrize(label: TranslationUtils.tr('dc_second_place'), amount: 2500),
+      ContestPrize(label: TranslationUtils.tr('dc_third_place'), amount: 1000),
     ];
 
     final displayPrizes = prizes.isNotEmpty ? prizes : fallbackPrizes;
@@ -1074,7 +1076,7 @@ class _PrizeStructureCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Prize Structure',
+                      TranslationUtils.tr('dc_prize_structure'),
                       style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.textPrimary,
                         fontSize: 14.sp,
@@ -1083,7 +1085,7 @@ class _PrizeStructureCard extends StatelessWidget {
                     ),
                     SizedBox(height: 1.h),
                     Text(
-                      'Rewards for top-performing traders.',
+                      TranslationUtils.tr('dc_rewards_for_top_traders'),
                       style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.textGrey,
                         fontSize: 10.5.sp,
@@ -1110,7 +1112,7 @@ class _PrizeStructureCard extends StatelessWidget {
               index: i + 1,
               label: displayPrizes[i].label.toLowerCase().contains('place')
                   ? displayPrizes[i].label
-                  : '${displayPrizes[i].label} Place',
+                  : '${displayPrizes[i].label} ${TranslationUtils.tr('dc_place')}',
               amount: displayPrizes[i].amount,
             ),
           ],
@@ -1139,7 +1141,7 @@ class _PrizeStructureCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'View Full Leaderboard',
+                    TranslationUtils.tr('dc_view_full_leaderboard'),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 13.5.sp,

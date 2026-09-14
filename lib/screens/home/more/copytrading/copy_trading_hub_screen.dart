@@ -4,6 +4,7 @@ import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_hub_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -28,7 +29,7 @@ class CopyTradingHubScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Copy Trading',
+          TranslationUtils.tr('more_copy_trading'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             color: AppColors.textPrimary,
@@ -54,34 +55,47 @@ class CopyTradingHubScreen extends StatelessWidget {
             final masterTile = switch (status) {
               CopyTradingMasterApplicationStatus.pending => _HubMenuItem(
                   icon: Icons.access_time,
-                  label: 'Pending Review',
-                  subtitle: code.isEmpty ? null : 'Code: $code',
-                  trailing: _StatusPill(text: 'Pending', color: AppColors.warning),
+                  label: TranslationUtils.tr('copy_trading_hub_screen_pending_review'),
+                  subtitle: code.isEmpty
+                      ? null
+                      : TranslationUtils.trArgs('copy_trading_hub_code', {'code': code}),
+                  trailing: _StatusPill(
+                    text: TranslationUtils.tr('transaction_history_pending'),
+                    color: AppColors.warning,
+                  ),
                   onTap: () => Get.to(() => _PendingReviewScreen(masterCode: code)),
                 ),
               CopyTradingMasterApplicationStatus.approved => _HubMenuItem(
                   icon: Icons.verified,
-                  label: 'Master Dashboard',
-                  subtitle: code.isEmpty ? null : 'Code: $code',
-                  trailing: _StatusPill(text: 'Active', color: AppColors.green),
+                  label: TranslationUtils.tr('master_dashboard_screen_master_dashboard'),
+                  subtitle: code.isEmpty
+                      ? null
+                      : TranslationUtils.trArgs('copy_trading_hub_code', {'code': code}),
+                  trailing: _StatusPill(
+                    text: TranslationUtils.tr('wallet_active'),
+                    color: AppColors.green,
+                  ),
                   onTap: () => Get.to(() => MasterDashboardScreen(masterCode: code)),
                 ),
               CopyTradingMasterApplicationStatus.rejected => _HubMenuItem(
                   icon: Icons.error_outline,
-                  label: 'Become a Master',
-                  subtitle: 'Application rejected — apply again',
-                  trailing: _StatusPill(text: 'Rejected', color: AppColors.error),
+                  label: TranslationUtils.tr('copy_trading_hub_screen_become_master'),
+                  subtitle: TranslationUtils.tr('copy_trading_hub_screen_application_rejected_apply_again'),
+                  trailing: _StatusPill(
+                    text: TranslationUtils.tr('kyc_verification_rejected'),
+                    color: AppColors.error,
+                  ),
                   onTap: () => Get.to(() => const _BecomeMasterScreen()),
                 ),
               CopyTradingMasterApplicationStatus.unknown => _HubMenuItem(
                   icon: Icons.help_outline,
-                  label: 'Become a Master',
-                  subtitle: 'Status unknown — try refresh',
+                  label: TranslationUtils.tr('copy_trading_hub_screen_become_master'),
+                  subtitle: TranslationUtils.tr('copy_trading_hub_screen_status_unknown_try_refresh'),
                   onTap: () => Get.to(() => const _BecomeMasterScreen()),
                 ),
               _ => _HubMenuItem(
                   icon: Icons.tune,
-                  label: 'Become a Master',
+                  label: TranslationUtils.tr('copy_trading_hub_screen_become_master'),
                   onTap: () => Get.to(() => const _BecomeMasterScreen()),
                 ),
             };
@@ -108,17 +122,25 @@ class CopyTradingHubScreen extends StatelessWidget {
                   children: [
                     _HubMenuItem(
                       icon: Icons.explore_outlined,
-                      label: 'Explore Masters',
+                      label: TranslationUtils.tr('explore_masters_screen_explore_masters'),
                       onTap: () => Get.to(() => const ExploreMastersScreen()),
                     ),
                     _divider(),
                     _HubMenuItem(
                       icon: Icons.copy_all_outlined,
-                      label: status == CopyTradingMasterApplicationStatus.approved ? 'My Copies' : 'My Investments',
+                      label: status == CopyTradingMasterApplicationStatus.approved
+                          ? TranslationUtils.tr('copy_trading_my_copies')
+                          : TranslationUtils.tr('my_investments_screen_my_investments'),
                       trailing:
                           hasSubs
-                              ? _StatusPill(text: 'Active', color: AppColors.green)
-                              : _StatusPill(text: 'None', color: AppColors.textGrey),
+                              ? _StatusPill(
+                                  text: TranslationUtils.tr('wallet_active'),
+                                  color: AppColors.green,
+                                )
+                              : _StatusPill(
+                                  text: TranslationUtils.tr('common_none'),
+                                  color: AppColors.textGrey,
+                                ),
                       onTap: () {
                         if (status == CopyTradingMasterApplicationStatus.approved) {
                           Get.to(() => const MyCopiesScreen());
@@ -282,7 +304,7 @@ class _PendingReviewScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        title: Text('Pending Review'),
+        title: Text(TranslationUtils.tr('copy_trading_hub_screen_pending_review')),
       ),
       body: Center(
         child: Container(
@@ -299,13 +321,13 @@ class _PendingReviewScreen extends StatelessWidget {
               Icon(Icons.access_time, size: 42.r, color: AppColors.warning),
               SizedBox(height: 10.h),
               Text(
-                'Your master application is under review.',
+                TranslationUtils.tr('copy_trading_hub_screen_your_master_application_is_under_review'),
                 textAlign: TextAlign.center,
                 style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
               ),
               if (masterCode.isNotEmpty) ...[
                 SizedBox(height: 6.h),
-                Text('Code: $masterCode', style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey)),
+                Text(TranslationUtils.trArgs('copy_trading_hub_code', {'code': masterCode}), style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey)),
               ],
               SizedBox(height: 14.h),
               ElevatedButton(
@@ -317,7 +339,7 @@ class _PendingReviewScreen extends StatelessWidget {
                           ? AppColors.textPrimaryLight
                           : AppColors.onColoredBackground,
                 ),
-                child: Text('OK'),
+                child: Text(TranslationUtils.tr('general_ok')),
               ),
             ],
           ),
@@ -369,7 +391,7 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
          leading: AppSvgBackButton(
           onPressed: () => AppSvgBackButton.popRoute(context),
         ),
-        title: Text('Become a Master', style: AppTextStyles.screenTitle),
+        title: Text(TranslationUtils.tr('copy_trading_hub_screen_become_master'), style: AppTextStyles.screenTitle),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.r),
@@ -403,26 +425,26 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
               children: [
 
                 LabeledAppTextField(
-                  label: 'Nickname *',
+                  label: TranslationUtils.tr('copy_trading_hub_nickname_required'),
                   controller: _nicknameCtrl,
                   keyboardType: TextInputType.text,
-                  hintText: 'e.g. Alpha Trader',
+                  hintText: TranslationUtils.tr('become_master_tab_eg_alpha_trader'),
                   onChanged: (s) => hub.masterApplyNicknameDraft.value = s,
                 ),
                 SizedBox(height: 16.h),
                 LabeledAppTextField(
-                  label: 'Strategy Description *',
+                  label: TranslationUtils.tr('copy_trading_hub_strategy_description_required'),
                   controller: _strategyCtrl,
                   keyboardType: TextInputType.text,
-                  hintText: 'e.g. Conservative gold scalping strategy',
+                  hintText: TranslationUtils.tr('become_master_tab_eg_conservative_gold_scalping'),
                   onChanged: (s) => hub.masterApplyStrategyDraft.value = s,
                 ),
                 SizedBox(height: 16.h),
                 LabeledAppTextField(
-                  label: 'Risk Info *',
+                  label: TranslationUtils.tr('copy_trading_hub_risk_info_required'),
                   controller: _riskInfoCtrl,
                   keyboardType: TextInputType.text,
-                  hintText: 'e.g. Drawdown can reach up to 15%.',
+                  hintText: TranslationUtils.tr('become_master_tab_eg_drawdown_can_reach'),
                   onChanged: (s) => hub.masterApplyRiskInfoDraft.value = s,
                 ),
                 SizedBox(height: 12.h),
@@ -448,9 +470,9 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 4.w),
+                      padding: EdgeInsetsDirectional.only(start: 4.w),
                       child: Text(
-                        'I accept the Terms & Conditions',
+                        TranslationUtils.tr('copy_trading_hub_screen_accept_the_terms_conditions'),
                         style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textPrimary),
                       ),
                     ),
@@ -476,13 +498,13 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
                             if (res.success) {
                               Get.back();
                               CustomToastService.showSuccess(
-                                title: 'Submitted',
-                                message: res.message ?? 'Application submitted',
+                                title: TranslationUtils.tr('tw_submitted'),
+                                message: res.message ?? TranslationUtils.tr('ibm_application_submitted'),
                                 duration: const Duration(milliseconds: 2500),
                               );
                             } else {
                               CustomToastService.showError(
-                                title: 'Failed',
+                                title: TranslationUtils.tr('transaction_history_failed'),
                                 message: res.message ?? hub.errorMessage.value,
                                 duration: const Duration(milliseconds: 2500),
                               );
@@ -509,7 +531,7 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
                             ),
                           )
                         : Text(
-                            'Apply',
+                            TranslationUtils.tr('general_apply'),
                             style: AppTextStyles.button.copyWith(color: applyBtnFg),
                           ),
                   ),

@@ -151,7 +151,7 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
     return Container(
       width: 163.5,
       height: 98,
-      padding: EdgeInsets.fromLTRB(14, 16, 14, 16),
+      padding: EdgeInsetsDirectional.fromSTEB(14, 16, 14, 16),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(10),
@@ -194,9 +194,9 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                     ),
                   ),
                   // Status indicator
-                  Positioned(
+                  PositionedDirectional(
                     top: 0,
-                    right: 0,
+                    end: 0,
                     child: Container(
                       width: 20.w,
                       height: 20.w,
@@ -288,7 +288,7 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
       ),
       child: Text(
         _isApplicationSubmitted
-            ? 'IB Dashboard'
+            ? languageService.tr('more_dashboard')
             : languageService.tr('submit_ib_application'),
         style: AppTextStyles.button.copyWith(
           fontSize: 16.sp,
@@ -349,7 +349,7 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
-              'I accept the IB Terms and conditions',
+              languageService.tr('ibm_accept_ib_terms_and_conditions'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w400,
@@ -377,7 +377,9 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
       Get.dialog(
         Center(
           child: CommonLoadingWidget(
-            message: 'Submitting IB application...',
+            message: Get.find<LanguageService>().tr(
+              'partnership_program_submitting_application',
+            ),
             size: 50.0,
             color: AppColors.primary,
           ),
@@ -419,7 +421,8 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
         Get.back();
       }
       CustomToastService.showError(
-        message: 'Error submitting IB application: $e',
+        message:
+            '${Get.find<LanguageService>().tr('partnership_program_error_submitting_application')}: $e',
       );
     }
   }

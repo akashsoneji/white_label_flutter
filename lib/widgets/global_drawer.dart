@@ -23,12 +23,12 @@ class GlobalDrawer extends StatelessWidget {
             // Header
             Container(
               width: double.infinity,
-              padding: EdgeInsets.fromLTRB(16.w, 60.h, 16.w, 20.h),
+              padding: EdgeInsetsDirectional.fromSTEB(16.w, 60.h, 16.w, 20.h),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [AppColors.primary, AppColors.primary],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
                 ),
               ),
               child: Column(
@@ -91,8 +91,10 @@ class GlobalDrawer extends StatelessWidget {
                       Get.back(closeOverlays: true);
                       if (Get.isRegistered<AppNotificationController>()) {
                         Get.find<AppNotificationController>().showInfo(
-                          message: 'Notifications coming soon',
-                          title: 'Info',
+                          message: languageService.tr(
+                            'global_drawer_notifications_coming_soon',
+                          ),
+                          title: languageService.tr('general_info'),
                         );
                       }
                     },

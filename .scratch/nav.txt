@@ -1,7 +1,0 @@
-151:             onTap: () => _showAccountBottomSheet(context),
-260:                   onTap: () => _selectTab(tab),
-314:             onTap: (sym) {
-318:                 Get.to(() => IQuoteChartScreen(symbol: sym));
-379:   final void Function(String)? onTap;
-385:     this.onTap,
-457:         onTap: () => onTap?.call(sym),

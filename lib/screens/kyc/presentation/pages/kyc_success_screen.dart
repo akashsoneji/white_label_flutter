@@ -6,6 +6,7 @@ import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/widgets/kyc_scaffold.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'dart:async';
 
 class KycSuccessScreen extends StatefulWidget {
@@ -230,7 +231,9 @@ class _KycSuccessScreenState extends State<KycSuccessScreen>
                     child: FadeTransition(
                       opacity: _titleOpacity,
                       child: Text(
-                        'Withdrawal Method Added!',
+                        TranslationUtils.tr(
+                          'kyc_success_screen_withdrawal_method_added',
+                        ),
                         style: AppTextStyles.centerbodyHeading,
                         textAlign: TextAlign.center,
                       ),
@@ -250,7 +253,9 @@ class _KycSuccessScreenState extends State<KycSuccessScreen>
                     child: FadeTransition(
                       opacity: _messageOpacity,
                       child: Text(
-                        'Your withdrawal method has been added and is pending verification.',
+                        TranslationUtils.tr(
+                          'kyc_success_screen_your_withdrawal_method_has_been_added',
+                        ),
                         style: AppTextStyles.grey14400h57,
                         textAlign: TextAlign.center,
                       ),

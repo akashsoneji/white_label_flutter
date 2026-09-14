@@ -51,24 +51,6 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 children: [
-                  // System default option
-                  _buildLanguageOption(
-                    languageCode: 'system',
-                    languageName: _languageService.tr(
-                      'settings_language_system',
-                    ),
-                    isSelected: _selectedLanguage == 'system',
-                    onTap: () => _selectLanguage('system'),
-                  ),
-
-                  SizedBox(height: 16),
-
-                  // Divider
-                  Container(height: 1, color: AppColors.border),
-
-                  SizedBox(height: 16),
-
-                  // Supported languages
                   ..._languageService.getSupportedLanguages().entries.map(
                     (entry) => _buildLanguageOption(
                       languageCode: entry.key,
@@ -110,7 +92,9 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
                           SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'RTL (Right-to-Left) layout is enabled for this language. The interface will automatically adjust for better readability.',
+                              _languageService.tr(
+                                'language_selector_rtl_notice',
+                              ),
                               style: AppTextStyles.subheading.copyWith(
                                 color: AppColors.primary,
                               ),
@@ -188,7 +172,7 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
             padding: EdgeInsets.all(16),
             child: Row(
               children: [
-                // Language flag/icon
+                // Country code chip
                 Container(
                   width: 40,
                   height: 40,
@@ -198,8 +182,11 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      _getLanguageFlag(languageCode),
-                      style: AppTextStyles.bodyText.copyWith(fontSize: 20),
+                      _countryChipFor(languageCode),
+                      style: AppTextStyles.label.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
@@ -220,7 +207,7 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
                       ),
                       if (isRTL)
                         Text(
-                          'RTL Layout',
+                          _languageService.tr('rtl_wrapper_rtl'),
                           style: AppTextStyles.subheading.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -252,24 +239,18 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
     );
   }
 
-  String _getLanguageFlag(String languageCode) {
-    switch (languageCode) {
-      case 'en':
-        return '🇺🇸';
-      case 'ar':
-        return '🇸🇦';
-      case 'tr':
-        return '🇹🇷';
-      case 'hi':
-        return '🇮🇳';
-      case 'es':
-        return '🇪🇸';
-      case 'system':
-        return '⚙️';
-      default:
-        return '🌐';
-    }
-  }
+  /// Country chip shown next to each language, matching the reference design.
+  static const Map<String, String> _countryChips = {
+    'en': 'GB',
+    'ar': 'SA',
+    'es': 'ES',
+    'id': 'ID',
+    'vi': 'VN',
+    'zh': 'CN',
+  };
+
+  String _countryChipFor(String languageCode) =>
+      _countryChips[languageCode] ?? languageCode.toUpperCase();
 
   void _selectLanguage(String languageCode) {
     setState(() {
@@ -289,11 +270,7 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
         barrierDismissible: false,
       );
 
-      if (_selectedLanguage == 'system') {
-        await _languageService.initializeWithSystemLanguage();
-      } else {
-        await _languageService.changeLanguage(_selectedLanguage!);
-      }
+      await _languageService.changeLanguage(_selectedLanguage!);
 
       // Close loading dialog
       Get.back(closeOverlays: true);
@@ -301,8 +278,10 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
       // Show success message
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showSuccess(
-          message: 'Language changed successfully',
-          title: 'Success',
+          message: _languageService.tr(
+            'settings_language_changed_successfully',
+          ),
+          title: _languageService.tr('general_success'),
         );
       }
 
@@ -316,7 +295,7 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
           message: 'Failed to change language: $e',
-          title: 'Error',
+          title: _languageService.tr('general_error_prefix'),
         );
       }
     }

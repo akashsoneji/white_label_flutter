@@ -364,7 +364,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.fromLTRB(24, 0, 24, 16),
+                  padding: EdgeInsetsDirectional.fromSTEB(24, 0, 24, 16),
                   child: Center(
                     child: TextButton(
                       onPressed: () {

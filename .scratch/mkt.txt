@@ -1,8 +1,0 @@
-Analyzing iquote_market_screen.dart...                          
-
-warning • The value of the field '_ls' isn't used. Try removing the field, or using it • lib/screens/home/brands/iquote/iquote_market_screen.dart:37:30 • unused_field
-warning • The value of the field '_sym' isn't used. Try removing the field, or using it • lib/screens/home/brands/iquote/iquote_market_screen.dart:38:37 • unused_field
-warning • The declaration '_buildTabBar' isn't referenced. Try removing the declaration of '_buildTabBar' • lib/screens/home/brands/iquote/iquote_market_screen.dart:246:10 • unused_element
-warning • The declaration '_matchesBroaderCategory' isn't referenced. Try removing the declaration of '_matchesBroaderCategory' • lib/screens/home/brands/iquote/iquote_market_screen.dart:327:8 • unused_element
-
-4 issues found. (ran in 3.7s)

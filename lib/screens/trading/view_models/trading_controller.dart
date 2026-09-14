@@ -6,6 +6,7 @@ import 'package:crm_app/models/trade_history_model.dart';
 import 'package:crm_app/models/order_types.dart';
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/screens/trading/data/repositories/trading_repository.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/utils/app_logger.dart';
@@ -1191,12 +1192,12 @@ class TradingController extends GetxController {
           update();
         }
 
-        _setSuccess('Position closed successfully');
+        _setSuccess(TranslationUtils.tr('trading_controller_position_closed_successfully'));
       } else {
-        _setError(response.message ?? 'Failed to close position');
+        _setError(response.message ?? TranslationUtils.tr('iquote_failed_close_position'));
       }
     } catch (e) {
-      _setError('Failed to close position: $e');
+      _setError('${TranslationUtils.tr('iquote_failed_close_position')}: $e');
     } finally {
       _setLoading(false);
     }
@@ -1206,7 +1207,7 @@ class TradingController extends GetxController {
     return _bulkClose(
       mt5Account: mt5Account,
       select: (_) => true,
-      summary: 'All positions closed successfully',
+      summary: TranslationUtils.tr('trading_controller_all_positions_closed_successfully'),
     );
   }
 
@@ -1214,14 +1215,14 @@ class TradingController extends GetxController {
   /// bottom sheets). Sends a single POST with `position_ids`.
   Future<void> closePositions(List<TradePosition> positions) async {
     if (positions.isEmpty) {
-      _setError('No positions found to close');
+      _setError(TranslationUtils.tr('trading_controller_no_positions_found_to_close'));
       return;
     }
     final mt5Account = positions.first.accountId;
     return _bulkClose(
       mt5Account: mt5Account,
       select: (p) => positions.any((x) => x.orderId == p.orderId),
-      summary: 'All positions closed successfully',
+      summary: TranslationUtils.tr('trading_controller_all_positions_closed_successfully'),
     );
   }
 
@@ -1271,7 +1272,7 @@ class TradingController extends GetxController {
         }
 
         // Show API response message if available
-        _setSuccess(response.message ?? 'Position closed successfully');
+        _setSuccess(response.message ?? TranslationUtils.tr('trading_controller_position_closed_successfully'));
 
         // Play trade close sound when position is closed successfully
         try {
@@ -1281,11 +1282,11 @@ class TradingController extends GetxController {
 
         return true;
       } else {
-        _setError(response.message ?? 'Failed to close position');
+        _setError(response.message ?? TranslationUtils.tr('iquote_failed_close_position'));
         return false;
       }
     } catch (e) {
-      _setError('Failed to close position: $e');
+      _setError('${TranslationUtils.tr('iquote_failed_close_position')}: $e');
       return false;
     } finally {
       _setLoading(false);
@@ -1306,15 +1307,15 @@ class TradingController extends GetxController {
 
       // Validate inputs
       if (mt5Account.isEmpty) {
-        _setError('MT5 account is required');
+        _setError(TranslationUtils.tr('trading_controller_mt5_account_is_required'));
         return false;
       }
       if (positionId <= 0) {
-        _setError('Invalid position ID');
+        _setError(TranslationUtils.tr('trading_controller_invalid_position_id'));
         return false;
       }
       if (stopLoss == null && takeProfit == null) {
-        _setError('At least one of Stop Loss or Take Profit must be provided');
+        _setError(TranslationUtils.tr('trading_controller_at_least_one_of_stop_loss'));
         return false;
       }
 
@@ -1345,12 +1346,12 @@ class TradingController extends GetxController {
         return true;
       } else {
         _setError(
-          response.message ?? 'Failed to update Take Profit and Stop Loss',
+          response.message ?? TranslationUtils.tr('trading_controller_failed_to_update_take_profit'),
         );
         return false;
       }
     } catch (e) {
-      _setError('Failed to update Take Profit and Stop Loss: $e');
+      _setError('${TranslationUtils.tr('trading_controller_failed_to_update_take_profit')}: $e');
       return false;
     } finally {
       _setLoading(false);
@@ -1372,11 +1373,11 @@ class TradingController extends GetxController {
 
       // Validate inputs
       if (mt5Account.isEmpty) {
-        _setError('MT5 account is required');
+        _setError(TranslationUtils.tr('trading_controller_mt5_account_is_required'));
         return false;
       }
       if (orderId <= 0) {
-        _setError('Invalid order ID');
+        _setError(TranslationUtils.tr('trading_controller_invalid_order_id'));
         return false;
       }
 
@@ -1412,12 +1413,12 @@ class TradingController extends GetxController {
         return true;
       } else {
         _setError(
-          response.message ?? 'Failed to update Pending Order',
+          response.message ?? TranslationUtils.tr('trading_controller_failed_to_update_pending_order'),
         );
         return false;
       }
     } catch (e) {
-      _setError('Failed to update Pending Order: $e');
+      _setError('${TranslationUtils.tr('trading_controller_failed_to_update_pending_order')}: $e');
       return false;
     } finally {
       _setLoading(false);
@@ -1438,7 +1439,7 @@ class TradingController extends GetxController {
         accountToUse = _marketPositions.first.accountId;
       }
       if (accountToUse.isEmpty) {
-        _setError('No MT5 account found to close positions');
+        _setError(TranslationUtils.tr('trading_controller_no_mt5_account_found_to_close'));
         return;
       }
       final positionsToClose =
@@ -1446,7 +1447,7 @@ class TradingController extends GetxController {
               .where((p) => p.accountId == accountToUse && select(p))
               .toList();
       if (positionsToClose.isEmpty) {
-        _setError('No positions found to close');
+        _setError(TranslationUtils.tr('trading_controller_no_positions_found_to_close'));
         return;
       }
       final positionIds =
@@ -1455,7 +1456,7 @@ class TradingController extends GetxController {
               .whereType<int>()
               .toList();
       if (positionIds.isEmpty) {
-        _setError('No valid position IDs found');
+        _setError(TranslationUtils.tr('trading_controller_no_valid_position_ids_found'));
         return;
       }
       final response = await _tradingRepo.closePositionByPositionId(
@@ -1475,10 +1476,10 @@ class TradingController extends GetxController {
           await AudioService.playTradeCloseSound();
         } catch (e) {}
       } else {
-        _setError(response.message ?? 'Failed to close positions');
+        _setError(response.message ?? TranslationUtils.tr('iquote_failed_close_positions'));
       }
     } catch (e) {
-      _setError('Failed to close positions: $e');
+      _setError('${TranslationUtils.tr('iquote_failed_close_positions')}: $e');
     } finally {
       _setLoading(false);
     }
@@ -1488,7 +1489,7 @@ class TradingController extends GetxController {
     return _bulkClose(
       mt5Account: mt5Account,
       select: (p) => p.profitLoss > 0,
-      summary: 'All profitable positions closed successfully',
+      summary: TranslationUtils.tr('trading_controller_all_profitable_positions_closed'),
     );
   }
 
@@ -1496,7 +1497,7 @@ class TradingController extends GetxController {
     return _bulkClose(
       mt5Account: mt5Account,
       select: (p) => p.profitLoss < 0,
-      summary: 'All losing positions closed successfully',
+      summary: TranslationUtils.tr('trading_controller_all_losing_positions_closed'),
     );
   }
 
@@ -1504,7 +1505,7 @@ class TradingController extends GetxController {
     return _bulkClose(
       mt5Account: mt5Account,
       select: (p) => p.action == 'Buy',
-      summary: 'All long positions closed successfully',
+      summary: TranslationUtils.tr('trading_controller_all_long_positions_closed'),
     );
   }
 
@@ -1512,7 +1513,7 @@ class TradingController extends GetxController {
     return _bulkClose(
       mt5Account: mt5Account,
       select: (p) => p.action == 'Sell',
-      summary: 'All short positions closed successfully',
+      summary: TranslationUtils.tr('trading_controller_all_short_positions_closed'),
     );
   }
 
@@ -1589,14 +1590,17 @@ class TradingController extends GetxController {
     _errorMessage.value = error;
     if (error.isNotEmpty) {
       // Get.snackbar('Error', error, snackPosition: SnackPosition.TOP);
-      CustomToastService.showError(title: 'Error', message: error);
+      CustomToastService.showError(
+        title: TranslationUtils.tr('general_error'),
+        message: error,
+      );
     }
   }
 
   void _setSuccess(String message) {
     _successMessage.value = message;
     if (message.isNotEmpty) {
-      CustomToastService.showSuccess(title: 'Success', message: message);
+      CustomToastService.showSuccess(title: TranslationUtils.tr('create_account_success'), message: message);
       // Get.snackbar('Success', message, snackPosition: SnackPosition.TOP);
     }
   }
@@ -1672,7 +1676,7 @@ class TradingController extends GetxController {
         // Trigger full UI rebuild
         update();
 
-        _setSuccess('Position closed successfully');
+        _setSuccess(TranslationUtils.tr('trading_controller_position_closed_successfully'));
 
         // Play trade close sound
         try {
@@ -1682,12 +1686,12 @@ class TradingController extends GetxController {
       } else {
         // Failure: Un-mark as deleted so it can resume receiving WebSocket updates
         _deletedPositionIds.remove(positionId.toString());
-        _setError(response.message ?? 'Failed to close position');
+        _setError(response.message ?? TranslationUtils.tr('iquote_failed_close_position'));
       }
     } catch (e) {
       // Error: Un-mark as deleted
       _deletedPositionIds.remove(positionId.toString());
-      _setError('Failed to close position: $e');
+      _setError('${TranslationUtils.tr('iquote_failed_close_position')}: $e');
     } finally {
       _setLoading(false);
     }
@@ -1739,7 +1743,7 @@ class TradingController extends GetxController {
         // Trigger full UI rebuild
         update();
 
-        _setSuccess('Order cancelled successfully');
+        _setSuccess(TranslationUtils.tr('trading_controller_order_cancelled_successfully'));
         return true;
       } else {
         // Check if error is "not found" - means order was already closed
@@ -1754,7 +1758,7 @@ class TradingController extends GetxController {
           return true;
         } else {
           _deletedPendingOrderIds.remove(orderId);
-          _setError(response.message ?? 'Failed to cancel order');
+          _setError(response.message ?? TranslationUtils.tr('iquote_failed_cancel_order'));
           _cancellingOrderIds.remove(orderId);
           return false;
         }
@@ -1772,7 +1776,7 @@ class TradingController extends GetxController {
         update();
         return true;
       } else {
-        _setError('Failed to cancel order: $e');
+        _setError('${TranslationUtils.tr('iquote_failed_cancel_order')}: $e');
         return false;
       }
     } finally {
@@ -1796,7 +1800,7 @@ class TradingController extends GetxController {
       _clearError();
 
       if (orderIds.isEmpty) {
-        _setError('No orders to close');
+        _setError(TranslationUtils.tr('trading_controller_no_orders_to_close'));
         return;
       }
 
@@ -1839,7 +1843,10 @@ class TradingController extends GetxController {
         // Use API response message if available, otherwise use default
         _setSuccess(
           response.message ??
-              '${existingOrders.length} orders cancelled successfully',
+              TranslationUtils.trArgs(
+                'trading_controller_count_orders_cancelled_successfully',
+                {'count': '${existingOrders.length}'},
+              ),
         );
 
         // Remove from list immediately after successful API call
@@ -1861,7 +1868,7 @@ class TradingController extends GetxController {
           _pendingPositions.refresh(); // Force UI update
         } else {
           // Real error - show it
-          _setError(response.message ?? 'Failed to cancel orders');
+          _setError(response.message ?? TranslationUtils.tr('trading_controller_failed_to_cancel_orders'));
         }
       }
     } catch (e) {
@@ -1878,7 +1885,7 @@ class TradingController extends GetxController {
         }
       } else {
         // Real error - show it
-        _setError('Failed to cancel orders: $e');
+        _setError('${TranslationUtils.tr('trading_controller_failed_to_cancel_orders')}: $e');
       }
     } finally {
       // Remove all orders from tracking set after a short delay
@@ -1927,7 +1934,7 @@ class TradingController extends GetxController {
           _tradeHistorySummary.value = null;
           update(['account_info']);
         }
-        _setError('No active trading account.');
+        _setError(TranslationUtils.tr('vantage_chart_layout_no_active_trading_account'));
         return;
       }
 
@@ -1993,10 +2000,10 @@ class TradingController extends GetxController {
         // Update closed positions for compatibility with existing UI
         _updateClosedPositionsFromHistory();
       } else {
-        _setError(response.message ?? 'Failed to load trade history');
+        _setError(response.message ?? TranslationUtils.tr('trading_controller_failed_to_load_trade_history'));
       }
     } catch (e) {
-      _setError('Failed to load trade history: $e');
+      _setError('${TranslationUtils.tr('trading_controller_failed_to_load_trade_history')}: $e');
     } finally {
       _isLoadingHistory.value = false;
     }
@@ -2475,14 +2482,14 @@ class TradingController extends GetxController {
   String? validateOrderPrice(String price, OrderType orderType) {
     if (price.isEmpty) {
       if (orderType.requiresPrice) {
-        return "Please add price!!";
+        return TranslationUtils.tr('trading_controller_please_add_price');
       }
       return null;
     }
 
     final priceValue = double.tryParse(price);
     if (priceValue == null || priceValue <= 0) {
-      return "Please enter a valid price";
+      return TranslationUtils.tr('price_alert_validation_price');
     }
 
     final currentPrice =
@@ -2493,25 +2500,25 @@ class TradingController extends GetxController {
       case OrderType.buyLimit:
         final difference = currentPrice - priceValue;
         if (difference < pipGap) {
-          return "Price too close to current market price (need ${pipGap.toStringAsFixed(2)} gap, have ${difference.toStringAsFixed(2)})";
+          return _priceTooCloseMessage(pipGap, difference);
         }
         break;
       case OrderType.sellLimit:
         final difference = priceValue - currentPrice;
         if (difference < pipGap) {
-          return "Price too close to current market price (need ${pipGap.toStringAsFixed(2)} gap, have ${difference.toStringAsFixed(2)})";
+          return _priceTooCloseMessage(pipGap, difference);
         }
         break;
       case OrderType.buyStop:
         final difference = priceValue - currentPrice;
         if (difference < pipGap) {
-          return "Price too close to current market price (need ${pipGap.toStringAsFixed(2)} gap, have ${difference.toStringAsFixed(2)})";
+          return _priceTooCloseMessage(pipGap, difference);
         }
         break;
       case OrderType.sellStop:
         final difference = currentPrice - priceValue;
         if (difference < pipGap) {
-          return "Price too close to current market price (need ${pipGap.toStringAsFixed(2)} gap, have ${difference.toStringAsFixed(2)})";
+          return _priceTooCloseMessage(pipGap, difference);
         }
         break;
       default:
@@ -2519,6 +2526,16 @@ class TradingController extends GetxController {
     }
 
     return null;
+  }
+
+  String _priceTooCloseMessage(double pipGap, double difference) {
+    return TranslationUtils.trArgs(
+      'trading_controller_price_too_close_to_current_market',
+      {
+        'gap': pipGap.toStringAsFixed(2),
+        'have': difference.toStringAsFixed(2),
+      },
+    );
   }
 
   /// Validate SL/TP values
@@ -2540,12 +2557,12 @@ class TradingController extends GetxController {
       if (orderType.isBuyOrder) {
         // For buy orders, TP should be above entry price
         if (tpPriceValue <= entryPriceValue + sltpGap) {
-          return "Take Profit should be above entry price";
+          return TranslationUtils.tr('trading_controller_take_profit_should_be_above_entry');
         }
       } else {
         // For sell orders, TP should be below entry price
         if (tpPriceValue >= entryPriceValue - sltpGap) {
-          return "Take Profit should be below entry price";
+          return TranslationUtils.tr('trading_controller_take_profit_should_be_below_entry');
         }
       }
     }
@@ -2555,12 +2572,12 @@ class TradingController extends GetxController {
       if (orderType.isBuyOrder) {
         // For buy orders, SL should be below entry price
         if (slPriceValue >= entryPriceValue - sltpGap) {
-          return "Stop Loss should be below entry price";
+          return TranslationUtils.tr('trading_controller_stop_loss_should_be_below_entry');
         }
       } else {
         // For sell orders, SL should be above entry price
         if (slPriceValue <= entryPriceValue + sltpGap) {
-          return "Stop Loss should be above entry price";
+          return TranslationUtils.tr('trading_controller_stop_loss_should_be_above_entry');
         }
       }
     }
@@ -2595,14 +2612,14 @@ class TradingController extends GetxController {
 
       // Validate inputs
       if (symbol.isEmpty) {
-        _setError('Symbol is required');
+        _setError(TranslationUtils.tr('trading_controller_symbol_is_required'));
         return false;
       }
 
       if (volume.isEmpty ||
           double.tryParse(volume) == null ||
           double.parse(volume) <= 0) {
-        _setError('Please add lot size!!');
+        _setError(TranslationUtils.tr('trading_controller_please_add_lot_size'));
         return false;
       }
 
@@ -2719,17 +2736,17 @@ API Response:
           // Don't fail the order if audio fails
         }
 
-        _setSuccess('Order placed successfully');
+        _setSuccess(TranslationUtils.tr('chart_order_placed_success'));
         return true;
       } else {
         AppLogger.error('Failed to place order: ${response.message}');
         final accountLabel = accountToUse.isNotEmpty ? ' (A/C: $accountToUse)' : '';
-        _setError('${response.message ?? 'Failed to place order'}$accountLabel');
+        _setError('${response.message ?? TranslationUtils.tr('chart_order_place_failed')}$accountLabel');
         return false;
       }
     } catch (e) {
       AppLogger.error('Exception placing order: $e', error: e);
-      _setError('Failed to place order: $e');
+      _setError('${TranslationUtils.tr('chart_order_place_failed')}: $e');
       return false;
     } finally {
       _setLoading(false);

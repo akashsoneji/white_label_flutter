@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/one_click_trading_service.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
@@ -28,7 +29,7 @@ class _OneClickTradingDisclaimerScreenState
         elevation: 0,
         leading: const AppBackButton(),
         title: Text(
-          'One Click Trading',
+          TranslationUtils.tr('more_screen_one_click_trading'),
           style: AppTextStyles.heading.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -44,9 +45,9 @@ class _OneClickTradingDisclaimerScreenState
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               child: Align(
-                alignment: Alignment.centerLeft,
+                alignment: AlignmentDirectional.centerStart,
                 child: Text(
-                  'Disclaimer',
+                  TranslationUtils.tr('one_click_trading_disclaimer_title'),
                   style: AppTextStyles.heading.copyWith(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
@@ -63,7 +64,9 @@ class _OneClickTradingDisclaimerScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'By clicking "I Accept these Terms and Conditions", you agree to activate One Click Trading mode and are bound by the terms and conditions set forth below.',
+                      TranslationUtils.tr(
+                        'one_click_trading_disclaimer_by_clicking_accept_these_terms_and',
+                      ),
                       style: AppTextStyles.label.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textPrimary,
@@ -72,7 +75,9 @@ class _OneClickTradingDisclaimerScreenState
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      'One Click Trading can be activated or deactivated in Chart settings.',
+                      TranslationUtils.tr(
+                        'one_click_trading_disclaimer_one_click_trading_can_be_activated',
+                      ),
                       style: AppTextStyles.label.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textPrimary,
@@ -81,7 +86,7 @@ class _OneClickTradingDisclaimerScreenState
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      'Order submission is a one-step process, triggered by tapping "bid (SELL)" or "ask (BUY)" price buttons on the One Click Trading panel of a chart, or by tapping "Sell, Close, Buy or order placing buttons in the Depth of Market window.',
+                      TranslationUtils.tr('one_click_trading_disclaimer_buy'),
                       style: AppTextStyles.label.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textPrimary,
@@ -90,7 +95,9 @@ class _OneClickTradingDisclaimerScreenState
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      'THERE WILL BE NO SUBSEQUENT CONFIRMATION PROMPT FOR YOU TO CLICK. YOU WILL NOT BE ABLE TO WITHDRAW OR CHANGE YOUR ORDER ONCE YOU CLICK. UNDER NORMAL MARKET CONDITIONS AND SYSTEM PERFORMANCE, A MARKET ORDER WILL BE PROMPTLY FILLED AFTER SUBMISSION AND YOU WILL HAVE ENTERED INTO A BINDING TRANSACTION.',
+                      TranslationUtils.tr(
+                        'one_click_trading_disclaimer_no_confirmation_warning',
+                      ),
                       style: AppTextStyles.label.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textPrimary,
@@ -100,7 +107,9 @@ class _OneClickTradingDisclaimerScreenState
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      'You agree to accept all risks associated with the use of One Click Trading mode.',
+                      TranslationUtils.tr(
+                        'one_click_trading_disclaimer_you_agree_to_accept_all_risks',
+                      ),
                       style: AppTextStyles.label.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textPrimary,
@@ -137,7 +146,9 @@ class _OneClickTradingDisclaimerScreenState
                         });
                       },
                       child: Text(
-                        'I Accept these Terms and Conditions',
+                        TranslationUtils.tr(
+                          'one_click_trading_disclaimer_accept_these_terms_and_conditions',
+                        ),
                         style: AppTextStyles.label.copyWith(
                           fontSize: 14.sp,
                           color: AppColors.textPrimary,

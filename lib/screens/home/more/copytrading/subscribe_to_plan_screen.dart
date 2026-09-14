@@ -6,6 +6,7 @@ import 'package:crm_app/controllers/copy_trading/copy_trading_hub_controller.dar
 import 'package:crm_app/controllers/copy_trading/copy_trading_master_details_controller.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_subscribe_controller.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -55,7 +56,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     if (msg.isEmpty) return;
     // Use app's existing notification/toast UI (matches other screens)
     CustomToastService.showError(
-      title: 'Error',
+      title: TranslationUtils.tr('general_error'),
       message: msg,
       duration: const Duration(milliseconds: 2500),
       position: SnackPosition.TOP,
@@ -105,7 +106,8 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch.toString()},
       );
       if (!res.success || res.data == null) {
-        _editLoadError.value = res.message ?? 'Failed to load subscription';
+        _editLoadError.value = res.message ??
+            TranslationUtils.tr('copy_trading_failed_to_load_subscription');
         return;
       }
       final root = res.data;
@@ -118,7 +120,8 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         }
       }
       if (subJson == null) {
-        _editLoadError.value = 'Invalid subscription detail';
+        _editLoadError.value =
+            TranslationUtils.tr('copy_trading_invalid_subscription_detail');
         return;
       }
 
@@ -239,7 +242,11 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
           final p = masterController.profile.value;
           final name = (p?.nickname.isNotEmpty ?? false) ? p!.nickname : widget.masterCode;
           return Text(
-            _isEditMode ? 'Edit copy settings' : 'Start Copy to $name',
+            _isEditMode
+                ? TranslationUtils.tr('edit_subscription_edit_copy_settings')
+                : TranslationUtils.trArgs('copy_trading_start_copy_to', {
+                  'name': name,
+                }),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.screenTitle,
@@ -348,18 +355,23 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
                   final plan = _selectedPlan.value;
                   final sub = controller;
                   if (plan == null) {
-                    if (sub != null) sub.errorMessage.value = 'Select a plan';
-                    _showTopError('Select a plan');
+                    final msg = TranslationUtils.tr('pmam_select_a_plan');
+                    if (sub != null) sub.errorMessage.value = msg;
+                    _showTopError(msg);
                     return;
                   }
                   final acc = sub?.selectedAccount.value;
                   if (sub == null || acc == null) {
-                    if (sub != null) sub.errorMessage.value = 'Select an account';
-                    _showTopError('Select an account');
+                    final msg = TranslationUtils.tr('copy_trading_select_an_account');
+                    if (sub != null) sub.errorMessage.value = msg;
+                    _showTopError(msg);
                     return;
                   }
                   if (plan.minimumCapital > 0 && acc.equity < plan.minimumCapital) {
-                    sub.errorMessage.value = 'Account equity is below minimum required (${plan.minimumCapital}).';
+                    sub.errorMessage.value = TranslationUtils.trArgs(
+                      'copy_trading_account_equity_below_minimum',
+                      {'amount': '${plan.minimumCapital}'},
+                    );
                     _showTopError(sub.errorMessage.value);
                     return;
                   }
@@ -389,7 +401,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     required bool isEditMode,
   }) {
     return ListView(
-      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 22.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 10.h, 16.w, 22.h),
       children: [
                     if (effectiveStep == 0) ...[
                       _PlanPickerCard(
@@ -419,7 +431,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
                         SizedBox(height: 12.h),
                         _Card(
                           child: Text(
-                            'Select a plan to view eligible accounts.',
+                            TranslationUtils.tr('subscribe_to_plan_screen_select_plan_to_view_eligible_accounts'),
                             style: AppTextStyles.cardSubtitle,
                           ),
                         ),
@@ -500,7 +512,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
                         }),
                         SizedBox(height: 90.h),
                       ] else ...[
-                        _Card(child: Text('Please go back and select a plan/account.', style: AppTextStyles.cardSubtitle)),
+                        _Card(child: Text(TranslationUtils.tr('subscribe_to_plan_screen_please_go_back_and_select_plan'), style: AppTextStyles.cardSubtitle)),
                         SizedBox(height: 90.h),
                       ],
                     ],
@@ -519,13 +531,17 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     } else {
       final acc = sub.selectedAccount.value;
       if (acc == null) {
-        sub.errorMessage.value = 'Select an account';
+        sub.errorMessage.value =
+            TranslationUtils.tr('copy_trading_select_an_account');
         _showTopError(sub.errorMessage.value);
         _step.value = 0;
         return;
       }
       if (plan.minimumCapital > 0 && acc.equity < plan.minimumCapital) {
-        sub.errorMessage.value = 'Account equity is below minimum required (${plan.minimumCapital}).';
+        sub.errorMessage.value = TranslationUtils.trArgs(
+          'copy_trading_account_equity_below_minimum',
+          {'amount': '${plan.minimumCapital}'},
+        );
         _showTopError(sub.errorMessage.value);
         _step.value = 0;
         return;
@@ -533,17 +549,24 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
 
       final investment = num.tryParse(_investmentCtrl.text.trim()) ?? 0;
       if (investment <= 0) {
-        sub.errorMessage.value = 'Enter a valid investment amount';
+        sub.errorMessage.value =
+            TranslationUtils.tr('copy_trading_enter_valid_investment_amount');
         _showTopError(sub.errorMessage.value);
         return;
       }
       if (plan.minimumCapital > 0 && investment < plan.minimumCapital) {
-        sub.errorMessage.value = 'Minimum investment is ${plan.minimumCapital}';
+        sub.errorMessage.value = TranslationUtils.trArgs(
+          'copy_trading_minimum_investment_is',
+          {'amount': '${plan.minimumCapital}'},
+        );
         _showTopError(sub.errorMessage.value);
         return;
       }
       if (acc.equity > 0 && investment > acc.equity) {
-        sub.errorMessage.value = 'Investment cannot exceed account equity (${acc.equity})';
+        sub.errorMessage.value = TranslationUtils.trArgs(
+          'copy_trading_investment_cannot_exceed_equity',
+          {'amount': '${acc.equity}'},
+        );
         _showTopError(sub.errorMessage.value);
         return;
       }
@@ -554,7 +577,8 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
       case 'fixed':
         final fixedLot = double.tryParse(_fixedLotCtrl.text.trim());
         if (fixedLot == null || fixedLot <= 0) {
-          sub.errorMessage.value = 'Enter a valid fixed lot size';
+          sub.errorMessage.value =
+              TranslationUtils.tr('edit_subscription_enter_valid_fixed_lot');
           _showTopError(sub.errorMessage.value);
           return;
         }
@@ -565,7 +589,8 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
       case 'mirror_ratio':
         final r = double.tryParse(_mirrorRatioCtrl.text.trim());
         if (r == null || r <= 0) {
-          sub.errorMessage.value = 'Enter a valid ratio';
+          sub.errorMessage.value =
+              TranslationUtils.tr('edit_subscription_enter_valid_ratio');
           _showTopError(sub.errorMessage.value);
           return;
         }
@@ -574,7 +599,8 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
       case 'percentage_risk':
         final rp = double.tryParse(_riskPercentCtrl.text.trim());
         if (rp == null || rp <= 0) {
-          sub.errorMessage.value = 'Enter a valid risk %';
+          sub.errorMessage.value =
+              TranslationUtils.tr('copy_trading_enter_valid_risk_percent');
           _showTopError(sub.errorMessage.value);
           return;
         }
@@ -600,7 +626,8 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
       if (_customMultiplier.value) {
         final m = double.tryParse(_multiplierCtrl.text.trim());
         if (m == null || m <= 0) {
-          sub.errorMessage.value = 'Enter a valid lot multiplier';
+          sub.errorMessage.value =
+              TranslationUtils.tr('copy_trading_enter_valid_lot_multiplier');
           _showTopError(sub.errorMessage.value);
           return;
         }
@@ -612,7 +639,8 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
       final tp = double.tryParse(_tpCtrl.text.trim());
       final sl = double.tryParse(_slCtrl.text.trim());
       if (tp == null || tp <= 0 || sl == null || sl <= 0) {
-        sub.errorMessage.value = 'Enter valid Take Profit and Stop Loss values';
+        sub.errorMessage.value =
+            TranslationUtils.tr('copy_trading_enter_valid_tp_sl_values');
         _showTopError(sub.errorMessage.value);
         return;
       }
@@ -641,8 +669,9 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         if (mounted) {
           Get.back();
           _showTopSuccess(
-            title: 'Updated',
-            message: res.message ?? 'Copy settings saved',
+            title: TranslationUtils.tr('copy_trading_updated'),
+            message: res.message ??
+                TranslationUtils.tr('copy_trading_copy_settings_saved'),
           );
         }
       } else {
@@ -661,8 +690,9 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
       if (mounted) {
         Get.back();
         _showTopSuccess(
-          title: 'Subscribed',
-          message: res.message ?? 'Successfully subscribed',
+          title: TranslationUtils.tr('copy_trading_subscribed'),
+          message: res.message ??
+              TranslationUtils.tr('copy_trading_successfully_subscribed'),
         );
       }
     } else {
@@ -683,13 +713,13 @@ class _EditSubscriptionSummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Plan & account', style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          Text(TranslationUtils.tr('subscribe_to_plan_screen_plan_account'), style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
           SizedBox(height: 10.h),
           Text(plan.planName, style: AppTextStyles.black14600),
           SizedBox(height: 6.h),
-          Text('Account: ${item.accountNumber}', style: AppTextStyles.caption),
+          Text(TranslationUtils.trArgs('copy_trading_account_value', {'value': item.accountNumber}), style: AppTextStyles.caption),
           SizedBox(height: 4.h),
-          Text('Capital: \$${item.capitalAmount.toStringAsFixed(2)}', style: AppTextStyles.caption),
+          Text(TranslationUtils.trArgs('copy_trading_capital_value', {'value': '\$${item.capitalAmount.toStringAsFixed(2)}'}), style: AppTextStyles.caption),
         ],
       ),
     );
@@ -708,7 +738,7 @@ class _PlanPickerCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Select a Plan *', style: AppTextStyles.label.copyWith(fontWeight: FontWeight.w600)),
+          Text(TranslationUtils.tr('subscribe_to_plan_screen_select_plan'), style: AppTextStyles.label.copyWith(fontWeight: FontWeight.w600)),
           SizedBox(height: 10.h),
           _PlanDropdown(plans: plans, selected: selectedPlan, onChanged: onPlanChanged),
         ],
@@ -728,10 +758,10 @@ class _AccountPickerCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Select Your Trading Account *', style: AppTextStyles.label.copyWith(fontWeight: FontWeight.w600)),
+          Text(TranslationUtils.tr('subscribe_to_plan_screen_select_your_trading_account'), style: AppTextStyles.label.copyWith(fontWeight: FontWeight.w600)),
           SizedBox(height: 10.h),
           if (controller == null)
-            Text('Select a plan first.', style: AppTextStyles.cardSubtitle)
+            Text(TranslationUtils.tr('subscribe_to_plan_screen_select_plan_first'), style: AppTextStyles.cardSubtitle)
           else
             Obx(() {
               final c = controller!;
@@ -755,7 +785,7 @@ class _AccountPickerCard extends StatelessWidget {
                 if (c.eligibleAccounts.isEmpty && c.errorMessage.value.isEmpty)
                   Padding(
                     padding: EdgeInsets.only(top: 6.h),
-                    child: Text('No eligible accounts found.', style: AppTextStyles.cardSubtitle),
+                    child: Text(TranslationUtils.tr('subscribe_to_plan_screen_no_eligible_accounts_found'), style: AppTextStyles.cardSubtitle),
                   ),
               ],
             );
@@ -798,7 +828,7 @@ class _CopySettingsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Copy settings', style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          Text(TranslationUtils.tr('subscribe_to_plan_screen_copy_settings'), style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
           SizedBox(height: 10.h),
           Obx(() {
             final method = controller.sizingMethod.value;
@@ -808,15 +838,15 @@ class _CopySettingsCard extends StatelessWidget {
                 _SelectTile(
                   value: method,
                   items: [
-                    _SelectItem(value: 'fixed', label: 'Fixed Lot — e.g. always trade 0.10 lot'),
-                    _SelectItem(value: 'proportional_equity', label: 'Equity-Based — scales by your equity vs master\'s'),
-                    _SelectItem(value: 'proportional_balance', label: 'Balance-Based — scales by your balance vs master\'s'),
-                    _SelectItem(value: 'multiplier_only', label: 'Multiplier — master lots × your multiplier'),
-                    _SelectItem(value: 'mirror_ratio', label: 'Mirror Ratio — master lots × fixed ratio'),
-                    _SelectItem(value: 'percentage_risk', label: 'Percentage Risk — risk % of balance per trade'),
-                    _SelectItem(value: 'reverse', label: 'Reverse — master buys, you sell (vice versa)'),
-                    _SelectItem(value: 'dynamic_lot', label: 'Dynamic Lot — reduces lots on drawdown'),
-                    _SelectItem(value: 'fixed_ratio', label: 'Fixed Ratio — adds lots per profit milestone'),
+                    _SelectItem(value: 'fixed', label: TranslationUtils.tr('copy_trading_sizing_fixed_lot')),
+                    _SelectItem(value: 'proportional_equity', label: TranslationUtils.tr('copy_trading_sizing_equity_based')),
+                    _SelectItem(value: 'proportional_balance', label: TranslationUtils.tr('copy_trading_sizing_balance_based')),
+                    _SelectItem(value: 'multiplier_only', label: TranslationUtils.tr('copy_trading_sizing_multiplier')),
+                    _SelectItem(value: 'mirror_ratio', label: TranslationUtils.tr('copy_trading_sizing_mirror_ratio')),
+                    _SelectItem(value: 'percentage_risk', label: TranslationUtils.tr('copy_trading_sizing_percentage_risk')),
+                    _SelectItem(value: 'reverse', label: TranslationUtils.tr('copy_trading_sizing_reverse')),
+                    _SelectItem(value: 'dynamic_lot', label: TranslationUtils.tr('copy_trading_sizing_dynamic_lot')),
+                    _SelectItem(value: 'fixed_ratio', label: TranslationUtils.tr('copy_trading_sizing_fixed_ratio')),
                   ],
                   onChanged: (v) {
                     controller.sizingMethod.value = v;
@@ -828,10 +858,10 @@ class _CopySettingsCard extends StatelessWidget {
                 if (method == 'fixed') ...[
                   SizedBox(height: 12.h),
                   LabeledAppTextField(
-                    label: 'Fixed Lot Size *',
+                    label: TranslationUtils.tr('edit_subscription_fixed_lot_size_required'),
                     controller: fixedLotCtrl,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    hintText: 'e.g. 0.10',
+                    hintText: TranslationUtils.tr('subscribe_to_plan_screen_10'),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                       const SingleDecimalTextFormatter(),
@@ -854,10 +884,10 @@ class _CopySettingsCard extends StatelessWidget {
                 if (method == 'mirror_ratio') ...[
                   SizedBox(height: 12.h),
                   LabeledAppTextField(
-                    label: 'Ratio *',
+                    label: TranslationUtils.tr('copy_trading_ratio_required'),
                     controller: mirrorRatioCtrl,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    hintText: 'e.g. 0.5',
+                    hintText: TranslationUtils.tr('edit_subscription_eg_0_5'),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                       const SingleDecimalTextFormatter(),
@@ -867,10 +897,10 @@ class _CopySettingsCard extends StatelessWidget {
                 if (method == 'percentage_risk') ...[
                   SizedBox(height: 12.h),
                   LabeledAppTextField(
-                    label: 'Risk % per trade *',
+                    label: TranslationUtils.tr('edit_subscription_risk_percent_per_trade'),
                     controller: riskPercentCtrl,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    hintText: 'e.g. 2',
+                    hintText: TranslationUtils.tr('subscribe_to_plan_screen'),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                       const SingleDecimalTextFormatter(),
@@ -894,7 +924,7 @@ class _CopySettingsCard extends StatelessWidget {
                       ),
                       Expanded(
                         child: Text(
-                          'Invert BUY/SELL for copied trades',
+                          TranslationUtils.tr('subscribe_to_plan_screen_buy'),
                           style: AppTextStyles.black14500,
                         ),
                       ),
@@ -905,10 +935,10 @@ class _CopySettingsCard extends StatelessWidget {
                 if (method == 'dynamic_lot') ...[
                   SizedBox(height: 12.h),
                   LabeledAppTextField(
-                    label: 'Drawdown threshold (%) *',
+                    label: TranslationUtils.tr('edit_subscription_drawdown_threshold'),
                     controller: dynamicDdCtrl,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    hintText: 'e.g. 20',
+                    hintText: TranslationUtils.tr('edit_subscription_eg_20'),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                       const SingleDecimalTextFormatter(),
@@ -916,10 +946,10 @@ class _CopySettingsCard extends StatelessWidget {
                   ),
                   SizedBox(height: 12.h),
                   LabeledAppTextField(
-                    label: 'Reduction ratio (0–1) *',
+                    label: TranslationUtils.tr('edit_subscription_reduction_ratio'),
                     controller: dynamicReduceCtrl,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    hintText: 'e.g. 0.5',
+                    hintText: TranslationUtils.tr('edit_subscription_eg_0_5'),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                       const SingleDecimalTextFormatter(),
@@ -929,10 +959,10 @@ class _CopySettingsCard extends StatelessWidget {
                 if (method == 'fixed_ratio') ...[
                   SizedBox(height: 12.h),
                   LabeledAppTextField(
-                    label: 'Profit milestone (USD) *',
+                    label: TranslationUtils.tr('edit_subscription_profit_milestone'),
                     controller: fixedRatioProfitStepCtrl,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    hintText: 'e.g. 1000.00',
+                    hintText: TranslationUtils.tr('edit_subscription_eg_1000_00'),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                       const SingleDecimalTextFormatter(),
@@ -940,10 +970,10 @@ class _CopySettingsCard extends StatelessWidget {
                   ),
                   SizedBox(height: 12.h),
                   LabeledAppTextField(
-                    label: 'Lot increase per milestone *',
+                    label: TranslationUtils.tr('edit_subscription_lot_increase_per_milestone'),
                     controller: fixedRatioLotStepCtrl,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    hintText: 'e.g. 0.01',
+                    hintText: TranslationUtils.tr('edit_subscription_eg_0_01'),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                       const SingleDecimalTextFormatter(),
@@ -968,31 +998,31 @@ class _MethodHelpText extends StatelessWidget {
     String text;
     switch (method) {
       case 'fixed':
-        text = 'Example: You set 0.10 lot. Master opens 1.00 lot → your order is placed at 0.10 lot (always same fixed size).';
+        text = TranslationUtils.tr('copy_trading_help_fixed');
         break;
       case 'proportional_equity':
-        text = 'Example: Your equity \$5,000, master equity \$50,000 (ratio 10%). Master opens 1.00 lot → your order is placed at 0.10 lot.';
+        text = TranslationUtils.tr('copy_trading_help_proportional_equity');
         break;
       case 'proportional_balance':
-        text = 'Example: Your balance \$5,000, master balance \$50,000 (ratio 10%). Master opens 1.00 lot → your order is placed at 0.10 lot.';
+        text = TranslationUtils.tr('copy_trading_help_proportional_balance');
         break;
       case 'multiplier_only':
-        text = 'Example: Multiplier set to 2×. Master opens 0.50 lot → your order is placed at 1.00 lot (0.50 × 2 = 1.00).';
+        text = TranslationUtils.tr('copy_trading_help_multiplier_only');
         break;
       case 'mirror_ratio':
-        text = 'Example: Ratio set to 0.5. Master opens 1.00 lot → your order is placed at 0.50 lot (1.00 × 0.5 = 0.50).';
+        text = TranslationUtils.tr('copy_trading_help_mirror_ratio');
         break;
       case 'percentage_risk':
-        text = 'Example: Risk 2% of your \$10,000 balance = \$200 at risk. With 50‑pip SL → lot is auto-calculated.';
+        text = TranslationUtils.tr('copy_trading_help_percentage_risk');
         break;
       case 'reverse':
-        text = 'Lots follow the selected sizing method; only direction flips.';
+        text = TranslationUtils.tr('copy_trading_help_reverse');
         break;
       case 'dynamic_lot':
-        text = 'Example: Equity-based → your order is placed at 0.10 lot. If drawdown exceeds your threshold, future orders reduce (e.g. to 0.05 lot).';
+        text = TranslationUtils.tr('copy_trading_help_dynamic_lot');
         break;
       case 'fixed_ratio':
-        text = 'Example: Equity-based → your order is placed at 0.10 lot. For every \$1,000 profit earned, future orders increase by 0.01 lot.';
+        text = TranslationUtils.tr('copy_trading_help_fixed_ratio');
         break;
       default:
         text = '';
@@ -1055,7 +1085,7 @@ class _AdvancedSettingsCard extends StatelessWidget {
           initiallyExpanded: false,
           tilePadding: EdgeInsets.zero,
           childrenPadding: EdgeInsets.only(top: 4.h),
-          title: Text('Advanced Settings', style: AppTextStyles.black14600),
+          title: Text(TranslationUtils.tr('subscribe_to_plan_screen_advanced_settings'), style: AppTextStyles.black14600),
           children: [
             Container(
               width: double.infinity,
@@ -1082,11 +1112,11 @@ class _AdvancedSettingsCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Lot Multiplier',
+                          TranslationUtils.tr('edit_subscription_lot_multiplier'),
                           style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600, color: AppColors.textGrey),
                         ),
                         SizedBox(height: 8.h),
-                        Text('Multiply master lot size', style: AppTextStyles.black14500),
+                        Text(TranslationUtils.tr('subscribe_to_plan_screen_multiply_master_lot_size'), style: AppTextStyles.black14500),
                         SizedBox(height: 10.h),
                         Wrap(
                           spacing: 8.w,
@@ -1118,7 +1148,7 @@ class _AdvancedSettingsCard extends StatelessWidget {
                               onTap: () => onMultiplierPreset(5),
                             ),
                             _SmallChoiceChip(
-                              label: 'Custom',
+                              label: TranslationUtils.tr('transaction_history_period_custom'),
                               selected: customMultiplier.value,
                               onTap: onMultiplierCustom,
                             ),
@@ -1130,7 +1160,7 @@ class _AdvancedSettingsCard extends StatelessWidget {
                             label: '',
                             controller: multiplierCtrl,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            hintText: 'e.g. 2',
+                            hintText: TranslationUtils.tr('subscribe_to_plan_screen'),
                             inputFormatters: [
                               FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                               const SingleDecimalTextFormatter(),
@@ -1139,7 +1169,11 @@ class _AdvancedSettingsCard extends StatelessWidget {
                         ],
                         SizedBox(height: 6.h),
                         Text(
-                          'Master trades 1 lot → your lot = 1 lot × ${customMultiplier.value ? (multiplierCtrl.text.isEmpty ? 'x' : multiplierCtrl.text) : '${controller.lotMultiplier.value}x'}',
+                          TranslationUtils.trArgs('copy_trading_master_trades_1_lot', {
+                            'multiplier': customMultiplier.value
+                                ? (multiplierCtrl.text.isEmpty ? 'x' : multiplierCtrl.text)
+                                : '${controller.lotMultiplier.value}x',
+                          }),
                           style: AppTextStyles.caption,
                         ),
                         SizedBox(height: 14.h),
@@ -1150,7 +1184,7 @@ class _AdvancedSettingsCard extends StatelessWidget {
                   }),
                   Row(
                     children: [
-                      Text('PER-TRADE TP / SL', style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                      Text(TranslationUtils.tr('subscribe_to_plan_screen_per_trade_tp_sl'), style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                       const Spacer(),
                       Obx(() {
                         return Row(
@@ -1163,7 +1197,7 @@ class _AdvancedSettingsCard extends StatelessWidget {
                                 onChanged: (v) => controller.overridesSlTp.value = v ?? false,
                               ),
                             ),
-                            Text('Override master', style: AppTextStyles.textButton),
+                            Text(TranslationUtils.tr('subscribe_to_plan_screen_override_master'), style: AppTextStyles.textButton),
                           ],
                         );
                       }),
@@ -1171,7 +1205,7 @@ class _AdvancedSettingsCard extends StatelessWidget {
                   ),
                   SizedBox(height: 6.h),
                   Text(
-                    'Set your own TP / SL in pips or a fixed dollar amount. Pip mode: 1 pip = 0.0001 for EURUSD · 0.01 for JPY pairs · \$1.00 for XAUUSD / metals. Dollar mode: trade closes when profit or loss reaches the dollar target you set.',
+                    TranslationUtils.tr('copy_trading_set_your_own_tp_sl_help'),
                     style: AppTextStyles.caption,
                   ),
                   
@@ -1184,12 +1218,12 @@ class _AdvancedSettingsCard extends StatelessWidget {
                         if(!enabled)...[
                           SizedBox(height: 10.h),
                   Text(
-                    'No TP/SL configured by master — trades will open without automatic TP/SL.',
+                    TranslationUtils.tr('subscribe_to_plan_screen_no_tp_sl_configured_by_master'),
                     style: AppTextStyles.caption,
                   ),
                   SizedBox(height: 10.h),
                   Text(
-                    'Using master\'s TP/SL. Enable "Override master" to set your own levels.',
+                    TranslationUtils.tr('subscribe_to_plan_screen_using_master_tp_sl_enable_override'),
                     style: AppTextStyles.caption,
                   ),
                         ],
@@ -1198,7 +1232,7 @@ class _AdvancedSettingsCard extends StatelessWidget {
                            Row(
                           children: [
                             _ModeChip(
-                              label: 'Pip',
+                              label: TranslationUtils.tr('copy_trading_pip'),
                               selected: controller.slTpMode.value == 'pip',
                               onTap: enabled
                                   ? () {
@@ -1271,7 +1305,9 @@ class _AdvancedSettingsCard extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    controller.slTpMode.value == 'pip' ? 'Take Profit (pips)' : 'Take Profit (\$)',
+                                    controller.slTpMode.value == 'pip'
+                                        ? TranslationUtils.tr('copy_trading_take_profit_pips')
+                                        : TranslationUtils.tr('copy_trading_take_profit_dollar'),
                                     style: AppTextStyles.caption,
                                   ),
                                   SizedBox(height: 6.h),
@@ -1279,7 +1315,11 @@ class _AdvancedSettingsCard extends StatelessWidget {
                                     label: '',
                                     controller: tpCtrl,
                                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                    hintText: enabled ? (controller.slTpMode.value == 'pip' ? 'e.g. 15.50' : 'e.g. 25.00') : 'Disabled',
+                                    hintText: enabled
+                                        ? (controller.slTpMode.value == 'pip'
+                                            ? TranslationUtils.tr('copy_trading_eg_15_50')
+                                            : TranslationUtils.tr('copy_trading_eg_25_00'))
+                                        : TranslationUtils.tr('copy_trading_disabled'),
                                     onChanged: enabled
                                         ? (s) {
                                             final n = num.tryParse(s.trim());
@@ -1305,7 +1345,9 @@ class _AdvancedSettingsCard extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    controller.slTpMode.value == 'pip' ? 'Stop Loss (pips)' : 'Stop Loss (\$)',
+                                    controller.slTpMode.value == 'pip'
+                                        ? TranslationUtils.tr('copy_trading_stop_loss_pips')
+                                        : TranslationUtils.tr('copy_trading_stop_loss_dollar'),
                                     style: AppTextStyles.caption,
                                   ),
                                   SizedBox(height: 6.h),
@@ -1313,7 +1355,11 @@ class _AdvancedSettingsCard extends StatelessWidget {
                                     label: '',
                                     controller: slCtrl,
                                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                    hintText: enabled ? (controller.slTpMode.value == 'pip' ? 'e.g. 5.50' : 'e.g. 20.00') : 'Disabled',
+                                    hintText: enabled
+                                        ? (controller.slTpMode.value == 'pip'
+                                            ? TranslationUtils.tr('copy_trading_eg_5_50')
+                                            : TranslationUtils.tr('copy_trading_eg_20_00'))
+                                        : TranslationUtils.tr('copy_trading_disabled'),
                                     onChanged: enabled
                                         ? (s) {
                                             final n = num.tryParse(s.trim());
@@ -1338,7 +1384,7 @@ class _AdvancedSettingsCard extends StatelessWidget {
                       
                         SizedBox(height: 10.h),
                   Text(
-                    'Your own TP/SL will be used instead of master\'s. Master\'s SL/TP changes will not affect your trades.',
+                    TranslationUtils.tr('subscribe_to_plan_screen_your_own_tp_sl_will_be'),
                     style: AppTextStyles.caption,
                   ),
                   ],
@@ -1505,10 +1551,14 @@ class _InvestmentCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           LabeledAppTextField(
-            label: 'Investment Amount (USD) *',
+            label: TranslationUtils.tr('copy_trading_investment_amount_usd'),
             controller: investmentCtrl,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            hintText: minCapital > 0 ? 'e.g. 100.05 (Min $minCapital)' : 'e.g. 100.05',
+            hintText: minCapital > 0
+                ? TranslationUtils.trArgs('copy_trading_eg_100_05_min', {
+                  'min': '$minCapital',
+                })
+                : TranslationUtils.tr('copy_trading_eg_100_05'),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
               const SingleDecimalTextFormatter(),
@@ -1519,7 +1569,13 @@ class _InvestmentCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 6.h),
-          if (minCapital > 0) Text('Minimum investment: \$$minCapital', style: AppTextStyles.caption), 
+          if (minCapital > 0)
+            Text(
+              TranslationUtils.trArgs('copy_trading_minimum_investment_colon', {
+                'amount': '\$$minCapital',
+              }),
+              style: AppTextStyles.caption,
+            ),
         ],
       ),
     );
@@ -1574,7 +1630,7 @@ class _ErrorState extends StatelessWidget {
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.brandPrimary, padding: EdgeInsets.zero),
               child: SizedBox(
                 height: 44.h,
-                child: Center(child: Text('Retry', style: AppTextStyles.button)),
+                child: Center(child: Text(TranslationUtils.tr('common_retry'), style: AppTextStyles.button)),
               ),
             ),
           ],
@@ -1615,15 +1671,15 @@ class _PlanInfoCard extends StatelessWidget {
           SizedBox(height: 8.h),
           Row(
             children: [
-              Text('Min: \$${plan.minimumCapital}', style: AppTextStyles.caption),
+              Text(TranslationUtils.trArgs('copy_trading_min_value', {'value': '\$${plan.minimumCapital}'}), style: AppTextStyles.caption),
               SizedBox(width: 12.w),
-              Text('Fee: ${plan.commissionLabel.isNotEmpty ? plan.commissionLabel : plan.commissionType}', style: AppTextStyles.caption),
+              Text(TranslationUtils.trArgs('copy_trading_fee_value', {'value': plan.commissionLabel.isNotEmpty ? plan.commissionLabel : plan.commissionType}), style: AppTextStyles.caption),
               SizedBox(width: 12.w),
-              Text('${plan.subscriptionFee > 0 ? '\$${plan.subscriptionFee}' : '\$0'} / ${plan.subscriptionPeriodDays} days', style: AppTextStyles.caption),
+              Text(TranslationUtils.trArgs('copy_trading_amount_per_days', {'amount': plan.subscriptionFee > 0 ? '\$${plan.subscriptionFee}' : '\$0', 'days': '${plan.subscriptionPeriodDays}'}), style: AppTextStyles.caption),
             ],
           ),
           SizedBox(height: 6.h),
-          Text('Grace: ${plan.noFeeDays} days', style: AppTextStyles.caption),
+          Text(TranslationUtils.trArgs('copy_trading_grace_days', {'days': '${plan.noFeeDays}'}), style: AppTextStyles.caption),
         ],
       ),
     );
@@ -1653,7 +1709,17 @@ class _PlanDropdown extends StatelessWidget {
               .map((p) => DropdownMenuItem<int>(
                     value: p.planId,
                     child: Text(
-                      '${p.planName.isNotEmpty ? p.planName : 'Plan ${p.planId}'} — Fee ${p.subscriptionFee > 0 ? '\$${p.subscriptionFee}' : p.commissionLabel} / ${p.subscriptionPeriodDays} days',
+                      TranslationUtils.trArgs('copy_trading_plan_option_summary', {
+                        'plan': p.planName.isNotEmpty
+                            ? p.planName
+                            : TranslationUtils.trArgs('copy_trading_plan_numbered', {
+                              'id': '${p.planId}',
+                            }),
+                        'fee': p.subscriptionFee > 0
+                            ? '\$${p.subscriptionFee}'
+                            : p.commissionLabel,
+                        'days': '${p.subscriptionPeriodDays}',
+                      }),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.black14500,
@@ -1718,7 +1784,7 @@ class _AccountListPicker extends StatelessWidget {
               return InkWell(
                 onTap: belowMin ? null : () => onChanged(a),
                 child: Container(
-                  padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
+                  padding: EdgeInsetsDirectional.fromSTEB(12.w, 12.h, 12.w, 12.h),
                   decoration: BoxDecoration(
                     color: isSelected ? AppColors.primary.withOpacity(0.06) : Colors.transparent,
                     borderRadius: BorderRadius.only(
@@ -1744,7 +1810,13 @@ class _AccountListPicker extends StatelessWidget {
                             ),
                             SizedBox(height: 3.h),
                             Text(
-                              '\$${a.balance.toStringAsFixed(2)}  ·  ${a.accountType.isNotEmpty ? a.accountType.toUpperCase() : 'Account'}  ·  Equity \$${a.equity.toStringAsFixed(2)}',
+                              TranslationUtils.trArgs('copy_trading_account_row_summary', {
+                                'balance': '\$${a.balance.toStringAsFixed(2)}',
+                                'type': a.accountType.isNotEmpty
+                                    ? a.accountType.toUpperCase()
+                                    : TranslationUtils.tr('transaction_history_account_label'),
+                                'equity': '\$${a.equity.toStringAsFixed(2)}',
+                              }),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTextStyles.caption.copyWith(
@@ -1756,11 +1828,11 @@ class _AccountListPicker extends StatelessWidget {
                       ),
                       SizedBox(width: 10.w),
                       if (belowMin)
-                        _Pill(text: 'Below min', tone: _PillTone.warning)
+                        _Pill(text: TranslationUtils.tr('copy_trading_below_min'), tone: _PillTone.warning)
                       else if (alreadyCopying)
-                        _Pill(text: 'Already copying', tone: _PillTone.success, icon: Icons.check_circle)
+                        _Pill(text: TranslationUtils.tr('copy_trading_already_copying'), tone: _PillTone.success, icon: Icons.check_circle)
                       else if (isSelected)
-                        _Pill(text: 'Selected', tone: _PillTone.primary, icon: Icons.check),
+                        _Pill(text: TranslationUtils.tr('copy_trading_selected'), tone: _PillTone.primary, icon: Icons.check),
                     ],
                   ),
                 ),
@@ -1771,7 +1843,7 @@ class _AccountListPicker extends StatelessWidget {
         if (accounts.isNotEmpty && eligibleCount == 0)
           Padding(
             padding: EdgeInsets.only(top: 8.h),
-            child: Text('No Eligible Accounts Found.', style: AppTextStyles.cardSubtitle),
+            child: Text(TranslationUtils.tr('subscribe_to_plan_screen_no_eligible_accounts_found_2'), style: AppTextStyles.cardSubtitle),
           ),
       ],
     );
@@ -1828,7 +1900,7 @@ class _BottomBar extends StatelessWidget {
                       side: BorderSide(color: AppColors.primary.withOpacity(0.55)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
                     ),
-                    child: Text('Back', style: AppTextStyles.outlinedButton),
+                    child: Text(TranslationUtils.tr('navigation_back'), style: AppTextStyles.outlinedButton),
                   ),
                 ),
               ),
@@ -1854,7 +1926,11 @@ class _BottomBar extends StatelessWidget {
                     child: loading
                         ? SizedBox(width: 18.r, height: 18.r, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onColoredBackground))
                         : Text(
-                            isEditMode ? 'Save' : (s == 0 ? 'Next' : 'Subscribe'),
+                            isEditMode
+                                ? TranslationUtils.tr('general_save')
+                                : (s == 0
+                                    ? TranslationUtils.tr('navigation_next')
+                                    : TranslationUtils.tr('copy_trading_subscribe')),
                             style: AppTextStyles.button,
                           ),
                   ),
@@ -1932,7 +2008,7 @@ class _InlineError extends StatelessWidget {
           SizedBox(width: 8.w),
           Expanded(child: Text(message, style: AppTextStyles.caption.copyWith(color: AppColors.error))),
           SizedBox(width: 8.w),
-          TextButton(onPressed: onRetry, style: TextButton.styleFrom(padding: EdgeInsets.zero), child: Text('Retry', style: AppTextStyles.textButton)),
+          TextButton(onPressed: onRetry, style: TextButton.styleFrom(padding: EdgeInsets.zero), child: Text(TranslationUtils.tr('common_retry'), style: AppTextStyles.textButton)),
         ],
       ),
     );

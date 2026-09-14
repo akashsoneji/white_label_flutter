@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class OtpModal extends StatefulWidget {
   final String email;
@@ -185,18 +186,23 @@ class _OtpModalState extends State<OtpModal> {
               SizedBox(height: 24.h),
 
               // OTP Input Fields - ✅ Generates fields based on otpLength (will be 6)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(widget.otpLength, (index) {
-                  return Container(
-                    width: 51.w,
-                    height: 50.h,
-                    child:
-                        Platform.isAndroid
-                            ? _buildOtpBoxAndroid(index)
-                            : _buildOtpBox(index),
-                  );
-                }),
+              // Boxes are positional (box 1 = first digit typed), so the row
+              // must stay LTR even in Arabic.
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(widget.otpLength, (index) {
+                    return Container(
+                      width: 51.w,
+                      height: 50.h,
+                      child:
+                          Platform.isAndroid
+                              ? _buildOtpBoxAndroid(index)
+                              : _buildOtpBox(index),
+                    );
+                  }),
+                ),
               ),
               SizedBox(height: 32.h),
 
@@ -476,9 +482,10 @@ class _OtpModalState extends State<OtpModal> {
         // Default behavior
         Get.back(closeOverlays: true); // Close modal
         if (Get.isRegistered<AppNotificationController>()) {
+          final lang = Get.find<LanguageService>();
           Get.find<AppNotificationController>().showSuccess(
-            message: 'OTP verified successfully!',
-            title: 'Success',
+            message: lang.tr('otp_modal_otp_verified_successfully'),
+            title: lang.tr('general_success'),
           );
         }
       }

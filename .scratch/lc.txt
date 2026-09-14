@@ -1,1 +1,0 @@
-     461 /Users/admin/Desktop/Project/white_label/app/white_label/lib/screens/home/trading_main_screen.dart

@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 // import 'package:flutter_svg/svg.dart' as Assets;
 import 'package:get/get.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_settings_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class CopyTradingWalletScreen extends StatelessWidget {
   const CopyTradingWalletScreen({super.key});
@@ -23,14 +24,14 @@ class CopyTradingWalletScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Wallet',
+          TranslationUtils.tr('bottom_navigation_wallet'),
           style: AppTextStyles.heading.copyWith(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
           ),
         ),
         leading: Padding(
-          padding: EdgeInsets.only(left: 8.w),
+          padding: EdgeInsetsDirectional.only(start: 8.w),
           child: IconButton(
             icon: Icon(
               Icons.grid_view_rounded,
@@ -80,7 +81,7 @@ class CopyTradingWalletScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'Balance',
+                    TranslationUtils.tr('general_balance'),
                     style: AppTextStyles.subheading.copyWith(
                       color: AppColors.textGrey,
                       fontSize: 14.sp,
@@ -107,11 +108,26 @@ class CopyTradingWalletScreen extends StatelessWidget {
             // Tabs (Actions, History, About)
             Row(
               children: [
-                _buildTab(context, 'Actions', 0, controller),
+                _buildTab(
+                  context,
+                  TranslationUtils.tr('actions_section_title'),
+                  0,
+                  controller,
+                ),
                 SizedBox(width: 8.w),
-                _buildTab(context, 'History', 1, controller),
+                _buildTab(
+                  context,
+                  TranslationUtils.tr('dashboard_history'),
+                  1,
+                  controller,
+                ),
                 SizedBox(width: 8.w),
-                _buildTab(context, 'About', 2, controller),
+                _buildTab(
+                  context,
+                  TranslationUtils.tr('about'),
+                  2,
+                  controller,
+                ),
               ],
             ),
 
@@ -126,24 +142,24 @@ class CopyTradingWalletScreen extends StatelessWidget {
                     children: [
                       _ActionItem(
                         iconData: Icons.add_circle_outline_rounded,
-                        label: 'Deposit',
+                        label: TranslationUtils.tr('general_deposit'),
                         onTap: () => Get.toNamed(AppPages.FINANCE),
                       ),
                       _ActionItem(
                         iconData: Icons.arrow_circle_up_rounded,
-                        label: 'Withdrawal',
+                        label: TranslationUtils.tr('general_withdrawal'),
                         onTap: () {},
                       ),
                       _ActionItem(
                         iconData: Icons.swap_horizontal_circle_outlined,
-                        label: 'Internal Transfer',
+                        label: TranslationUtils.tr('internal_transfer'),
                         onTap:
                             () =>
                                 Get.toNamed('/copy-trading-internal-transfer'),
                       ),
                       _ActionItem(
                         iconData: Icons.history_rounded,
-                        label: 'Internal Transfer History',
+                        label: TranslationUtils.tr('internal_transfer_history'),
                         onTap: () {},
                       ),
                     ],
@@ -201,7 +217,7 @@ class CopyTradingWalletScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Filters',
+                  TranslationUtils.tr('traders_filter_screen_filters'),
                   style: AppTextStyles.heading.copyWith(
                     fontWeight: FontWeight.w700,
                     fontSize: 20.sp,
@@ -210,7 +226,7 @@ class CopyTradingWalletScreen extends StatelessWidget {
                 GestureDetector(
                   onTap: () => controller.resetFilters(),
                   child: Text(
-                    'Reset all',
+                    TranslationUtils.tr('trade_screen_reset_all'),
                     style: AppTextStyles.label.copyWith(
                       color: AppColors.textPrimary.withOpacity(0.7),
                     ),
@@ -220,22 +236,26 @@ class CopyTradingWalletScreen extends StatelessWidget {
             ),
             SizedBox(height: 24.h),
             _FilterOption(
-              label: 'Transaction Type',
+              label: TranslationUtils.tr(
+                'transaction_history_transaction_type',
+              ),
               onTap:
                   () => _showSelectionSheet(
                     context,
-                    'Transaction Type',
+                    TranslationUtils.tr(
+                      'transaction_history_transaction_type',
+                    ),
                     ['All', 'Withdrawal', 'Deposit', 'Copytrading'],
                     controller.selectedTransactionType,
                     controller,
                   ),
             ),
             _FilterOption(
-              label: 'Status',
+              label: TranslationUtils.tr('common_status'),
               onTap:
                   () => _showSelectionSheet(
                     context,
-                    'Status',
+                    TranslationUtils.tr('common_status'),
                     ['All', 'Complete', 'Pending', 'Rejected', 'Cancelled'],
                     controller.selectedStatus,
                     controller,
@@ -258,7 +278,7 @@ class CopyTradingWalletScreen extends StatelessWidget {
                   overlayColor: WidgetStateProperty.all(Colors.transparent),
                 ),
                 child: Text(
-                  'Cancel',
+                  TranslationUtils.tr('account_management_cancel'),
                   style: AppTextStyles.button.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
@@ -314,7 +334,7 @@ class CopyTradingWalletScreen extends StatelessWidget {
                 GestureDetector(
                   onTap: () => controller.resetFilters(),
                   child: Text(
-                    'Reset all',
+                    TranslationUtils.tr('trade_screen_reset_all'),
                     style: AppTextStyles.label.copyWith(
                       color: AppColors.textPrimary.withOpacity(0.7),
                     ),
@@ -545,34 +565,46 @@ class _HistoryItem extends StatelessWidget {
               SizedBox(height: 16.h),
               Divider(height: 1, color: AppColors.border.withValues(alpha: 0.1)),
               SizedBox(height: 12.h),
-              _DetailRow(label: 'Status', value: transaction.status),
-              _DetailRow(label: 'Request ID', value: transaction.requestId),
-              _DetailRow(label: 'Account', value: transaction.account),
+              _DetailRow(
+                label: TranslationUtils.tr('common_status'),
+                value: transaction.status,
+              ),
+              _DetailRow(
+                label: TranslationUtils.tr('wallet_screen_request_id'),
+                value: transaction.requestId,
+              ),
+              _DetailRow(
+                label: TranslationUtils.tr('settings_account'),
+                value: transaction.account,
+              ),
               if (transaction.paymentMethod != null)
                 _DetailRow(
-                  label: 'Payment method',
+                  label: TranslationUtils.tr('deposit_screen_payment_method'),
                   value: transaction.paymentMethod!,
                 ),
               if (transaction.senderName != null)
                 _DetailRow(
-                  label: 'Sender name',
+                  label: TranslationUtils.tr('wallet_screen_sender_name'),
                   value: transaction.senderName!,
                 ),
               if (transaction.paymentCreated != null)
                 _DetailRow(
-                  label: 'Payment created',
+                  label: TranslationUtils.tr('wallet_screen_payment_created'),
                   value: transaction.paymentCreated!,
                 ),
               if (transaction.created != null)
-                _DetailRow(label: 'Created', value: transaction.created!),
+                _DetailRow(
+                  label: TranslationUtils.tr('ticket_created'),
+                  value: transaction.created!,
+                ),
               if (transaction.processedOn != null)
                 _DetailRow(
-                  label: 'Processed on',
+                  label: TranslationUtils.tr('wallet_screen_processed_on'),
                   value: transaction.processedOn!,
                 ),
               if (transaction.creditedAmount != null)
                 _DetailRow(
-                  label: 'Credited amount',
+                  label: TranslationUtils.tr('wallet_screen_credited_amount'),
                   value: transaction.creditedAmount!,
                 ),
             ],
@@ -648,28 +680,32 @@ class _AboutTabContent extends StatelessWidget {
       physics: const BouncingScrollPhysics(),
       children: [
         Text(
-          'We create Wallet for all our clients.',
+          TranslationUtils.tr('wallet_screen_we_create_wallet_for_all_our'),
           style: AppTextStyles.headingblack,
         ),
         SizedBox(height: 16.h),
         _AboutItem(
           svg: 'assets/svg/copy_trading/investment/wallet.svg',
           icon: Icons.account_balance_wallet_outlined,
-          title: 'For Everyone',
-          description:
-              'Use it to make internal transfer, deposits and withdrawals.',
+          title: TranslationUtils.tr('wallet_screen_for_everyone'),
+          description: TranslationUtils.tr(
+            'wallet_screen_use_it_to_make_internal_transfer',
+          ),
         ),
         _AboutItem(
           icon: Icons.share_outlined,
-          title: 'For Copier',
-          description:
-              'Use the wallet to parcel your investment between masters.',
+          title: TranslationUtils.tr('wallet_screen_for_copier'),
+          description: TranslationUtils.tr(
+            'wallet_screen_use_the_wallet_to_parcel',
+          ),
         ),
         _AboutItem(
           svg: 'assets/svg/copy_trading/investment/coin.svg',
           icon: Icons.layers_outlined,
-          title: 'For Masters',
-          description: 'Get your commission payouts to the wallet.',
+          title: TranslationUtils.tr('wallet_screen_for_masters'),
+          description: TranslationUtils.tr(
+            'wallet_screen_get_your_commission_payouts',
+          ),
         ),
       ],
     );

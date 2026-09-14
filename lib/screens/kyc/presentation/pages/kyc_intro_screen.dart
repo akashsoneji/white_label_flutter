@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
@@ -78,7 +79,7 @@ class KycIntroScreen extends StatelessWidget {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 24.h),
+                padding: EdgeInsetsDirectional.fromSTEB(20.w, 8.h, 20.w, 24.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -86,64 +87,88 @@ class KycIntroScreen extends StatelessWidget {
                     SizedBox(height: 28.h),
                     _buildTimelineStep(
                       stepNumber: 1,
-                      title: 'Profile Setup',
+                      title: TranslationUtils.tr(
+                        'kyc_intro_screen_profile_setup',
+                      ),
                       state: step1State,
                       headerIcon: Icons.person_outline_rounded,
                       isLast: false,
-                      features: const [
+                      features: [
                         _StepFeature(
                           Icons.person_outline_rounded,
-                          'Complete your personal information',
+                          TranslationUtils.tr(
+                            'kyc_intro_screen_complete_your_personal_information',
+                          ),
                         ),
                         _StepFeature(
                           Icons.mail_outline_rounded,
-                          'Verify your email & phone number',
+                          TranslationUtils.tr(
+                            'kyc_intro_screen_verify_your_email_phone_number',
+                          ),
                         ),
                         _StepFeature(
                           Icons.home_outlined,
-                          'Add your residential address',
+                          TranslationUtils.tr(
+                            'kyc_intro_screen_add_your_residential_address',
+                          ),
                         ),
                       ],
                     ),
                     _buildTimelineStep(
                       stepNumber: 2,
-                      title: 'Verification',
+                      title: TranslationUtils.tr(
+                        'kyc_intro_screen_verification',
+                      ),
                       state: step2State,
                       headerIcon: Icons.badge_outlined,
                       isLast: false,
-                      features: const [
+                      features: [
                         _StepFeature(
                           Icons.cloud_upload_outlined,
-                          'Upload your KYC documents',
+                          TranslationUtils.tr(
+                            'kyc_intro_screen_upload_your_kyc_documents',
+                          ),
                         ),
                         _StepFeature(
                           Icons.verified_user_outlined,
-                          'Verify your identity',
+                          TranslationUtils.tr(
+                            'kyc_intro_screen_verify_your_identity',
+                          ),
                         ),
                         _StepFeature(
                           Icons.credit_card_outlined,
-                          'Add & verify your withdrawal method',
+                          TranslationUtils.tr(
+                            'kyc_intro_screen_add_verify_your_withdrawal_method',
+                          ),
                         ),
                       ],
                     ),
                     _buildTimelineStep(
                       stepNumber: 3,
-                      title: 'Trading Account',
+                      title: TranslationUtils.tr(
+                        'kyc_intro_screen_trading_account',
+                      ),
                       state: step3State,
                       headerIcon: Icons.work_outline_rounded,
                       isLast: true,
-                      features: const [
+                      features: [
                         _StepFeature(
                           Icons.trending_up_rounded,
-                          'Choose Live or Demo',
+                          TranslationUtils.tr(
+                            'kyc_intro_screen_choose_live_or_demo',
+                          ),
                         ),
                         _StepFeature(
                           Icons.add_circle_outline_rounded,
-                          'Create your trading account',
+                          TranslationUtils.tr(
+                            'kyc_intro_screen_create_your_trading_account',
+                          ),
                         ),
                         _StepFeature(
                           Icons.check_circle_outline_rounded,
-                          "You're ready to trade",
+                          TranslationUtils.tr(
+                            'kyc_intro_screen_you_re_ready_to_trade',
+                          ),
                         ),
                       ],
                     ),
@@ -182,8 +207,8 @@ class KycIntroScreen extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18.r),
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: AlignmentDirectional.topStart,
+                end: AlignmentDirectional.bottomEnd,
                 colors: [
                   AppColors.primary,
                   Color.lerp(AppColors.primary, Colors.black, 0.30)!,
@@ -210,7 +235,7 @@ class KycIntroScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Let's get you verified",
+                TranslationUtils.tr('kyc_intro_screen_let_s_get_you_verified'),
                 style: TextStyle(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w700,
@@ -220,7 +245,9 @@ class KycIntroScreen extends StatelessWidget {
               ),
               SizedBox(height: 6.h),
               Text(
-                'Complete these simple steps to unlock all features and start trading',
+                TranslationUtils.tr(
+                  'kyc_intro_screen_complete_these_simple_steps_to',
+                ),
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w400,
@@ -300,8 +327,8 @@ class KycIntroScreen extends StatelessWidget {
             locked
                 ? null
                 : LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
                   colors: [
                     AppColors.primary,
                     Color.lerp(AppColors.primary, Colors.black, 0.30)!,
@@ -435,7 +462,9 @@ class KycIntroScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: Text(
-        'Step $stepNumber',
+        TranslationUtils.trArgs('kyc_intro_screen_step_number', {
+          'number': '$stepNumber',
+        }),
         style: TextStyle(
           fontSize: 11.sp,
           fontWeight: FontWeight.w700,
@@ -451,17 +480,17 @@ class KycIntroScreen extends StatelessWidget {
     late final IconData icon;
     switch (state) {
       case _StepState.completed:
-        label = 'Completed';
+        label = TranslationUtils.tr('completed');
         color = AppColors.success;
         icon = Icons.check_circle;
         break;
       case _StepState.active:
-        label = 'Incomplete';
+        label = TranslationUtils.tr('kyc_intro_screen_incomplete');
         color = AppColors.primary;
         icon = Icons.circle_outlined;
         break;
       case _StepState.locked:
-        label = 'Locked';
+        label = TranslationUtils.tr('kyc_intro_screen_locked');
         color = AppColors.textGrey;
         icon = Icons.lock_outline_rounded;
         break;
@@ -527,7 +556,7 @@ class KycIntroScreen extends StatelessWidget {
   Widget _buildFooter() {
     return Container(
       color: AppColors.scaffold,
-      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 12.h),
+      padding: EdgeInsetsDirectional.fromSTEB(20.w, 12.h, 20.w, 12.h),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -539,8 +568,8 @@ class KycIntroScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14.r),
                 gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+                  begin: AlignmentDirectional.centerStart,
+                  end: AlignmentDirectional.centerEnd,
                   colors: [
                     Color.lerp(AppColors.primary.withValues(alpha: 0.3), AppColors.primary.withValues(alpha: 0.4), 0.9)!,
                     AppColors.primary,
@@ -558,7 +587,9 @@ class KycIntroScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Start Your Verification Journey',
+                    TranslationUtils.tr(
+                      'kyc_intro_screen_start_your_verification_journey',
+                    ),
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
@@ -586,7 +617,9 @@ class KycIntroScreen extends StatelessWidget {
               ),
               SizedBox(width: 6.w),
               Text(
-                'Your information is secure and encrypted',
+                TranslationUtils.tr(
+                  'kyc_intro_screen_your_information_is_secure_and',
+                ),
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w400,

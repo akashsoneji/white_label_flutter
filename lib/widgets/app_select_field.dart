@@ -77,7 +77,7 @@ class AppSelectField<T> extends StatelessWidget {
         final maxSheetHeight = MediaQuery.of(ctx).size.height * 0.55;
         return SafeArea(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 16.h),
+            padding: EdgeInsetsDirectional.fromSTEB(20.w, 12.h, 20.w, 16.h),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -167,7 +167,10 @@ class AppSelectField<T> extends StatelessWidget {
                               ),
                               if (selected)
                                 Padding(
-                                  padding: EdgeInsets.only(left: 8.w, top: 2.h),
+                                  padding: EdgeInsetsDirectional.only(
+                                    start: 8.w,
+                                    top: 2.h,
+                                  ),
                                   child: Icon(
                                     Icons.check_circle_rounded,
                                     color: AppColors.primary,

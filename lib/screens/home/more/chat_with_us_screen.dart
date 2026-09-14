@@ -6,6 +6,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
 import 'package:crm_app/screens/more/view_models/chat_with_us_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class ChatWithUsScreen extends StatelessWidget {
   const ChatWithUsScreen({super.key});
@@ -23,7 +24,7 @@ class ChatWithUsScreen extends StatelessWidget {
         elevation: 0,
         leading: const AppBackButton(),
         title: Text(
-          'Chat with us',
+          TranslationUtils.tr('chat_with_us'),
           style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 18,
@@ -92,7 +93,7 @@ class ChatWithUsScreen extends StatelessWidget {
             Container(
               width: 32,
               height: 32,
-              margin: EdgeInsets.only(right: 8),
+              margin: EdgeInsetsDirectional.only(end: 8),
               decoration: BoxDecoration(
                 color: AppColors.primary,
                 shape: BoxShape.circle,
@@ -115,7 +116,7 @@ class ChatWithUsScreen extends StatelessWidget {
               children: [
                 if (!message.isUser && message.sender != null)
                   Padding(
-                    padding: EdgeInsets.only(bottom: 4, left: 8),
+                    padding: EdgeInsetsDirectional.only(bottom: 4, start: 8),
                     child: Text(
                       message.sender!,
                       style: AppTextStyles.bodyText.copyWith(
@@ -178,7 +179,7 @@ class ChatWithUsScreen extends StatelessWidget {
 
   Widget _buildLanguageSelectionCard(ChatController controller) {
     return Container(
-      margin: EdgeInsets.only(bottom: 16, left: 40),
+      margin: EdgeInsetsDirectional.only(bottom: 16, start: 40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -192,7 +193,9 @@ class ChatWithUsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Please select the department where you want to get assistance.",
+                  TranslationUtils.tr(
+                    'chat_with_us_screen_please_select_the_department_where_you',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(fontSize: 14, color: AppColors.textPrimary),
                 ),
                 SizedBox(height: 12),
@@ -226,7 +229,7 @@ class ChatWithUsScreen extends StatelessWidget {
 
   Widget _buildTypingIndicator() {
     return Container(
-      margin: EdgeInsets.only(bottom: 16, left: 40),
+      margin: EdgeInsetsDirectional.only(bottom: 16, start: 40),
       child: Row(
         children: [
           Container(
@@ -307,7 +310,9 @@ class ChatWithUsScreen extends StatelessWidget {
                 child: TextField(
                   controller: controller.messageController,
                   decoration: InputDecoration(
-                    hintText: 'Ask me anything...',
+                    hintText: Get.find<LanguageService>().tr(
+                      'chat_with_us_ask_me_anything',
+                    ),
                     hintStyle: AppTextStyles.bodyText.copyWith(color: Colors.grey[500], fontSize: 15),
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 20,

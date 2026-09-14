@@ -215,7 +215,7 @@ class MyContestEntryCard extends StatelessWidget {
                       SizedBox(width: 8.w),
                       Expanded(
                         child: Text(
-                          'Reward available: \$${entry.prizeAmount?.toStringAsFixed(0) ?? '0'}',
+                          '${translate('dc_reward_available')}: \$${entry.prizeAmount?.toStringAsFixed(0) ?? '0'}',
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
@@ -263,11 +263,13 @@ class MyContestEntryCard extends StatelessWidget {
   }
 
   String _monthName(int m) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    const monthKeys = [
+      'month_short_jan', 'month_short_feb', 'month_short_mar',
+      'month_short_apr', 'month_short_may', 'month_short_jun',
+      'month_short_jul', 'month_short_aug', 'month_short_sep',
+      'month_short_oct', 'month_short_nov', 'month_short_dec',
     ];
-    return months[m - 1];
+    return translate(monthKeys[m - 1]);
   }
 }
 

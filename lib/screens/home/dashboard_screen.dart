@@ -254,7 +254,7 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildHeaderIconButton({
     required String assetPath,
     required VoidCallback onPressed,
-    EdgeInsets? margin,
+    EdgeInsetsGeometry? margin,
     String? label,
   }) {
     // Label variant renders a wider pill with a leading "+" icon plus the
@@ -355,9 +355,9 @@ class DashboardScreen extends StatelessWidget {
                     )
                   else
                     SliverPadding(
-                      padding: EdgeInsets.only(
-                        left: 16.w,
-                        right: 16.w,
+                      padding: EdgeInsetsDirectional.only(
+                        start: 16.w,
+                        end: 16.w,
                         top: 8.h,
                         bottom:
                             16 + 77.h + MediaQuery.of(context).padding.bottom,
@@ -395,7 +395,7 @@ class DashboardScreen extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
         child: Container(
           width: double.infinity,
-          padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 16.h),
+          padding: EdgeInsetsDirectional.fromSTEB(20.w, 18.h, 20.w, 16.h),
           decoration: BoxDecoration(
             color: CelTheme.card(context),
             borderRadius: BorderRadius.circular(12.r),
@@ -529,7 +529,7 @@ class DashboardScreen extends StatelessWidget {
                     )
                   else
                     SliverPadding(
-                      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 24.h),
+                      padding: EdgeInsetsDirectional.fromSTEB(12.w, 12.h, 12.w, 24.h),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate((context, index) {
                           final account = accounts[index];
@@ -955,7 +955,7 @@ class DashboardScreen extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          'Switch',
+                          TranslationUtils.tr('dashboard_screen_switch'),
                           style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                             fontSize: 10.5.sp,
@@ -1016,7 +1016,7 @@ class DashboardScreen extends StatelessWidget {
           children: [
             // ── Top row: account# + LIVE/DEMO pill + actions (compact) ───────────
             Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 10.h, 6.w, 0),
+              padding: EdgeInsetsDirectional.fromSTEB(12.w, 10.h, 6.w, 0),
               child: Row(
                 children: [
                   Expanded(
@@ -1077,7 +1077,7 @@ class DashboardScreen extends StatelessWidget {
                                 ),
                                 SizedBox(width: 3.w),
                                 Text(
-                                  'Scratchcard',
+                                  TranslationUtils.tr('iquote_scratchcard'),
                                   style: AppTextStyles.bodyText.copyWith(
                                     color: Colors.purple,
                                     fontSize: 8.sp,
@@ -1121,7 +1121,7 @@ class DashboardScreen extends StatelessWidget {
 
             // ── Compact balance + P/L pill (single row) ───────────────────
             Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 0),
+              padding: EdgeInsetsDirectional.fromSTEB(12.w, 8.h, 12.w, 0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -1138,14 +1138,17 @@ class DashboardScreen extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 2.h),
-                      Text(
-                        '\$${balance.toStringAsFixed(2)}',
-                        style: AppTextStyles.bodyText.copyWith(
-                          color: CelTheme.mainText(context),
-                          fontSize: 19.sp,
-                          fontWeight: FontWeight.w800,
-                          height: 1.15,
-                          letterSpacing: -0.2,
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Text(
+                          '\$${balance.toStringAsFixed(2)}',
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: CelTheme.mainText(context),
+                            fontSize: 19.sp,
+                            fontWeight: FontWeight.w800,
+                            height: 1.15,
+                            letterSpacing: -0.2,
+                          ),
                         ),
                       ),
                     ],
@@ -1165,6 +1168,7 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
+                      textDirection: TextDirection.ltr,
                       children: [
                         Icon(
                           pnl >= 0
@@ -1190,7 +1194,7 @@ class DashboardScreen extends StatelessWidget {
 
             // 3-col compact stat strip
             Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 0),
+              padding: EdgeInsetsDirectional.fromSTEB(12.w, 10.h, 12.w, 0),
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
                 decoration: BoxDecoration(
@@ -1229,7 +1233,7 @@ class DashboardScreen extends StatelessWidget {
 
             // Server meta
             Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 0),
+              padding: EdgeInsetsDirectional.fromSTEB(12.w, 8.h, 12.w, 0),
               child: Row(
                 children: [
                   Icon(
@@ -1623,9 +1627,9 @@ class DashboardScreen extends StatelessWidget {
                     )
                   else
                     SliverPadding(
-                      padding: EdgeInsets.only(
-                        left: 16,
-                        right: 16,
+                      padding: EdgeInsetsDirectional.only(
+                        start: 16,
+                        end: 16,
                         top: isVantage ? 8.h : 16,
                         bottom:
                             16 +
@@ -1687,19 +1691,19 @@ class DashboardScreen extends StatelessWidget {
               centerTitle: true,
               leadingWidth: 180.w,
               leading: Padding(
-                padding: EdgeInsets.only(left: 16.w),
+                padding: EdgeInsetsDirectional.only(start: 16.w),
                 child: Align(
-                  alignment: Alignment.centerLeft,
+                  alignment: AlignmentDirectional.centerStart,
                   child: _buildWalletHeaderButton(),
                 ),
               ),
               title: Text('', style: AppTextStyles.screenTitle),
               actions: [
                 _buildHeaderIconButton(
-                  label: 'Account',
+                  label: TranslationUtils.tr('settings_account'),
                   assetPath: 'assets/svg/deshboard/add-square.svg',
                   onPressed: controller.showOpenAccountSheet,
-                  margin: EdgeInsets.only(right: 16.w),
+                  margin: EdgeInsetsDirectional.only(end: 16.w),
                 ),
               ],
             )
@@ -1713,13 +1717,13 @@ class DashboardScreen extends StatelessWidget {
               titleSpacing: 0,
               leadingWidth: 220.w,
               leading: Padding(
-                padding: EdgeInsets.only(left: 16.w),
+                padding: EdgeInsetsDirectional.only(start: 16.w),
                 child: Row(
                   children: [
                     GestureDetector(
                       onTap: () => Get.back(),
                       child: Padding(
-                        padding: EdgeInsets.only(right: 12.w),
+                        padding: EdgeInsetsDirectional.only(end: 12.w),
                         child: Icon(
                           Icons.arrow_back_ios_new_rounded,
                           size: 20.r,
@@ -1759,13 +1763,13 @@ class DashboardScreen extends StatelessWidget {
               automaticallyImplyLeading: false,
               leadingWidth: 220.w,
               leading: Padding(
-                padding: EdgeInsets.only(left: 16.w),
+                padding: EdgeInsetsDirectional.only(start: 16.w),
                 child: Row(
                   children: [
                     GestureDetector(
                       onTap: () => Get.back(),
                       child: Padding(
-                        padding: EdgeInsets.only(right: 12.w),
+                        padding: EdgeInsetsDirectional.only(end: 12.w),
                         child: Icon(
                           Icons.arrow_back_ios_new_rounded,
                           size: 20.r,
@@ -1781,10 +1785,10 @@ class DashboardScreen extends StatelessWidget {
               // centerTitle: true,
               actions: [
                 _buildHeaderIconButton(
-                  label: 'Account',
+                  label: TranslationUtils.tr('settings_account'),
                   assetPath: 'assets/svg/deshboard/add-square.svg',
                   onPressed: controller.showOpenAccountSheet,
-                  margin: EdgeInsets.only(right: 16.w),
+                  margin: EdgeInsetsDirectional.only(end: 16.w),
                 ),
               ],
             );
@@ -2550,7 +2554,7 @@ class DashboardScreen extends StatelessWidget {
         children: [
           // ── Header strip (compact, deep primary tint) ─────────────────
           Container(
-            padding: EdgeInsets.fromLTRB(12.w, 8.h, 10.w, 8.h),
+            padding: EdgeInsetsDirectional.fromSTEB(12.w, 8.h, 10.w, 8.h),
             decoration: BoxDecoration(
               color: headerBg,
               borderRadius: BorderRadius.only(
@@ -2670,7 +2674,7 @@ class DashboardScreen extends StatelessWidget {
 
           // ── Action row (compact, primary-only) ─────────────────────────
           Padding(
-            padding: EdgeInsets.fromLTRB(8.w, 8.h, 8.w, 8.h),
+            padding: EdgeInsetsDirectional.fromSTEB(8.w, 8.h, 8.w, 8.h),
             child: Column(
               children: [
                 Row(
@@ -3008,7 +3012,10 @@ class AccountInfoBottomSheet extends StatelessWidget {
                             child: Container(
                               height: 15.h,
                               // width: 29.w,
-                              padding: EdgeInsets.only(left: 4.w, right: 4.w),
+                              padding: EdgeInsetsDirectional.only(
+                                start: 4.w,
+                                end: 4.w,
+                              ),
                               decoration: BoxDecoration(
                                 color:
                                     AppColors.isDarkMode
@@ -3399,7 +3406,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Account: ${account.metaAccountNumber}',
+                      '${languageService.tr('settings_account')}: ${account.metaAccountNumber}',
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textGrey,
@@ -3419,13 +3426,19 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Password is required';
+                            return languageService.tr(
+                              'validation_password_required',
+                            );
                           }
                           if (value.length < 8 || value.length > 16) {
-                            return 'Password must be 8-16 characters';
+                            return languageService.tr(
+                              'dashboard_screen_password_must_be_8_16_characters',
+                            );
                           }
                           if (!_isPasswordComplex(value)) {
-                            return 'Must include uppercase, lowercase, number, and special character';
+                            return languageService.tr(
+                              'dashboard_screen_must_include_uppercase_lowercase',
+                            );
                           }
                           return null;
                         },
@@ -3437,8 +3450,12 @@ class AccountMenuBottomSheet extends StatelessWidget {
                           floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                             color: AppColors.textGrey,
                           ),
-                          labelText: 'New Password',
-                          hintText: 'Enter new password',
+                          labelText: languageService.tr(
+                            'create_new_password_new_password_label',
+                          ),
+                          hintText: languageService.tr(
+                            'create_new_password_screen_enter_new_password',
+                          ),
                           suffixIcon: IconButton(
                             icon: Icon(
                               obscurePassword.value
@@ -3474,16 +3491,24 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         obscureText: obscureConfirmPassword.value,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please confirm your password';
+                            return languageService.tr(
+                              'create_new_password_validation_confirm',
+                            );
                           }
                           if (value != passwordController.text) {
-                            return 'Passwords do not match';
+                            return languageService.tr(
+                              'create_account_validation_password_match',
+                            );
                           }
                           return null;
                         },
                         decoration: InputDecoration(
-                          labelText: 'Confirm Password',
-                          hintText: 'Confirm new password',
+                          labelText: languageService.tr(
+                            'auth_confirm_password_label',
+                          ),
+                          hintText: languageService.tr(
+                            'dashboard_confirm_new_password_hint',
+                          ),
                           floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                             color: AppColors.textGrey,
                           ),
@@ -3542,14 +3567,18 @@ class AccountMenuBottomSheet extends StatelessWidget {
                                           CustomToastService.showSuccess(
                                             message:
                                                 response.data?['message'] ??
-                                                'Password changed successfully',
+                                                languageService.tr(
+                                                  'dashboard_screen_password_changed_successfully',
+                                                ),
                                           );
                                           Get.back(closeOverlays: true);
                                         } else {
                                           CustomToastService.showError(
                                             message:
                                                 response.message ??
-                                                'Failed to change password',
+                                                languageService.tr(
+                                                  'dashboard_screen_failed_to_change_password',
+                                                ),
                                           );
                                         }
                                       } catch (e) {
@@ -3582,7 +3611,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                                     ),
                                   )
                                   : Text(
-                                    'Change Password',
+                                    languageService.tr('change_password'),
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.w600,
@@ -3670,9 +3699,9 @@ class AccountMenuBottomSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsetsDirectional.only(start: 8),
                       child: Text(
-                        'Reset Investor Password',
+                        languageService.tr('dashboard_reset_investor_password'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w600,
@@ -3685,8 +3714,12 @@ class AccountMenuBottomSheet extends StatelessWidget {
                       () => RTLHelper.rtlTextField(
                         obscureText: obscurePassword.value,
                         decoration: InputDecoration(
-                          labelText: 'New Investor Password',
-                          hintText: 'Enter new investor password (8-16 chars)',
+                          labelText: languageService.tr(
+                            'dashboard_new_investor_password_label',
+                          ),
+                          hintText: languageService.tr(
+                            'dashboard_new_investor_password_hint',
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: BorderSide(color: AppColors.border),
@@ -3726,13 +3759,19 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         controller: passwordController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Password is required';
+                            return languageService.tr(
+                              'validation_password_required',
+                            );
                           }
                           if (value.length < 8 || value.length > 16) {
-                            return 'Password must be 8-16 characters';
+                            return languageService.tr(
+                              'dashboard_screen_password_must_be_8_16_characters',
+                            );
                           }
                           if (!_isPasswordComplex(value)) {
-                            return 'Must include uppercase, lowercase, number, and special character';
+                            return languageService.tr(
+                              'dashboard_screen_must_include_uppercase_lowercase',
+                            );
                           }
                           return null;
                         },
@@ -3740,9 +3779,11 @@ class AccountMenuBottomSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Padding(
-                      padding: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsetsDirectional.only(start: 8),
                       child: Text(
-                        '8-16 characters with uppercase, lowercase, numbers, and special characters',
+                        languageService.tr(
+                          'dashboard_screen_password_requirements_hint',
+                        ),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           color: AppColors.textGrey,
@@ -3755,8 +3796,12 @@ class AccountMenuBottomSheet extends StatelessWidget {
                       () => RTLHelper.rtlTextField(
                         obscureText: obscureConfirmPassword.value,
                         decoration: InputDecoration(
-                          labelText: 'Confirm Password',
-                          hintText: 'Confirm new investor password',
+                          labelText: languageService.tr(
+                            'auth_confirm_password_label',
+                          ),
+                          hintText: languageService.tr(
+                            'dashboard_confirm_investor_password_hint',
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: BorderSide(color: AppColors.border),
@@ -3796,10 +3841,14 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         controller: confirmPasswordController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please confirm password';
+                            return languageService.tr(
+                              'account_management_validation_confirm_password',
+                            );
                           }
                           if (value != passwordController.text) {
-                            return 'Passwords do not match';
+                            return languageService.tr(
+                              'create_account_validation_password_match',
+                            );
                           }
                           return null;
                         },
@@ -3809,7 +3858,10 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         passwordController.text !=
                             confirmPasswordController.text)
                       Padding(
-                        padding: const EdgeInsets.only(left: 8, top: 4),
+                        padding: const EdgeInsetsDirectional.only(
+                          start: 8,
+                          top: 4,
+                        ),
                         child: Text(
                           languageService.tr('password_mismatch_error'),
                           style: AppTextStyles.bodyText.copyWith(
@@ -3843,14 +3895,18 @@ class AccountMenuBottomSheet extends StatelessWidget {
                                           CustomToastService.showSuccess(
                                             message:
                                                 response.data?['message'] ??
-                                                'Investor password reset successfully',
+                                                languageService.tr(
+                                                  'dashboard_screen_investor_password_reset_successfully',
+                                                ),
                                           );
                                           Get.back(closeOverlays: true);
                                         } else {
                                           CustomToastService.showError(
                                             message:
                                                 response.message ??
-                                                'Failed to reset investor password',
+                                                languageService.tr(
+                                                  'dashboard_screen_failed_to_reset_investor_password',
+                                                ),
                                           );
                                         }
                                       } catch (e) {
@@ -3883,7 +3939,9 @@ class AccountMenuBottomSheet extends StatelessWidget {
                                     ),
                                   )
                                   : Text(
-                                    'Reset Password',
+                                    languageService.tr(
+                                      'create_password_reset_password',
+                                    ),
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 15.sp,
                                       fontWeight: FontWeight.w600,
@@ -3916,7 +3974,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 24),
         child: SafeArea(
           top: false,
           child: Column(
@@ -3933,7 +3991,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
               const SizedBox(height: 16),
               ListTile(
                 leading: Icon(Icons.lock_outline, color: AppColors.primary),
-                title: Text('Change Master Password'),
+                title: Text(TranslationUtils.tr('change_master_password')),
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: () {
                   Get.back();
@@ -3942,7 +4000,9 @@ class AccountMenuBottomSheet extends StatelessWidget {
               ),
               ListTile(
                 leading: Icon(Icons.vpn_key_outlined, color: AppColors.primary),
-                title: Text('Reset Investor Password'),
+                title: Text(
+                  TranslationUtils.tr('dashboard_reset_investor_password'),
+                ),
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: () {
                   Get.back();
@@ -3953,7 +4013,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
               TextButton(
                 onPressed: () => Get.back(),
                 child: Text(
-                  'Cancel',
+                  TranslationUtils.tr('account_management_cancel'),
                   style: TextStyle(
                     color: Colors.redAccent,
                     fontSize: 16,
@@ -4043,7 +4103,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                   SizedBox(height: 16),
                   _buildMenuItem(
                     icon: Icons.trending_up,
-                    label: 'Leverage',
+                    label: TranslationUtils.tr('common_leverage'),
                     onTap: () {
                       print('Leverage: ${account.leverageId}');
                       Get.back(closeOverlays: true);
@@ -4186,7 +4246,7 @@ class OpenAccountBottomSheet extends StatelessWidget {
                   ),
 
                   Align(
-                    alignment: Alignment.topLeft,
+                    alignment: AlignmentDirectional.topStart,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(20.r),
                       onTap: () => Get.back(),

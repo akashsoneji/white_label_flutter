@@ -85,7 +85,7 @@ class ContestRulesScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 32.h),
+        padding: EdgeInsetsDirectional.fromSTEB(20.w, 8.h, 20.w, 32.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

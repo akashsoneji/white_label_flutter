@@ -1,5 +1,6 @@
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:get/get.dart';
 
 class EligibleCopyAccount {
@@ -115,13 +116,14 @@ class CopyTradingSubscribeController extends GetxController {
       );
       if (!res.success || res.data == null) {
         eligibleAccounts.clear();
-        errorMessage.value = res.message ?? 'Failed to load eligible accounts';
+        errorMessage.value = res.message ??
+            TranslationUtils.tr('copy_trading_failed_to_load_eligible_accounts');
         return;
       }
       final data = res.data?['data'];
       if (data is! List) {
         eligibleAccounts.clear();
-        errorMessage.value = 'Invalid response';
+        errorMessage.value = TranslationUtils.tr('copy_trading_invalid_response');
         return;
       }
       final list =
@@ -132,7 +134,8 @@ class CopyTradingSubscribeController extends GetxController {
       }
     } catch (e) {
       eligibleAccounts.clear();
-      errorMessage.value = 'Load error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_load_error')}: $e';
     } finally {
       if (showLoading) isLoading.value = false;
     }
@@ -144,7 +147,7 @@ class CopyTradingSubscribeController extends GetxController {
     try {
       final acc = selectedAccount.value;
       if (acc == null || acc.id <= 0) {
-        errorMessage.value = 'Select an account';
+        errorMessage.value = TranslationUtils.tr('copy_trading_select_an_account');
         return ApiResponse.error(errorMessage.value);
       }
 
@@ -205,11 +208,13 @@ class CopyTradingSubscribeController extends GetxController {
 
       final res = await ApiService.post(endpoint: ApiConstants.copyTradingCopierSubscribe, data: payload);
       if (!res.success) {
-        errorMessage.value = res.message ?? 'Failed to subscribe';
+        errorMessage.value =
+            res.message ?? TranslationUtils.tr('copy_trading_failed_to_subscribe');
       }
       return res;
     } catch (e) {
-      errorMessage.value = 'Subscribe error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_subscribe_error')}: $e';
       return ApiResponse.error(errorMessage.value);
     } finally {
       isLoading.value = false;
@@ -310,11 +315,13 @@ class CopyTradingSubscribeController extends GetxController {
         data: payload,
       );
       if (!res.success) {
-        errorMessage.value = res.message ?? 'Failed to update';
+        errorMessage.value =
+            res.message ?? TranslationUtils.tr('copy_trading_failed_to_update');
       }
       return res;
     } catch (e) {
-      errorMessage.value = 'Update error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_update_error')}: $e';
       return ApiResponse.error(errorMessage.value);
     } finally {
       isLoading.value = false;

@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/models/ib_models.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class CommissionGroupFormScreen extends StatefulWidget {
   final CommissionGroup? group;
@@ -142,8 +143,10 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
   Future<void> _saveGroup() async {
     if (_groupNameController.text.trim().isEmpty) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Please enter a group name',
+        title: TranslationUtils.tr('close_position_error'),
+        message: TranslationUtils.tr(
+          'commission_group_form_screen_please_enter_group_name',
+        ),
       );
       return;
     }
@@ -190,8 +193,10 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
       }
     } catch (e) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to save group: $e',
+        title: TranslationUtils.tr('close_position_error'),
+        message: TranslationUtils.trArgs('ib_failed_save_group', {
+          'reason': '$e',
+        }),
       );
     } finally {
       setState(() {
@@ -223,7 +228,9 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
           iconHeight: 30.h,
         ),
         title: Text(
-          widget.group != null ? 'Edit Commission Group' : 'Add Commission Group',
+          widget.group != null
+              ? TranslationUtils.tr('ib_edit_commission_group')
+              : TranslationUtils.tr('ib_add_commission_group'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -240,7 +247,9 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
           if (_isPageLoading) {
             return Center(
               child: CommonLoadingWidget(
-                message: 'Loading structure data...',
+                message: TranslationUtils.tr(
+                  'commission_group_form_screen_loading_structure_data',
+                ),
                 size: 50.0,
                 color: AppColors.primary,
               ),
@@ -256,7 +265,9 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
 
           if (!_isStructureDataValid(structureData)) {
             return _buildStructureErrorState(
-              message: 'Failed to load structure data',
+              message: TranslationUtils.tr(
+                'commission_group_form_screen_failed_to_load_structure_data',
+              ),
             );
           }
 
@@ -273,7 +284,9 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Standard Group Structure',
+                          TranslationUtils.tr(
+                            'commission_group_form_screen_standard_group_structure',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w600,
@@ -282,7 +295,9 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
                         ),
                         SizedBox(height: 8.h),
                         Text(
-                          'Standard Group Structure: Create commission groups for Sub-IBs. Commission rates cannot exceed your own rates.',
+                          TranslationUtils.tr(
+                            'commission_group_form_screen_standard_group_structure_create_commission_groups',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             color: AppColors.textGrey,
@@ -303,7 +318,9 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Group Name',
+                          TranslationUtils.tr(
+                            'commission_group_form_screen_group_name',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
@@ -314,7 +331,9 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
                         TextField(
                           controller: _groupNameController,
                           decoration: InputDecoration(
-                            hintText: 'Enter group name',
+                            hintText: TranslationUtils.tr(
+                              'commission_group_form_screen_enter_group_name',
+                            ),
                             hintStyle: AppTextStyles.bodyText.copyWith(
                               color: AppColors.textGrey,
                               fontSize: 14.sp,
@@ -356,7 +375,9 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Set Commission Rates (Category-wise)',
+                          TranslationUtils.tr(
+                            'commission_group_form_screen_set_commission_rates_category_wise',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
@@ -404,7 +425,7 @@ style: OutlinedButton.styleFrom(
                     ),
                   ),
                   child: Text(
-                    'Cancel',
+                    TranslationUtils.tr('account_management_cancel'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
@@ -438,7 +459,9 @@ style: OutlinedButton.styleFrom(
                             ),
                           )
                           : Text(
-                            'Save Commission Group',
+                            TranslationUtils.tr(
+                              'commission_group_form_screen_save_commission_group',
+                            ),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
@@ -491,7 +514,7 @@ style: OutlinedButton.styleFrom(
                   ),
                 ),
                 child: Text(
-                  'Retry',
+                  TranslationUtils.tr('edit_profile_retry'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
@@ -614,7 +637,9 @@ style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 16.h),
                         child: Center(
                           child: Text(
-                            'No categories available',
+                            TranslationUtils.tr(
+                              'commission_group_form_screen_no_categories_available',
+                            ),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               color: AppColors.textGrey,
@@ -690,7 +715,7 @@ style: OutlinedButton.styleFrom(
                           ? AppColors.textGrey
                           : AppColors.primary,
                 ),
-                textAlign: TextAlign.right,
+                textAlign: TextAlign.end,
                 decoration: InputDecoration(
                   prefixText: '\$ ',
                   prefixStyle: AppTextStyles.bodyText.copyWith(
@@ -734,11 +759,13 @@ style: OutlinedButton.styleFrom(
         ),
         SizedBox(height: 4.h),
         Align(
-          alignment: Alignment.centerRight,
+          alignment: AlignmentDirectional.centerEnd,
           child: Text(
             maxValue != null
-                ? 'Max: \$${maxValue.toStringAsFixed(2)}'
-                : 'Max: \$0.00',
+                ? TranslationUtils.trArgs('ib_max_amount', {
+                    'amount': maxValue.toStringAsFixed(2),
+                  })
+                : TranslationUtils.trArgs('ib_max_amount', {'amount': '0.00'}),
             style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textGrey),
           ),
         ),

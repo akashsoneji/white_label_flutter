@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/finance/view_models/transaction_history_controller.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
@@ -42,7 +43,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
   Timer? _pollingTimer;
   DateTime? _pollingStartedAt;
   bool _resolved = false; // set once success/timeout/cancel fires
-  String _statusText = 'Checking payment details...';
+  String _statusText = '';
   bool _isPolling = true;
   int _pollAttempts = 0;
 
@@ -55,6 +56,9 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
   @override
   void initState() {
     super.initState();
+    _statusText = TranslationUtils.tr(
+      'cregis_success_screen_checking_payment_details',
+    );
     _openExternalBrowser();
     _startStatusPolling();
   }
@@ -134,10 +138,14 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
     if (mounted) {
       setState(() {
         _isPolling = false;
-        _statusText = 'Payment confirmed!';
+        _statusText = TranslationUtils.tr(
+          'cregis_success_screen_payment_confirmed',
+        );
       });
     }
-    CustomToastService.showSuccess(message: 'Deposit successful!');
+      CustomToastService.showSuccess(
+        message: TranslationUtils.tr('deposit_deposit_successful'),
+      );
     try {
       Get.find<DashboardController>().markMT5AccountsAsStale();
     } catch (_) {}
@@ -154,12 +162,16 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
     if (mounted) {
       setState(() {
         _isPolling = false;
-        _statusText = 'Transaction is processing. Check Transaction History.';
+        _statusText = TranslationUtils.tr(
+          'cregis_address_screen_transaction_is_processing_check_transaction',
+        );
       });
     }
     CustomToastService.showWarning(
-      message: 'Transaction is processing. Please wait in Transaction History.',
-      title: 'Processing',
+      message: TranslationUtils.tr(
+        'cregis_address_screen_transaction_is_processing_please_wait_in',
+      ),
+      title: TranslationUtils.tr('cregis_address_screen_processing'),
     );
     Get.offAllNamed(
       AppPages.TRANSACTION_HISTORY,
@@ -176,19 +188,24 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: Text('Cancel payment?'),
+        title: Text(TranslationUtils.tr('cregis_address_screen_cancel_payment')),
         content: Text(
-          'Are you sure you want to cancel this payment? The transaction '
-          'will not be processed and you will be returned to the home screen.',
+          TranslationUtils.tr(
+            'cregis_address_screen_are_you_sure_you_want_to_cancel_this_payment',
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('No, keep waiting'),
+            child: Text(
+              TranslationUtils.tr('cregis_address_screen_no_keep_waiting'),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Yes, cancel'),
+            child: Text(
+              TranslationUtils.tr('cregis_address_screen_yes_cancel'),
+            ),
           ),
         ],
       ),
@@ -196,7 +213,11 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
     if (confirmed != true || _resolved) return;
     _resolved = true;
     _pollingTimer?.cancel();
-    CustomToastService.showError(message: 'Transaction cancelled');
+    CustomToastService.showError(
+      message: TranslationUtils.tr(
+        'cregis_address_screen_transaction_cancelled',
+      ),
+    );
     Get.offAllNamed(AppPages.TRADING);
   }
 
@@ -227,7 +248,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
           elevation: 0,
           leading: AppSvgBackButton(onPressed: _confirmCancel),
           title: Text(
-            'Cregis Payment',
+                    TranslationUtils.tr('cregis_success_screen_cregis_payment'),
             style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 16.sp),
           ),
           centerTitle: true,
@@ -252,7 +273,9 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                 ),
                 SizedBox(height: 32.h),
                 Text(
-                  'Payment Request Submitted',
+                  TranslationUtils.tr(
+                    'cregis_success_screen_payment_request_submitted',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 22.sp,
                     fontWeight: FontWeight.bold,
@@ -340,7 +363,9 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                         Icon(Icons.open_in_browser, size: 20),
                         SizedBox(width: 8.w),
                         Text(
-                          'Open Payment Link',
+                  TranslationUtils.tr(
+                    'cregis_success_screen_open_payment_link',
+                  ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
@@ -356,7 +381,9 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                   child: TextButton(
                     onPressed: _goToHistory,
                     child: Text(
-                      'Go to Transaction History',
+                  TranslationUtils.tr(
+                    'cregis_address_screen_go_to_transaction_history',
+                  ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textGrey,
@@ -382,7 +409,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Debug — last poll',
+                TranslationUtils.tr('cregis_address_screen_debug_last_poll'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w700,

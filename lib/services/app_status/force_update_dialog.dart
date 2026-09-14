@@ -9,6 +9,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/services/app_status/app_status_controller.dart';
 import 'package:crm_app/services/app_status/in_app_update_service.dart';
 import 'package:crm_app/screens/common/webview_screen.dart';
+import 'package:crm_app/services/language_service.dart';
 
 enum UpdateDialogState {
   idle,
@@ -40,7 +41,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
     if (updateUrl == null || updateUrl.isEmpty) {
       setState(() {
         _state = UpdateDialogState.error;
-        _downloadError = 'No update URL found.';
+        _downloadError = TranslationUtils.tr('update_no_url_found');
       });
       return;
     }
@@ -49,7 +50,12 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
 
     // If NOT an APK URL, open in WebView
     if (!isApk) {
-      Get.to(() => WebViewScreen(url: updateUrl, title: 'Update'));
+      Get.to(
+        () => WebViewScreen(
+          url: updateUrl,
+          title: TranslationUtils.tr('general_update'),
+        ),
+      );
       return;
     }
 
@@ -58,7 +64,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
       _state = UpdateDialogState.downloading;
       _downloadProgress = 0.0;
       _downloadError = null;
-      _downloadedSizeLabel = 'Starting download...';
+      _downloadedSizeLabel = TranslationUtils.tr('update_starting_download');
     });
 
     final result = await InAppUpdateService.instance.downloadAndInstall(
@@ -68,7 +74,10 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
           setState(() {
             _downloadProgress = progress;
             final percent = (progress * 100).toStringAsFixed(0);
-            _downloadedSizeLabel = '$percent% complete';
+            _downloadedSizeLabel = TranslationUtils.trArgs(
+              'update_percent_complete',
+              {'percent': percent},
+            );
           });
         }
       },
@@ -81,7 +90,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
         setState(() {
           _state = UpdateDialogState.installing;
           _downloadProgress = 1.0;
-          _downloadedSizeLabel = 'Ready to install';
+          _downloadedSizeLabel = TranslationUtils.tr('update_ready_to_install');
         });
         await Future.delayed(const Duration(seconds: 2));
         if (mounted) setState(() => _state = UpdateDialogState.idle);
@@ -89,7 +98,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
       case DownloadResult.error:
         setState(() {
           _state = UpdateDialogState.error;
-          _downloadError = 'Download failed. Please check your connection and try again.';
+          _downloadError = TranslationUtils.tr('update_download_failed_message');
         });
         break;
     }
@@ -249,7 +258,9 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                           ),
                                           SizedBox(width: 6.w),
                                           Text(
-                                            "What's new",
+                                            TranslationUtils.tr(
+                                              'update_whats_new',
+                                            ),
                                             style: AppTextStyles.bodyText.copyWith(
                                               fontSize: 11.sp,
                                               fontWeight: FontWeight.w600,
@@ -284,7 +295,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                     controller.resetForceUpdateDialogFlag();
                                   },
                                   child: Text(
-                                    'Remind me later',
+                                    TranslationUtils.tr('update_remind_me_later'),
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 14.sp,
                                       color: subtitleColor.withValues(alpha: 0.8),
@@ -311,32 +322,36 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
   String _getTitle() {
     switch (_state) {
       case UpdateDialogState.downloading:
-        return 'Downloading Update';
+        return TranslationUtils.tr('update_downloading_update');
       case UpdateDialogState.installing:
-        return 'Ready to Install';
+        return TranslationUtils.tr('update_ready_to_install_title');
       case UpdateDialogState.openingStore:
-        return 'Opening App Store';
+        return TranslationUtils.tr('update_opening_app_store');
       case UpdateDialogState.error:
-        return 'Download Failed';
+        return TranslationUtils.tr('update_download_failed');
       case UpdateDialogState.idle:
-        return 'Update Available';
+        return TranslationUtils.tr('update_available');
     }
   }
 
   String _getSubtitle(String latestVersion) {
     switch (_state) {
       case UpdateDialogState.downloading:
-        return _downloadedSizeLabel ?? 'Please wait...';
+        return _downloadedSizeLabel ?? TranslationUtils.tr('update_please_wait');
       case UpdateDialogState.installing:
-        return 'Tap "Install" in the system prompt to continue';
+        return TranslationUtils.tr('update_tap_install_system_prompt');
       case UpdateDialogState.openingStore:
-        return 'Taking you to the app store...';
+        return TranslationUtils.tr('update_taking_you_to_store');
       case UpdateDialogState.error:
-        return _downloadError ?? 'Something went wrong.';
+        return _downloadError ??
+            TranslationUtils.tr('general_something_went_wrong');
       case UpdateDialogState.idle:
-        return 'Version $latestVersion is ready. Update now for the best experience.';
+        return TranslationUtils.trArgs('update_version_ready_message', {
+          'version': latestVersion,
+        });
     }
   }
+
 
   Widget _buildIcon(bool isDark) {
     final bool isDownloading = _state == UpdateDialogState.downloading;
@@ -479,7 +494,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
             ),
             SizedBox(width: 4.w),
             Text(
-              'Do not close the app',
+              TranslationUtils.tr('update_do_not_close_app'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: AppColors.textGrey,
@@ -530,7 +545,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Tap Install when prompted',
+                  TranslationUtils.tr('update_tap_install_when_prompted'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
@@ -539,7 +554,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  'Allow "Unknown apps" if asked by your device',
+                  TranslationUtils.tr('update_allow_unknown_apps'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     color: textColor.withValues(alpha: 0.85),
@@ -568,7 +583,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
         ),
         SizedBox(width: 10.w),
         Text(
-          'Redirecting to app store...',
+          TranslationUtils.tr('update_redirecting_to_store'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 13.sp,
             color: AppColors.textSecondary,
@@ -617,7 +632,9 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
             ),
             SizedBox(width: 10.w),
             Text(
-              hasApkUrl ? 'Download & Install' : 'Update Now',
+              hasApkUrl
+                  ? TranslationUtils.tr('update_download_and_install')
+                  : TranslationUtils.tr('update_update_now'),
               style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.onColoredBackground,
                 fontSize: 15.sp,
@@ -662,7 +679,9 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
               ),
               SizedBox(width: 12.w),
               Text(
-                'Downloading... ${((_downloadProgress ?? 0) * 100).toStringAsFixed(0)}%',
+                TranslationUtils.trArgs('update_downloading_percent', {
+                  'percent': ((_downloadProgress ?? 0) * 100).toStringAsFixed(0),
+                }),
                 style: AppTextStyles.bodyText.copyWith(
                   color: _accentColor,
                   fontSize: 14.sp,
@@ -677,7 +696,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
           GestureDetector(
             onTap: null,
             child: Text(
-              'Remind me later',
+              TranslationUtils.tr('update_remind_me_later'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 color: AppColors.textGrey,
@@ -720,7 +739,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
               ),
               SizedBox(width: 10.w),
               Text(
-                'Download complete!',
+                TranslationUtils.tr('update_download_complete'),
                 style: AppTextStyles.bodyText.copyWith(
                   color: textColor,
                   fontSize: 14.sp,
@@ -732,7 +751,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
         ),
         SizedBox(height: 8.h),
         Text(
-          'System installer should have opened automatically',
+          TranslationUtils.tr('update_system_installer_opened'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 12.sp,
             color: AppColors.textGrey,
@@ -772,7 +791,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
           ),
           SizedBox(width: 12.w),
           Text(
-            'Opening app store...',
+            TranslationUtils.tr('update_opening_app_store_progress'),
             style: AppTextStyles.bodyText.copyWith(
               color: _accentColor,
               fontSize: 14.sp,
@@ -809,7 +828,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                 ),
                 SizedBox(width: 10.w),
                 Text(
-                  'Try Again',
+                  TranslationUtils.tr('my_plans_tab_try_again'),
                   style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.onColoredBackground,
                     fontSize: 15.sp,
@@ -827,7 +846,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
             Get.find<AppStatusController>().resetForceUpdateDialogFlag();
           },
           child: Text(
-            'Skip this version',
+            TranslationUtils.tr('update_skip_this_version'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.sp,
               color: AppColors.textGrey,

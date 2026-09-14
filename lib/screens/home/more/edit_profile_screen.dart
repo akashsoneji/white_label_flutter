@@ -1229,10 +1229,10 @@ class _EditProfileState extends State<EditProfile> {
           isProfileVerified
               ? SizedBox.shrink()
               : Padding(
-                padding: EdgeInsets.only(
+                padding: EdgeInsetsDirectional.only(
                   bottom: MediaQuery.of(context).padding.bottom + 10,
-                  left: 16.w,
-                  right: 16.w,
+                  start: 16.w,
+                  end: 16.w,
                 ),
                 child: SizedBox(
                   width: double.infinity,

@@ -1,5 +1,6 @@
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:get/get.dart';
 
 class TradeItem {
@@ -271,7 +272,9 @@ class CopierSubscriptionItem {
 
   String get commissionDisplay {
     if (commissionType == 'per_trade') {
-      return '${commissionPercentage.toStringAsFixed(0)}% per trade';
+      return TranslationUtils.trArgs('copy_trading_percent_per_trade', {
+        'percent': commissionPercentage.toStringAsFixed(0),
+      });
     } else if (commissionType == 'subscription') {
       return '\$$subscriptionFee / period';
     }
@@ -331,14 +334,15 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
 
       if (!res.success || res.data == null) {
         subscriptions.clear();
-        errorMessage.value = res.message ?? 'Failed to load subscriptions';
+      errorMessage.value = res.message ??
+          TranslationUtils.tr('copy_trading_failed_to_load_subscriptions');
         return;
       }
 
       final data = res.data?['data'];
       if (data is! List) {
         subscriptions.clear();
-        errorMessage.value = 'Invalid response';
+      errorMessage.value = TranslationUtils.tr('copy_trading_invalid_response');
         return;
       }
 
@@ -356,7 +360,8 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
     } catch (e,t) {
       subscriptions.clear();
       print('Load error: $e\n$t');
-      errorMessage.value = 'Load error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_load_error')}: $e';
     } finally {
       if (showLoading) isLoading.value = false;
     }
@@ -434,7 +439,9 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
 
       if (!res.success || res.data == null) {
         trades.clear();
-        tradeError.value = res.message ?? 'Failed to load trades';
+        tradeError.value =
+            res.message ??
+            TranslationUtils.tr('my_investments_screen_failed_to_load_trades');
         return;
       }
 
@@ -444,7 +451,7 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
       final data = nestedData is Map ? nestedData['data'] : null;
       if (data is! List) {
         trades.clear();
-        tradeError.value = 'Invalid response';
+        tradeError.value = TranslationUtils.tr('copy_trading_invalid_response');
         return;
       }
 
@@ -503,7 +510,9 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
-      return ApiResponse.error('Pause error: $e');
+      return ApiResponse.error(
+        '${TranslationUtils.tr('copy_trading_pause_error')}: $e',
+      );
     } finally {
       actionLoading.value = false;
     }
@@ -519,7 +528,9 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
-      return ApiResponse.error('Resume error: $e');
+      return ApiResponse.error(
+        '${TranslationUtils.tr('copy_trading_resume_error')}: $e',
+      );
     } finally {
       actionLoading.value = false;
     }
@@ -535,7 +546,9 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
-      return ApiResponse.error('Stop error: $e');
+      return ApiResponse.error(
+        '${TranslationUtils.tr('copy_trading_stop_error')}: $e',
+      );
     } finally {
       actionLoading.value = false;
     }
@@ -551,7 +564,9 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
-      return ApiResponse.error('Add capital error: $e');
+      return ApiResponse.error(
+        '${TranslationUtils.tr('copy_trading_add_capital_error')}: $e',
+      );
     } finally {
       actionLoading.value = false;
     }

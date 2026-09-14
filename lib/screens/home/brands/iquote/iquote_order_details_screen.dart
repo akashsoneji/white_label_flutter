@@ -96,7 +96,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
                 ),
               ]),
               _cardContainer([
-                _row(t('Commission'), _d.commission, showDivider: true),
+                _row(t('general_commission'), _d.commission, showDivider: true),
                 _row(t('swap'), _d.swap, showDivider: true),
               ]),
 
@@ -184,7 +184,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
               ),
               SizedBox(width: 8.w),
               Text(
-                '${_d.lots}Lot',
+                '${_d.lots}${TranslationUtils.tr('scratch_card_screen_lot')}',
                 style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.textGrey,
                   fontSize: 13.sp,
@@ -280,7 +280,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
           '',
           titleText: const SizedBox.shrink(),
           messageText: Text(
-            'Copied',
+            TranslationUtils.tr('deposit_instruction_copied'),
             style: AppTextStyles.bodyText.copyWith(
               color: AppColors.textPrimary,
               fontSize: 12.sp,

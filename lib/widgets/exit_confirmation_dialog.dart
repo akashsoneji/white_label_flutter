@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class ExitConfirmationDialog extends StatelessWidget {
   const ExitConfirmationDialog({Key? key}) : super(key: key);
@@ -12,15 +13,15 @@ class ExitConfirmationDialog extends StatelessWidget {
       backgroundColor: AppColors.card,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
       insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
-      titlePadding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 12.h),
+      titlePadding: EdgeInsetsDirectional.fromSTEB(24.w, 24.h, 24.w, 12.h),
       contentPadding: EdgeInsets.symmetric(horizontal: 24.w),
-      actionsPadding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 20.h),
+      actionsPadding: EdgeInsetsDirectional.fromSTEB(24.w, 12.h, 24.w, 20.h),
       title: Row(
         children: [
           Icon(Icons.exit_to_app, color: AppColors.primary, size: 26.w),
           SizedBox(width: 12.w),
           Text(
-            'Exit App',
+            TranslationUtils.tr('exit_confirmation_dialog_exit_app'),
             style: AppTextStyles.heading.copyWith(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -30,7 +31,9 @@ class ExitConfirmationDialog extends StatelessWidget {
         ],
       ),
       content: Text(
-        'Do you want to exit the app?',
+        TranslationUtils.tr(
+          'exit_confirmation_dialog_do_you_want_to_exit_the',
+        ),
         style: AppTextStyles.bodyText.copyWith(
           fontSize: 15.sp,
           color: AppColors.textSecondary,
@@ -53,7 +56,7 @@ class ExitConfirmationDialog extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Cancel',
+                  TranslationUtils.tr('account_management_cancel'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
@@ -76,7 +79,7 @@ class ExitConfirmationDialog extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Exit',
+                  TranslationUtils.tr('exit_confirmation_dialog_exit'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,

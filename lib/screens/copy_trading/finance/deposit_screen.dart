@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class CopyTradingDepositScreen extends StatelessWidget {
   const CopyTradingDepositScreen({super.key});
@@ -17,7 +18,7 @@ class CopyTradingDepositScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Deposit',
+          TranslationUtils.tr('common_deposit'),
           style: AppTextStyles.heading.copyWith(fontWeight: FontWeight.w600),
         ),
         leading: IconButton(
@@ -63,7 +64,7 @@ class CopyTradingDepositScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Please note',
+                          TranslationUtils.tr('deposit_screen_please_note'),
                           style: AppTextStyles.label.copyWith(
                             fontWeight: FontWeight.w700,
                             fontSize: 16.sp,
@@ -72,7 +73,9 @@ class CopyTradingDepositScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 8.h),
                         Text(
-                          'You need at least 25 USD to start a new investment.',
+                          TranslationUtils.tr(
+                            'deposit_screen_you_need_at_least_25_usd',
+                          ),
                           style: AppTextStyles.subheading.copyWith(
                             color: AppColors.textGrey,
                             fontSize: 14.sp,
@@ -88,7 +91,7 @@ class CopyTradingDepositScreen extends StatelessWidget {
 
             SizedBox(height: 32.h),
             Text(
-              'Payment Method',
+              TranslationUtils.tr('deposit_screen_payment_method'),
               style: AppTextStyles.label.copyWith(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,

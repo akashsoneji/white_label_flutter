@@ -3,11 +3,13 @@ import 'dart:collection';
 import 'dart:convert';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 /// **New** chart widget used when `FlavorConfig.instance.useNewChart == true`.
 ///
@@ -157,10 +159,12 @@ class AdvancedChartInAppWebViewState extends State<AdvancedChartInAppWebView> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: double.infinity,
-      child: Stack(
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: SizedBox(
+        width: double.infinity,
+        height: double.infinity,
+        child: Stack(
         children: [
           InAppWebView(
             initialFile: _assetFile,
@@ -236,9 +240,11 @@ class AdvancedChartInAppWebViewState extends State<AdvancedChartInAppWebView> {
             Container(
               color: Colors.transparent,
               child: Center(
-                child: CommonLoadingWidget(
-                  message: 'Loading chart...',
-                  size: 40.0,
+                  child: CommonLoadingWidget(
+                    message: Get.find<LanguageService>().tr(
+                      'advanced_chart_inapp_webview_loading_chart',
+                    ),
+                    size: 40.0,
                   color: AppColors.primary,
                 ),
               ),
@@ -288,7 +294,8 @@ class AdvancedChartInAppWebViewState extends State<AdvancedChartInAppWebView> {
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }

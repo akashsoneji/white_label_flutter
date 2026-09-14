@@ -13,6 +13,7 @@ import 'package:crm_app/utils/trade_win_format.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/screens/ibm/presentation/widgets/ibm_top_header.dart';
 import 'package:crm_app/screens/trade_win/widgets/trade_win_product_image.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class IbmPromotionScreen extends StatefulWidget {
   const IbmPromotionScreen({super.key});
@@ -75,8 +76,8 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
-      appBar: const IbmTopHeader(
-        title: 'Promotion & Rewards',
+      appBar: IbmTopHeader(
+        title: TranslationUtils.tr('ibm_promotion_and_rewards'),
         showBackButton: false,
       ),
       body: Obx(() {
@@ -121,28 +122,33 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                         width: cardWidth,
                         icon: Icons.bar_chart,
                         iconBg: AppColors.primary,
-                        title: 'Available IB Lots',
+                        title: TranslationUtils.tr('ibm_available_ib_lots'),
                         value: availableLots.toStringAsFixed(1),
-                        subtitle:
-                            'Lifetime ${lifetimeLots.toStringAsFixed(1)} · spent ${spentLots.toStringAsFixed(1)}',
+                        subtitle: TranslationUtils.trArgs(
+                          'ibm_lifetime_spent_lots',
+                          {
+                            'lifetime': lifetimeLots.toStringAsFixed(1),
+                            'spent': spentLots.toStringAsFixed(1),
+                          },
+                        ),
                       ),
                       SizedBox(width: 6.w),
                       _buildTopStatCard(
                         width: cardWidth,
                         icon: Icons.verified_user_outlined,
                         iconBg: AppColors.primary,
-                        title: 'Past Wins',
+                        title: TranslationUtils.tr('tw_past_wins'),
                         value: '$totalWins',
-                        subtitle: 'Total redemptions',
+                        subtitle: TranslationUtils.tr('tw_total_redemptions'),
                       ),
                       SizedBox(width: 6.w),
                       _buildTopStatCard(
                         width: cardWidth,
                         icon: Icons.account_balance_wallet_outlined,
                         iconBg: AppColors.primary,
-                        title: 'Value Won',
+                        title: TranslationUtils.tr('tw_value_won'),
                         value: '\$${totalValueWon.toStringAsFixed(0)}',
-                        subtitle: 'Total prize value',
+                        subtitle: TranslationUtils.tr('tw_total_prize_value'),
                       ),
                     ],
                   );
@@ -156,7 +162,9 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                 child: Row(
                   children: [
                     _buildPillChip(
-                      label: 'All (${products.length})',
+                      label: TranslationUtils.trArgs('ibm_all_count', {
+                        'count': '${products.length}',
+                      }),
                       isSelected: isAllSelected,
                       onTap: () {
                         if (!isAllSelected) {
@@ -170,8 +178,13 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                     ),
                     SizedBox(width: 6.w),
                     _buildPillChip(
-                      label:
-                          'Ready to Redeem (${isRedeemableSelected ? products.length : products.where((p) => p.requiredLots <= availableLots).length})',
+                      label: TranslationUtils.trArgs(
+                        'ibm_ready_to_redeem_count',
+                        {
+                          'count':
+                              '${isRedeemableSelected ? products.length : products.where((p) => p.requiredLots <= availableLots).length}',
+                        },
+                      ),
                       isSelected: isRedeemableSelected,
                       onTap: () {
                         if (!isRedeemableSelected) {
@@ -191,7 +204,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                           controller.selectedCategory.value.toLowerCase() ==
                           cat.toLowerCase();
                       return Padding(
-                        padding: EdgeInsets.only(right: 6.w),
+                        padding: EdgeInsetsDirectional.only(end: 6.w),
                         child: _buildPillChip(
                           label: cat.toUpperCase(),
                           isSelected: isSelected,
@@ -215,7 +228,9 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${products.length} products available',
+                    TranslationUtils.trArgs('ibm_products_available', {
+                      'count': '${products.length}',
+                    }),
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
@@ -241,7 +256,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                   padding: EdgeInsets.symmetric(vertical: 30.h),
                   alignment: Alignment.center,
                   child: Text(
-                    'No promotional rewards available in this category.',
+                    TranslationUtils.tr('ibm_no_promotional_rewards'),
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: AppColors.textGrey,
@@ -424,7 +439,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                 Text(
                   product.description.isNotEmpty
                       ? product.description
-                      : 'Exclusive loyalty reward',
+                      : TranslationUtils.tr('ibm_exclusive_loyalty_reward'),
                   style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
                 ),
                 SizedBox(height: 12.h),
@@ -441,7 +456,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'LOT REQUIREMENT',
+                        TranslationUtils.tr('ibm_lot_requirement'),
                         style: TextStyle(
                           fontSize: 9.sp,
                           fontWeight: FontWeight.bold,
@@ -463,7 +478,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                             ),
                           ),
                           Text(
-                            'lots',
+                            TranslationUtils.tr('ibm_lots_lower'),
                             style: TextStyle(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
@@ -472,7 +487,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                           ),
                           SizedBox(width: 8.w),
                           Text(
-                            'Closed trades only',
+                            TranslationUtils.tr('tw_closed_trades_only'),
                             style: TextStyle(
                               fontSize: 10.sp,
                               color: AppColors.textGrey,
@@ -499,23 +514,23 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                   child: Column(
                     children: [
                       _buildDetailRow(
-                        'Allowed Groups:',
+                        TranslationUtils.tr('ibm_allowed_groups_label'),
                         product.displayAllowedGroups,
                       ),
                       SizedBox(height: 4.h),
                       _buildDetailRow(
-                        'Allowed Symbols:',
+                        TranslationUtils.tr('ibm_allowed_symbols_label'),
                         product.displayAllowedSymbols,
                       ),
                       SizedBox(height: 4.h),
                       _buildDetailRow(
-                        'Your Available Lots:',
+                        TranslationUtils.tr('ibm_your_available_lots_label'),
                         availableLots.toStringAsFixed(1),
                         valueColor: Colors.green,
                       ),
                       SizedBox(height: 4.h),
                       _buildDetailRow(
-                        'Your Available Deposit:',
+                        TranslationUtils.tr('ibm_your_available_deposit_label'),
                         '\$0',
                         valueColor: Colors.green,
                       ),
@@ -529,7 +544,9 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Value: \$${product.prizeValue.toStringAsFixed(0)}',
+                      TranslationUtils.trArgs('ibm_value_amount', {
+                        'amount': product.prizeValue.toStringAsFixed(0),
+                      }),
                       style: TextStyle(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.bold,
@@ -537,7 +554,9 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                       ),
                     ),
                     Text(
-                      'Stock: ${product.stock} left',
+                      TranslationUtils.trArgs('ibm_stock_left', {
+                        'count': '${product.stock}',
+                      }),
                       style: TextStyle(
                         fontSize: 11.sp,
                         color: Colors.green,
@@ -545,7 +564,9 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                       ),
                     ),
                     Text(
-                      'Claimed: ${product.claimsCount} times',
+                      TranslationUtils.trArgs('ibm_claimed_times', {
+                        'count': '${product.claimsCount}',
+                      }),
                       style: TextStyle(
                         fontSize: 11.sp,
                         color: AppColors.textGrey,
@@ -625,7 +646,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                           color: AppColors.whiteColor,
                         ),
                         label: Text(
-                          'Redeem Now',
+                          TranslationUtils.tr('tw_redeem_now'),
                           style: TextStyle(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.bold,
@@ -673,7 +694,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                 color: AppColors.card,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
               ),
-              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
+              padding: EdgeInsetsDirectional.fromSTEB(20.w, 16.h, 20.w, 24.h),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -696,7 +717,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'REDEEM PRIZE',
+                              TranslationUtils.tr('tw_redeem_prize'),
                               style: TextStyle(
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.w700,
@@ -715,7 +736,9 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                             ),
                             SizedBox(height: 2.h),
                             Text(
-                              '\$${product.prizeValue.toStringAsFixed(0)} value',
+                              TranslationUtils.trArgs('ibm_amount_value', {
+                                'amount': product.prizeValue.toStringAsFixed(0),
+                              }),
                               style: TextStyle(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w600,
@@ -798,7 +821,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                   if (currentStep == 1) ...[
                     // Step 1: Confirm Redemption
                     Text(
-                      'Step 1: Confirm Redemption',
+                      TranslationUtils.tr('tw_step_confirm'),
                       style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w800,
@@ -824,7 +847,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                           Row(
                             children: [
                               Text(
-                                'Item: ',
+                                TranslationUtils.tr('ibm_item_label'),
                                 style: TextStyle(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w700,
@@ -844,7 +867,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                           Row(
                             children: [
                               Text(
-                                'Quantity: ',
+                                TranslationUtils.tr('ibm_quantity_label'),
                                 style: TextStyle(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w700,
@@ -885,7 +908,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                           SizedBox(width: 10.w),
                           Expanded(
                             child: Text(
-                              'Once redeemed, this claim will be processed and your stock will be adjusted.',
+                              TranslationUtils.tr('ibm_once_redeemed_warning'),
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 color: const Color(0xFF8D4E00),
@@ -914,7 +937,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                               ),
                             ),
                             child: Text(
-                              'Cancel',
+                              TranslationUtils.tr('account_management_cancel'),
                               style: TextStyle(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w700,
@@ -960,7 +983,9 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                                         });
                                         CustomToastService.showError(
                                           message: response.message ??
-                                              'Claim failed',
+                                              TranslationUtils.tr(
+                                                'ibm_claim_failed',
+                                              ),
                                         );
                                       }
                                     } catch (e) {
@@ -993,7 +1018,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        'Yes, Continue',
+                                        TranslationUtils.tr('ibm_yes_continue'),
                                         style: TextStyle(
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.bold,
@@ -1036,7 +1061,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                           ),
                           SizedBox(height: 16.h),
                           Text(
-                            'Redemption Successful!',
+                            TranslationUtils.tr('tw_redemption_successful'),
                             style: TextStyle(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.w800,
@@ -1045,7 +1070,9 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                           ),
                           SizedBox(height: 4.h),
                           Text(
-                            'Your ${product.name} is being processed.',
+                            TranslationUtils.trArgs('ibm_your_x_is_processing', {
+                              'name': product.name,
+                            }),
                             style: TextStyle(
                               fontSize: 13.sp,
                               color: AppColors.textGrey,
@@ -1068,7 +1095,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                             child: Column(
                               children: [
                                 Text(
-                                  'REFERENCE NUMBER',
+                                  TranslationUtils.tr('tw_reference_number'),
                                   style: TextStyle(
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.w700,
@@ -1092,7 +1119,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                           ),
                           SizedBox(height: 14.h),
                           Text(
-                            'You will receive status updates via email and the "Past Wins" section.',
+                            TranslationUtils.tr('ibm_status_updates_via_email'),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 11.sp,
@@ -1116,7 +1143,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                                 ),
                               ),
                               child: Text(
-                                'Done',
+                                TranslationUtils.tr('navigation_done'),
                                 style: TextStyle(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.bold,
@@ -1187,7 +1214,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                       ),
                       SizedBox(width: 6.w),
                       Text(
-                        'Live Leaderboard',
+                        TranslationUtils.tr('tw_live_leaderboard'),
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w700,
@@ -1215,7 +1242,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                   padding: EdgeInsets.symmetric(vertical: 16.h),
                   child: Center(
                     child: Text(
-                      'No leaderboard data yet.',
+                      TranslationUtils.tr('ibm_no_leaderboard_data_yet'),
                       style: TextStyle(
                         fontSize: 11.sp,
                         color: AppColors.textGrey,
@@ -1228,7 +1255,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                   final index = entry.key;
                   final item = entry.value;
 
-                  String name = 'Trader';
+                  String name = TranslationUtils.tr('ibm_trader');
                   String lots = '0.0';
                   int rank = index + 1;
 
@@ -1236,7 +1263,10 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                     name =
                         item.name.isNotEmpty
                             ? TradeWinFormat.maskName(item.name)
-                            : 'Trader #${item.rank > 0 ? item.rank : index + 1}';
+                            : TranslationUtils.trArgs('ibm_trader_numbered', {
+                              'rank':
+                                  '${item.rank > 0 ? item.rank : index + 1}',
+                            });
                     lots = item.lots.toStringAsFixed(1);
                     if (item.rank > 0) rank = item.rank;
                   } else if (item is Map) {
@@ -1247,7 +1277,9 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                     name =
                         rawName.isNotEmpty
                             ? TradeWinFormat.maskName(rawName)
-                            : 'Trader #${index + 1}';
+                            : TranslationUtils.trArgs('ibm_trader_numbered', {
+                              'rank': '${index + 1}',
+                            });
                     final rawLots =
                         item['closed_lots'] ?? item['lots'] ?? '0.0';
                     if (rawLots is num) {
@@ -1297,7 +1329,9 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                           ),
                         ),
                         Text(
-                          '$lots lots',
+                          TranslationUtils.trArgs('ibm_lots_count', {
+                            'count': lots,
+                          }),
                           style: TextStyle(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
@@ -1334,7 +1368,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                   ),
                   SizedBox(width: 6.w),
                   Text(
-                    'My Past Wins',
+                    TranslationUtils.tr('tw_my_past_wins'),
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
@@ -1351,7 +1385,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                     child: Column(
                       children: [
                         Text(
-                          'No redemptions yet',
+                          TranslationUtils.tr('ibm_no_redemptions_yet'),
                           style: TextStyle(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
@@ -1360,7 +1394,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                         ),
                         SizedBox(height: 4.h),
                         Text(
-                          'Keep trading to win!',
+                          TranslationUtils.tr('ibm_keep_trading_to_win'),
                           style: TextStyle(
                             fontSize: 10.sp,
                             color: AppColors.textGrey,
@@ -1372,7 +1406,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                 )
               else
                 ...pastWins.map((win) {
-                  String title = 'Prize';
+                  String title = TranslationUtils.tr('ibm_prize');
                   String date = '';
                   String ref = '';
                   String status = 'Delivered';
@@ -1380,7 +1414,9 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                   double prizeValue = 0;
 
                   if (win is Map) {
-                    title = win['product_name']?.toString() ?? 'Prize';
+                    title =
+                        win['product_name']?.toString() ??
+                        TranslationUtils.tr('ibm_prize');
                     date =
                         (win['claim_date'] ?? win['created_at'] ?? '')
                             .toString();
@@ -1394,7 +1430,9 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                         0;
                   } else {
                     title =
-                        win.productName.isNotEmpty ? win.productName : 'Prize';
+                        win.productName.isNotEmpty
+                            ? win.productName
+                            : TranslationUtils.tr('ibm_prize');
                     date =
                         win.claimDate.isNotEmpty
                             ? win.claimDate
@@ -1479,7 +1517,10 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                               ),
                               SizedBox(height: 3.h),
                               Text(
-                                'Reference: $ref',
+                                TranslationUtils.trArgs(
+                                  'cregis_address_screen_reference_number',
+                                  {'reference': ref},
+                                ),
                                 style: TextStyle(
                                   fontSize: 10.sp,
                                   color: AppColors.textGrey,
@@ -1488,7 +1529,10 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                               if (date.isNotEmpty) ...[
                                 SizedBox(height: 2.h),
                                 Text(
-                                  'Submitted: $date',
+                                  TranslationUtils.trArgs(
+                                    'ibm_promotion_submitted_date',
+                                    {'date': date},
+                                  ),
                                   style: TextStyle(
                                     fontSize: 9.5.sp,
                                     color: AppColors.textGrey,

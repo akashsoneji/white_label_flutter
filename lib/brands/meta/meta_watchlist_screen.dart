@@ -154,7 +154,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
   // ── Header: hamburger | Quotes | + | ✎ ───────────────────────────────
   Widget _header(BuildContext c) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(8.w, 6.h, 8.w, 4.h),
+      padding: EdgeInsetsDirectional.fromSTEB(8.w, 6.h, 8.w, 4.h),
       child: Row(
         children: [
           IconButton(
@@ -203,7 +203,11 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
 
   // ── Simple view (image #2): Symbol/Bid/Ask header + minimal rows ─────
   Widget _simpleInstrumentList(BuildContext c, List<ListElement> items) {
-    return ListView.separated(
+    // Price ladder: the Symbol | Bid | Ask columns are numeric market data
+    // and must keep their left-to-right order in Arabic.
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.separated(
       padding: EdgeInsets.only(bottom: 8.h),
       itemCount: items.length + 1,
       separatorBuilder: (_, __) => Divider(
@@ -255,6 +259,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
         }
         return _simpleRow(c, items[i - 1]);
       },
+      ),
     );
   }
 
@@ -335,12 +340,16 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
   }
 
   Widget _instrumentList(BuildContext c, List<ListElement> items) {
-    return ListView.separated(
-      padding: EdgeInsets.only(bottom: 8.h),
-      itemCount: items.length,
-      separatorBuilder: (_, __) => Divider(
-          color: MetaTheme.divider(c), height: 1, thickness: 0.5),
-      itemBuilder: (_, i) => _row(c, items[i]),
+    // Price ladder: bid / ask / day-high / day-low columns stay left-to-right.
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.separated(
+        padding: EdgeInsets.only(bottom: 8.h),
+        itemCount: items.length,
+        separatorBuilder: (_, __) => Divider(
+            color: MetaTheme.divider(c), height: 1, thickness: 0.5),
+        itemBuilder: (_, i) => _row(c, items[i]),
+      ),
     );
   }
 
@@ -430,7 +439,8 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                         MetaTheme.sell(c)),
                     SizedBox(height: 1.h),
                     Text(
-                      'L: ${price.dayLow.toStringAsFixed(digits)}',
+                      TranslationUtils.trArgs('meta_watchlist_day_low_value',
+                          {'price': price.dayLow.toStringAsFixed(digits)}),
                       style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.subText(c), fontSize: 10.sp),
                     ),
@@ -447,7 +457,8 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                         MetaTheme.buyBlue),
                     SizedBox(height: 1.h),
                     Text(
-                      'H: ${price.dayHigh.toStringAsFixed(digits)}',
+                      TranslationUtils.trArgs('meta_watchlist_day_high_value',
+                          {'price': price.dayHigh.toStringAsFixed(digits)}),
                       style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.subText(c), fontSize: 10.sp),
                     ),
@@ -657,7 +668,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
 
   Widget _searchBar(BuildContext c) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 8.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 8.h),
       child: Row(
         children: [
           Icon(Icons.search, color: MetaTheme.subText(c), size: 20.sp),
@@ -693,7 +704,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
   Widget _breadcrumb(BuildContext c) {
     if (_activeFolderId == null) {
       return Padding(
-        padding: EdgeInsets.fromLTRB(20.w, 14.h, 16.w, 4.h),
+        padding: EdgeInsetsDirectional.fromSTEB(20.w, 14.h, 16.w, 4.h),
         child: Row(
           children: [
             _homeIcon(18.sp),
@@ -705,7 +716,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
     }
     final label = _activeFolderLabel ?? _capitalize(_activeFolderId ?? '');
     return Padding(
-      padding: EdgeInsets.fromLTRB(20.w, 14.h, 16.w, 4.h),
+      padding: EdgeInsetsDirectional.fromSTEB(20.w, 14.h, 16.w, 4.h),
       child: Row(
         children: [
           _homeIcon(18.sp),
@@ -1220,8 +1231,9 @@ class _RowActionSheet extends StatelessWidget {
   Widget build(BuildContext c) {
     // When currently in simple view, offer to switch back to advanced,
     // and vice-versa — matches the two screenshots (#1 / #2).
-    final toggleLabel =
-        simpleView ? 'Advanced view mode' : 'Simple view mode';
+    final toggleLabel = simpleView
+        ? TranslationUtils.tr('meta_watchlist_advanced_view_mode')
+        : TranslationUtils.tr('meta_watchlist_simple_view_mode');
     return SafeArea(
       top: false,
       child: Padding(
@@ -1231,7 +1243,7 @@ class _RowActionSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 12.h),
+              padding: EdgeInsetsDirectional.fromSTEB(20.w, 4.h, 20.w, 12.h),
               child: Text(
                 '${symbol.symbol}: ${symbol.category}',
                 style: AppTextStyles.bodyText.copyWith(
@@ -1240,11 +1252,16 @@ class _RowActionSheet extends StatelessWidget {
                     fontWeight: FontWeight.w500),
               ),
             ),
-            _menu(c, 'New Order', () => _routeTo(c, RowAction.newOrder)),
-            _menu(c, 'Chart', () => _routeTo(c, RowAction.chart)),
-            _menu(c, 'Properties', () => _routeTo(c, RowAction.properties)),
-            _menu(c, 'Depth Of Market', () => _routeTo(c, RowAction.dom)),
-            _menu(c, 'Market Statistics', () => _routeTo(c, RowAction.marketStats)),
+            _menu(c, TranslationUtils.tr('trade_new_order'),
+                () => _routeTo(c, RowAction.newOrder)),
+            _menu(c, TranslationUtils.tr('bottom_navigation_chart'),
+                () => _routeTo(c, RowAction.chart)),
+            _menu(c, TranslationUtils.tr('meta_watchlist_properties'),
+                () => _routeTo(c, RowAction.properties)),
+            _menu(c, TranslationUtils.tr('meta_watchlist_depth_of_market'),
+                () => _routeTo(c, RowAction.dom)),
+            _menu(c, TranslationUtils.tr('meta_watchlist_market_statistics'),
+                () => _routeTo(c, RowAction.marketStats)),
             _menu(c, toggleLabel, () => _routeTo(c, RowAction.toggleView)),
             SizedBox(height: 4.h),
           ],

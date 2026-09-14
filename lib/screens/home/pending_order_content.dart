@@ -677,12 +677,28 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
     if (widget.selectedPendingOrderType.value == 0) {
       // Sell Limit - Stop Loss should be ABOVE entry price (safety net above)
       if (widget.stopLossPrice.value <= entryPrice) {
-        return 'Stop Loss should be above entry price ${PrecisionHelper.formatPrice(entryPrice, decimals: currentDigits)}';
+        return TranslationUtils.trArgs(
+          'pending_order_content_sl_should_be_above_entry',
+          {
+            'price': PrecisionHelper.formatPrice(
+              entryPrice,
+              decimals: currentDigits,
+            ),
+          },
+        );
       }
     } else {
       // Buy Limit - Stop Loss should be BELOW entry price (safety net below)
       if (widget.stopLossPrice.value >= entryPrice) {
-        return 'Stop Loss should be below entry price ${PrecisionHelper.formatPrice(entryPrice, decimals: currentDigits)}';
+        return TranslationUtils.trArgs(
+          'pending_order_content_sl_should_be_below_entry',
+          {
+            'price': PrecisionHelper.formatPrice(
+              entryPrice,
+              decimals: currentDigits,
+            ),
+          },
+        );
       }
     }
 
@@ -707,12 +723,28 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
     if (widget.selectedPendingOrderType.value == 0) {
       // Sell Limit - Take Profit should be BELOW entry price (profit when price drops)
       if (widget.takeProfitPrice.value >= entryPrice) {
-        return 'Take Profit should be below entry price ${PrecisionHelper.formatPrice(entryPrice, decimals: currentDigits)}';
+        return TranslationUtils.trArgs(
+          'pending_order_content_tp_should_be_below_entry',
+          {
+            'price': PrecisionHelper.formatPrice(
+              entryPrice,
+              decimals: currentDigits,
+            ),
+          },
+        );
       }
     } else {
       // Buy Limit - Take Profit should be ABOVE entry price (profit when price rises)
       if (widget.takeProfitPrice.value <= entryPrice) {
-        return 'Take Profit should be above entry price ${PrecisionHelper.formatPrice(entryPrice, decimals: currentDigits)}';
+        return TranslationUtils.trArgs(
+          'pending_order_content_tp_should_be_above_entry',
+          {
+            'price': PrecisionHelper.formatPrice(
+              entryPrice,
+              decimals: currentDigits,
+            ),
+          },
+        );
       }
     }
 
@@ -746,12 +778,28 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
     if (widget.selectedPendingOrderType.value == 0) {
       // Sell Limit - Limit price should be above current price
       if (roundedLimitPrice <= roundedCurrentPrice) {
-        return 'Sell Limit price should be above ${PrecisionHelper.formatPrice(currentPrice, decimals: currentDigits)}';
+        return TranslationUtils.trArgs(
+          'pending_order_content_sell_limit_price_above',
+          {
+            'price': PrecisionHelper.formatPrice(
+              currentPrice,
+              decimals: currentDigits,
+            ),
+          },
+        );
       }
     } else {
       // Buy Limit - Limit price should be below current price
       if (roundedLimitPrice >= roundedCurrentPrice) {
-        return 'Buy Limit price should be below ${PrecisionHelper.formatPrice(currentPrice, decimals: currentDigits)}';
+        return TranslationUtils.trArgs(
+          'pending_order_content_buy_limit_price_below',
+          {
+            'price': PrecisionHelper.formatPrice(
+              currentPrice,
+              decimals: currentDigits,
+            ),
+          },
+        );
       }
     }
 
@@ -847,7 +895,7 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
 
               // When Price Is Toggle
               _buildSwitchTile(
-                'When Price Is',
+                TranslationUtils.tr('pending_order_content_when_price_is'),
                 widget.whenPriceIsEnabled,
                 onChanged: (value) {
                   widget.whenPriceIsEnabled.value = value;
@@ -964,7 +1012,9 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
                                       ),
                                       SizedBox(width: 12.w),
                                       Text(
-                                        'Processing...',
+                                        TranslationUtils.tr(
+                                          'pending_order_processing',
+                                        ),
                                         style: AppTextStyles.label.copyWith(
                                           fontSize: 16.sp,
                                           fontWeight: FontWeight.w700,
@@ -975,8 +1025,12 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
                                   )
                                   : Text(
                                     isValid
-                                        ? 'Place pending order'
-                                        : 'Fix validation errors',
+                                        ? TranslationUtils.tr(
+                                          'pending_order_place_order',
+                                        )
+                                        : TranslationUtils.tr(
+                                          'pending_order_fix_validation',
+                                        ),
                                     style: AppTextStyles.label.copyWith(
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.w700,
@@ -1009,7 +1063,7 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Quantity (lots)',
+          TranslationUtils.tr('vantage_chart_layout_quantity_lots'),
           style: AppTextStyles.label.copyWith(
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
@@ -1092,7 +1146,9 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
                     decoration: InputDecoration(
                       filled: false,
                       fillColor: Colors.transparent,
-                      hintText: 'Enter lots',
+                      hintText: Get.find<LanguageService>().tr(
+                        'pending_order_enter_lots',
+                      ),
                       hintStyle: AppTextStyles.label.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.textGrey,
@@ -1263,6 +1319,23 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
     );
   }
 
+  /// Display-only translation for TP/SL labels. The raw label value is still
+  /// used for the `label == 'Take Profit'` logic checks.
+  String _fieldLabel(String label) {
+    switch (label) {
+      case 'Take Profit':
+        return TranslationUtils.tr('general_take_profit');
+      case 'Stop Loss':
+        return TranslationUtils.tr('general_stop_loss');
+      case 'Potential Profit at TP':
+        return TranslationUtils.tr('pending_order_potential_profit_at_tp');
+      case 'Potential Loss at SL':
+        return TranslationUtils.tr('pending_order_potential_loss_at_sl');
+      default:
+        return label;
+    }
+  }
+
   Widget _buildSwitchTile(
     String title,
     ValueNotifier<bool> valueNotifier, {
@@ -1271,7 +1344,11 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
     return ValueListenableBuilder<bool>(
       valueListenable: valueNotifier,
       builder: (context, value, child) {
-        return AppSwitchTile(title: title, value: value, onChanged: onChanged);
+        return AppSwitchTile(
+          title: _fieldLabel(title),
+          value: value,
+          onChanged: onChanged,
+        );
       },
     );
   }
@@ -1615,13 +1692,13 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
             : AppColors.error; // SL is always a loss, always show in red
 
     return Padding(
-      padding: EdgeInsets.only(top: 8.h, left: 12.w, right: 12.w),
+      padding: EdgeInsetsDirectional.only(top: 8.h, start: 12.w, end: 12.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Label - static, never rebuilds
           Text(
-            label,
+            _fieldLabel(label),
             style: AppTextStyles.label.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w400,
@@ -1655,6 +1732,27 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
     );
   }
 
+  /// Display-only label for an order type. The raw value is still used for the
+  /// `switch`/`contains('Buy')` logic and for the API payload.
+  String _orderTypeLabel(String orderType) {
+    switch (orderType) {
+      case 'Buy Limit':
+        return TranslationUtils.tr('general_buy_limit');
+      case 'Sell Limit':
+        return TranslationUtils.tr('general_sell_limit');
+      case 'Buy Stop':
+        return TranslationUtils.tr('general_buy_stop');
+      case 'Sell Stop':
+        return TranslationUtils.tr('general_sell_stop');
+      case 'Buy Stop Limit':
+        return TranslationUtils.tr('general_buy_stop_limit');
+      case 'Sell Stop Limit':
+        return TranslationUtils.tr('general_sell_stop_limit');
+      default:
+        return orderType;
+    }
+  }
+
   Widget _buildOrderTypeDropdown() {
     return GestureDetector(
       onTap: () => _showOrderTypeBottomSheet(),
@@ -1674,7 +1772,7 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
               valueListenable: widget.selectedOrderType,
               builder: (context, orderType, child) {
                 return Text(
-                  orderType,
+                  _orderTypeLabel(orderType),
                   style: AppTextStyles.label.copyWith(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w500,
@@ -1739,7 +1837,9 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
                     SizedBox(height: 24.h),
                     // Title
                     Text(
-                      'Select Order Type',
+                      TranslationUtils.tr(
+                        'enhanced_pending_order_content_select_order_type',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w600,
@@ -1778,7 +1878,7 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
                                 padding: EdgeInsets.symmetric(vertical: 8.h),
                                 child: Center(
                                   child: Text(
-                                    option,
+                                    _orderTypeLabel(option),
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.w500,

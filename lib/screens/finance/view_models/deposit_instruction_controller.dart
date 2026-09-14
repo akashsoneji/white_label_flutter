@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'dart:io';
 import 'dart:async';
 
@@ -123,8 +124,9 @@ class DepositInstructionController extends GetxController {
     } catch (e) {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Failed to fetch crypto address: ${e.toString()}',
-          title: 'Error',
+        message:
+            '${TranslationUtils.tr('deposit_instruction_failed_to_fetch_crypto_address')}: ${e.toString()}',
+          title: TranslationUtils.tr('general_error'),
         );
       }
     } finally {
@@ -139,8 +141,10 @@ class DepositInstructionController extends GetxController {
     if (cameras == null || cameras!.isEmpty) {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'No camera available on this device.',
-          title: 'Error',
+          message: TranslationUtils.tr(
+            'deposit_instruction_controller_no_camera_available_on_this_device',
+          ),
+          title: TranslationUtils.tr('general_error'),
         );
       }
       return;
@@ -185,8 +189,10 @@ class DepositInstructionController extends GetxController {
     if (cameraController == null || !cameraController!.value.isInitialized) {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Camera is not ready. Please wait.',
-          title: 'Error',
+          message: TranslationUtils.tr(
+            'deposit_instruction_controller_camera_is_not_ready_please_wait',
+          ),
+          title: TranslationUtils.tr('general_error'),
         );
       }
       return;
@@ -213,8 +219,10 @@ class DepositInstructionController extends GetxController {
 
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showSuccess(
-          message: 'Payment proof captured successfully!',
-          title: 'Success',
+          message: TranslationUtils.tr(
+            'deposit_instruction_controller_payment_proof_captured_successfully',
+          ),
+          title: TranslationUtils.tr('general_success'),
         );
       }
     } catch (e) {
@@ -253,8 +261,10 @@ class DepositInstructionController extends GetxController {
         selectedImage.value = File(result.files.single.path!);
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showSuccess(
-            message: 'Image selected from gallery',
-            title: 'Success',
+            message: TranslationUtils.tr(
+              'deposit_instruction_controller_image_selected_from_gallery',
+            ),
+            title: TranslationUtils.tr('general_success'),
           );
         }
       }
@@ -262,8 +272,10 @@ class DepositInstructionController extends GetxController {
       print('Error picking image from gallery: $e');
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Failed to pick image from gallery. Please try again.',
-          title: 'Error',
+          message: TranslationUtils.tr(
+            'deposit_instruction_controller_failed_to_pick_image_from_gallery',
+          ),
+          title: TranslationUtils.tr('general_error'),
         );
       }
     }
@@ -273,7 +285,9 @@ class DepositInstructionController extends GetxController {
   void copyCryptoAddress() {
     // Clipboard.setData(ClipboardData(text: cryptoAddress.value));
 
-    CustomToastService.showSuccess(message: 'Copied');
+    CustomToastService.showSuccess(
+      message: TranslationUtils.tr('deposit_instruction_copied'),
+    );
   }
 
   /// Submit deposit instruction (Bank, Crypto, Local, etc.)
@@ -282,7 +296,9 @@ class DepositInstructionController extends GetxController {
   ) async {
     if (selectedImage.value == null) {
       CustomToastService.showError(
-        message: 'Please upload a payment proof file',
+        message: TranslationUtils.tr(
+          'deposit_instruction_controller_please_upload_payment_proof_file',
+        ),
       );
       return;
     }
@@ -300,7 +316,11 @@ class DepositInstructionController extends GetxController {
 
       if (response.success) {
         CustomToastService.showSuccess(
-          message: response.message ?? 'Deposit request submitted successfully',
+          message:
+              response.message ??
+              TranslationUtils.tr(
+                'deposit_instruction_controller_deposit_request_submitted_successfully',
+              ),
         );
 
         // Mark dashboard MT5 accounts as stale so it refreshes when user returns to dashboard
@@ -324,7 +344,11 @@ class DepositInstructionController extends GetxController {
         // Clear image on error so user has to upload again
         selectedImage.value = null;
         CustomToastService.showError(
-          message: response.message ?? 'Deposit submission failed',
+          message:
+              response.message ??
+              TranslationUtils.tr(
+                'deposit_instruction_controller_deposit_submission_failed',
+              ),
         );
       }
     } catch (e, t) {
@@ -346,7 +370,9 @@ class DepositInstructionController extends GetxController {
   ) async {
     if (selectedImage.value == null) {
       CustomToastService.showError(
-        message: 'Please upload a payment proof file',
+        message: TranslationUtils.tr(
+          'deposit_instruction_controller_please_upload_payment_proof_file',
+        ),
       );
       return;
     }
@@ -364,7 +390,11 @@ class DepositInstructionController extends GetxController {
 
       if (response.success) {
         CustomToastService.showSuccess(
-          message: response.message ?? 'Deposit request submitted successfully',
+          message:
+              response.message ??
+              TranslationUtils.tr(
+                'deposit_instruction_controller_deposit_request_submitted_successfully',
+              ),
         );
 
         // Mark dashboard MT5 accounts as stale so it refreshes when user returns to dashboard
@@ -385,7 +415,11 @@ class DepositInstructionController extends GetxController {
         // Clear image on error so user has to upload again
         selectedImage.value = null;
         CustomToastService.showError(
-          message: response.message ?? 'Deposit submission failed',
+          message:
+              response.message ??
+              TranslationUtils.tr(
+                'deposit_instruction_controller_deposit_submission_failed',
+              ),
         );
       }
     } catch (e, t) {
@@ -408,7 +442,11 @@ class DepositInstructionController extends GetxController {
     required String mt5AccountId,
   }) async {
     if (selectedCregisNetwork.value.isEmpty) {
-      CustomToastService.showError(message: 'Please select a network');
+      CustomToastService.showError(
+        message: TranslationUtils.tr(
+          'deposit_instruction_controller_please_select_network',
+        ),
+      );
       return;
     }
 
@@ -449,17 +487,24 @@ class DepositInstructionController extends GetxController {
           );
         } else if (cregisDepositAddress.value.isNotEmpty) {
           CustomToastService.showSuccess(
-            message:
-                'Deposit address created. Send crypto to the address shown.',
+            message: TranslationUtils.tr(
+              'deposit_instruction_controller_deposit_address_created_send_crypto_to',
+            ),
           );
         } else {
           CustomToastService.showError(
-            message: 'No deposit address or checkout URL returned',
+            message: TranslationUtils.tr(
+              'deposit_instruction_controller_no_deposit_address_or_checkout_url',
+            ),
           );
         }
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to create deposit',
+          message:
+              response.message ??
+              TranslationUtils.tr(
+                'deposit_instruction_controller_failed_to_create_deposit',
+              ),
         );
       }
     } catch (e) {
@@ -492,7 +537,9 @@ class DepositInstructionController extends GetxController {
 
     if (cregisDepositAddress.value.isEmpty) {
       CustomToastService.showError(
-        message: 'Please generate a deposit address first',
+        message: TranslationUtils.tr(
+          'deposit_instruction_controller_please_generate_deposit_address_first',
+        ),
       );
       return;
     }

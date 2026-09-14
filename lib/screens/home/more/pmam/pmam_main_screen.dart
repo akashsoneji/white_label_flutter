@@ -1,5 +1,6 @@
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -87,17 +88,18 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
   String _titleFor(PmamNavMode mode, int i) {
     if (mode == PmamNavMode.manager) {
       return [
-        'Manager Dashboard',
-        'My Plans',
-        'My Investors',
-        'Explore Fund Managers',
-        'My Investments',
+        TranslationUtils.tr('pmam_manager_dashboard_screen_manager_dashboard'),
+        TranslationUtils.tr('copy_trading_nav_my_plans'),
+        TranslationUtils.tr('pmam_main_screen_my_investors'),
+        TranslationUtils.tr(
+            'pmam_explore_managers_screen_explore_fund_managers'),
+        TranslationUtils.tr('my_investments_screen_my_investments'),
       ][i];
     }
     return [
-      'Become a Manager',
-      'Explore Fund Managers',
-      'My Investments',
+      TranslationUtils.tr('pmam_become_manager_screen_become_manager'),
+      TranslationUtils.tr('pmam_explore_managers_screen_explore_fund_managers'),
+      TranslationUtils.tr('my_investments_screen_my_investments'),
     ][i];
   }
 
@@ -143,7 +145,7 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
           actions: [
             if (mode == PmamNavMode.manager)
               IconButton(
-                tooltip: 'Refresh',
+                tooltip: TranslationUtils.tr('common_refresh'),
                 icon: Icon(Icons.refresh_rounded, color: AppColors.textPrimary),
                 onPressed: () => _c.loadManagerDashboard(),
               ),

@@ -42,30 +42,30 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   String? _validateCurrentPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Current password is required';
+      return languageService.tr('change_password_current_required');
     }
     return null;
   }
 
   String? _validateNewPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'New password is required';
+      return languageService.tr('change_password_new_required');
     }
     if (value.length < 8) {
-      return 'Password must be at least 8 characters long';
+      return languageService.tr('change_password_min_length');
     }
     if (!_passwordRegex.hasMatch(value)) {
-      return 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character';
+      return languageService.tr('change_password_complexity');
     }
     return null;
   }
 
   String? _validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
+      return languageService.tr('create_new_password_validation_confirm');
     }
     if (value != _changePasswordController.newPasswordController.text) {
-      return 'Password confirmation does not match';
+      return languageService.tr('change_password_confirmation_mismatch');
     }
     return null;
   }
@@ -152,7 +152,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildPasswordField(
-                label: 'Current Password',
+                label: languageService.tr('change_password_current_password'),
                 controller: _changePasswordController.currentPasswordController,
                 validator: _validateCurrentPassword,
                 obscureText: _obscureCurrentPassword,
@@ -163,7 +163,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 },
               ),
               _buildPasswordField(
-                label: 'New Password',
+                label: languageService.tr('create_password_new'),
                 controller: _changePasswordController.newPasswordController,
                 validator: _validateNewPassword,
                 obscureText: _obscureNewPassword,
@@ -174,7 +174,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 },
               ),
               _buildPasswordField(
-                label: 'Confirm Password',
+                label: languageService.tr('create_new_password_confirm_password'),
                 controller: _changePasswordController.confirmPasswordController,
                 validator: _validateConfirmPassword,
                 obscureText: _obscureConfirmPassword,

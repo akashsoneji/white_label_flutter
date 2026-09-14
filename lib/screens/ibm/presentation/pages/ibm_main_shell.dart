@@ -82,12 +82,12 @@ class IbmMainShell extends StatelessWidget {
                 BottomNavigationBarItem(
                   icon: const Icon(Icons.dashboard_outlined),
                   activeIcon: const Icon(Icons.dashboard),
-                  label: languageService.tr('Dashboard'),
+                  label: languageService.tr('dashboard_title'),
                 ),
                 BottomNavigationBarItem(
                   icon: const Icon(Icons.campaign_outlined),
                   activeIcon: const Icon(Icons.campaign),
-                  label: languageService.tr('Promotion'),
+                  label: languageService.tr('ibm_nav_promotion'),
                 ),
                 BottomNavigationBarItem(
                   icon:
@@ -98,22 +98,22 @@ class IbmMainShell extends StatelessWidget {
                           )
                           : const Icon(Icons.people_outline),
                   activeIcon: const Icon(Icons.people),
-                  label: languageService.tr('Network'),
+                  label: languageService.tr('ibm_nav_network'),
                 ),
                 BottomNavigationBarItem(
                   icon: const Icon(Icons.account_balance_wallet_outlined),
                   activeIcon: const Icon(Icons.account_balance_wallet),
-                  label: languageService.tr('Commission'),
+                  label: languageService.tr('general_commission'),
                 ),
                 BottomNavigationBarItem(
                   icon: const Icon(Icons.link_outlined),
                   activeIcon: const Icon(Icons.link),
-                  label: languageService.tr('Links'),
+                  label: languageService.tr('ibm_nav_links'),
                 ),
                 BottomNavigationBarItem(
                   icon: const Icon(Icons.more_horiz_outlined),
                   activeIcon: const Icon(Icons.more_horiz),
-                  label: languageService.tr('More'),
+                  label: languageService.tr('general_more'),
                 ),
               ],
             ),
@@ -156,7 +156,7 @@ class IbmMainShell extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'IB Manager Portal',
+                          languageService.tr('ibm_ib_manager_portal'),
                           style: TextStyle(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w800,
@@ -164,7 +164,7 @@ class IbmMainShell extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'Partner Workspace',
+                          languageService.tr('ibm_partner_workspace'),
                           style: TextStyle(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
@@ -189,7 +189,7 @@ class IbmMainShell extends StatelessWidget {
                   children: [
                     _buildDrawerItem(
                       icon: Icons.dashboard_outlined,
-                      title: 'Dashboard',
+                      title: languageService.tr('dashboard_title'),
                       isSelected: currentIdx == 0,
                       hasArrow: false,
                       onTap: () {
@@ -199,7 +199,7 @@ class IbmMainShell extends StatelessWidget {
                     ),
                     _buildDrawerItem(
                       icon: Icons.campaign_outlined,
-                      title: 'Promotion',
+                      title: languageService.tr('ibm_nav_promotion'),
                       isSelected: currentIdx == 1,
                       hasArrow: true,
                       onTap: () {
@@ -209,7 +209,7 @@ class IbmMainShell extends StatelessWidget {
                     ),
                     _buildDrawerItem(
                       icon: Icons.person_outline,
-                      title: 'Clients & Network',
+                      title: languageService.tr('ibm_clients_and_network'),
                       isSelected: currentIdx == 2,
                       hasArrow: true,
                       onTap: () {
@@ -219,7 +219,7 @@ class IbmMainShell extends StatelessWidget {
                     ),
                     _buildDrawerItem(
                       icon: Icons.account_balance_wallet_outlined,
-                      title: 'Commission',
+                      title: languageService.tr('general_commission'),
                       isSelected: currentIdx == 3,
                       hasArrow: true,
                       onTap: () {
@@ -229,7 +229,7 @@ class IbmMainShell extends StatelessWidget {
                     ),
                     _buildDrawerItem(
                       icon: Icons.link_outlined,
-                      title: 'Referral Links',
+                      title: languageService.tr('ibm_referral_links'),
                       isSelected: currentIdx == 4,
                       hasArrow: false,
                       onTap: () {
@@ -239,7 +239,7 @@ class IbmMainShell extends StatelessWidget {
                     ),
                     _buildDrawerItem(
                       icon: Icons.more_horiz_outlined,
-                      title: 'More',
+                      title: languageService.tr('general_more'),
                       isSelected: currentIdx == 5,
                       hasArrow: true,
                       onTap: () {
@@ -264,8 +264,8 @@ class IbmMainShell extends StatelessWidget {
                         ? Colors.grey[900]
                         : const Color(0xFFF7F8FA),
                 leading: const Icon(Icons.arrow_back, color: Color(0xFF5F259E)),
-                title: const Text(
-                  'Back to Client Portal',
+                title: Text(
+                  languageService.tr('ibm_back_to_client_portal'),
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
                 ),
                 onTap: () {

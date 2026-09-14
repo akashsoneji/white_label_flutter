@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 
 // Message Model
 class ChatMessage {
@@ -41,8 +42,16 @@ class ChatController extends GetxController {
   final List<Language> languages = [
     Language(name: 'English', code: 'en', number: 1),
     Language(name: 'Hindi', code: 'hi', number: 2),
-    Language(name: 'Bahasa Melayu', code: 'ms', number: 3),
-    Language(name: 'Bahasa Indonesia', code: 'id', number: 4),
+    Language(
+      name: 'Bahasa Melayu',
+      code: 'ms',
+      number: 3,
+    ),
+    Language(
+      name: 'Bahasa Indonesia',
+      code: 'id',
+      number: 4,
+    ),
   ];
 
   @override
@@ -55,23 +64,23 @@ class ChatController extends GetxController {
     // Initial bot messages
     messages.addAll([
       ChatMessage(
-        text: "Hi, there!",
+        text: TranslationUtils.tr('chat_hi_there_comma'),
         isUser: false,
         timestamp: DateTime.now().subtract(const Duration(minutes: 2)),
-        sender: "App Assistant",
+        sender: TranslationUtils.tr('chat_app_assistant'),
       ),
       ChatMessage(
-        text: "Welcome to App. How can we help you today?",
+        text: TranslationUtils.tr('chat_welcome_how_can_we_help'),
         isUser: false,
         timestamp: DateTime.now().subtract(const Duration(minutes: 2)),
-        sender: "App Assistant",
+        sender: TranslationUtils.tr('chat_app_assistant'),
       ),
     ]);
 
     // User's response
     Future.delayed(const Duration(milliseconds: 500), () {
       messages.add(ChatMessage(
-        text: "Hi there!",
+        text: TranslationUtils.tr('chat_hi_there'),
         isUser: true,
         timestamp: DateTime.now().subtract(const Duration(minutes: 1)),
       ));
@@ -79,18 +88,20 @@ class ChatController extends GetxController {
       // Bot's follow-up
       Future.delayed(const Duration(milliseconds: 1000), () {
         messages.add(ChatMessage(
-          text: "Hello, Brooklyn! Thank you for contacting App.",
+          text: TranslationUtils.tr('chat_hello_thank_you_for_contacting'),
           isUser: false,
           timestamp: DateTime.now().subtract(const Duration(seconds: 30)),
-          sender: "App Assistant",
+          sender: TranslationUtils.tr('chat_app_assistant'),
         ));
 
         Future.delayed(const Duration(milliseconds: 1500), () {
           messages.add(ChatMessage(
-            text: "Please select the department where you want to get assistance.",
+            text: TranslationUtils.tr(
+              'chat_with_us_screen_please_select_the_department_where_you',
+            ),
             isUser: false,
             timestamp: DateTime.now(),
-            sender: "App Assistant",
+            sender: TranslationUtils.tr('chat_app_assistant'),
           ));
           _scrollToBottom();
         });
@@ -100,11 +111,19 @@ class ChatController extends GetxController {
 
   void selectLanguage(Language language) {
     showLanguageSelection.value = false;
-    sendMessage("I'd like assistance in ${language.name}");
+    sendMessage(
+      TranslationUtils.trArgs('chat_id_like_assistance_in', {
+        'language': language.name,
+      }),
+    );
 
     // Bot response
     Future.delayed(const Duration(milliseconds: 800), () {
-      _addBotMessage("Great! I'll assist you in ${language.name}. How can I help you today?");
+      _addBotMessage(
+        TranslationUtils.trArgs('chat_great_ill_assist_you_in', {
+          'language': language.name,
+        }),
+      );
     });
   }
 
@@ -135,7 +154,7 @@ class ChatController extends GetxController {
       text: text,
       isUser: false,
       timestamp: DateTime.now(),
-      sender: "App Assistant",
+      sender: TranslationUtils.tr('chat_app_assistant'),
     ));
     _scrollToBottom();
   }
@@ -145,15 +164,15 @@ class ChatController extends GetxController {
     final message = userMessage.toLowerCase();
 
     if (message.contains('help') || message.contains('assist')) {
-      return "I'm here to help! What specific issue are you facing?";
+      return TranslationUtils.tr('chat_bot_here_to_help');
     } else if (message.contains('account') || message.contains('balance')) {
-      return "I can help you with account-related queries. Please provide more details.";
+      return TranslationUtils.tr('chat_bot_account_queries');
     } else if (message.contains('deposit') || message.contains('withdraw')) {
-      return "For transaction assistance, I can guide you through the process. What would you like to do?";
+      return TranslationUtils.tr('chat_bot_transaction_assistance');
     } else if (message.contains('thank')) {
-      return "You're welcome! Is there anything else I can help you with?";
+      return TranslationUtils.tr('chat_bot_youre_welcome');
     } else {
-      return "Thank you for your message. Our team will get back to you shortly. Is there anything specific I can help you with right now?";
+      return TranslationUtils.tr('chat_bot_team_will_get_back');
     }
   }
 
@@ -171,9 +190,10 @@ class ChatController extends GetxController {
 
   void openVoiceInput() {
     if (Get.isRegistered<AppNotificationController>()) {
+      final lang = Get.find<LanguageService>();
       Get.find<AppNotificationController>().showInfo(
-        message: 'Voice input feature would be implemented here',
-        title: 'Voice Input',
+        message: lang.tr('chat_with_us_voice_input_placeholder'),
+        title: lang.tr('chat_with_us_voice_input_title'),
       );
     }
   }
@@ -182,7 +202,7 @@ class ChatController extends GetxController {
     if (Get.isRegistered<AppNotificationController>()) {
       Get.find<AppNotificationController>().showInfo(
         message: 'File attachment feature would be implemented here',
-        title: 'Attachment',
+        title: TranslationUtils.tr('chat_attachment'),
       );
     }
   }

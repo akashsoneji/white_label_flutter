@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/models/ib_models.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:intl/intl.dart';
 import 'commission_group_form_screen.dart';
@@ -60,25 +61,27 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
     final confirm = await Get.dialog<bool>(
       AlertDialog(
         title: Text(
-          'Delete Group',
+          TranslationUtils.tr('commission_groups_screen_delete_group'),
           style: AppTextStyles.bodyText.copyWith(fontSize: 18.sp, fontWeight: FontWeight.w600),
         ),
         content: Text(
-          'Are you sure you want to delete "${group.groupName}"?',
+          TranslationUtils.trArgs('ib_delete_group_confirm', {
+            'name': group.groupName ?? '',
+          }),
           style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
             child: Text(
-              'Cancel',
+              TranslationUtils.tr('account_management_cancel'),
               style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
             ),
           ),
           TextButton(
             onPressed: () => Get.back(result: true),
             child: Text(
-              'Delete',
+              TranslationUtils.tr('account_management_delete'),
               style: AppTextStyles.bodyText.copyWith(color: AppColors.error),
             ),
           ),
@@ -117,7 +120,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                 onPressed: () => Get.offAllNamed(AppPages.TRADING),
               ),
               title: Text(
-                'IB Structure',
+                TranslationUtils.tr('ib_structure_screen_ib_structure'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
@@ -139,7 +142,9 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                 !controller.isLoading.value) {
               return Center(
                 child: CommonLoadingWidget(
-                  message: 'Loading commission groups...',
+                  message: TranslationUtils.tr(
+                    'commission_groups_screen_loading_commission_groups',
+                  ),
                   size: 50.0,
                   color: AppColors.primary,
                 ),
@@ -159,7 +164,9 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                     children: [
                       Flexible(
                         child: Text(
-                          'Commission Groups',
+                          TranslationUtils.tr(
+                            'commission_groups_screen_commission_groups',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
@@ -185,7 +192,9 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                               Icon(Icons.add, color: AppColors.whiteColor, size: 16.sp),
                               SizedBox(width: 4.w),
                               Text(
-                                'Add Group',
+                                TranslationUtils.tr(
+                                  'ib_structure_screen_add_group',
+                                ),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w600,
@@ -214,7 +223,9 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                             ),
                             SizedBox(height: 16.h),
                             Text(
-                              'No commission groups found',
+                              TranslationUtils.tr(
+                                'commission_groups_screen_no_commission_groups_found',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 16.sp,
                                 color: AppColors.textGrey,
@@ -285,7 +296,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      'Group Name',
+                      TranslationUtils.tr('commission_group_form_screen_group_name'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -296,7 +307,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      'Created Date',
+                      TranslationUtils.tr('commission_groups_screen_created_date'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -307,8 +318,8 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      'Actions',
-                      textAlign: TextAlign.right,
+                      TranslationUtils.tr('actions_section_title'),
+                      textAlign: TextAlign.end,
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,

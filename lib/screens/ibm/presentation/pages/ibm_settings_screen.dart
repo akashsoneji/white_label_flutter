@@ -39,8 +39,8 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
       backgroundColor: AppColors.tradeBackgroundCenterColor,
       appBar: widget.embedded
           ? null
-          : const IbmTopHeader(
-              title: 'Partner Settings',
+          : IbmTopHeader(
+              title: languageService.tr('ibm_partner_settings'),
               showBackButton: false,
             ),
       body: Obx(() {
@@ -142,7 +142,7 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'IB Partner Profile',
+                      TranslationUtils.tr('ibm_ib_partner_profile'),
                       style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
@@ -160,13 +160,16 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildProfileStat('Direct Clients', '${clients['total'] ?? 0}'),
               _buildProfileStat(
-                'Direct Partners',
+                TranslationUtils.tr('ibm_direct_clients'),
+                '${clients['total'] ?? 0}',
+              ),
+              _buildProfileStat(
+                TranslationUtils.tr('ibm_direct_partners'),
                 '${partners['direct'] ?? 0}',
               ),
               _buildProfileStat(
-                'Network Partners',
+                TranslationUtils.tr('ibm_network_partners'),
                 '${partners['network'] ?? 0}',
               ),
             ],
@@ -216,7 +219,7 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Client Account Visibility',
+                TranslationUtils.tr('ibm_client_account_visibility'),
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
@@ -233,7 +236,7 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
           ),
           SizedBox(height: 4.h),
           Text(
-            'Control which trading account groups your referred clients see when registering.',
+            TranslationUtils.tr('ibm_control_which_groups_clients_see'),
             style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
           ),
           SizedBox(height: 12.h),
@@ -242,7 +245,7 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 14.h),
               child: Text(
-                'All standard account groups are currently enabled.',
+                TranslationUtils.tr('ibm_all_standard_groups_enabled'),
                 style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
               ),
             )
@@ -306,7 +309,7 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
                                     borderRadius: BorderRadius.circular(4.r),
                                   ),
                                   child: Text(
-                                    'Default',
+                                    TranslationUtils.tr('ibm_default'),
                                     style: TextStyle(
                                       fontSize: 9.sp,
                                       fontWeight: FontWeight.bold,
@@ -325,7 +328,7 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
                               child: Padding(
                                 padding: EdgeInsets.only(top: 2.h),
                                 child: Text(
-                                  'Set as default',
+                                  TranslationUtils.tr('ibm_set_as_default'),
                                   style: TextStyle(
                                     fontSize: 10.sp,
                                     color: AppColors.primary,
@@ -366,7 +369,7 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
                   ),
                 ),
                 child: Text(
-                  'Save Visibility Settings',
+                  TranslationUtils.tr('ibm_save_visibility_settings'),
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.bold,
@@ -400,7 +403,7 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'My Commission Plan',
+                TranslationUtils.tr('ibm_my_commission_plan'),
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
@@ -414,7 +417,9 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
                   borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Text(
-                  isActive ? 'ASSIGNED' : 'INACTIVE',
+                  isActive
+                      ? TranslationUtils.tr('ibm_assigned_upper')
+                      : TranslationUtils.tr('ibm_inactive_upper'),
                   style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.bold,
@@ -436,12 +441,14 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
           SizedBox(height: 8.h),
           if (groups.isNotEmpty) ...[
             Text(
-              '${groups.length} Trading group rate structure(s) applied to your account.',
+              TranslationUtils.trArgs('ibm_group_rate_structures_applied', {
+                'count': '${groups.length}',
+              }),
               style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
             ),
           ] else ...[
             Text(
-              'Standard tier commission rates per traded lot across Forex & Metals.',
+              TranslationUtils.tr('ibm_standard_tier_commission_rates'),
               style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
             ),
           ],
@@ -462,7 +469,7 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Portal Preferences',
+            TranslationUtils.tr('ibm_portal_preferences'),
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: FontWeight.w700,
@@ -474,7 +481,7 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
             contentPadding: EdgeInsets.zero,
             leading: Icon(Icons.language_outlined, color: AppColors.primary),
             title: Text(
-              'Language',
+              TranslationUtils.tr('settings_language'),
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
@@ -498,7 +505,7 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
               color: AppColors.primary,
             ),
             title: Text(
-              'Notification Alerts',
+              TranslationUtils.tr('ibm_notification_alerts'),
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,

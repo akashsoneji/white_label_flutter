@@ -9,6 +9,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/ibm/presentation/widgets/ibm_top_header.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class IbmLinksScreen extends StatefulWidget {
   const IbmLinksScreen({super.key});
@@ -52,11 +53,11 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
       appBar: IbmTopHeader(
-        title: 'Referral Links',
+        title: TranslationUtils.tr('ibm_referral_links'),
         showBackButton: false,
         extraActions: [
           Padding(
-            padding: EdgeInsets.only(right: 8.w),
+            padding: EdgeInsetsDirectional.only(end: 8.w),
             child: InkWell(
               onTap: () => _openCreateEditDialog(context),
               borderRadius: BorderRadius.circular(8.r),
@@ -72,7 +73,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                     Icon(Icons.add, size: 14.w, color: AppColors.whiteColor),
                     SizedBox(width: 4.w),
                     Text(
-                      'Create link',
+                      TranslationUtils.tr('ibm_create_link'),
                       style: TextStyle(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.bold,
@@ -133,7 +134,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Referral Links',
+                          TranslationUtils.tr('ibm_referral_links'),
                           style: AppTextStyles.heading.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w700,
@@ -142,7 +143,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                         ),
                         SizedBox(height: 2.h),
                         Text(
-                          'Every way somebody can sign up under you',
+                          TranslationUtils.tr('ibm_every_way_sign_up_under_you'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
@@ -173,7 +174,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                           ),
                           SizedBox(width: 4.w),
                           Text(
-                            'New link',
+                            TranslationUtils.tr('ibm_new_link'),
                             style: TextStyle(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
@@ -200,33 +201,37 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                         width: cardWidth,
                         icon: Icons.link,
                         iconBg: AppColors.primary,
-                        title: 'Links',
+                        title: TranslationUtils.tr('ibm_nav_links'),
                         value: '${links.length}',
-                        subtitle: '${links.length} of your own',
+                        subtitle: TranslationUtils.trArgs('ibm_n_of_your_own', {
+                          'count': '${links.length}',
+                        }),
                       ),
                       _buildMetricCard(
                         width: cardWidth,
                         icon: Icons.person_add_alt_1,
                         iconBg: AppColors.primary,
-                        title: 'Signed up',
+                        title: TranslationUtils.tr('ibm_signed_up'),
                         value: '$totalSignups',
-                        subtitle: 'from $totalVisits visits',
+                        subtitle: TranslationUtils.trArgs('ibm_from_n_visits', {
+                          'count': '$totalVisits',
+                        }),
                       ),
                       _buildMetricCard(
                         width: cardWidth,
                         icon: Icons.account_balance_wallet,
                         iconBg: AppColors.primary,
-                        title: 'Opened an account',
+                        title: TranslationUtils.tr('ibm_opened_an_account'),
                         value: '$totalAccounts',
-                        subtitle: 'got as far as trading account',
+                        subtitle: TranslationUtils.tr('ibm_got_as_far_as_trading_account'),
                       ),
                       _buildMetricCard(
                         width: cardWidth,
                         icon: Icons.arrow_downward,
                         iconBg: const Color(0xFF2E7D32),
-                        title: 'Funded',
+                        title: TranslationUtils.tr('ibm_funded'),
                         value: '$totalFunded',
-                        subtitle: 'put money in',
+                        subtitle: TranslationUtils.tr('ibm_put_money_in'),
                       ),
                     ],
                   );
@@ -236,7 +241,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
 
               // Section Label
               Text(
-                'YOUR OWN LINKS ${links.length}',
+                TranslationUtils.trArgs('ibm_your_own_links_count', {
+                  'count': '${links.length}',
+                }),
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w700,
@@ -270,7 +277,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                         ),
                         SizedBox(height: 10.h),
                         Text(
-                          'No referral links created yet',
+                          TranslationUtils.tr('ibm_no_referral_links_yet'),
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
@@ -279,7 +286,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                         ),
                         SizedBox(height: 4.h),
                         Text(
-                          'Click "+ New link" to generate your first partner link.',
+                          TranslationUtils.tr('ibm_click_new_link_to_generate'),
                           style: TextStyle(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
@@ -370,13 +377,14 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
     if (link is! Map) return const SizedBox();
 
     final linkId = _parseInt(link['link_id'] ?? link['id']);
-    final label = link['label']?.toString() ?? 'Unnamed Link';
+    final label =
+        link['label']?.toString() ?? TranslationUtils.tr('ibm_unnamed_link');
     final code = link['code']?.toString() ?? '';
     final isActive = _parseBool(link['is_active']);
     final isToggling = _togglingLinkIds.contains(linkId);
 
     // Groups info
-    String groupsText = 'All Groups';
+    String groupsText = TranslationUtils.tr('bonus_screen_all_groups');
     if (link['groups'] is List && (link['groups'] as List).isNotEmpty) {
       final names =
           (link['groups'] as List)
@@ -451,7 +459,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                             child: Text(
-                              'Inactive',
+                              TranslationUtils.tr('wallet_inactive'),
                               style: TextStyle(
                                 fontSize: 9.sp,
                                 fontWeight: FontWeight.bold,
@@ -490,7 +498,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                       ),
                       SizedBox(width: 2.w),
                       Text(
-                        'Edit',
+                        TranslationUtils.tr('general_edit'),
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
@@ -535,7 +543,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                             ),
                           )
                           : Text(
-                            isActive ? 'Switch off' : 'Switch on',
+                            isActive
+                                ? TranslationUtils.tr('ibm_switch_off')
+                                : TranslationUtils.tr('ibm_switch_on'),
                             style: TextStyle(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
@@ -594,7 +604,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                   onTap: () {
                     Clipboard.setData(ClipboardData(text: url));
                     CustomToastService.showSuccess(
-                      message: 'Referral link copied to clipboard!',
+                      message: TranslationUtils.tr('ibm_referral_link_copied'),
                     );
                   },
                   borderRadius: BorderRadius.circular(6.r),
@@ -607,7 +617,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                       ),
                       SizedBox(width: 3.w),
                       Text(
-                        'Copy',
+                        TranslationUtils.tr('common_copy'),
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w700,
@@ -626,10 +636,22 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildLinkStatColumn('$visits', 'Visits'),
-              _buildLinkStatColumn('$signups', 'Signed up\n$signupPct%'),
-              _buildLinkStatColumn('$accounts', 'Opened account'),
-              _buildLinkStatColumn('$funded', 'Funded'),
+              _buildLinkStatColumn(
+                '$visits',
+                TranslationUtils.tr('ibm_visits'),
+              ),
+              _buildLinkStatColumn(
+                '$signups',
+                '${TranslationUtils.tr('ibm_signed_up')}\n$signupPct%',
+              ),
+              _buildLinkStatColumn(
+                '$accounts',
+                TranslationUtils.tr('ibm_opened_account'),
+              ),
+              _buildLinkStatColumn(
+                '$funded',
+                TranslationUtils.tr('ibm_funded'),
+              ),
             ],
           ),
         ],
@@ -671,7 +693,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
           borderRadius: BorderRadius.circular(14.r),
         ),
         title: Text(
-          'Delete Referral Link',
+          TranslationUtils.tr('ibm_delete_referral_link'),
           style: TextStyle(
             fontSize: 15.sp,
             fontWeight: FontWeight.w700,
@@ -679,10 +701,12 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
           ),
         ),
         content: Text(
-          'Are you sure you want to delete "$label"? Referred clients will no longer be able to use this code.',
+          TranslationUtils.trArgs('ibm_confirm_delete_referral_link', {
+            'label': label,
+          }),
           style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
         ),
-        actionsPadding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+        actionsPadding: EdgeInsetsDirectional.fromSTEB(16.w, 0, 16.w, 16.h),
         actions: [
           Row(
             children: [
@@ -697,7 +721,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                       borderRadius: BorderRadius.circular(10.r),
                     ),
                   ),
-                  child: const Text('Cancel'),
+                  child: Text(
+                    TranslationUtils.tr('account_management_cancel'),
+                  ),
                 ),
               ),
               SizedBox(width: 12.w),
@@ -715,7 +741,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                       borderRadius: BorderRadius.circular(10.r),
                     ),
                   ),
-                  child: const Text('Delete'),
+                  child: Text(
+                    TranslationUtils.tr('account_management_delete'),
+                  ),
                 ),
               ),
             ],
@@ -832,7 +860,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                     children: [
                       // Top Header Row with title & close button
                       Padding(
-                        padding: EdgeInsets.fromLTRB(20.w, 16.h, 16.w, 12.h),
+                        padding: EdgeInsetsDirectional.fromSTEB(20.w, 16.h, 16.w, 12.h),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -842,7 +870,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    isEdit ? 'Edit link' : 'New link',
+                                    isEdit
+                                        ? TranslationUtils.tr('ibm_edit_link')
+                                        : TranslationUtils.tr('ibm_new_link'),
                                     style: TextStyle(
                                       fontSize: 18.sp,
                                       fontWeight: FontWeight.w800,
@@ -851,7 +881,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                                   ),
                                   SizedBox(height: 3.h),
                                   Text(
-                                    'Where you post it, and what it opens the door to',
+                                    TranslationUtils.tr(
+                                      'ibm_where_you_post_it',
+                                    ),
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       color: AppColors.textGrey,
@@ -893,7 +925,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                             children: [
                               // 1. Name it
                               Text(
-                                'Name it',
+                                TranslationUtils.tr('ibm_name_it'),
                                 style: TextStyle(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w700,
@@ -908,7 +940,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                                   color: AppColors.textPrimary,
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: 'Instagram bio',
+                                  hintText: TranslationUtils.tr(
+                                    'ibm_instagram_bio',
+                                  ),
                                   hintStyle: TextStyle(
                                     fontSize: 13.sp,
                                     color: AppColors.textGrey.withOpacity(0.7),
@@ -939,7 +973,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                               ),
                               SizedBox(height: 4.h),
                               Text(
-                                'Only you see this. It is how you tell your links apart.',
+                                TranslationUtils.tr('ibm_only_you_see_this'),
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   color: const Color(0xFF8E9BB0),
@@ -949,7 +983,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
 
                               // 2. Code (optional)
                               Text(
-                                'Code (optional)',
+                                TranslationUtils.tr('ibm_code_optional'),
                                 style: TextStyle(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w700,
@@ -965,7 +999,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                                   color: AppColors.textPrimary,
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: 'leave blank and we make one',
+                                  hintText: TranslationUtils.tr(
+                                    'ibm_leave_blank_we_make_one',
+                                  ),
                                   hintStyle: TextStyle(
                                     fontSize: 13.sp,
                                     color: AppColors.textGrey.withOpacity(0.7),
@@ -1003,7 +1039,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                               ),
                               SizedBox(height: 4.h),
                               Text(
-                                'Letters, numbers, dashes and underscores. It cannot be changed later.',
+                                TranslationUtils.tr(
+                                  'ibm_letters_numbers_dashes',
+                                ),
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   color: const Color(0xFF8E9BB0),
@@ -1013,7 +1051,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
 
                               // 3. GROUPS THIS LINK OFFERS
                               Text(
-                                'GROUPS THIS LINK OFFERS',
+                                TranslationUtils.tr(
+                                  'ibm_groups_this_link_offers',
+                                ),
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   fontWeight: FontWeight.w700,
@@ -1023,7 +1063,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                               ),
                               SizedBox(height: 4.h),
                               Text(
-                                'A client who signs up here can open an account in these groups, and nothing else.',
+                                TranslationUtils.tr(
+                                  'ibm_client_can_open_account_in_groups',
+                                ),
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   color: const Color(0xFF8E9BB0),
@@ -1151,7 +1193,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                                                   BorderRadius.circular(6.r),
                                             ),
                                             child: Text(
-                                              'Shown first',
+                                              TranslationUtils.tr(
+                                                'ibm_shown_first',
+                                              ),
                                               style: TextStyle(
                                                 fontSize: 10.sp,
                                                 fontWeight: FontWeight.bold,
@@ -1168,7 +1212,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
 
                               // 4. Stop working on (optional)
                               Text(
-                                'Stop working on (optional)',
+                                TranslationUtils.tr(
+                                  'ibm_stop_working_on_optional',
+                                ),
                                 style: TextStyle(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w700,
@@ -1272,7 +1318,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                               ),
                               SizedBox(height: 4.h),
                               Text(
-                                'Useful for a campaign. Leave blank and it never expires.',
+                                TranslationUtils.tr('ibm_useful_for_a_campaign'),
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   color: const Color(0xFF8E9BB0),
@@ -1287,7 +1333,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                                     onTap: () async {
                                       if (labelCtrl.text.trim().isEmpty) {
                                         CustomToastService.showError(
-                                          message: 'Please provide a link name.',
+                                          message: TranslationUtils.tr(
+                                            'ibm_please_provide_link_name',
+                                          ),
                                         );
                                         return;
                                       }
@@ -1339,7 +1387,13 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                                         borderRadius: BorderRadius.circular(8.r),
                                       ),
                                       child: Text(
-                                        isEdit ? 'Save changes' : 'Make link',
+                                        isEdit
+                                            ? TranslationUtils.tr(
+                                              'edit_plan_bottom_sheet_save_changes',
+                                            )
+                                            : TranslationUtils.tr(
+                                              'ibm_make_link',
+                                            ),
                                         style: TextStyle(
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w700,
@@ -1362,7 +1416,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                                         borderRadius: BorderRadius.circular(8.r),
                                       ),
                                       child: Text(
-                                        'Cancel',
+                                        TranslationUtils.tr(
+                                          'account_management_cancel',
+                                        ),
                                         style: TextStyle(
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w600,

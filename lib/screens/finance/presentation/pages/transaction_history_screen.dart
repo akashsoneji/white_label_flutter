@@ -69,7 +69,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     if (raw == null || raw.isEmpty) return '';
     final v = raw.toLowerCase();
     if (v == 'mt5') return 'MT5';
-    if (v == 'wallet') return 'Wallet';
+    if (v == 'wallet') return languageService.tr('wallet');
     // Title-case fallback
     return v
         .split('_')
@@ -104,6 +104,38 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     'This month',
     'Custom',
   ];
+
+  /// Display label for a transaction-type logic value.
+  String _typeLabel(String type) {
+    switch (type) {
+      case 'All':
+        return languageService.tr('common_all');
+      case 'Deposit':
+        return languageService.tr('common_deposit');
+      case 'Withdrawal':
+        return languageService.tr('general_withdrawal');
+      case 'Fund Transfer':
+        return languageService.tr('transaction_history_transaction_type_transfer');
+    }
+    return type;
+  }
+
+  /// Display label for a time-period logic value.
+  String _periodLabel(String period) {
+    switch (period) {
+      case 'All Time':
+        return languageService.tr('transaction_history_period_all_time');
+      case 'Today':
+        return languageService.tr('dc_range_today');
+      case 'Last week':
+        return languageService.tr('transaction_history_period_last_week');
+      case 'This month':
+        return languageService.tr('time_this_month');
+      case 'Custom':
+        return languageService.tr('transaction_history_period_custom');
+    }
+    return period;
+  }
 
   // Compute filtered transactions - must be called inside Obx
   List<Data> _computeFilteredTransactions(List<Data> allTransactions) {
@@ -206,7 +238,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           scrolledUnderElevation: 0,
           elevation: 0,
           leading: Padding(
-            padding: EdgeInsets.only(left: 0.w),
+            padding: EdgeInsetsDirectional.only(start: 0.w),
             child: AppBackButton(onPressed: _handleBack),
           ),
           title: Text(
@@ -268,7 +300,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 label: languageService.tr(
                   'transaction_history_transaction_type',
                 ),
-                value: selectedTransactionType,
+                value: _typeLabel(selectedTransactionType),
                 onTap: () => _showTransactionTypeDropdown(),
                 suffixIcon: Icons.arrow_drop_down,
               ),
@@ -355,7 +387,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              period,
+                              _periodLabel(period),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w400,
@@ -403,7 +435,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               child: Row(
                 children: [
                   Text(
-                    'Start Date:',
+                    languageService.tr('transaction_history_screen_start_date'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w400,
@@ -423,7 +455,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     child: Text(
                       customStartDate != null
                           ? _formatDate(customStartDate!)
-                          : 'Select start date',
+                          : languageService.tr(
+                            'transaction_history_screen_select_start_date',
+                          ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.pureWhite,
@@ -447,7 +481,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               child: Row(
                 children: [
                   Text(
-                    'End Date:',
+                    languageService.tr('transaction_history_screen_end_date'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w400,
@@ -467,7 +501,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     child: Text(
                       customEndDate != null
                           ? _formatDate(customEndDate!)
-                          : 'Select end date',
+                          : languageService.tr(
+                            'transaction_history_screen_select_end_date',
+                          ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.pureWhite,
@@ -523,7 +559,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               Icon(Icons.receipt_long, size: 64.w, color: AppColors.primary),
               SizedBox(height: 16.h),
               Text(
-                'No transactions found',
+                languageService.tr('transaction_history_no_transactions'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w500,
@@ -532,7 +568,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               ),
               SizedBox(height: 8.h),
               Text(
-                'Try adjusting your filters',
+                languageService.tr(
+                  'transaction_history_screen_try_adjusting_your_filters',
+                ),
                 style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: Colors.grey[500]),
               ),
             ],
@@ -734,43 +772,34 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     );
   }
 
+  static const List<String> _monthKeys = [
+    'month_short_jan',
+    'month_short_feb',
+    'month_short_mar',
+    'month_short_apr',
+    'month_short_may',
+    'month_short_jun',
+    'month_short_jul',
+    'month_short_aug',
+    'month_short_sep',
+    'month_short_oct',
+    'month_short_nov',
+    'month_short_dec',
+  ];
+
+  String _monthShort(int month) =>
+      languageService.tr(_monthKeys[month - 1]);
+
   String _formatDate(DateTime date) {
-    final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
+    return '${date.day} ${_monthShort(date.month)} ${date.year}';
   }
 
   String _formatDateTime(String dateStr) {
     final date = DateTime.tryParse(dateStr)?.toLocal();
     if (date == null) return dateStr;
-    final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
+
     final day = date.day;
-    final month = months[date.month - 1];
+    final month = _monthShort(date.month);
     final hour24 = date.hour;
     final hour = hour24 > 12 ? hour24 - 12 : (hour24 == 0 ? 12 : hour24);
     final period = hour24 >= 12 ? 'PM' : 'AM';
@@ -834,7 +863,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 ),
                 SizedBox(height: 24.h),
                 Text(
-                  'Select Transaction Type',
+                  languageService.tr(
+                    'transaction_history_screen_select_transaction_type',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
@@ -873,7 +904,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  type,
+                                  _typeLabel(type),
                                   style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 16.sp,
                                     color:

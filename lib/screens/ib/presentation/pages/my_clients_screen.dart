@@ -13,6 +13,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/models/ib_models.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class MyClientsScreen extends StatefulWidget {
   const MyClientsScreen({super.key});
@@ -90,8 +91,10 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
     final clientId = client.id;
     if (clientId == null) {
       CustomToastService.showError(
-        title: 'Unavailable',
-        message: 'Cannot load trade history without a client ID',
+        title: TranslationUtils.tr('ib_unavailable'),
+        message: TranslationUtils.tr(
+          'my_clients_screen_cannot_load_trade_history_without_client',
+        ),
       );
       return;
     }
@@ -103,7 +106,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
 
     await ibController.selectClientForTradeHistory(
       clientId: clientId,
-      clientName: client.name ?? 'Client',
+      clientName: client.name ?? TranslationUtils.tr('ib_client'),
     );
     if (mounted) setState(() {});
   }
@@ -459,7 +462,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
         title: Obx(() {
           final ibType = ibController.ibStatusResponse.value?.data?.ibType ?? 'dynamic';
           return Text(
-            ibType == 'traditional' ? 'My Network' : 'My Client',
+            ibType == 'traditional'
+                ? TranslationUtils.tr('ib_nav_my_network')
+                : TranslationUtils.tr('my_clients_screen_my_client'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -491,7 +496,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
           if (controller.isLoading.value) {
             return Center(
               child: CommonLoadingWidget(
-                message: 'Loading data...',
+                message: TranslationUtils.tr('ib_clients_screen_loading_data'),
                 size: 50.0,
                 color: AppColors.primary,
               ),
@@ -499,7 +504,8 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
           }
 
           final stats = controller.ibStats.value;
-          final userFullName = authController.userFullName ?? 'User';
+          final userFullName =
+              authController.userFullName ?? TranslationUtils.tr('ib_user');
 
           // Check if we have any data at all (clients, sub-IBs, or stats)
           final hasClients = controller.ibClients.isNotEmpty;
@@ -529,7 +535,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     ),
                     SizedBox(height: 24.h),
                     Text(
-                      'No Data Found',
+                      TranslationUtils.tr('my_clients_screen_no_data_found'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w700,
@@ -538,7 +544,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'We couldn\'t find any records for this IB. Please check your connection or try again.',
+                      TranslationUtils.tr('ib_we_couldnt_find_records'),
                       textAlign: TextAlign.center,
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
@@ -551,7 +557,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                       onPressed:
                           () => _loadMyClientsData(subIbId: _selectedSubIB?.id),
                       icon: Icon(Icons.refresh, size: 20.sp),
-                      label: Text('Retry Now'),
+                      label: Text(
+                        TranslationUtils.tr('my_clients_screen_retry_now'),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: AppColors.whiteColor,
@@ -673,7 +681,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
           hasScrollBody: false,
           child: Center(
             child: Text(
-              'No clients found',
+              TranslationUtils.tr('my_clients_screen_no_clients_found'),
               style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
             ),
           ),
@@ -683,7 +691,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
 
     return [
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 0),
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
             final client = filteredClients[index];
@@ -703,7 +711,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
           hasScrollBody: false,
           child: Center(
             child: Text(
-              'No Sub-IBs found',
+              TranslationUtils.tr('my_clients_screen_no_sub_ibs_found'),
               style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
             ),
           ),
@@ -713,7 +721,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
 
     return [
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 0),
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
             final subIB = filteredSubIBs[index];
@@ -760,7 +768,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
           hasScrollBody: false,
           child: Center(
             child: Text(
-              'No trade history found.',
+              TranslationUtils.tr(
+                'investment_detail_screen_no_trade_history_found',
+              ),
               style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
             ),
           ),
@@ -773,7 +783,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
         controller.tradeHistoryPage < controller.tradeHistoryTotalPages;
     slivers.add(
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 0),
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
             if (index == trades.length) {
@@ -805,7 +815,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                 Icon(Icons.arrow_back, size: 18.sp, color: AppColors.primary),
                 SizedBox(width: 6.w),
                 Text(
-                  'Select Client',
+                  TranslationUtils.tr('my_clients_screen_select_client'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     color: AppColors.primary,
@@ -823,7 +833,8 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
               borderRadius: BorderRadius.circular(6.r),
             ),
             child: Text(
-              controller.selectedClientName.value ?? 'Client',
+              controller.selectedClientName.value ??
+                  TranslationUtils.tr('ib_client'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 11.sp,
                 color: AppColors.primary,
@@ -839,8 +850,11 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
   Widget _buildHierarchyBreadcrumb(String userFullName) {
     final bannerTitle =
         _selectedSubIB == null
-            ? '$userFullName (You)'
-            : (_selectedSubIB!.name ?? 'Sub IB');
+            ? TranslationUtils.trArgs('ib_name_you_suffix', {
+              'name': userFullName,
+            })
+            : (_selectedSubIB!.name ??
+                TranslationUtils.tr('ib_clients_screen_sub_ib'));
 
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
@@ -915,8 +929,8 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                           SizedBox(width: 4.w),
                           Text(
                             _ibHierarchy.length > 1
-                                ? 'Back to Sub IB'
-                                : 'Back to Master IB',
+                                ? TranslationUtils.tr('ib_back_to_sub_ib')
+                                : TranslationUtils.tr('ib_back_to_master_ib'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
@@ -931,7 +945,12 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    '${ibController.ibClients.length} clients under ${_selectedSubIB?.name ?? "Sub IB"}',
+                    TranslationUtils.trArgs('ib_clients_under_name', {
+                      'count': '${ibController.ibClients.length}',
+                      'name':
+                          _selectedSubIB?.name ??
+                          TranslationUtils.tr('ib_clients_screen_sub_ib'),
+                    }),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 11.sp,
                       color: AppColors.textGrey,
@@ -984,7 +1003,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Show More',
+                              TranslationUtils.tr('my_clients_screen_show_more'),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
@@ -993,7 +1012,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                             ),
                             SizedBox(height: 2.h),
                             Text(
-                              'View statistics & performance overview',
+                              TranslationUtils.tr(
+                                'my_clients_screen_view_statistics_performance_overview',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,
@@ -1026,11 +1047,29 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
       margin: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 8.h),
       child: Row(
         children: [
-          Expanded(child: _buildTabButton('Client List', 0, Icons.person)),
+          Expanded(
+            child: _buildTabButton(
+              TranslationUtils.tr('ib_client_list'),
+              0,
+              Icons.person,
+            ),
+          ),
           SizedBox(width: 8.w),
-          Expanded(child: _buildTabButton('IB List', 1, Icons.star)),
+          Expanded(
+            child: _buildTabButton(
+              TranslationUtils.tr('ib_ib_list'),
+              1,
+              Icons.star,
+            ),
+          ),
           SizedBox(width: 8.w),
-          Expanded(child: _buildTabButton('Trade History', 2, Icons.list)),
+          Expanded(
+            child: _buildTabButton(
+              TranslationUtils.tr('my_clients_screen_trade_history'),
+              2,
+              Icons.list,
+            ),
+          ),
         ],
       ),
     );
@@ -1115,17 +1154,21 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
       case 0:
         hintText =
             _selectedSubIB == null
-                ? 'Search clients by name or email...'
-                : 'Search clients under ${_selectedSubIB!.name ?? "Sub IB"}...';
+                ? TranslationUtils.tr('ib_search_clients_by_name_email')
+                : TranslationUtils.trArgs('ib_search_clients_under_subib', {
+                    'name':
+                        _selectedSubIB!.name ??
+                        TranslationUtils.tr('ib_clients_screen_sub_ib'),
+                  });
         break;
       case 1:
         hintText =
             _selectedSubIB == null
-                ? 'Search Sub IBs by name or email...'
-                : 'Search nested Sub IBs...';
+                ? TranslationUtils.tr('ib_search_sub_ibs_by_name_email')
+                : TranslationUtils.tr('ib_search_nested_sub_ibs');
         break;
       default:
-        hintText = 'Search trade history...';
+        hintText = TranslationUtils.tr('ib_search_trade_history');
     }
 
     return Padding(
@@ -1238,57 +1281,61 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
             // Row 1: First card - Show "Master IB" or "Sub IB" based on selection
             _buildStatCard(
               icon: Icons.account_balance_wallet,
-              label: _selectedSubIB == null ? 'Master IB' : 'Sub IB',
+              label: _selectedSubIB == null
+                  ? TranslationUtils.tr('ib_master_ib')
+                  : TranslationUtils.tr('ib_clients_screen_sub_ib'),
               value: _selectedSubIB?.name ?? userFullName,
             ),
             _buildStatCard(
               icon: Icons.trending_up,
-              label: 'Total Clients',
+              label: TranslationUtils.tr('ib_dashboard_new_screen_total_clients'),
               value:
                   (stats.totalClients ?? ibController.ibClients.length)
                       .toString(),
             ),
             _buildStatCard(
               icon: Icons.arrow_downward,
-              label: 'Total Deposit',
+              label: TranslationUtils.tr('ib_dashboard_new_screen_total_deposit'),
               value: '\$${(stats.totalDeposited ?? 0.0).toStringAsFixed(2)}',
             ),
             _buildStatCard(
               icon: Icons.arrow_upward,
-              label: 'Total Withdraw',
+              label: TranslationUtils.tr('ib_total_withdraw'),
               value: '\$${(stats.totalWithdrawal ?? 0.0).toStringAsFixed(2)}',
             ),
             // Row 2: Next 4 cards
             _buildStatCard(
               icon: Icons.account_balance_wallet,
-              label: 'Total Equity',
+              label: TranslationUtils.tr('ib_dashboard_new_screen_total_equity'),
               value: '\$${(stats.totalEquity ?? 0.0).toStringAsFixed(2)}',
             ),
             _buildStatCard(
               icon: Icons.people,
-              label: 'Total Sub IB',
+              label: TranslationUtils.tr('ib_total_sub_ib'),
               value: totalSubIBs.toString(),
             ),
             _buildStatCard(
               icon: Icons.description,
-              label: 'Total Lots',
+              label: TranslationUtils.tr('tw_total_lots'),
               value: (stats.totalLots ?? 0.0).toStringAsFixed(2),
             ),
             _buildStatCard(
               icon: Icons.account_balance,
-              label: 'Total Rebate',
+              label: TranslationUtils.tr('ib_dashboard_new_screen_total_rebate'),
               value: '\$${totalRebateValue.toStringAsFixed(2)}',
             ),
             // Row 3: Last 2 cards
             _buildStatCard(
               icon: Icons.wallet,
-              label: 'Total Withdrawal Rebate',
+              label: TranslationUtils.tr('ib_total_withdrawal_rebate'),
               value:
                   '\$${(stats.ibWithdrawalRebate ?? 0.0).toStringAsFixed(2)}',
             ),
             _buildStatCard(
               icon: Icons.wallet,
-              label: 'Available Rebate',
+              label: TranslationUtils.tr(
+                'ib_dashboard_new_screen_available_rebate',
+              ),
               value: '\$${availableRebateValue.toStringAsFixed(2)}',
               isHighlighted: true,
             ),
@@ -1495,7 +1542,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     child: IconButton(
                       iconSize: 20.sp,
                       padding: EdgeInsets.zero,
-                      tooltip: 'View details',
+                      tooltip: TranslationUtils.tr(
+                        'my_clients_screen_view_details',
+                      ),
                       icon: Icon(
                         Icons.visibility_outlined,
                         size: 18.sp,
@@ -1515,7 +1564,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     child: IconButton(
                       iconSize: 20.sp,
                       padding: EdgeInsets.zero,
-                      tooltip: 'Trade history',
+                      tooltip: TranslationUtils.tr(
+                        'my_clients_screen_trade_history',
+                      ),
                       icon: Icon(
                         Icons.menu,
                         size: 18.sp,
@@ -1538,7 +1589,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                       ),
                       child: IconButton(
                         padding: EdgeInsets.zero,
-                        tooltip: 'Open Sub IB',
+                        tooltip: TranslationUtils.tr(
+                          'my_clients_screen_open_sub_ib',
+                        ),
                         icon: Icon(
                           Icons.arrow_forward,
                           size: 16.sp,
@@ -1566,33 +1619,41 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildDetailRow(
-                    'Account Number',
+                    TranslationUtils.tr('wallet_account_number'),
                     client.accountNumber ?? 'N/A',
                   ),
-                  _buildDetailRow('Total Clients', '${clientCount}'),
                   _buildDetailRow(
-                    'Total Deposit',
+                    TranslationUtils.tr('ib_dashboard_new_screen_total_clients'),
+                    '${clientCount}',
+                  ),
+                  _buildDetailRow(
+                    TranslationUtils.tr('ib_dashboard_new_screen_total_deposit'),
                     '\$${(client.deposit ?? client.totalDeposit ?? 0.0).toStringAsFixed(2)}',
                   ),
                   _buildDetailRow(
-                    'Total Withdraw',
+                    TranslationUtils.tr('ib_total_withdraw'),
                     '\$${(client.withdraw ?? 0.0).toStringAsFixed(2)}',
                   ),
                   _buildDetailRow(
-                    'Total Rebate',
+                    TranslationUtils.tr('ib_dashboard_new_screen_total_rebate'),
                     '\$${(client.rebate ?? client.totalRebate ?? 0.0).toStringAsFixed(2)}',
                   ),
                   if (client.lots != null)
                     _buildDetailRow(
-                      'Total Lots',
+                      TranslationUtils.tr('tw_total_lots'),
                       client.lots!.toStringAsFixed(2),
                     ),
                   if (client.equity != null)
                     _buildDetailRow(
-                      'Total Equity',
+                      TranslationUtils.tr(
+                        'ib_dashboard_new_screen_total_equity',
+                      ),
                       '\$${client.equity!.toStringAsFixed(2)}',
                     ),
-                  _buildDetailRow('Total Sub IBs', '$subIbCount'),
+                  _buildDetailRow(
+                    TranslationUtils.tr('ib_total_sub_ibs'),
+                    '$subIbCount',
+                  ),
                 ],
               ),
             ),
@@ -1718,7 +1779,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                             ),
                             SizedBox(width: 4.w),
                             Text(
-                              '${clientCount} Clients',
+                              TranslationUtils.trArgs('ib_n_clients', {
+                                'count': '$clientCount',
+                              }),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,
@@ -1732,7 +1795,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                             ),
                             SizedBox(width: 4.w),
                             Text(
-                              '$subIbCount Sub IBs',
+                              TranslationUtils.trArgs('ib_n_sub_ibs', {
+                                'count': '$subIbCount',
+                              }),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,
@@ -1744,7 +1809,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     ),
                   ),
                   IconButton(
-                    tooltip: 'View details',
+                    tooltip: TranslationUtils.tr(
+                      'my_clients_screen_view_details',
+                    ),
                     icon: Icon(
                       Icons.visibility_outlined,
                       size: 18.sp,
@@ -1753,7 +1820,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     onPressed: () => _toggleExpand(index),
                   ),
                   IconButton(
-                    tooltip: 'Trade history',
+                    tooltip: TranslationUtils.tr(
+                      'my_clients_screen_trade_history',
+                    ),
                     icon: Icon(
                       Icons.history_rounded,
                       size: 18.sp,
@@ -1770,7 +1839,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     ),
                     child: IconButton(
                       padding: EdgeInsets.zero,
-                      tooltip: 'Open Sub IB',
+                      tooltip: TranslationUtils.tr(
+                        'my_clients_screen_open_sub_ib',
+                      ),
                       icon: Icon(
                         Icons.arrow_forward,
                         size: 16.sp,
@@ -1797,33 +1868,41 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildDetailRow(
-                    'Account Number',
+                    TranslationUtils.tr('wallet_account_number'),
                     subIB.accountNumber ?? 'N/A',
                   ),
-                  _buildDetailRow('Total Clients', '${clientCount}'),
                   _buildDetailRow(
-                    'Total Deposit',
+                    TranslationUtils.tr('ib_dashboard_new_screen_total_clients'),
+                    '${clientCount}',
+                  ),
+                  _buildDetailRow(
+                    TranslationUtils.tr('ib_dashboard_new_screen_total_deposit'),
                     '\$${(subIB.deposit ?? subIB.totalDeposit ?? 0.0).toStringAsFixed(2)}',
                   ),
                   _buildDetailRow(
-                    'Total Withdraw',
+                    TranslationUtils.tr('ib_total_withdraw'),
                     '\$${(subIB.withdraw ?? 0.0).toStringAsFixed(2)}',
                   ),
                   _buildDetailRow(
-                    'Total Rebate',
+                    TranslationUtils.tr('ib_dashboard_new_screen_total_rebate'),
                     '\$${(subIB.rebate ?? subIB.totalRebate ?? 0.0).toStringAsFixed(2)}',
                   ),
                   if (subIB.lots != null)
                     _buildDetailRow(
-                      'Total Lots',
+                      TranslationUtils.tr('tw_total_lots'),
                       subIB.lots!.toStringAsFixed(2),
                     ),
                   if (subIB.equity != null)
                     _buildDetailRow(
-                      'Total Equity',
+                      TranslationUtils.tr(
+                        'ib_dashboard_new_screen_total_equity',
+                      ),
                       '\$${subIB.equity!.toStringAsFixed(2)}',
                     ),
-                  _buildDetailRow('Total Sub IBs', '$subIbCount'),
+                  _buildDetailRow(
+                    TranslationUtils.tr('ib_total_sub_ibs'),
+                    '$subIbCount',
+                  ),
                 ],
               ),
             ),
@@ -1848,7 +1927,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                   focusNode: _tradeHistorySearchFocusNode,
                   style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp),
                   decoration: InputDecoration(
-                    hintText: 'Search name, email, or account...',
+                    hintText: TranslationUtils.tr(
+                      'my_clients_screen_search_name_email_or_account',
+                    ),
                     hintStyle: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       color: AppColors.textGrey,
@@ -1903,7 +1984,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: Text(
-                    'Search',
+                    TranslationUtils.tr('common_search'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       color: AppColors.whiteColor,
@@ -1948,7 +2029,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
               child: Padding(
                 padding: EdgeInsets.all(16.w),
                 child: Text(
-                  'No clients found for "${_clientSearchController.text}"',
+                  TranslationUtils.trArgs('ib_no_clients_found_for_query', {
+                    'query': _clientSearchController.text,
+                  }),
                   textAlign: TextAlign.center,
                   style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textGrey),
                 ),
@@ -1974,7 +2057,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
                   child: Text(
-                    'Search for a client to view their trade history',
+                    TranslationUtils.tr(
+                      'my_clients_screen_search_for_client_to_view_their',
+                    ),
                     textAlign: TextAlign.center,
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
@@ -2040,7 +2125,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     ),
                   )
                   : Text(
-                    'Load More',
+                    TranslationUtils.tr('my_clients_screen_load_more'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       color: AppColors.primary,
@@ -2058,7 +2143,10 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
       () => GestureDetector(
         onTap: () {
           _clientSearchController.clear();
-          controller.selectClient(client.id ?? 0, client.name ?? 'Client');
+          controller.selectClient(
+            client.id ?? 0,
+            client.name ?? TranslationUtils.tr('ib_client'),
+          );
           setState(() {});
         },
         child: Container(
@@ -2122,17 +2210,24 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     Row(
                       children: [
                         _buildClientBadge(
-                          'AC: ${client.accountNumber ?? 'N/A'}',
+                          TranslationUtils.trArgs('ib_badge_account', {
+                            'account': client.accountNumber ?? 'N/A',
+                          }),
                           AppColors.blue,
                         ),
                         SizedBox(width: 6.w),
                         _buildClientBadge(
-                          'Lots: ${client.lots?.toStringAsFixed(1) ?? '0.0'}',
+                          TranslationUtils.trArgs('ib_badge_lots', {
+                            'lots': client.lots?.toStringAsFixed(1) ?? '0.0',
+                          }),
                           AppColors.primary,
                         ),
                         SizedBox(width: 6.w),
                         _buildClientBadge(
-                          'Rebate: \$${client.rebate?.toStringAsFixed(2) ?? '0.00'}',
+                          TranslationUtils.trArgs('ib_badge_rebate', {
+                            'rebate':
+                                client.rebate?.toStringAsFixed(2) ?? '0.00',
+                          }),
                           AppColors.green,
                         ),
                       ],
@@ -2275,7 +2370,11 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                         ),
                         SizedBox(height: 2.h),
                         Text(
-                          'Vol: ${trade.volume?.toStringAsFixed(2) ?? '0.00'} | ${_formatDate(trade.openTime)}',
+                          TranslationUtils.trArgs('ib_trade_vol_date', {
+                            'volume':
+                                trade.volume?.toStringAsFixed(2) ?? '0.00',
+                            'date': _formatDate(trade.openTime),
+                          }),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
@@ -2298,7 +2397,10 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        'Comm: \$${trade.commission?.toStringAsFixed(2) ?? '0.00'}',
+                        TranslationUtils.trArgs('ib_trade_commission_value', {
+                          'commission':
+                              trade.commission?.toStringAsFixed(2) ?? '0.00',
+                        }),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           color: AppColors.textGrey,
@@ -2324,24 +2426,38 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
               ),
               child: Column(
                 children: [
-                  _buildDetailRow('Account', trade.mt5Account ?? 'N/A'),
-                  _buildDetailRow('Open Price', trade.openPrice ?? 'N/A'),
-                  _buildDetailRow('Close Price', trade.closePrice ?? 'N/A'),
                   _buildDetailRow(
-                    'Volume',
-                    '${trade.volume?.toString() ?? '0'} lots',
+                    TranslationUtils.tr('settings_account'),
+                    trade.mt5Account ?? 'N/A',
                   ),
                   _buildDetailRow(
-                    'Commission',
+                    TranslationUtils.tr('trading_order_open_price'),
+                    trade.openPrice ?? 'N/A',
+                  ),
+                  _buildDetailRow(
+                    TranslationUtils.tr('pmam_investor_portal_screen_close_price'),
+                    trade.closePrice ?? 'N/A',
+                  ),
+                  _buildDetailRow(
+                    TranslationUtils.tr('general_volume'),
+                    TranslationUtils.trArgs('ib_volume_lots_suffix', {
+                      'lots': trade.volume?.toString() ?? '0',
+                    }),
+                  ),
+                  _buildDetailRow(
+                    TranslationUtils.tr('general_commission'),
                     '\$${trade.commission?.toStringAsFixed(2) ?? '0.00'}',
                   ),
                   _buildDetailRow(
                     'P/L',
                     '${isProfit ? '+' : ''}\$${trade.profit?.toStringAsFixed(2) ?? '0.00'}',
                   ),
-                  _buildDetailRow('Open Time', _formatDateTime(trade.openTime)),
                   _buildDetailRow(
-                    'Close Time',
+                    TranslationUtils.tr('open_time'),
+                    _formatDateTime(trade.openTime),
+                  ),
+                  _buildDetailRow(
+                    TranslationUtils.tr('pmam_investor_portal_screen_close_time'),
                     _formatDateTime(trade.closeTime),
                   ),
                 ],

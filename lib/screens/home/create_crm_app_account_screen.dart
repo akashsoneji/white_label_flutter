@@ -53,7 +53,9 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
         elevation: 0,
         leading: const AppBackButton(),
         title: Text(
-          'Create new ${widget.accountType} Account',
+          TranslationUtils.trArgs('create_account_create_new_type_account', {
+            'type': widget.accountType,
+          }),
           style: AppTextStyles.heading,
         ),
         centerTitle: true,
@@ -97,7 +99,7 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
               if (widget.isDemo) ...[
                 // Title
                 Text(
-                  'Select Account',
+                  TranslationUtils.tr('create_account_select_account'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14,
                     color: AppColors.icongrey,
@@ -205,7 +207,7 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
                   text: TextSpan(
                     children: [
                       TextSpan(
-                        text: 'Note :',
+                        text: TranslationUtils.tr('create_account_note_label'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16,
                           color: AppColors.textPrimary,
@@ -213,8 +215,9 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
                         ),
                       ),
                       TextSpan(
-                        text:
-                            'Your Investor password and trading password cannot be the same.',
+                        text: TranslationUtils.tr(
+                          'create_account_investor_trading_password_same_note',
+                        ),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14,
                           color: AppColors.textGrey,
@@ -232,10 +235,10 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(
+        padding: EdgeInsetsDirectional.only(
           bottom: MediaQuery.of(context).padding.bottom + 10,
-          left: 24.w,
-          right: 24.w,
+          start: 24.w,
+          end: 24.w,
         ),
         child: _buildCreateAccountButton(),
       ),
@@ -393,7 +396,7 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
             controller.isLoading.value
                 ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
                 : Text(
-                  'Create Account',
+                  TranslationUtils.tr('create_account_create_button'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -427,7 +430,9 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
                 Row(
                   children: [
                     Text(
-                      'Select $label',
+                      TranslationUtils.trArgs('common_select_field', {
+                        'field': label,
+                      }),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w600,

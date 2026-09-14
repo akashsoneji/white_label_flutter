@@ -181,7 +181,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
               ticket.isOpen ? AppColors.statusGreen : AppColors.statusGrey,
             ),
           ),
-          childrenPadding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 12.h),
+          childrenPadding: EdgeInsetsDirectional.fromSTEB(14.w, 0, 14.w, 12.h),
           children: [
             _infoRow(lang.tr('ticket_reference'), '#${ticket.id}'),
             _infoRow(lang.tr('ticket_department'), ticket.department),
@@ -229,7 +229,10 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
         final c = detail.conversation[index];
         final isUser = c.isUser;
         return Align(
-          alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+          alignment:
+              isUser
+                  ? AlignmentDirectional.centerEnd
+                  : AlignmentDirectional.centerStart,
           child: Container(
             constraints: BoxConstraints(maxWidth: 0.78.sw),
             margin: EdgeInsets.only(bottom: 12.h),
@@ -346,7 +349,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
 
   Widget _buildReplyBar() {
     return Container(
-      padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 12.h),
+      padding: EdgeInsetsDirectional.fromSTEB(12.w, 8.h, 12.w, 12.h),
       decoration: BoxDecoration(
         color: AppColors.card,
         border: Border(top: BorderSide(color: AppColors.border)),

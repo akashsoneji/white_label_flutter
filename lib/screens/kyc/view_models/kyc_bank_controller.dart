@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:crm_app/constants/api_const.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/models/bank_withdralList_model.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
@@ -143,7 +144,10 @@ class KycBankController extends GetxController {
         print('💰 Found ${currencies.length} currencies');
       } else {
         errorMessage.value =
-            response.message ?? 'Failed to fetch currency list';
+            response.message ??
+            TranslationUtils.tr(
+              'kyc_bank_controller_failed_to_fetch_currency_list',
+            );
         print('❌ Failed to fetch currency list: ${response.message}');
       }
     } catch (e) {
@@ -176,7 +180,10 @@ class KycBankController extends GetxController {
         print('🔌 Found ${allowedCryptoNetworks.length} crypto networks');
       } else {
         errorMessage.value =
-            response.message ?? 'Failed to fetch withdrawal list';
+            response.message ??
+            TranslationUtils.tr(
+              'kyc_bank_controller_failed_to_fetch_withdrawal_list',
+            );
         print('❌ Failed to fetch withdrawal list: ${response.message}');
       }
     } catch (e) {
@@ -285,7 +292,9 @@ class KycBankController extends GetxController {
         print('✅ OTP sent successfully');
         isOtpSent.value = true;
         // Use API response message instead of static text
-        successMessage.value = response.message ?? 'OTP sent successfully';
+        successMessage.value =
+            response.message ??
+            TranslationUtils.tr('wallet_controller_otp_sent_successfully');
 
         // Start countdown timer (60 seconds = 1 minute)
         _startOtpCountdown();
@@ -293,16 +302,22 @@ class KycBankController extends GetxController {
         // Use AppNotificationController for consistent notifications
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showSuccess(
-            message: response.message ?? 'OTP sent successfully',
+            message:
+                response.message ??
+                TranslationUtils.tr('wallet_controller_otp_sent_successfully'),
           );
         }
       } else {
-        errorMessage.value = response.message ?? 'Failed to send OTP';
+        errorMessage.value =
+            response.message ??
+            TranslationUtils.tr('auth_controller_failed_to_send_otp');
         print('❌ Failed to send OTP: ${response.message}');
         // Use AppNotificationController for consistent notifications
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: response.message ?? 'Failed to send OTP',
+            message:
+                response.message ??
+                TranslationUtils.tr('auth_controller_failed_to_send_otp'),
           );
         }
       }
@@ -312,7 +327,8 @@ class KycBankController extends GetxController {
       // Use AppNotificationController for consistent notifications
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Error sending OTP: $e',
+        message:
+            '${TranslationUtils.tr('kyc_bank_controller_error_sending_otp')}: $e',
         );
       }
     } finally {
@@ -328,11 +344,15 @@ class KycBankController extends GetxController {
 
       // Validate OTP
       if (otp.value.isEmpty) {
-        errorMessage.value = 'Please enter OTP';
+        errorMessage.value = TranslationUtils.tr(
+          'kyc_bank_controller_please_enter_otp',
+        );
         // Use AppNotificationController for consistent notifications
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: 'Please enter OTP',
+            message: TranslationUtils.tr(
+              'kyc_bank_controller_please_enter_otp',
+            ),
           );
         }
         return;
@@ -356,12 +376,18 @@ class KycBankController extends GetxController {
         print('✅ Withdrawal submitted successfully');
         // Use API response message instead of static text
         successMessage.value =
-            response.message ?? 'Withdrawal request submitted successfully';
+            response.message ??
+            TranslationUtils.tr(
+              'kyc_bank_controller_withdrawal_request_submitted_successfully',
+            );
         // Use AppNotificationController for consistent notifications
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showSuccess(
             message:
-                response.message ?? 'Withdrawal request submitted successfully',
+                response.message ??
+                TranslationUtils.tr(
+                  'kyc_bank_controller_withdrawal_request_submitted_successfully',
+                ),
           );
         }
         // Reset form
@@ -382,12 +408,20 @@ class KycBankController extends GetxController {
 
         // Navigate to Bank List screen on success
       } else {
-        errorMessage.value = response.message ?? 'Failed to submit withdrawal';
+        errorMessage.value =
+            response.message ??
+            TranslationUtils.tr(
+              'kyc_bank_controller_failed_to_submit_withdrawal',
+            );
         print('❌ Failed to submit withdrawal: ${response.message}');
         // Use AppNotificationController for consistent notifications
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: response.message ?? 'Failed to submit withdrawal',
+            message:
+                response.message ??
+                TranslationUtils.tr(
+                  'kyc_bank_controller_failed_to_submit_withdrawal',
+                ),
           );
         }
       }
@@ -409,30 +443,26 @@ class KycBankController extends GetxController {
   bool _validateRequiredFields() {
     // Common validation
     if (selectedAccountType.value.isEmpty) {
-      errorMessage.value = 'Please select account type';
+      errorMessage.value = TranslationUtils.tr(
+        'account_management_validation_type',
+      );
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please select account type',
+          message: TranslationUtils.tr('account_management_validation_type'),
         );
       }
       return false;
     }
 
-    // if (selectedCurrency.value.isEmpty) {
-    //   errorMessage.value = 'Please select currency';
-    //   if (Get.isRegistered<AppNotificationController>()) {
-    //     Get.find<AppNotificationController>().showError(
-    //       message: 'Please select currency',
-    //     );
-    //   }
-    //   return false;
-    // }
-
     if (accountHolderName.value.isEmpty) {
-      errorMessage.value = 'Please enter account holder name';
+      errorMessage.value = TranslationUtils.tr(
+        'kyc_bank_controller_please_enter_account_holder_name',
+      );
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please enter account holder name',
+          message: TranslationUtils.tr(
+            'kyc_bank_controller_please_enter_account_holder_name',
+          ),
         );
       }
       return false;
@@ -441,77 +471,107 @@ class KycBankController extends GetxController {
     // Dynamic validation based on account type
     if (selectedAccountType.value.toLowerCase() == "bank") {
       if (ifscIbanCode.value.isEmpty) {
-        errorMessage.value = 'Please enter IFSC/IBAN code';
+        errorMessage.value = TranslationUtils.tr(
+          'kyc_bank_controller_please_enter_ifsc_iban_code',
+        );
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: 'Please enter IFSC/IBAN code',
+            message: TranslationUtils.tr(
+              'kyc_bank_controller_please_enter_ifsc_iban_code',
+            ),
           );
         }
         return false;
       }
       if (bankName.value.isEmpty) {
-        errorMessage.value = 'Please enter bank name';
+        errorMessage.value = TranslationUtils.tr(
+          'kyc_bank_controller_please_enter_bank_name',
+        );
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: 'Please enter bank name',
+            message: TranslationUtils.tr(
+              'kyc_bank_controller_please_enter_bank_name',
+            ),
           );
         }
         return false;
       }
       if (bankAccountNumber.value.isEmpty) {
-        errorMessage.value = 'Please enter bank account number';
+        errorMessage.value = TranslationUtils.tr(
+          'kyc_bank_controller_please_enter_bank_account_number',
+        );
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: 'Please enter bank account number',
+            message: TranslationUtils.tr(
+              'kyc_bank_controller_please_enter_bank_account_number',
+            ),
           );
         }
         return false;
       }
       if (confirmBankAccountNumber.value.isEmpty) {
-        errorMessage.value = 'Please confirm bank account number';
+        errorMessage.value = TranslationUtils.tr(
+          'kyc_bank_controller_please_confirm_bank_account_number',
+        );
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: 'Please confirm bank account number',
+            message: TranslationUtils.tr(
+              'kyc_bank_controller_please_confirm_bank_account_number',
+            ),
           );
         }
         return false;
       }
       if (bankAccountNumber.value != confirmBankAccountNumber.value) {
-        errorMessage.value = 'Bank account numbers do not match';
+        errorMessage.value = TranslationUtils.tr(
+          'kyc_bank_screen_bank_account_numbers_do_not_match',
+        );
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: 'Bank account numbers do not match',
+            message: TranslationUtils.tr(
+              'kyc_bank_screen_bank_account_numbers_do_not_match',
+            ),
           );
         }
         return false;
       }
     } else if (selectedAccountType.value.toLowerCase() == "crypto") {
       if (selectedCryptoNetwork.value.isEmpty) {
-        errorMessage.value = 'Please select network';
+        errorMessage.value = TranslationUtils.tr(
+          'kyc_bank_controller_please_select_network',
+        );
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: 'Please select network',
+            message: TranslationUtils.tr(
+              'kyc_bank_controller_please_select_network',
+            ),
           );
         }
         return false;
       }
       if (cryptoAddress.value.isEmpty) {
-        errorMessage.value = 'Please enter crypto address';
+        errorMessage.value = TranslationUtils.tr(
+          'kyc_bank_controller_please_enter_crypto_address',
+        );
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: 'Please enter crypto address',
+            message: TranslationUtils.tr(
+              'kyc_bank_controller_please_enter_crypto_address',
+            ),
           );
         }
         return false;
       }
       if (accountHolderName.value.isNotEmpty &&
           !_isValidCryptoHolderName(accountHolderName.value)) {
-        errorMessage.value =
-            'Crypto holder name can only contain letters, spaces, hyphens, apostrophes, and periods';
+        errorMessage.value = TranslationUtils.tr(
+          'kyc_bank_controller_crypto_holder_name_can_only_contain',
+        );
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message:
-                'Crypto holder name can only contain letters, spaces, hyphens, apostrophes, and periods',
+            message: TranslationUtils.tr(
+              'kyc_bank_controller_crypto_holder_name_can_only_contain',
+            ),
           );
         }
         return false;
@@ -519,10 +579,14 @@ class KycBankController extends GetxController {
     } else {
       // UPI case
       if (upiAddress.value.isEmpty) {
-        errorMessage.value = 'Please enter UPI address';
+        errorMessage.value = TranslationUtils.tr(
+          'kyc_bank_controller_please_enter_upi_address',
+        );
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: 'Please enter UPI address',
+            message: TranslationUtils.tr(
+              'kyc_bank_controller_please_enter_upi_address',
+            ),
           );
         }
         return false;
@@ -531,10 +595,14 @@ class KycBankController extends GetxController {
 
     // Proof validation — only required when the API says so for this method.
     if (isProofRequired && proofFile.value == null) {
-      errorMessage.value = 'Please upload proof image';
+      errorMessage.value = TranslationUtils.tr(
+        'kyc_bank_controller_please_upload_proof_image',
+      );
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please upload proof image',
+          message: TranslationUtils.tr(
+            'kyc_bank_controller_please_upload_proof_image',
+          ),
         );
       }
       return false;
@@ -865,7 +933,9 @@ class KycBankController extends GetxController {
       if (cameras == null || cameras!.isEmpty) {
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: 'No camera available on this device.',
+            message: TranslationUtils.tr(
+              'deposit_instruction_controller_no_camera_available_on_this_device',
+            ),
           );
         }
         return;
@@ -898,7 +968,9 @@ class KycBankController extends GetxController {
       print('Error starting camera: $e');
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Failed to start camera. Please try again.',
+          message: TranslationUtils.tr(
+            'kyc_bank_controller_failed_to_start_camera_please_try',
+          ),
         );
       }
       await _disposeCamera();
@@ -914,7 +986,9 @@ class KycBankController extends GetxController {
     if (cameraController == null || !cameraController!.value.isInitialized) {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Camera is not ready. Please wait.',
+          message: TranslationUtils.tr(
+            'deposit_instruction_controller_camera_is_not_ready_please_wait',
+          ),
         );
       }
       return;
@@ -949,7 +1023,9 @@ class KycBankController extends GetxController {
 
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showSuccess(
-          message: 'Image captured successfully!',
+          message: TranslationUtils.tr(
+            'kyc_bank_controller_image_captured_successfully',
+          ),
         );
       }
     } catch (e) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class CommissionHistoryScreen extends StatefulWidget {
   const CommissionHistoryScreen({super.key});
@@ -21,7 +22,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
         title: Text(
-          'Commission Tracking',
+          TranslationUtils.tr('commission_history_screen_commission_tracking'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -56,10 +57,18 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                   // First row
                   Row(
                     children: [
-                      Expanded(child: _buildStatCard('\$0', 'Total Deposits')),
+                      Expanded(
+                        child: _buildStatCard(
+                          '\$0',
+                          TranslationUtils.tr('ib_total_deposits'),
+                        ),
+                      ),
                       SizedBox(width: 8.w),
                       Expanded(
-                        child: _buildStatCard('\$0', 'Total Withdrawals'),
+                        child: _buildStatCard(
+                          '\$0',
+                          TranslationUtils.tr('ib_total_withdrawals'),
+                        ),
                       ),
                     ],
                   ),
@@ -68,10 +77,18 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: _buildStatCard('\$100', 'Total commissions'),
+                        child: _buildStatCard(
+                          '\$100',
+                          TranslationUtils.tr('ib_total_commissions'),
+                        ),
                       ),
                       SizedBox(width: 8.w),
-                      Expanded(child: _buildStatCard('0', 'Total Volume')),
+                      Expanded(
+                        child: _buildStatCard(
+                          '0',
+                          TranslationUtils.tr('ib_total_volume'),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -113,7 +130,9 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                               ),
                               SizedBox(height: 4.h),
                               Text(
-                                'Pending Commissions',
+                                TranslationUtils.tr(
+                                  'commission_history_screen_pending_commissions',
+                                ),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   color: AppColors.textGrey,
@@ -132,7 +151,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                             borderRadius: BorderRadius.circular(6.r),
                           ),
                           child: Text(
-                            'Withdraw',
+                            TranslationUtils.tr('dashboard_withdraw'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
@@ -176,7 +195,9 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                               ),
                               SizedBox(height: 4.h),
                               Text(
-                                'Request Payout',
+                                TranslationUtils.tr(
+                                  'commission_history_screen_request_payout',
+                                ),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   color: AppColors.textGrey,
@@ -199,7 +220,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                               ),
                               SizedBox(height: 4.h),
                               Text(
-                                'Withdrawn',
+                                TranslationUtils.tr('ib_withdrawn'),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   color: AppColors.textGrey,
@@ -224,7 +245,9 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Request Payout History',
+                    TranslationUtils.tr(
+                      'commission_history_screen_request_payout_history',
+                    ),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
@@ -251,7 +274,9 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              'IB Rebet',
+                              TranslationUtils.tr(
+                                'commission_history_screen_ib_rebet',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w500,

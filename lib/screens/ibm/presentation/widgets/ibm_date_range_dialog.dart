@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/services/language_service.dart';
 
 /// Shows a theme-aware Date Range Dialog supporting Light and Dark modes
 Future<DateTimeRange?> showIbmDateRangeDialog(
@@ -115,7 +116,7 @@ Future<DateTimeRange?> showIbmDateRangeDialog(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Select Date Range',
+                        TranslationUtils.tr('ibm_select_date_range'),
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
@@ -139,11 +140,26 @@ Future<DateTimeRange?> showIbmDateRangeDialog(
                     spacing: 6.w,
                     runSpacing: 6.h,
                     children: [
-                      _buildPresetChip('Today', () => applyPreset('today')),
-                      _buildPresetChip('7 Days', () => applyPreset('7d')),
-                      _buildPresetChip('30 Days', () => applyPreset('30d')),
-                      _buildPresetChip('MTD', () => applyPreset('mtd')),
-                      _buildPresetChip('All Time', () => applyPreset('all')),
+                      _buildPresetChip(
+                        TranslationUtils.tr('dc_range_today'),
+                        () => applyPreset('today'),
+                      ),
+                      _buildPresetChip(
+                        TranslationUtils.tr('ibm_range_7_days'),
+                        () => applyPreset('7d'),
+                      ),
+                      _buildPresetChip(
+                        TranslationUtils.tr('ibm_range_30_days'),
+                        () => applyPreset('30d'),
+                      ),
+                      _buildPresetChip(
+                        TranslationUtils.tr('ibm_range_mtd'),
+                        () => applyPreset('mtd'),
+                      ),
+                      _buildPresetChip(
+                        TranslationUtils.tr('ibm_range_all_time'),
+                        () => applyPreset('all'),
+                      ),
                     ],
                   ),
                   SizedBox(height: 18.h),
@@ -170,7 +186,7 @@ Future<DateTimeRange?> showIbmDateRangeDialog(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'From (Start)',
+                                  TranslationUtils.tr('ibm_from_start'),
                                   style: TextStyle(
                                     fontSize: 10.sp,
                                     color: AppColors.textGrey,
@@ -221,7 +237,7 @@ Future<DateTimeRange?> showIbmDateRangeDialog(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'To (End)',
+                                  TranslationUtils.tr('ibm_to_end'),
                                   style: TextStyle(
                                     fontSize: 10.sp,
                                     color: AppColors.textGrey,
@@ -269,7 +285,7 @@ Future<DateTimeRange?> showIbmDateRangeDialog(
                           ),
                         ),
                         child: Text(
-                          'Cancel',
+                          TranslationUtils.tr('account_management_cancel'),
                           style: TextStyle(
                             fontSize: 13.sp,
                             color: AppColors.textGrey,
@@ -298,7 +314,7 @@ Future<DateTimeRange?> showIbmDateRangeDialog(
                           ),
                         ),
                         child: Text(
-                          'Apply Range',
+                          TranslationUtils.tr('ibm_apply_range'),
                           style: TextStyle(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.bold,

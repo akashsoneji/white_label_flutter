@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/services/language_service.dart';
 
 /// A single, theme-aware confirmation dialog used across the app for
 /// yes/no and delete/cancel prompts.
@@ -15,12 +16,16 @@ import 'package:crm_app/constants/color.dart';
 Future<bool> showAppConfirmDialog({
   required String title,
   required String message,
-  String confirmText = 'Confirm',
-  String cancelText = 'Cancel',
+  String? confirmText,
+  String? cancelText,
   bool isDestructive = false,
 }) async {
   final Color confirmColor =
       isDestructive ? AppColors.error : AppColors.primary;
+  final String resolvedConfirmText =
+      confirmText ?? TranslationUtils.tr('confirm');
+  final String resolvedCancelText =
+      cancelText ?? TranslationUtils.tr('account_management_cancel');
 
   final result = await Get.dialog<bool>(
     Dialog(
@@ -55,11 +60,11 @@ Future<bool> showAppConfirmDialog({
             ),
             SizedBox(height: 22.h),
             Align(
-              alignment: Alignment.centerRight,
+              alignment: AlignmentDirectional.centerEnd,
               child: TextButton(
                 onPressed: () => Get.back(result: false),
                 child: Text(
-                  cancelText,
+                  resolvedCancelText,
                   style: TextStyle(
                     fontSize: 15.sp,
                     color: AppColors.textPrimary,
@@ -82,7 +87,7 @@ Future<bool> showAppConfirmDialog({
                   ),
                 ),
                 child: Text(
-                  confirmText,
+                  resolvedConfirmText,
                   style: TextStyle(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w600,

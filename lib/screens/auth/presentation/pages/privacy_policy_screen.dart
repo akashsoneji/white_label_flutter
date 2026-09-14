@@ -31,12 +31,14 @@ class PrivacyPolicyScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Privacy Policy',
+                Get.find<LanguageService>().tr('create_account_privacy_policy'),
                 style: AppTextStyles.bodyText.copyWith(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 16),
               Text(
-                'This is a placeholder for the privacy policy content. You can replace this with your actual privacy policy text.',
+                Get.find<LanguageService>().tr(
+                  'privacy_policy_screen_this_is_placeholder_for_the_privacy',
+                ),
                 style: AppTextStyles.bodyText.copyWith(fontSize: 16),
               ),
             ],

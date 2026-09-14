@@ -7,11 +7,27 @@ import 'package:intl/intl.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/text_styles.dart';
 import 'package:crm_app/screens/finance/view_models/internal_transfer_history_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import '../../../../widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
+/// Display label for an internal-transfer status filter (raw values are API params).
+String _statusLabel(InternalTransferStatusFilter status) {
+  switch (status.value) {
+    case 'approved':
+      return TranslationUtils.tr('kyc_verification_approved');
+    case 'pending':
+      return TranslationUtils.tr('transaction_history_pending');
+    case 'failed':
+      return TranslationUtils.tr('transaction_history_failed');
+    default:
+      return TranslationUtils.tr('ticket_all_status');
+  }
+}
+
 class InternalTransferHistoryScreen extends GetView<InternalTransferHistoryController> {
   const InternalTransferHistoryScreen({super.key});
+
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +46,7 @@ class InternalTransferHistoryScreen extends GetView<InternalTransferHistoryContr
           onPressed: () => NavigationHelper.safeBack(context: context),
         ),
         title: Text(
-          'Internal Transfer History',
+          TranslationUtils.tr('internal_transfer_history'),
           style: AppTextStyles.screenTitle,
         ),
         centerTitle: true,
@@ -40,11 +56,11 @@ class InternalTransferHistoryScreen extends GetView<InternalTransferHistoryContr
           children: [
             // Fixed top part
             Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
+              padding: EdgeInsetsDirectional.fromSTEB(20.w, 12.h, 20.w, 0),
               child: InternalTransferFilterCard(),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 10.h),
+              padding: EdgeInsetsDirectional.fromSTEB(20.w, 16.h, 20.w, 10.h),
               child: const InternalTransferSummaryHeader(),
             ),
             // Scrollable list part
@@ -66,7 +82,7 @@ class InternalTransferHistoryScreen extends GetView<InternalTransferHistoryContr
                   child: ListView.builder(
                     controller: controller.scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 24.h),
+                    padding: EdgeInsetsDirectional.fromSTEB(20.w, 4.h, 20.w, 24.h),
                     itemCount: controller.items.length + 1, // +1 for loading indicator
                     itemBuilder: (context, index) {
                       if (index == controller.items.length) {
@@ -115,7 +131,9 @@ class InternalTransferFilterCard extends GetView<InternalTransferHistoryControll
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Filter History',
+            TranslationUtils.tr(
+              'internal_transfer_history_screen_filter_history',
+            ),
             style: AppTextStyles.bodyText.copyWith(
               color: AppColors.textPrimary,
               fontSize: 15.sp,
@@ -127,7 +145,9 @@ class InternalTransferFilterCard extends GetView<InternalTransferHistoryControll
             children: [
               Expanded(
                 child: _buildFilterField(
-                  label: 'From Date',
+                  label: TranslationUtils.tr(
+                    'internal_transfer_history_screen_from_date',
+                  ),
                   value: _formatFilterDate(controller.fromDate.value),
                   icon: Icons.calendar_month_outlined,
                   onTap: () => _pickDate(context, isFromDate: true),
@@ -136,7 +156,9 @@ class InternalTransferFilterCard extends GetView<InternalTransferHistoryControll
               SizedBox(width: 10.w),
               Expanded(
                 child: _buildFilterField(
-                  label: 'To Date',
+                  label: TranslationUtils.tr(
+                    'internal_transfer_history_screen_to_date',
+                  ),
                   value: _formatFilterDate(controller.toDate.value),
                   icon: Icons.calendar_month_outlined,
                   onTap: () => _pickDate(context, isFromDate: false),
@@ -146,8 +168,8 @@ class InternalTransferFilterCard extends GetView<InternalTransferHistoryControll
           )),
           SizedBox(height: 10.h),
           Obx(() => _buildFilterField(
-            label: 'Status',
-            value: controller.selectedStatus.value.label,
+            label: TranslationUtils.tr('common_status'),
+            value: _statusLabel(controller.selectedStatus.value),
             icon: Icons.keyboard_arrow_down_rounded,
             onTap: () => _showStatusSheet(context),
           )),
@@ -168,7 +190,9 @@ class InternalTransferFilterCard extends GetView<InternalTransferHistoryControll
                       ),
                     ),
                     child: Text(
-                      'Apply Filters',
+                      TranslationUtils.tr(
+                        'internal_transfer_history_screen_apply_filters',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.whiteColor,
                         fontSize: 14.sp,
@@ -194,7 +218,7 @@ class InternalTransferFilterCard extends GetView<InternalTransferHistoryControll
                       ),
                     ),
                     child: Text(
-                      'Clear',
+                      TranslationUtils.tr('common_clear'),
                       style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.textPrimary,
                         fontSize: 14.sp,
@@ -316,7 +340,7 @@ class InternalTransferFilterCard extends GetView<InternalTransferHistoryControll
               maxHeight: MediaQuery.of(context).size.height * 0.5,
             ),
             child: Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
+              padding: EdgeInsetsDirectional.fromSTEB(20.w, 12.h, 20.w, 20.h),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -330,7 +354,9 @@ class InternalTransferFilterCard extends GetView<InternalTransferHistoryControll
                   ),
                   SizedBox(height: 18.h),
                   Text(
-                    'Select Status',
+                    TranslationUtils.tr(
+                      'internal_transfer_history_screen_select_status',
+                    ),
                     style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.textPrimary,
                       fontSize: 17.sp,
@@ -349,7 +375,7 @@ class InternalTransferFilterCard extends GetView<InternalTransferHistoryControll
                         return ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: Text(
-                            status.label,
+                            _statusLabel(status),
                             style: AppTextStyles.bodyText.copyWith(
                               color: isSelected
                                   ? AppColors.primary
@@ -388,8 +414,15 @@ class InternalTransferSummaryHeader extends GetView<InternalTransferHistoryContr
     return Obx(() {
       final pagination = controller.pagination.value;
       final showing = pagination.total == 0
-          ? 'No entries'
-          : 'Showing ${pagination.from} to ${pagination.to} of ${pagination.total} entries';
+          ? TranslationUtils.tr('internal_transfer_history_screen_no_entries')
+          : TranslationUtils.trArgs(
+              'internal_transfer_history_screen_showing_from_to_of_total',
+              {
+                'from': '${pagination.from}',
+                'to': '${pagination.to}',
+                'total': '${pagination.total}',
+              },
+            );
 
       return Row(
         children: [
@@ -472,7 +505,7 @@ class InternalTransferCard extends StatelessWidget {
                   children: [
                     Text(
                       item.reference.isEmpty
-                          ? 'Internal Transfer'
+                          ? TranslationUtils.tr('internal_transfer')
                           : item.reference,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -527,7 +560,7 @@ class InternalTransferCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _buildAccountBlock(
-                    title: 'From',
+                    title: TranslationUtils.tr('internal_transfer_history_from'),
                     account: item.fromAccount,
                     alignment: CrossAxisAlignment.start,
                   ),
@@ -590,7 +623,9 @@ class InternalTransferCard extends StatelessWidget {
         ),
         SizedBox(height: 6.h),
         Text(
-          displayName.isEmpty ? 'Account' : displayName,
+          displayName.isEmpty
+              ? TranslationUtils.tr('settings_account')
+              : displayName,
           textAlign: textAlign,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -612,7 +647,9 @@ class InternalTransferCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: Text(
-        _titleCase(status.isEmpty ? 'Unknown' : status),
+        status.isEmpty
+            ? TranslationUtils.tr('internal_transfer_history_screen_unknown')
+            : _titleCase(status),
         style: AppTextStyles.bodyText.copyWith(
           color: color,
           fontSize: 10.sp,
@@ -687,7 +724,7 @@ class InternalTransferEmptyState extends StatelessWidget {
           ),
           SizedBox(height: 18.h),
           Text(
-            'No data',
+            TranslationUtils.tr('master_details_screen_no_data'),
             textAlign: TextAlign.center,
             style: AppTextStyles.bodyText.copyWith(
               color: AppColors.textPrimary,
@@ -697,7 +734,9 @@ class InternalTransferEmptyState extends StatelessWidget {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Try changing the date or status filter.',
+            TranslationUtils.tr(
+              'internal_transfer_history_screen_try_changing_the_date_or_status',
+            ),
             textAlign: TextAlign.center,
             style: AppTextStyles.bodyText.copyWith(
               color: AppColors.icongrey,
@@ -732,8 +771,12 @@ class InternalTransferPaginationFooter extends GetView<InternalTransferHistoryCo
         padding: EdgeInsets.symmetric(vertical: 10.h),
         child: Text(
           controller.hasNextPage
-              ? 'Scroll down to load more'
-              : 'You have reached the end',
+              ? TranslationUtils.tr(
+                'internal_transfer_history_screen_scroll_down_to_load_more',
+              )
+              : TranslationUtils.tr(
+                'internal_transfer_history_screen_you_have_reached_the_end',
+              ),
           textAlign: TextAlign.center,
           style: AppTextStyles.bodyText.copyWith(
             color: AppColors.icongrey,

@@ -3,6 +3,7 @@ import 'dart:developer' as dev;
 import 'package:get/get.dart';
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/models/mt5_account.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
@@ -637,8 +638,10 @@ class TransactionHistoryController extends GetxController {
         print('📝 Message: ${response.message}');
         print('📦 Data: ${response.data}');
         print('═══════════════════════════════════════════════════════════\n');
-        _errorMessage.value =
-            response.message ?? "Failed to fetch user transactions";
+        _errorMessage.value = response.message ??
+            TranslationUtils.tr(
+              'transaction_history_controller_failed_to_fetch_user_transactions',
+            );
         CustomToastService.showError(message: _errorMessage.value);
       }
     } catch (e, t) {
@@ -806,7 +809,11 @@ class TransactionHistoryController extends GetxController {
 
     try {
       _setLoading(true);
-      CustomToastService.showSuccess(message: "Downloading receipt...");
+      CustomToastService.showSuccess(
+        message: TranslationUtils.tr(
+          'transaction_history_controller_downloading_receipt',
+        ),
+      );
 
       final token = await SecureStorageService.getAuthToken();
       final headers = token != null 
@@ -862,7 +869,9 @@ class TransactionHistoryController extends GetxController {
         await file.writeAsBytes(response.bodyBytes);
 
         CustomToastService.showSuccess(
-          message: "Receipt downloaded successfully",
+          message: TranslationUtils.tr(
+            'transaction_history_controller_receipt_downloaded_successfully',
+          ),
         );
 
         // Open the file
@@ -873,7 +882,11 @@ class TransactionHistoryController extends GetxController {
           );
         }
       } else if (response.statusCode == 404) {
-        CustomToastService.showError(message: "Proof not available");
+        CustomToastService.showError(
+          message: TranslationUtils.tr(
+            'transaction_history_controller_proof_not_available',
+          ),
+        );
       } else {
         CustomToastService.showError(
           message: "Failed to download receipt: ${response.statusCode}",

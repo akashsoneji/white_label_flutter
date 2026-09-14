@@ -8,6 +8,7 @@ import 'package:crm_app/widgets/AppTextField.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/ibm/presentation/widgets/ibm_top_header.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class IbmMarketingScreen extends StatefulWidget {
@@ -48,8 +49,8 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
       backgroundColor: AppColors.tradeBackgroundCenterColor,
       appBar: widget.embedded
           ? null
-          : const IbmTopHeader(
-              title: 'Marketing Material',
+          : IbmTopHeader(
+              title: TranslationUtils.tr('ibm_marketing_material'),
               showBackButton: false,
             ),
       body: Obx(() {
@@ -68,7 +69,7 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
             children: [
               // Header title
               Text(
-                'Marketing Material',
+                TranslationUtils.tr('ibm_marketing_material'),
                 style: AppTextStyles.heading.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
@@ -77,7 +78,7 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
               ),
               SizedBox(height: 2.h),
               Text(
-                'Banners, decks and copy your broker has published for you to promote with',
+                TranslationUtils.tr('ibm_banners_decks_and_copy'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 11.sp,
                   color: AppColors.textGrey,
@@ -88,7 +89,7 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
               // Search Bar
               AppTextField(
                 controller: _searchCtrl,
-                hintText: 'Search material',
+                hintText: TranslationUtils.tr('ibm_search_material'),
                 prefixIcon: Icon(
                   Icons.search,
                   size: 18.w,
@@ -116,7 +117,11 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      _buildCatPill('all', 'All', selectedCat == 'all'),
+                      _buildCatPill(
+                        'all',
+                        TranslationUtils.tr('common_all'),
+                        selectedCat == 'all',
+                      ),
                       ...categories.map((c) {
                         final key = c is Map ? (c['key'] ?? '') : c.toString();
                         final label = c is Map ? (c['label'] ?? key) : key;
@@ -159,7 +164,7 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
 
   Widget _buildCatPill(String key, String label, bool isSelected) {
     return Padding(
-      padding: EdgeInsets.only(right: 6.w),
+      padding: EdgeInsetsDirectional.only(end: 6.w),
       child: InkWell(
         onTap: () {
           controller.fetchMarketingMaterials(category: key);
@@ -215,7 +220,7 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
             ),
             SizedBox(height: 14.h),
             Text(
-              'Nothing published yet',
+              TranslationUtils.tr('ibm_nothing_published_yet'),
               style: TextStyle(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w700,
@@ -224,7 +229,7 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
             ),
             SizedBox(height: 6.h),
             Text(
-              'When your broker publishes banners or documents for partners,\nthey show up here.',
+              TranslationUtils.tr('ibm_broker_publishes_show_up_here'),
               style: TextStyle(
                 fontSize: 11.sp,
                 color: AppColors.textGrey,
@@ -242,12 +247,13 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
     if (item is! Map) return const SizedBox();
 
     final materialId = (item['material_id'] ?? item['id'] ?? 0) as int;
-    final title = item['title']?.toString() ?? 'Marketing Asset';
+    final title =
+        item['title']?.toString() ?? TranslationUtils.tr('ibm_marketing_asset');
     final desc = item['description']?.toString() ?? '';
     final categoryLabel =
         item['category_label']?.toString() ??
         item['category']?.toString() ??
-        'Asset';
+        TranslationUtils.tr('ibm_asset');
     final dimensions = item['dimensions']?.toString() ?? '';
     final language = item['language']?.toString() ?? 'EN';
     final thumbnailUrl = item['thumbnail_url']?.toString() ?? '';
@@ -326,7 +332,12 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
               if (dimensions.isNotEmpty)
                 _buildTag(Icons.aspect_ratio, dimensions),
               _buildTag(Icons.language, language.toUpperCase()),
-              _buildTag(Icons.download_done, '$downloadCount downloads'),
+              _buildTag(
+                Icons.download_done,
+                TranslationUtils.trArgs('ibm_downloads_count', {
+                  'count': '$downloadCount',
+                }),
+              ),
             ],
           ),
           SizedBox(height: 12.h),
@@ -343,7 +354,7 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
                     color: AppColors.whiteColor,
                   ),
                   label: Text(
-                    'Download Asset',
+                    TranslationUtils.tr('ibm_download_asset'),
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
@@ -412,6 +423,8 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
         return;
       }
     }
-    CustomToastService.showSuccess(message: 'Starting material download...');
+    CustomToastService.showSuccess(
+      message: TranslationUtils.tr('ibm_starting_material_download'),
+    );
   }
 }

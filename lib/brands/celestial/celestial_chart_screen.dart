@@ -395,7 +395,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
   // ── Chart area — just the WebView, no overlay ─────────────────────────
   Widget _chartArea(BuildContext c) {
     return Container(
-      margin: EdgeInsets.fromLTRB(4.w, 0, 4.w, 4.h),
+      margin: EdgeInsetsDirectional.fromSTEB(4.w, 0, 4.w, 4.h),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: CelTheme.divider(c), width: 0.5),
@@ -404,8 +404,12 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
         borderRadius: BorderRadius.circular(8.r),
         // ── _CelChartArea seeds the WebView symbol ONCE and updates it via
         // its own GlobalKey — never causes ChartInAppWebView to rebuild.
-        child: _CelChartArea(
-          isDark: AppColors.chartTheme == 'dark',
+        // Candle chart: never mirror the price/time axes.
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: _CelChartArea(
+            isDark: AppColors.chartTheme == 'dark',
+          ),
         ),
       ),
     );
@@ -853,7 +857,7 @@ class _SymbolPickerState extends State<_SymbolPicker> {
   @override
   Widget build(BuildContext c) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 16.h),
+      padding: EdgeInsetsDirectional.fromSTEB(14.w, 12.h, 14.w, 16.h),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

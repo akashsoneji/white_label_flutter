@@ -62,7 +62,9 @@ class TogglePill extends StatelessWidget {
               ),
               child: AnimatedAlign(
                 duration: const Duration(milliseconds: 200),
-                alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+                alignment: value
+                    ? AlignmentDirectional.centerEnd
+                    : AlignmentDirectional.centerStart,
                 curve: Curves.easeOut,
                 child: Container(
                   margin: EdgeInsets.symmetric(horizontal: 4.w),

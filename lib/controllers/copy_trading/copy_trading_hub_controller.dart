@@ -1,5 +1,6 @@
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:get/get.dart';
 
 enum CopyTradingMasterApplicationStatus { none, pending, approved, rejected, unknown }
@@ -53,7 +54,8 @@ class CopyTradingHubController extends GetxController {
     try {
       await Future.wait([_loadMasterStatus(), _loadCopierSubscriptions()]);
     } catch (e) {
-      errorMessage.value = 'Failed to load copy trading status: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_failed_to_load_status')}: $e';
     } finally {
       if (showLoading) {
         isLoading.value = false;
@@ -155,13 +157,15 @@ class CopyTradingHubController extends GetxController {
         },
       );
       if (!res.success) {
-        errorMessage.value = res.message ?? 'Failed to submit application';
+        errorMessage.value = res.message ??
+            TranslationUtils.tr('copy_trading_failed_to_submit_application');
       } else {
         await refreshAll(showLoading: false);
       }
       return res;
     } catch (e) {
-      errorMessage.value = 'Apply error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_apply_error')}: $e';
       return ApiResponse.error(errorMessage.value);
     } finally {
       isLoading.value = false;

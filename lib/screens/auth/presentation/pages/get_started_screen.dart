@@ -92,7 +92,7 @@ class GetStartedScreen extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(24, 0, 24, 16),
+              padding: EdgeInsetsDirectional.fromSTEB(24, 0, 24, 16),
               child: Text.rich(
                 TextSpan(
                   style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
@@ -112,7 +112,9 @@ class GetStartedScreen extends StatelessWidget {
                               AgreementLauncher.openTerms();
                             },
                     ),
-                    TextSpan(text: " and "),
+                    TextSpan(
+                      text: " ${languageService.tr("common_and")} ",
+                    ),
                     TextSpan(
                       text: "${languageService.tr("privacy_policy_title").tr}",
                       style: AppTextStyles.bodyText.copyWith(

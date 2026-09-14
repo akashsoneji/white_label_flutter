@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
 import 'package:crm_app/screens/finance/view_models/deposit_instruction_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import '../../../../widgets/common_loading_widget.dart';
 
 class DepositCameraScreen extends StatefulWidget {
@@ -74,7 +75,9 @@ class _DepositCameraScreenState extends State<DepositCameraScreen> {
             onPressed: _closeCamera,
           ),
           title:   Text(
-            'Take Payment Proof Photo',
+            TranslationUtils.tr(
+              'deposit_camera_screen_take_payment_proof_photo',
+            ),
             style: AppTextStyles.bodyText.copyWith(color: AppColors.whiteColor),
           ),
         ),

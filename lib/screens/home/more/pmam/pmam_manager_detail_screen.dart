@@ -9,6 +9,7 @@ import 'package:crm_app/controllers/pmam/pmam_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/app_select_field.dart';
 import 'package:crm_app/models/pmam_model.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class PmamManagerDetailScreen extends StatefulWidget {
   const PmamManagerDetailScreen({super.key});
@@ -104,7 +105,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                     ),
                     SizedBox(height: 18.h),
                     Text(
-                      'Invest Now',
+                      TranslationUtils.tr('pmam_manager_detail_screen_invest_now'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
@@ -116,7 +117,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                     // Plan Selection Dropdown
                     if (_manager.plans.length > 1) ...[
                       Text(
-                        'Select Plan',
+                        TranslationUtils.tr('pmam_fund_manager_view_select_plan'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
@@ -126,8 +127,9 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                       SizedBox(height: 8.h),
                       AppSelectField<PmamPlan>(
                         value: _selectedPlan,
-                        hint: 'Select a plan',
-                        sheetTitle: 'Select Plan',
+                        hint: TranslationUtils.tr('pmam_select_a_plan'),
+                        sheetTitle: TranslationUtils.tr(
+                            'pmam_fund_manager_view_select_plan'),
                         valueEquals: (a, b) => a.id == b.id,
                         options:
                             _manager.plans
@@ -153,7 +155,8 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                     ],
 
                     Text(
-                      'Select Trading Account',
+                      TranslationUtils.tr(
+                          'pmam_manager_detail_screen_select_trading_account'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
@@ -175,8 +178,9 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                       }
                       return AppSelectField<Map<String, dynamic>>(
                         value: _selectedAccount,
-                        hint: 'Choose an account',
-                        sheetTitle: 'Select Trading Account',
+                        hint: TranslationUtils.tr('pmam_choose_an_account'),
+                        sheetTitle: TranslationUtils.tr(
+                            'pmam_manager_detail_screen_select_trading_account'),
                         valueEquals: (a, b) => a['id'] == b['id'],
                         options:
                             _ctrl.eligibleAccounts.map((acc) {
@@ -222,7 +226,8 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Min. Investment:',
+                                  TranslationUtils.tr(
+                                      'pmam_min_investment_colon'),
                                   style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 12.sp,
                                     color: AppColors.textGrey,
@@ -245,7 +250,8 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Your Balance:',
+                                    TranslationUtils.tr(
+                                        'pmam_your_balance_colon'),
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 12.sp,
                                       color: AppColors.textGrey,
@@ -273,7 +279,8 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                       Padding(
                         padding: EdgeInsets.only(top: 8.h),
                         child: Text(
-                          'Insufficient balance for this plan.',
+                          TranslationUtils.tr(
+                              'pmam_fund_manager_view_insufficient_balance_for_this_plan'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.error,
@@ -316,7 +323,8 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                             elevation: 0,
                           ),
                           child: Text(
-                            'Confirm Invest',
+                            TranslationUtils.tr(
+                                'pmam_manager_detail_screen_confirm_invest'),
                             style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.onColoredBackground,
                               fontSize: 15.sp,
@@ -337,7 +345,8 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final name = _manager.managerName ?? 'Fund Manager';
+    final name = _manager.managerName ??
+        TranslationUtils.tr('pmam_fund_manager_view_fund_manager');
     final initials =
         name
             .split(' ')
@@ -365,7 +374,9 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
           iconWidth: 30.w,
           iconHeight: 30.h,
         ),
-        title: Text('Manager Detail', style: AppTextStyles.heading),
+        title: Text(
+            TranslationUtils.tr('pmam_manager_detail_screen_manager_detail'),
+            style: AppTextStyles.heading),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -421,7 +432,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                       borderRadius: BorderRadius.circular(20.r),
                     ),
                     child: Text(
-                      'FUND MANAGER',
+                      TranslationUtils.tr('pmam_fund_manager_caps'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         color: AppColors.primary,
@@ -455,7 +466,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                             ),
                             SizedBox(width: 6.w),
                             Text(
-                              'INVEST NOW',
+                              TranslationUtils.tr('pmam_invest_now_caps'),
                               style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.onColoredBackground,
                                 fontSize: 14.sp,
@@ -469,7 +480,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Min. Investment: $minInvest',
+                      '${TranslationUtils.tr('pmam_manager_detail_screen_min_investment')}: $minInvest',
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.textGrey,
@@ -503,7 +514,8 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'No Active Plan Yet',
+                                  TranslationUtils.tr(
+                                      'pmam_manager_detail_screen_no_active_plan_yet'),
                                   style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.w500,
@@ -533,23 +545,23 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
               childAspectRatio: 2.5,
               children: [
                 _DetailStatCard(
-                  label: 'GAIN',
+                  label: TranslationUtils.tr('pmam_gain_caps'),
                   value: '${gain >= 0 ? '+' : ''}${gain.toStringAsFixed(2)}%',
                   icon: Icons.trending_up_rounded,
                   color: gain >= 0 ? AppColors.green : AppColors.error,
                 ),
                 _DetailStatCard(
-                  label: 'TOTAL AUM',
+                  label: TranslationUtils.tr('pmam_total_aum_caps'),
                   value: aum,
                   icon: Icons.account_balance_wallet_rounded,
                 ),
                 _DetailStatCard(
-                  label: 'INVESTORS',
+                  label: TranslationUtils.tr('pmam_investors_caps'),
                   value: investors,
                   icon: Icons.people_rounded,
                 ),
                 _DetailStatCard(
-                  label: 'COMMISSION',
+                  label: TranslationUtils.tr('pmam_commission_caps'),
                   value: commission,
                   icon: Icons.percent_rounded,
                   color: AppColors.primary,
@@ -581,7 +593,8 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Plan Details',
+                          TranslationUtils.tr(
+                              'master_plan_detail_screen_plan_details'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w700,
@@ -593,7 +606,8 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                             onTap:
                                 _showInvestSheet, // Or a dedicated plan picker
                             child: Text(
-                              'Change Plan',
+                              TranslationUtils.tr(
+                                  'pmam_manager_detail_screen_change_plan'),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: AppColors.primary,
@@ -604,16 +618,22 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                       ],
                     ),
                     SizedBox(height: 12.h),
-                    _DetailRow('Plan Name', _selectedPlan!.planName),
-                    _DetailRow('Manager Code', _manager.managerCode),
-                    _DetailRow('Commission', commission),
-                    _DetailRow('Min. Investment', minInvest),
+                    _DetailRow(TranslationUtils.tr('pmam_create_plan_plan_name'),
+                        _selectedPlan!.planName),
+                    _DetailRow(TranslationUtils.tr('pmam_manager_code'),
+                        _manager.managerCode),
+                    _DetailRow(
+                        TranslationUtils.tr('general_commission'), commission),
+                    _DetailRow(
+                        TranslationUtils.tr(
+                            'pmam_manager_detail_screen_min_investment'),
+                        minInvest),
 
                     if (_selectedPlan!.strategyDescription != null &&
                         _selectedPlan!.strategyDescription!.isNotEmpty) ...[
                       SizedBox(height: 12.h),
                       Text(
-                        'Strategy',
+                        TranslationUtils.tr('pmam_strategy'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
@@ -635,7 +655,8 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                         _selectedPlan!.riskInformation!.isNotEmpty) ...[
                       SizedBox(height: 12.h),
                       Text(
-                        'Risk Information',
+                        TranslationUtils.tr(
+                            'copy_trading_create_plan_risk_information'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
