@@ -1,0 +1,506 @@
+{
+  "info": {
+    "_postman_id": "b7f1e4a2-9c3d-4f10-8a55-whitelabelapp01",
+    "name": "White Label App — Full API (flow-wise)",
+    "description": "Every endpoint the Flutter app actually calls, generated from lib/constants/api_const.dart + real call sites.\n\nURL rule: full URL = {{base_url}} + endpoint. `base_url` MUST already contain the `/api/` segment and a trailing slash (FlavorConfig.apiBaseUrl), e.g. https://demo.tenaxcode.com/api/.\nMost endpoints are prefixed `user/`; Scratch Card + Trade&Win use `v1/user/`.\n\nAuth: Bearer token from login is auto-attached by ApiService for get/post/put/delete/multipart. Collection-level auth = Bearer {{token}}; requests that must be anonymous override auth to `noauth`.\n\n`_t` query param seen in many requests is only a client-side cache-buster.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+  "variable": [
+    { "key": "base_url", "value": "https://demo.tenaxcode.com/api/", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "email", "value": "user@example.com", "type": "string" },
+    { "key": "password", "value": "Secret@123", "type": "string" },
+    { "key": "otp", "value": "123456", "type": "string" },
+    { "key": "fcm_token", "value": "test-fcm-token", "type": "string" },
+    { "key": "mt5_account", "value": "1000123", "type": "string" },
+    { "key": "mt5_account_id", "value": "1", "type": "string" },
+    { "key": "position_id", "value": "10001", "type": "string" },
+    { "key": "order_id", "value": "10002", "type": "string" },
+    { "key": "symbol", "value": "EURUSD", "type": "string" },
+    { "key": "ticket_id", "value": "1", "type": "string" },
+    { "key": "sub_ib_id", "value": "1", "type": "string" },
+    { "key": "client_id", "value": "1", "type": "string" },
+    { "key": "request_id", "value": "1", "type": "string" },
+    { "key": "group_id", "value": "1", "type": "string" },
+    { "key": "transfer_id", "value": "1", "type": "string" },
+    { "key": "plan_id", "value": "1", "type": "string" },
+    { "key": "subscription_id", "value": "1", "type": "string" },
+    { "key": "master_code", "value": "MSTR123", "type": "string" },
+    { "key": "contest_id", "value": "1", "type": "string" },
+    { "key": "card_id", "value": "1", "type": "string" },
+    { "key": "product_id", "value": "1", "type": "string" },
+    { "key": "slug", "value": "bank", "type": "string" },
+    { "key": "bonus_id", "value": "1", "type": "string" },
+    { "key": "deposit_id", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "00 — App Bootstrap (pre-login)",
+      "description": "Splash flow: version/maintenance gate, CRM settings, then per-user feature flags after login.",
+      "item": [
+        {
+          "name": "Mobile app details (version / maintenance)",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/mobile-app-details", "host": ["{{base_url}}"], "path": ["user", "mobile-app-details"] } }
+        },
+        {
+          "name": "CRM settings",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/crm-settings", "host": ["{{base_url}}"], "path": ["user", "crm-settings"] } }
+        },
+        {
+          "name": "Enabled modules (feature flags)",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/enabled-modules", "host": ["{{base_url}}"], "path": ["user", "enabled-modules"] } }
+        }
+      ]
+    },
+    {
+      "name": "01 — Auth",
+      "description": "Register → send OTP → verify OTP → login. 2FA (Google OTP) login verification and password-reset OTP flow included.",
+      "item": [
+        {
+          "name": "Register",
+          "request": { "auth": { "type": "noauth" }, "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"password_confirmation\": \"{{password}}\",\n  \"mobile\": \"9876543210\",\n  \"country_code\": \"+91\",\n  \"country\": 101,\n  \"terms_accepted\": true\n}" }, "url": { "raw": "{{base_url}}user/register", "host": ["{{base_url}}"], "path": ["user", "register"] } }
+        },
+        {
+          "name": "Send OTP (email)",
+          "request": { "auth": { "type": "noauth" }, "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\"\n}" }, "url": { "raw": "{{base_url}}user/send-otp", "host": ["{{base_url}}"], "path": ["user", "send-otp"] } }
+        },
+        {
+          "name": "Verify OTP",
+          "request": { "auth": { "type": "noauth" }, "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"otp\": \"{{otp}}\",\n  \"otp_verification_type\": \"email\",\n  \"register_event_type\": \"verifyOtp\"\n}" }, "url": { "raw": "{{base_url}}user/verify-otp", "host": ["{{base_url}}"], "path": ["user", "verify-otp"] } }
+        },
+        {
+          "name": "Login",
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "const r = pm.response.json();", "const t = r.data && (r.data.token || r.data.access_token);", "if (t) pm.collectionVariables.set('token', t);" ] } } ],
+          "request": { "auth": { "type": "noauth" }, "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"fcm_token\": \"{{fcm_token}}\",\n  \"device_type\": \"android\"\n}" }, "url": { "raw": "{{base_url}}user/login", "host": ["{{base_url}}"], "path": ["user", "login"] } }
+        },
+        {
+          "name": "Verify login 2FA OTP (Google Authenticator)",
+          "request": { "auth": { "type": "noauth" }, "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"otp_code\": \"{{otp}}\"\n}" }, "url": { "raw": "{{base_url}}user/auth/google/verify-login-otp", "host": ["{{base_url}}"], "path": ["user", "auth", "google", "verify-login-otp"] } }
+        },
+        {
+          "name": "Register FCM token",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"fcm_token\": \"{{fcm_token}}\",\n  \"device_type\": \"android\"\n}" }, "url": { "raw": "{{base_url}}user/register-fcm-token", "host": ["{{base_url}}"], "path": ["user", "register-fcm-token"] } }
+        },
+        {
+          "name": "Check mobile (Google sign-in completion)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"mobile\": \"9876543210\",\n  \"country_code\": \"+91\"\n}" }, "url": { "raw": "{{base_url}}user/auth/google/check-mobile", "host": ["{{base_url}}"], "path": ["user", "auth", "google", "check-mobile"] } }
+        },
+        {
+          "name": "Logout",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"fcm_token\": \"{{fcm_token}}\"\n}" }, "url": { "raw": "{{base_url}}user/logout", "host": ["{{base_url}}"], "path": ["user", "logout"] } }
+        }
+      ]
+    },
+    {
+      "name": "02 — Password & Security",
+      "description": "Two reset flows exist: legacy (send-otp/reset-password) and the OTP flow under password/*. Plus in-app password change, Google 2FA management, account deletion.",
+      "item": [
+        {
+          "name": "Forgot password (email link)",
+          "request": { "auth": { "type": "noauth" }, "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\"\n}" }, "url": { "raw": "{{base_url}}user/password/email", "host": ["{{base_url}}"], "path": ["user", "password", "email"] } }
+        },
+        {
+          "name": "Request password reset OTP",
+          "request": { "auth": { "type": "noauth" }, "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\"\n}" }, "url": { "raw": "{{base_url}}user/password/forgot", "host": ["{{base_url}}"], "path": ["user", "password", "forgot"] } }
+        },
+        {
+          "name": "Verify password reset OTP",
+          "request": { "auth": { "type": "noauth" }, "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"otp\": \"{{otp}}\"\n}" }, "url": { "raw": "{{base_url}}user/password/verify-otp", "host": ["{{base_url}}"], "path": ["user", "password", "verify-otp"] } }
+        },
+        {
+          "name": "Reset password with OTP",
+          "request": { "auth": { "type": "noauth" }, "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"otp\": \"{{otp}}\",\n  \"password\": \"{{password}}\",\n  \"password_confirmation\": \"{{password}}\"\n}" }, "url": { "raw": "{{base_url}}user/password/reset", "host": ["{{base_url}}"], "path": ["user", "password", "reset"] } }
+        },
+        {
+          "name": "Reset password (legacy)",
+          "request": { "auth": { "type": "noauth" }, "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"otp\": \"{{otp}}\",\n  \"new_password\": \"{{password}}\"\n}" }, "url": { "raw": "{{base_url}}user/reset-password", "host": ["{{base_url}}"], "path": ["user", "reset-password"] } }
+        },
+        {
+          "name": "Change account password (logged in)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"current_password\": \"OldPass@1\",\n  \"password\": \"{{password}}\",\n  \"password_confirmation\": \"{{password}}\"\n}" }, "url": { "raw": "{{base_url}}user/settings/change-password", "host": ["{{base_url}}"], "path": ["user", "settings", "change-password"] } }
+        },
+        {
+          "name": "Google OTP — generate secret/QR",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{base_url}}user/settings/google-otp/generate", "host": ["{{base_url}}"], "path": ["user", "settings", "google-otp", "generate"] } }
+        },
+        {
+          "name": "Google OTP — verify / enable",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"otp_code\": \"{{otp}}\"\n}" }, "url": { "raw": "{{base_url}}user/settings/google-otp/verify", "host": ["{{base_url}}"], "path": ["user", "settings", "google-otp", "verify"] } }
+        },
+        {
+          "name": "Google OTP — disable",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"otp_code\": \"{{otp}}\"\n}" }, "url": { "raw": "{{base_url}}user/settings/google-otp/disable", "host": ["{{base_url}}"], "path": ["user", "settings", "google-otp", "disable"] } }
+        },
+        {
+          "name": "Delete account",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"password\": \"{{password}}\",\n  \"reason\": \"No longer trading\",\n  \"accept_terms\": true,\n  \"confirm_deletion\": true\n}" }, "url": { "raw": "{{base_url}}user/settings/delete-account", "host": ["{{base_url}}"], "path": ["user", "settings", "delete-account"] } }
+        }
+      ]
+    },
+    {
+      "name": "03 — Profile & Dropdowns",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/dashboard", "host": ["{{base_url}}"], "path": ["user", "dashboard"] } }
+        },
+        {
+          "name": "Get profile",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/settings/profile", "host": ["{{base_url}}"], "path": ["user", "settings", "profile"] } }
+        },
+        {
+          "name": "Update profile (page1..page5 payload)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"is_app\": 1,\n  \"user_id\": 1,\n  \"auth_key\": \"{{token}}\",\n  \"page1\": { \"email\": \"{{email}}\", \"title\": \"Mr\", \"gender\": \"male\" },\n  \"page2\": { \"date_of_birth\": \"1995-01-01\", \"alt_mobile\": \"9876543210\", \"alt_email\": \"alt@example.com\" },\n  \"page3\": { \"country\": 101, \"state\": 12, \"city\": 340, \"nationality\": \"Indian\" },\n  \"page4\": { \"address_line1\": \"Street 1\", \"address_line2\": \"Area\", \"postcode\": \"380001\", \"language\": \"en\" },\n  \"page5\": { \"us_citizen\": 0, \"politically_exposed\": 0, \"industry\": \"IT\", \"tax_identification_number\": \"ABCDE1234F\" }\n}" }, "url": { "raw": "{{base_url}}user/settings/profile", "host": ["{{base_url}}"], "path": ["user", "settings", "profile"] } }
+        },
+        {
+          "name": "Country dropdown",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/settings/getCountryDropdown", "host": ["{{base_url}}"], "path": ["user", "settings", "getCountryDropdown"] } }
+        },
+        {
+          "name": "State dropdown",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"country_id\": 101\n}" }, "url": { "raw": "{{base_url}}user/settings/getStateDropdown", "host": ["{{base_url}}"], "path": ["user", "settings", "getStateDropdown"] } }
+        },
+        {
+          "name": "City dropdown",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"state_id\": 12\n}" }, "url": { "raw": "{{base_url}}user/settings/getCityDropdown", "host": ["{{base_url}}"], "path": ["user", "settings", "getCityDropdown"] } }
+        },
+        {
+          "name": "Notifications",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/notifications", "host": ["{{base_url}}"], "path": ["user", "notifications"] } }
+        },
+        {
+          "name": "Create price alert",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"meta_account_number\": \"{{mt5_account}}\",\n  \"symbol\": \"{{symbol}}\",\n  \"target_price\": 1.0850,\n  \"condition\": \"above\",\n  \"fcm_token\": \"{{fcm_token}}\",\n  \"device_type\": \"android\"\n}" }, "url": { "raw": "{{base_url}}user/price-alerts", "host": ["{{base_url}}"], "path": ["user", "price-alerts"] } }
+        }
+      ]
+    },
+    {
+      "name": "04 — KYC & Compliance",
+      "description": "Flow: kyc status → profile/address update → regulation questionnaire → document upload (per-doc or unified multi-file).",
+      "item": [
+        {
+          "name": "KYC status",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/kyc", "host": ["{{base_url}}"], "path": ["user", "kyc"] } }
+        },
+        {
+          "name": "KYC profile / address update",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"country\": 101,\n  \"state\": 12,\n  \"city\": 340,\n  \"address_1\": \"Street 1\",\n  \"address_2\": \"Area\",\n  \"postcode\": \"380001\"\n}" }, "url": { "raw": "{{base_url}}user/kyc/profile", "host": ["{{base_url}}"], "path": ["user", "kyc", "profile"] } }
+        },
+        {
+          "name": "Regulation questionnaire (schema)",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/regulation", "host": ["{{base_url}}"], "path": ["user", "regulation"] } }
+        },
+        {
+          "name": "Regulation questionnaire (submit)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"answers\": { \"q1\": \"a\", \"q2\": \"b\" }\n}" }, "url": { "raw": "{{base_url}}user/regulation", "host": ["{{base_url}}"], "path": ["user", "regulation"] } }
+        },
+        {
+          "name": "Upload KYC document (multipart)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" } ], "body": { "mode": "formdata", "formdata": [ { "key": "document_type", "value": "kyc", "type": "text" }, { "key": "subdocument_types[]", "value": "identity_front", "type": "text" }, { "key": "files[]", "type": "file", "src": [] } ] }, "url": { "raw": "{{base_url}}user/kyc/documents/upload", "host": ["{{base_url}}"], "path": ["user", "kyc", "documents", "upload"] } }
+        },
+        {
+          "name": "Submit unified KYC (multi named files)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" } ], "body": { "mode": "formdata", "formdata": [ { "key": "identity_front", "type": "file", "src": [] }, { "key": "identity_back", "type": "file", "src": [] }, { "key": "address_front", "type": "file", "src": [] }, { "key": "address_back", "type": "file", "src": [] } ] }, "url": { "raw": "{{base_url}}user/kyc/submit-unified", "host": ["{{base_url}}"], "path": ["user", "kyc", "submit-unified"] } }
+        }
+      ]
+    },
+    {
+      "name": "05 — MT5 Accounts",
+      "item": [
+        {
+          "name": "Get accounts",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/mt5accounts/get", "host": ["{{base_url}}"], "path": ["user", "mt5accounts", "get"] } }
+        },
+        {
+          "name": "Plan / group details",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"is_live\": 1\n}" }, "url": { "raw": "{{base_url}}user/mt5accounts/plandetails", "host": ["{{base_url}}"], "path": ["user", "mt5accounts", "plandetails"] } }
+        },
+        {
+          "name": "Create account",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"group_id\": {{group_id}},\n  \"main_password\": \"Main@1234\",\n  \"investor_password\": \"Inv@1234\",\n  \"leverage\": 100\n}" }, "url": { "raw": "{{base_url}}user/mt5accounts/create", "host": ["{{base_url}}"], "path": ["user", "mt5accounts", "create"] } }
+        },
+        {
+          "name": "Sync accounts",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/mt5accounts/mt5AccountSync", "host": ["{{base_url}}"], "path": ["user", "mt5accounts", "mt5AccountSync"] } }
+        },
+        {
+          "name": "Top-up demo balance",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"meta_account_number\": \"{{mt5_account}}\",\n  \"amount\": 10000\n}" }, "url": { "raw": "{{base_url}}user/mt5accounts/setbalance", "host": ["{{base_url}}"], "path": ["user", "mt5accounts", "setbalance"] } }
+        },
+        {
+          "name": "Change master password",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"meta_account_number\": \"{{mt5_account}}\",\n  \"newPassword\": \"New@1234\"\n}" }, "url": { "raw": "{{base_url}}user/mt5accounts/changepassword", "host": ["{{base_url}}"], "path": ["user", "mt5accounts", "changepassword"] } }
+        },
+        {
+          "name": "Reset investor password",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"meta_account_number\": \"{{mt5_account}}\",\n  \"newPassword\": \"Inv@1234\"\n}" }, "url": { "raw": "{{base_url}}user/mt5accounts/resetinvestorpassword", "host": ["{{base_url}}"], "path": ["user", "mt5accounts", "resetinvestorpassword"] } }
+        },
+        {
+          "name": "Change leverage",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"mt5Account\": \"{{mt5_account}}\",\n  \"leverage\": 200\n}" }, "url": { "raw": "{{base_url}}user/mt5accounts/changeleverage", "host": ["{{base_url}}"], "path": ["user", "mt5accounts", "changeleverage"] } }
+        },
+        {
+          "name": "Change primary account",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"meta_account_number\": \"{{mt5_account}}\"\n}" }, "url": { "raw": "{{base_url}}user/mt5accounts/changePrimaryAccount", "host": ["{{base_url}}"], "path": ["user", "mt5accounts", "changePrimaryAccount"] } }
+        }
+      ]
+    },
+    {
+      "name": "06 — Trading",
+      "description": "Instruments load per account → place order → manage TP/SL → close position / pending order → history.",
+      "item": [
+        {
+          "name": "Instruments by account",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/instruments/{{mt5_account}}", "host": ["{{base_url}}"], "path": ["user", "instruments", "{{mt5_account}}"] } }
+        },
+        {
+          "name": "Place order",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"mt5_account\": \"{{mt5_account}}\",\n  \"symbol\": \"{{symbol}}\",\n  \"type\": \"buy\",\n  \"volume\": 0.01,\n  \"price\": 1.0850,\n  \"stop_loss\": 1.0800,\n  \"take_profit\": 1.0900,\n  \"tp\": 1.0900,\n  \"comment\": \"app order\"\n}" }, "url": { "raw": "{{base_url}}user/trade/new-order", "host": ["{{base_url}}"], "path": ["user", "trade", "new-order"] } }
+        },
+        {
+          "name": "Update TP/SL (open position)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"mt5_account\": \"{{mt5_account}}\",\n  \"position_id\": \"{{position_id}}\",\n  \"stop_loss\": 1.0800,\n  \"take_profit\": 1.0900\n}" }, "url": { "raw": "{{base_url}}user/trade/update-tp-sl", "host": ["{{base_url}}"], "path": ["user", "trade", "update-tp-sl"] } }
+        },
+        {
+          "name": "Update pending order (price / TP / SL)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"mt5_account\": \"{{mt5_account}}\",\n  \"order_id\": \"{{order_id}}\",\n  \"price\": 1.0820,\n  \"stop_loss\": 1.0780,\n  \"take_profit\": 1.0880\n}" }, "url": { "raw": "{{base_url}}user/trade/update-pending-order-tp-sl", "host": ["{{base_url}}"], "path": ["user", "trade", "update-pending-order-tp-sl"] } }
+        },
+        {
+          "name": "Close position (full / partial)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"mt5_account\": \"{{mt5_account}}\",\n  \"position_id\": \"{{position_id}}\",\n  \"volume\": 0.01\n}" }, "url": { "raw": "{{base_url}}user/trade/closePositionByPositionId", "host": ["{{base_url}}"], "path": ["user", "trade", "closePositionByPositionId"] } }
+        },
+        {
+          "name": "Close multiple positions",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"mt5_account\": \"{{mt5_account}}\",\n  \"position_ids\": [\"{{position_id}}\"]\n}" }, "url": { "raw": "{{base_url}}user/trade/closePositions", "host": ["{{base_url}}"], "path": ["user", "trade", "closePositions"] } }
+        },
+        {
+          "name": "Delete pending order(s)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"mt5_account\": \"{{mt5_account}}\",\n  \"orderIds\": [\"{{order_id}}\"]\n}" }, "url": { "raw": "{{base_url}}user/trade/closePendingOrder", "host": ["{{base_url}}"], "path": ["user", "trade", "closePendingOrder"] } }
+        },
+        {
+          "name": "Trade history",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/trade/tradehistory?page=1&per_page=20&mt5_account={{mt5_account}}&from=2026-01-01&to=2026-12-31", "host": ["{{base_url}}"], "path": ["user", "trade", "tradehistory"], "query": [ { "key": "page", "value": "1" }, { "key": "per_page", "value": "20" }, { "key": "mt5_account", "value": "{{mt5_account}}" }, { "key": "from", "value": "2026-01-01" }, { "key": "to", "value": "2026-12-31" } ] } }
+        }
+      ]
+    },
+    {
+      "name": "07 — Deposit",
+      "description": "Deposit methods list → method detail by slug → manual deposit request with proof (multipart) OR Cregis crypto invoice.",
+      "item": [
+        {
+          "name": "Deposit methods",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/deposit", "host": ["{{base_url}}"], "path": ["user", "deposit"] } }
+        },
+        {
+          "name": "Deposit method detail (by slug)",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/deposit/{{slug}}", "host": ["{{base_url}}"], "path": ["user", "deposit", "{{slug}}"] } }
+        },
+        {
+          "name": "Deposit request (multipart + proof)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" } ], "body": { "mode": "formdata", "formdata": [ { "key": "gateway_method_id", "value": "1", "type": "text" }, { "key": "amount", "value": "100", "type": "text" }, { "key": "mt5_account_id", "value": "{{mt5_account_id}}", "type": "text" }, { "key": "currency", "value": "USD", "type": "text" }, { "key": "proof", "type": "file", "src": [] } ] }, "url": { "raw": "{{base_url}}user/deposit/depositrequest", "host": ["{{base_url}}"], "path": ["user", "deposit", "depositrequest"] } }
+        },
+        {
+          "name": "Cregis crypto deposit (create invoice)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"gateway_method_id\": 1,\n  \"amount\": 100,\n  \"mt5_account_id\": {{mt5_account_id}},\n  \"crypto_network\": \"TRC20\"\n}" }, "url": { "raw": "{{base_url}}user/deposit/cregis", "host": ["{{base_url}}"], "path": ["user", "deposit", "cregis"] } }
+        },
+        {
+          "name": "Deposit proof proxy (view uploaded proof)",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/deposit-proof-proxy/{{deposit_id}}", "host": ["{{base_url}}"], "path": ["user", "deposit-proof-proxy", "{{deposit_id}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "08 — Withdrawal",
+      "description": "Methods list → method detail by slug → saved user methods → check balance → send OTP → submit request. Bank/UPI/crypto payload differs by method.",
+      "item": [
+        {
+          "name": "Withdrawal methods",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/withdrawal", "host": ["{{base_url}}"], "path": ["user", "withdrawal"] } }
+        },
+        {
+          "name": "Withdrawal method detail (by slug)",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/withdrawal/withdrawal-method/{{slug}}", "host": ["{{base_url}}"], "path": ["user", "withdrawal", "withdrawal-method", "{{slug}}"] } }
+        },
+        {
+          "name": "Saved withdrawal methods",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/withdrawal/getUserWithdrawalMethods", "host": ["{{base_url}}"], "path": ["user", "withdrawal", "getUserWithdrawalMethods"] } }
+        },
+        {
+          "name": "Check balance",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"account_number\": \"{{mt5_account}}\",\n  \"amount\": 50\n}" }, "url": { "raw": "{{base_url}}user/withdrawal/checkbalance", "host": ["{{base_url}}"], "path": ["user", "withdrawal", "checkbalance"] } }
+        },
+        {
+          "name": "Send withdrawal OTP",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/withdrawal/sendOTP?account_number={{mt5_account}}&amount=50&withdrawalMethod=bank", "host": ["{{base_url}}"], "path": ["user", "withdrawal", "sendOTP"], "query": [ { "key": "account_number", "value": "{{mt5_account}}" }, { "key": "amount", "value": "50" }, { "key": "withdrawalMethod", "value": "bank" } ] } }
+        },
+        {
+          "name": "Save withdrawal method (bank, multipart)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" } ], "body": { "mode": "formdata", "formdata": [ { "key": "withdrawalMethod", "value": "bank", "type": "text" }, { "key": "currency", "value": "USD", "type": "text" }, { "key": "otp", "value": "{{otp}}", "type": "text" }, { "key": "relationship", "value": "self", "type": "text" }, { "key": "bankHolderName", "value": "John Doe", "type": "text" }, { "key": "bankName", "value": "HDFC", "type": "text" }, { "key": "bankAccountNo", "value": "123456789", "type": "text" }, { "key": "confirmBankAccountNo", "value": "123456789", "type": "text" }, { "key": "ifscIban", "value": "HDFC0001234", "type": "text" }, { "key": "bankSwiftCode", "value": "HDFCINBB", "type": "text" }, { "key": "proof", "type": "file", "src": [] } ] }, "url": { "raw": "{{base_url}}user/withdrawal", "host": ["{{base_url}}"], "path": ["user", "withdrawal"] } }
+        },
+        {
+          "name": "Submit withdrawal (non-crypto)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"amount\": 50,\n  \"currency\": \"USD\",\n  \"otp\": \"{{otp}}\",\n  \"mt5_account_id\": {{mt5_account_id}}\n}" }, "url": { "raw": "{{base_url}}user/withdrawal/withdrawalrequest", "host": ["{{base_url}}"], "path": ["user", "withdrawal", "withdrawalrequest"] } }
+        },
+        {
+          "name": "Submit withdrawal (crypto)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"payment_method\": \"crypto\",\n  \"withdrawal_method_id\": 1,\n  \"withdrawal_method_slug\": \"crypto\",\n  \"mt5_account_id\": {{mt5_account_id}},\n  \"to_account\": \"TXxxxxxxxxxxxxxxxxxx\",\n  \"amount\": 50,\n  \"currency\": \"USDT\",\n  \"otp\": \"{{otp}}\"\n}" }, "url": { "raw": "{{base_url}}user/withdrawal/withdrawalrequest", "host": ["{{base_url}}"], "path": ["user", "withdrawal", "withdrawalrequest"] } }
+        }
+      ]
+    },
+    {
+      "name": "09 — Wallet, Transfers & Transactions",
+      "item": [
+        {
+          "name": "Wallet details",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/wallet", "host": ["{{base_url}}"], "path": ["user", "wallet"] } }
+        },
+        {
+          "name": "Internal transfer — accounts data",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/internaltransfer", "host": ["{{base_url}}"], "path": ["user", "internaltransfer"] } }
+        },
+        {
+          "name": "Internal transfer — request",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"from_account\": \"{{mt5_account}}\",\n  \"to_account\": \"1000124\",\n  \"amount\": 25,\n  \"comment\": \"rebalance\",\n  \"otp\": \"{{otp}}\"\n}" }, "url": { "raw": "{{base_url}}user/internaltransfer/request", "host": ["{{base_url}}"], "path": ["user", "internaltransfer", "request"] } }
+        },
+        {
+          "name": "Internal transfer — history",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/internaltransfer/history?page=1&per_page=20&dateFrom=2026-01-01&dateTo=2026-12-31", "host": ["{{base_url}}"], "path": ["user", "internaltransfer", "history"], "query": [ { "key": "page", "value": "1" }, { "key": "per_page", "value": "20" }, { "key": "dateFrom", "value": "2026-01-01" }, { "key": "dateTo", "value": "2026-12-31" } ] } }
+        },
+        {
+          "name": "Transactions",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/transactions?page=1&perPage=20&transactionType=deposit&status=approved&dateFrom=2026-01-01&dateTo=2026-12-31", "host": ["{{base_url}}"], "path": ["user", "transactions"], "query": [ { "key": "page", "value": "1" }, { "key": "perPage", "value": "20" }, { "key": "transactionType", "value": "deposit" }, { "key": "status", "value": "approved" }, { "key": "dateFrom", "value": "2026-01-01" }, { "key": "dateTo", "value": "2026-12-31" } ] } }
+        },
+        {
+          "name": "Currency list",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/utility/currency-list", "host": ["{{base_url}}"], "path": ["user", "utility", "currency-list"] } }
+        }
+      ]
+    },
+    {
+      "name": "10 — Bonus",
+      "item": [
+        {
+          "name": "Bonus list",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/bonus", "host": ["{{base_url}}"], "path": ["user", "bonus"] } }
+        },
+        {
+          "name": "Bonus claim list",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/bonus/bonusClaimList?page=1", "host": ["{{base_url}}"], "path": ["user", "bonus", "bonusClaimList"], "query": [ { "key": "page", "value": "1" } ] } }
+        },
+        {
+          "name": "Claim bonus",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"bonus_id\": {{bonus_id}},\n  \"deposit_id\": {{deposit_id}},\n  \"selected_percentage\": 50,\n  \"target_mt5_account\": \"{{mt5_account}}\"\n}" }, "url": { "raw": "{{base_url}}user/bonus/bonusClaim", "host": ["{{base_url}}"], "path": ["user", "bonus", "bonusClaim"] } }
+        }
+      ]
+    },
+    {
+      "name": "11 — IB Portal",
+      "description": "Status → apply → dashboard/stats → clients, sub-IBs, structure → commission groups → approval requests → IB internal transfer.",
+      "item": [
+        { "name": "IB status", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/status", "host": ["{{base_url}}"], "path": ["user", "ib", "status"] } } },
+        { "name": "IB application", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"terms_accepted\": true\n}" }, "url": { "raw": "{{base_url}}user/ib/application", "host": ["{{base_url}}"], "path": ["user", "ib", "application"] } } },
+        { "name": "IB dashboard", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/dashboard", "host": ["{{base_url}}"], "path": ["user", "ib", "dashboard"] } } },
+        { "name": "IB stats", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/stats", "host": ["{{base_url}}"], "path": ["user", "ib", "stats"] } } },
+        { "name": "IB clients", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/clients?page=1&per_page=20&search=&sub_ib_id={{sub_ib_id}}", "host": ["{{base_url}}"], "path": ["user", "ib", "clients"], "query": [ { "key": "page", "value": "1" }, { "key": "per_page", "value": "20" }, { "key": "search", "value": "" }, { "key": "sub_ib_id", "value": "{{sub_ib_id}}" } ] } } },
+        { "name": "IB sub-IBs", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/sub-ibs", "host": ["{{base_url}}"], "path": ["user", "ib", "sub-ibs"] } } },
+        { "name": "Sub-IB's sub-IBs", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/sub-ib-sub-ibs/{{sub_ib_id}}", "host": ["{{base_url}}"], "path": ["user", "ib", "sub-ib-sub-ibs", "{{sub_ib_id}}"] } } },
+        { "name": "Sub-IB stats", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/sub-ib-stats/{{sub_ib_id}}", "host": ["{{base_url}}"], "path": ["user", "ib", "sub-ib-stats", "{{sub_ib_id}}"] } } },
+        { "name": "IB structure", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/structure", "host": ["{{base_url}}"], "path": ["user", "ib", "structure"] } } },
+        { "name": "Sub-IB structure", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/sub-ib-structure/{{sub_ib_id}}", "host": ["{{base_url}}"], "path": ["user", "ib", "sub-ib-structure", "{{sub_ib_id}}"] } } },
+        { "name": "IB trade history", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/trade-history?page=1&per_page=20&client_id={{client_id}}", "host": ["{{base_url}}"], "path": ["user", "ib", "trade-history"], "query": [ { "key": "page", "value": "1" }, { "key": "per_page", "value": "20" }, { "key": "client_id", "value": "{{client_id}}" } ] } } },
+        { "name": "IB approval requests (primary)", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/ib-request-list", "host": ["{{base_url}}"], "path": ["user", "ib", "ib-request-list"] } } },
+        { "name": "IB approval requests (fallback)", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/approval/requests", "host": ["{{base_url}}"], "path": ["user", "ib", "approval", "requests"] } } },
+        { "name": "Approve / reject request", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"status\": \"approved\",\n  \"reason\": \"\"\n}" }, "url": { "raw": "{{base_url}}user/ib/update-status/{{request_id}}", "host": ["{{base_url}}"], "path": ["user", "ib", "update-status", "{{request_id}}"] } } },
+        { "name": "Commission groups — list", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/commission-groups", "host": ["{{base_url}}"], "path": ["user", "ib", "commission-groups"] } } },
+        { "name": "Commission group — create / update", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"id\": {{group_id}},\n  \"group_name\": \"Gold IB\",\n  \"master_ids\": [1, 2],\n  \"structure_type\": \"per_lot\",\n  \"EURUSD\": 5\n}" }, "url": { "raw": "{{base_url}}user/ib/manage", "host": ["{{base_url}}"], "path": ["user", "ib", "manage"] } } },
+        { "name": "Commission group — delete", "request": { "method": "DELETE", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/commission-groups/{{group_id}}", "host": ["{{base_url}}"], "path": ["user", "ib", "commission-groups", "{{group_id}}"] } } },
+        { "name": "IB transfer — form data", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/transfer/create", "host": ["{{base_url}}"], "path": ["user", "ib", "transfer", "create"] } } },
+        { "name": "IB transfer — search clients", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/transfer/clients/search?search=john", "host": ["{{base_url}}"], "path": ["user", "ib", "transfer", "clients", "search"], "query": [ { "key": "search", "value": "john" } ] } } },
+        { "name": "IB transfer — store", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"to_client_user_id\": {{client_id}},\n  \"amount\": 50,\n  \"comment\": \"bonus payout\"\n}" }, "url": { "raw": "{{base_url}}user/ib/transfer/store", "host": ["{{base_url}}"], "path": ["user", "ib", "transfer", "store"] } } },
+        { "name": "IB transfer — history", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/transfer/history?page=1", "host": ["{{base_url}}"], "path": ["user", "ib", "transfer", "history"], "query": [ { "key": "page", "value": "1" } ] } } },
+        { "name": "IB transfer — cancel", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/ib/transfer/{{transfer_id}}/cancel", "host": ["{{base_url}}"], "path": ["user", "ib", "transfer", "{{transfer_id}}", "cancel"] } } }
+      ]
+    },
+    {
+      "name": "12 — Copy Trading (Master)",
+      "item": [
+        { "name": "Master apply", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"nickname\": \"ProTrader\",\n  \"terms_accepted\": true,\n  \"strategy\": \"Scalping EURUSD\",\n  \"risk_info\": \"Medium\"\n}" }, "url": { "raw": "{{base_url}}user/copytrading/master/apply", "host": ["{{base_url}}"], "path": ["user", "copytrading", "master", "apply"] } } },
+        { "name": "Master status", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/copytrading/master/status", "host": ["{{base_url}}"], "path": ["user", "copytrading", "master", "status"] } } },
+        { "name": "Master dashboard stats", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/copytrading/master/dashboard-stats", "host": ["{{base_url}}"], "path": ["user", "copytrading", "master", "dashboard-stats"] } } },
+        { "name": "Master dashboard overview", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/copytrading/master/dashboard-overview?range=30d", "host": ["{{base_url}}"], "path": ["user", "copytrading", "master", "dashboard-overview"], "query": [ { "key": "range", "value": "30d" } ] } } },
+        { "name": "Master plans list", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/copytrading/master/plans", "host": ["{{base_url}}"], "path": ["user", "copytrading", "master", "plans"] } } },
+        { "name": "Plan detail", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/copytrading/master/plans/{{plan_id}}", "host": ["{{base_url}}"], "path": ["user", "copytrading", "master", "plans", "{{plan_id}}"] } } },
+        { "name": "Plan open positions", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/copytrading/master/plans/{{plan_id}}/open-positions", "host": ["{{base_url}}"], "path": ["user", "copytrading", "master", "plans", "{{plan_id}}", "open-positions"] } } },
+        { "name": "Plan update", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Aggressive\",\n  \"performance_fee\": 20,\n  \"min_investment\": 100\n}" }, "url": { "raw": "{{base_url}}user/copytrading/master/plans/{{plan_id}}", "host": ["{{base_url}}"], "path": ["user", "copytrading", "master", "plans", "{{plan_id}}"] } } },
+        { "name": "Plan pause", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{base_url}}user/copytrading/master/plans/{{plan_id}}/pause", "host": ["{{base_url}}"], "path": ["user", "copytrading", "master", "plans", "{{plan_id}}", "pause"] } } },
+        { "name": "Plan resume", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{base_url}}user/copytrading/master/plans/{{plan_id}}/resume", "host": ["{{base_url}}"], "path": ["user", "copytrading", "master", "plans", "{{plan_id}}", "resume"] } } },
+        { "name": "Plan inactivate", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{base_url}}user/copytrading/master/plans/{{plan_id}}/inactivate", "host": ["{{base_url}}"], "path": ["user", "copytrading", "master", "plans", "{{plan_id}}", "inactivate"] } } },
+        { "name": "Master copiers", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/copytrading/master/copiers?page=1&per_page=20", "host": ["{{base_url}}"], "path": ["user", "copytrading", "master", "copiers"], "query": [ { "key": "page", "value": "1" }, { "key": "per_page", "value": "20" } ] } } }
+      ]
+    },
+    {
+      "name": "13 — Copy Trading (Copier)",
+      "description": "Browse masters → master profile + trade history → eligible accounts → subscribe → manage subscription (pause/resume/stop/add capital/update).",
+      "item": [
+        { "name": "Masters list", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}copytrading/masters?page=1&per_page=20", "host": ["{{base_url}}"], "path": ["copytrading", "masters"], "query": [ { "key": "page", "value": "1" }, { "key": "per_page", "value": "20" } ] } } },
+        { "name": "Master profile (public)", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}copytrading/masters/{{master_code}}?timeframe=30d&plan_id={{plan_id}}", "host": ["{{base_url}}"], "path": ["copytrading", "masters", "{{master_code}}"], "query": [ { "key": "timeframe", "value": "30d" }, { "key": "plan_id", "value": "{{plan_id}}" } ] } } },
+        { "name": "Master trade history", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/copytrading/copier/masters/{{master_code}}/trade-history?timeframe=30d&plan_id={{plan_id}}&page=1&per_page=20", "host": ["{{base_url}}"], "path": ["user", "copytrading", "copier", "masters", "{{master_code}}", "trade-history"], "query": [ { "key": "timeframe", "value": "30d" }, { "key": "plan_id", "value": "{{plan_id}}" }, { "key": "page", "value": "1" }, { "key": "per_page", "value": "20" } ] } } },
+        { "name": "Eligible accounts", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/copytrading/copier/eligible-accounts?plan_id={{plan_id}}", "host": ["{{base_url}}"], "path": ["user", "copytrading", "copier", "eligible-accounts"], "query": [ { "key": "plan_id", "value": "{{plan_id}}" } ] } } },
+        { "name": "Subscribe", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"master_code\": \"{{master_code}}\",\n  \"plan_id\": {{plan_id}},\n  \"mt5_account_id\": {{mt5_account_id}},\n  \"investment_amount\": 500,\n  \"sizing_method\": \"fixed_lot\",\n  \"copying_method\": \"standard\",\n  \"lot_multiplier\": 1,\n  \"fixed_lot_size\": 0.01,\n  \"is_reverse\": false,\n  \"overrides_sl_tp\": true,\n  \"sl_tp_mode\": \"pips\",\n  \"take_profit_pips\": 50,\n  \"stop_loss_pips\": 30\n}" }, "url": { "raw": "{{base_url}}user/copytrading/copier/subscribe", "host": ["{{base_url}}"], "path": ["user", "copytrading", "copier", "subscribe"] } } },
+        { "name": "Subscriptions list", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/copytrading/copier/subscriptions?page=1&per_page=20", "host": ["{{base_url}}"], "path": ["user", "copytrading", "copier", "subscriptions"], "query": [ { "key": "page", "value": "1" }, { "key": "per_page", "value": "20" } ] } } },
+        { "name": "Subscription detail", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/copytrading/copier/subscriptions/{{subscription_id}}/detail", "host": ["{{base_url}}"], "path": ["user", "copytrading", "copier", "subscriptions", "{{subscription_id}}", "detail"] } } },
+        { "name": "Subscription trades", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/copytrading/copier/subscriptions/{{subscription_id}}/trades?page=1&limit=20", "host": ["{{base_url}}"], "path": ["user", "copytrading", "copier", "subscriptions", "{{subscription_id}}", "trades"], "query": [ { "key": "page", "value": "1" }, { "key": "limit", "value": "20" } ] } } },
+        { "name": "Add capital", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"amount\": 100\n}" }, "url": { "raw": "{{base_url}}user/copytrading/copier/subscriptions/{{subscription_id}}/add-capital", "host": ["{{base_url}}"], "path": ["user", "copytrading", "copier", "subscriptions", "{{subscription_id}}", "add-capital"] } } },
+        { "name": "Pause subscription", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{base_url}}user/copytrading/copier/subscriptions/{{subscription_id}}/pause", "host": ["{{base_url}}"], "path": ["user", "copytrading", "copier", "subscriptions", "{{subscription_id}}", "pause"] } } },
+        { "name": "Resume subscription", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{base_url}}user/copytrading/copier/subscriptions/{{subscription_id}}/resume", "host": ["{{base_url}}"], "path": ["user", "copytrading", "copier", "subscriptions", "{{subscription_id}}", "resume"] } } },
+        { "name": "Stop subscription", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{base_url}}user/copytrading/copier/subscriptions/{{subscription_id}}/stop", "host": ["{{base_url}}"], "path": ["user", "copytrading", "copier", "subscriptions", "{{subscription_id}}", "stop"] } } },
+        { "name": "Update subscription settings", "request": { "method": "PUT", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"sizing_method\": \"multiplier\",\n  \"lot_multiplier\": 2,\n  \"copying_method\": \"standard\",\n  \"overrides_sl_tp\": false\n}" }, "url": { "raw": "{{base_url}}user/copytrading/copier/subscriptions/{{subscription_id}}/update", "host": ["{{base_url}}"], "path": ["user", "copytrading", "copier", "subscriptions", "{{subscription_id}}", "update"] } } }
+      ]
+    },
+    {
+      "name": "14 — Support Tickets",
+      "item": [
+        { "name": "Departments", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/tickets/departments", "host": ["{{base_url}}"], "path": ["user", "tickets", "departments"] } } },
+        { "name": "Tickets list", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/tickets?page=1&per_page=20", "host": ["{{base_url}}"], "path": ["user", "tickets"], "query": [ { "key": "page", "value": "1" }, { "key": "per_page", "value": "20" } ] } } },
+        { "name": "Create ticket (multipart)", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" } ], "body": { "mode": "formdata", "formdata": [ { "key": "department_id", "value": "1", "type": "text" }, { "key": "priority", "value": "medium", "type": "text" }, { "key": "title", "value": "Deposit not credited", "type": "text" }, { "key": "description", "value": "Deposited 100 USD 2 hours ago", "type": "text" }, { "key": "attachment", "type": "file", "src": [] } ] }, "url": { "raw": "{{base_url}}user/tickets", "host": ["{{base_url}}"], "path": ["user", "tickets"] } } },
+        { "name": "Ticket detail", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/tickets/{{ticket_id}}", "host": ["{{base_url}}"], "path": ["user", "tickets", "{{ticket_id}}"] } } },
+        { "name": "Reply to ticket", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"reply_text\": \"Any update on this?\"\n}" }, "url": { "raw": "{{base_url}}user/tickets/{{ticket_id}}/reply", "host": ["{{base_url}}"], "path": ["user", "tickets", "{{ticket_id}}", "reply"] } } },
+        { "name": "Close ticket", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{base_url}}user/tickets/{{ticket_id}}/close", "host": ["{{base_url}}"], "path": ["user", "tickets", "{{ticket_id}}", "close"] } } },
+        { "name": "Ticket attachment (download)", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/tickets/attachment?path=tickets%2F1%2Ffile.png", "host": ["{{base_url}}"], "path": ["user", "tickets", "attachment"], "query": [ { "key": "path", "value": "tickets%2F1%2Ffile.png" } ] } } }
+      ]
+    },
+    {
+      "name": "15 — Demo Contest",
+      "description": "One endpoint (contests) is reused with query flags for leaderboard / my entries / winners. joinContest bypasses ApiService and hits user/demo-contest/join.",
+      "item": [
+        { "name": "Contests list", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/demo-contest/contests", "host": ["{{base_url}}"], "path": ["user", "demo-contest", "contests"] } } },
+        { "name": "Leaderboard", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/demo-contest/contests?contest_id={{contest_id}}&leaderboard=1", "host": ["{{base_url}}"], "path": ["user", "demo-contest", "contests"], "query": [ { "key": "contest_id", "value": "{{contest_id}}" }, { "key": "leaderboard", "value": "1" } ] } } },
+        { "name": "My entries", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/demo-contest/contests?my_entries=1", "host": ["{{base_url}}"], "path": ["user", "demo-contest", "contests"], "query": [ { "key": "my_entries", "value": "1" } ] } } },
+        { "name": "Winners", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/demo-contest/contests?winners=1&limit=10", "host": ["{{base_url}}"], "path": ["user", "demo-contest", "contests"], "query": [ { "key": "winners", "value": "1" }, { "key": "limit", "value": "10" } ] } } },
+        { "name": "My stats", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}user/demo-contest/my-stats?contest_id={{contest_id}}", "host": ["{{base_url}}"], "path": ["user", "demo-contest", "my-stats"], "query": [ { "key": "contest_id", "value": "{{contest_id}}" } ] } } },
+        { "name": "Join contest", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"contest_id\": {{contest_id}}\n}" }, "url": { "raw": "{{base_url}}user/demo-contest/join", "host": ["{{base_url}}"], "path": ["user", "demo-contest", "join"] } } }
+      ]
+    },
+    {
+      "name": "16 — Scratch Cards",
+      "description": "Note: these use the v1/user/ prefix, not user/.",
+      "item": [
+        { "name": "My scratch cards", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}v1/user/scratch-cards", "host": ["{{base_url}}"], "path": ["v1", "user", "scratch-cards"] } } },
+        { "name": "Reveal card", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"card_id\": {{card_id}}\n}" }, "url": { "raw": "{{base_url}}v1/user/scratch-cards/reveal", "host": ["{{base_url}}"], "path": ["v1", "user", "scratch-cards", "reveal"] } } },
+        { "name": "Leaderboard", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}v1/user/scratch-cards/leaderboard", "host": ["{{base_url}}"], "path": ["v1", "user", "scratch-cards", "leaderboard"] } } },
+        { "name": "Convert credit to balance", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"account_id\": {{mt5_account_id}}\n}" }, "url": { "raw": "{{base_url}}v1/user/scratch-cards/convert-credit-to-balance", "host": ["{{base_url}}"], "path": ["v1", "user", "scratch-cards", "convert-credit-to-balance"] } } }
+      ]
+    },
+    {
+      "name": "17 — Trade & Win",
+      "description": "Also on the v1/user/ prefix.",
+      "item": [
+        { "name": "Products", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}v1/user/trade-win/products?page=1&category=&audience=client&availability=available", "host": ["{{base_url}}"], "path": ["v1", "user", "trade-win", "products"], "query": [ { "key": "page", "value": "1" }, { "key": "category", "value": "" }, { "key": "audience", "value": "client" }, { "key": "availability", "value": "available" } ] } } },
+        { "name": "Past wins", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}v1/user/trade-win/past-wins?page=1", "host": ["{{base_url}}"], "path": ["v1", "user", "trade-win", "past-wins"], "query": [ { "key": "page", "value": "1" } ] } } },
+        { "name": "Saved addresses", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}v1/user/trade-win/saved-addresses", "host": ["{{base_url}}"], "path": ["v1", "user", "trade-win", "saved-addresses"] } } },
+        { "name": "Claim reward", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"product_id\": {{product_id}},\n  \"quantity\": 1,\n  \"shipping_details\": {\n    \"full_name\": \"John Doe\",\n    \"phone\": \"9876543210\",\n    \"address_line1\": \"Street 1\",\n    \"city\": \"Ahmedabad\",\n    \"state\": \"Gujarat\",\n    \"country\": \"India\",\n    \"postcode\": \"380001\"\n  }\n}" }, "url": { "raw": "{{base_url}}v1/user/trade-win/claim", "host": ["{{base_url}}"], "path": ["v1", "user", "trade-win", "claim"] } } }
+      ]
+    }
+  ]
+}

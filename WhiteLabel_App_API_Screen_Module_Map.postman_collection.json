@@ -1,0 +1,150 @@
+{
+  "info": {
+    "_postman_id": "white-label-screen-module-map-vantage-pipze",
+    "name": "White Label API — Screen & Module Map (Vantage / Pipze)",
+    "description": "Screen-wise API map for the Flutter white-label app. Import WhiteLabel_App_API_Vantage_Pipze.postman_environment.json first. Set base_url to the active Vantage-family flavor. The complete request bodies remain in WhiteLabel_App_API.postman_collection.json; this collection adds screen/module ownership and local-logic notes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+  "variable": [{ "key": "base_url", "value": "https://my.pipze.com/api/", "type": "string" }, { "key": "token", "value": "", "type": "string" }, { "key": "mt5_account", "value": "1000123", "type": "string" }, { "key": "symbol", "value": "EURUSD", "type": "string" }, { "key": "slug", "value": "bank", "type": "string" }, { "key": "id", "value": "1", "type": "string" }],
+  "item": [
+    { "name": "00 Bootstrap — Splash / AuthCheckScreen", "description": "Screens: Splash/AuthCheckScreen. Local: startup suppression, maintenance/update state, cached config, feature flags, auth redirect.", "item": [
+      { "name": "Mobile app details", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{base_url}}user/mobile-app-details" } },
+      { "name": "CRM settings", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{base_url}}user/crm-settings" } },
+      { "name": "Enabled modules", "request": { "method": "GET", "url": "{{base_url}}user/enabled-modules" } }
+    ] },
+    { "name": "01 Auth — Login / Register / OTP", "description": "Screens: Login, Register, OTP, Google login. Local: token persistence, connectivity check, OTP state, controller reinitialization, notification deferral.", "item": [
+      { "name": "Register", "request": { "auth": { "type": "noauth" }, "method": "POST", "url": "{{base_url}}user/register" } },
+      { "name": "Send OTP", "request": { "auth": { "type": "noauth" }, "method": "POST", "url": "{{base_url}}user/send-otp" } },
+      { "name": "Verify OTP", "request": { "auth": { "type": "noauth" }, "method": "POST", "url": "{{base_url}}user/verify-otp" } },
+      { "name": "Login", "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const r=pm.response.json(); const t=r.data&&(r.data.token||r.data.access_token); if(t) pm.environment.set('token',t);"] } }], "request": { "auth": { "type": "noauth" }, "method": "POST", "url": "{{base_url}}user/login" } },
+      { "name": "Google login OTP", "request": { "auth": { "type": "noauth" }, "method": "POST", "url": "{{base_url}}user/auth/google/verify-login-otp" } },
+      { "name": "Register FCM token", "request": { "method": "POST", "url": "{{base_url}}user/register-fcm-token" } },
+      { "name": "Logout", "request": { "method": "POST", "url": "{{base_url}}user/logout" } }
+    ] },
+    { "name": "02 Security — Password / Google 2FA / Delete", "description": "Screens: ChangePassword, TwoFactorAuth, DeleteAccount. Local: form validation, OTP state, confirmation and secure-storage cleanup.", "item": [
+      { "name": "Password reset request", "request": { "auth": { "type": "noauth" }, "method": "POST", "url": "{{base_url}}user/password/forgot" } },
+      { "name": "Password reset verify", "request": { "auth": { "type": "noauth" }, "method": "POST", "url": "{{base_url}}user/password/verify-otp" } },
+      { "name": "Password reset", "request": { "auth": { "type": "noauth" }, "method": "POST", "url": "{{base_url}}user/password/reset" } },
+      { "name": "Change user password", "request": { "method": "POST", "url": "{{base_url}}user/settings/change-password" } },
+      { "name": "Generate Google OTP", "request": { "method": "POST", "url": "{{base_url}}user/settings/google-otp/generate" } },
+      { "name": "Verify Google OTP", "request": { "method": "POST", "url": "{{base_url}}user/settings/google-otp/verify" } },
+      { "name": "Disable Google OTP", "request": { "method": "POST", "url": "{{base_url}}user/settings/google-otp/disable" } },
+      { "name": "Delete account", "request": { "method": "POST", "url": "{{base_url}}user/settings/delete-account" } }
+    ] },
+    { "name": "03 Home / Dashboard / MT5 Accounts / Instruments", "description": "Screens: Trading home, Dashboard, Accounts, Instrument list/search, account management. Local: primary account, filters/sorts, response normalization, 24h symbol cache and account-switch reconnect.", "item": [
+      { "name": "Dashboard", "request": { "method": "GET", "url": "{{base_url}}user/dashboard" } },
+      { "name": "Get MT5 accounts", "request": { "method": "GET", "url": "{{base_url}}user/mt5accounts/get" } },
+      { "name": "Plan details", "request": { "method": "POST", "url": "{{base_url}}user/mt5accounts/plandetails" } },
+      { "name": "Create MT5 account", "request": { "method": "POST", "url": "{{base_url}}user/mt5accounts/create" } },
+      { "name": "Sync MT5 accounts", "request": { "method": "GET", "url": "{{base_url}}user/mt5accounts/mt5AccountSync" } },
+      { "name": "Top up demo", "request": { "method": "POST", "url": "{{base_url}}user/mt5accounts/setbalance" } },
+      { "name": "Change primary account", "request": { "method": "POST", "url": "{{base_url}}user/mt5accounts/changePrimaryAccount" } },
+      { "name": "Instruments", "request": { "method": "GET", "url": "{{base_url}}user/instruments" } },
+      { "name": "Account instruments", "request": { "method": "GET", "url": "{{base_url}}user/instruments/{{mt5_account}}" } }
+    ] },
+    { "name": "04 Trading — Orders / Positions / History", "description": "Screens: Trade, order ticket, close position, edit pending order, history. Local: Buy/Sell validation, volume/price/TP-SL checks, bulk-close filters, pagination and optimistic UI.", "item": [
+      { "name": "New order", "request": { "method": "POST", "url": "{{base_url}}user/trade/new-order" } },
+      { "name": "Close position", "request": { "method": "POST", "url": "{{base_url}}user/trade/closePositionByPositionId" } },
+      { "name": "Close positions", "request": { "method": "POST", "url": "{{base_url}}user/trade/closePositions" } },
+      { "name": "Cancel pending order", "request": { "method": "POST", "url": "{{base_url}}user/trade/cancel-pending-order" } },
+      { "name": "Close pending order", "request": { "method": "POST", "url": "{{base_url}}user/trade/closePendingOrder" } },
+      { "name": "Modify pending order", "request": { "method": "POST", "url": "{{base_url}}user/trade/modify-pending-order" } },
+      { "name": "Update TP SL", "request": { "method": "POST", "url": "{{base_url}}user/trade/update-tp-sl" } },
+      { "name": "Update pending TP SL", "request": { "method": "POST", "url": "{{base_url}}user/trade/update-pending-order-tp-sl" } },
+      { "name": "Trade history", "request": { "method": "GET", "url": "{{base_url}}user/trade/tradehistory" } }
+    ] },
+    { "name": "05 Chart / Market WebSockets", "description": "Screens/widgets: Chart, Tenax chart, advanced chart. REST: chartBaseUrl/charthistory. WebSockets: market watch, symbols, open positions, pending orders. Local: symbol mapping, suffix normalization, pricescale, midpoint and tick-to-bar aggregation.", "item": [ { "name": "Chart history (direct chart REST)", "request": { "method": "POST", "url": "{{chart_base_url}}/charthistory" } } ] },
+    { "name": "06 Finance — Deposit / Cregis", "description": "Screens: Finance, Deposit, PaymentMethods, DepositInstruction, CregisAddress/Success. Local: amount/file validation, multipart assembly, invoice parsing, reference polling and cache invalidation.", "item": [
+      { "name": "Deposit methods", "request": { "method": "GET", "url": "{{base_url}}user/deposit" } },
+      { "name": "Deposit method detail", "request": { "method": "GET", "url": "{{base_url}}user/deposit/{{slug}}" } },
+      { "name": "Deposit request with proof", "request": { "method": "POST", "url": "{{base_url}}user/deposit/depositrequest" } },
+      { "name": "Cregis create", "request": { "method": "POST", "url": "{{base_url}}user/deposit/cregis" } },
+      { "name": "Cregis status by reference", "request": { "method": "GET", "url": "{{base_url}}user/deposit/by-reference" } }
+    ] },
+    { "name": "07 Finance — Withdrawal / Wallet / Transfers", "description": "Screens: Withdrawal, Wallet, InternalTransfer, histories. Local: bank/crypto/UPI payload branching, balance/OTP checks, same-account rejection, precision formatting, pagination and receipt download.", "item": [
+      { "name": "Wallet", "request": { "method": "GET", "url": "{{base_url}}user/wallet" } },
+      { "name": "Withdrawal methods", "request": { "method": "GET", "url": "{{base_url}}user/withdrawal" } },
+      { "name": "Withdrawal method detail", "request": { "method": "GET", "url": "{{base_url}}user/withdrawal/withdrawal-method/{{slug}}" } },
+      { "name": "Saved withdrawal methods", "request": { "method": "GET", "url": "{{base_url}}user/withdrawal/getUserWithdrawalMethods" } },
+      { "name": "Check balance", "request": { "method": "GET", "url": "{{base_url}}user/withdrawal/checkbalance" } },
+      { "name": "Send withdrawal OTP", "request": { "method": "GET", "url": "{{base_url}}user/withdrawal/sendOTP" } },
+      { "name": "Submit withdrawal", "request": { "method": "POST", "url": "{{base_url}}user/withdrawal/withdrawalrequest" } },
+      { "name": "Internal transfer info", "request": { "method": "GET", "url": "{{base_url}}user/internaltransfer" } },
+      { "name": "Internal transfer request", "request": { "method": "POST", "url": "{{base_url}}user/internaltransfer/request" } },
+      { "name": "Internal transfer history", "request": { "method": "GET", "url": "{{base_url}}user/internaltransfer/history" } },
+      { "name": "Transactions", "request": { "method": "GET", "url": "{{base_url}}user/transactions" } },
+      { "name": "Currency list", "request": { "method": "GET", "url": "{{base_url}}user/utility/currency-list" } }
+    ] },
+    { "name": "08 Profile / Notifications / KYC", "description": "Screens: Profile, dropdowns, Notifications, KYC and Compliance wizard. Local: dependent dropdown chain, five-page profile payload, stage gating, document mapping, questionnaire and FCM routing.", "item": [
+      { "name": "Profile", "request": { "method": "GET", "url": "{{base_url}}user/settings/profile" } },
+      { "name": "Country dropdown", "request": { "method": "GET", "url": "{{base_url}}user/settings/getCountryDropdown" } },
+      { "name": "State dropdown", "request": { "method": "POST", "url": "{{base_url}}user/settings/getStateDropdown" } },
+      { "name": "City dropdown", "request": { "method": "POST", "url": "{{base_url}}user/settings/getCityDropdown" } },
+      { "name": "Notifications", "request": { "method": "GET", "url": "{{base_url}}user/notifications" } },
+      { "name": "KYC status", "request": { "method": "GET", "url": "{{base_url}}user/kyc" } },
+      { "name": "KYC profile", "request": { "method": "POST", "url": "{{base_url}}user/kyc/profile" } },
+      { "name": "Regulation schema/submit", "request": { "method": "GET", "url": "{{base_url}}user/regulation" } },
+      { "name": "KYC document upload", "request": { "method": "POST", "url": "{{base_url}}user/kyc/documents/upload" } },
+      { "name": "Unified KYC submit", "request": { "method": "POST", "url": "{{base_url}}user/kyc/submit-unified" } }
+    ] },
+    { "name": "09 IB / IBM", "description": "Screens: IB dashboard, clients, network, requests, groups, transfers and IBM portal. Local: tree parsing/dedup/enrichment, own-vs-branch totals, pagination/date filters, referral and transfer validation.", "item": [
+      { "name": "IB status", "request": { "method": "GET", "url": "{{base_url}}user/ib/status" } },
+      { "name": "IB application", "request": { "method": "POST", "url": "{{base_url}}user/ib/application" } },
+      { "name": "IB dashboard", "request": { "method": "GET", "url": "{{base_url}}user/ib/dashboard" } },
+      { "name": "IB clients", "request": { "method": "GET", "url": "{{base_url}}user/ib/clients" } },
+      { "name": "IB sub-IBs", "request": { "method": "GET", "url": "{{base_url}}user/ib/sub-ibs" } },
+      { "name": "IB trade history", "request": { "method": "GET", "url": "{{base_url}}user/ib/trade-history" } },
+      { "name": "IB transfer history", "request": { "method": "GET", "url": "{{base_url}}user/ib/transfer/history" } },
+      { "name": "IB transfer store", "request": { "method": "POST", "url": "{{base_url}}user/ib/transfer/store" } },
+      { "name": "IBM client system gate", "request": { "method": "GET", "url": "{{base_url}}ibm/client/system" } },
+      { "name": "IBM client account groups", "request": { "method": "GET", "url": "{{base_url}}ibm/client/account-groups" } },
+      { "name": "IBM client partner request", "request": { "method": "POST", "url": "{{base_url}}ibm/client/partner-request" } },
+      { "name": "IBM client partner request status", "request": { "method": "GET", "url": "{{base_url}}ibm/client/partner-request" } },
+      { "name": "IBM dashboard", "request": { "method": "GET", "url": "{{base_url}}ibm/portal/dashboard" } },
+      { "name": "IBM dashboard activity", "request": { "method": "GET", "url": "{{base_url}}ibm/portal/dashboard/activity" } },
+      { "name": "IBM network", "request": { "method": "GET", "url": "{{base_url}}ibm/portal/network" } },
+      { "name": "IBM network summary", "request": { "method": "GET", "url": "{{base_url}}ibm/portal/network/summary" } },
+      { "name": "IBM network tree summary", "request": { "method": "GET", "url": "{{base_url}}ibm/portal/network/tree-summary" } },
+      { "name": "IBM network performance", "request": { "method": "GET", "url": "{{base_url}}ibm/portal/network/performance" } },
+      { "name": "IBM partner detail", "request": { "method": "GET", "url": "{{base_url}}ibm/portal/network/{{id}}" } },
+      { "name": "IBM partner node", "request": { "method": "GET", "url": "{{base_url}}ibm/portal/network/{{id}}/node" } },
+      { "name": "IBM partner wallet", "request": { "method": "GET", "url": "{{base_url}}ibm/portal/network/{{id}}/wallet" } },
+      { "name": "IBM wallet withdrawal", "request": { "method": "POST", "url": "{{base_url}}ibm/portal/wallet/withdraw" } }
+    ] },
+    { "name": "10 Copy Trading", "description": "Screens: Hub, masters, trader details, investments, subscriptions, master dashboard/plans/copiers. Local: mock trader detail, plan/subscription state, PnL aggregation, pagination and form validation.", "item": [
+      { "name": "Public masters", "request": { "method": "GET", "url": "{{base_url}}copytrading/masters" } },
+      { "name": "Master status", "request": { "method": "GET", "url": "{{base_url}}user/copytrading/master/status" } },
+      { "name": "Master dashboard overview", "request": { "method": "GET", "url": "{{base_url}}user/copytrading/master/dashboard-overview" } },
+      { "name": "Master plans", "request": { "method": "GET", "url": "{{base_url}}user/copytrading/master/plans" } },
+      { "name": "Eligible copier accounts", "request": { "method": "GET", "url": "{{base_url}}user/copytrading/copier/eligible-accounts" } },
+      { "name": "Subscribe", "request": { "method": "POST", "url": "{{base_url}}user/copytrading/copier/subscribe" } },
+      { "name": "Subscriptions", "request": { "method": "GET", "url": "{{base_url}}user/copytrading/copier/subscriptions" } },
+      { "name": "Master apply", "request": { "method": "POST", "url": "{{base_url}}user/copytrading/master/apply" } }
+    ] },
+    { "name": "11 Bonus / Scratch / Trade & Win", "description": "Screens: Bonus, Scratch Cards, Trade & Win. Local: reward parsing, claim/reveal state, credit conversion, prize selection and redemption validation.", "item": [
+      { "name": "Bonus list", "request": { "method": "GET", "url": "{{base_url}}user/bonus" } },
+      { "name": "Bonus claim", "request": { "method": "POST", "url": "{{base_url}}user/bonus/bonusClaim" } },
+      { "name": "Scratch cards", "request": { "method": "GET", "url": "{{base_url}}v1/user/scratch-cards" } },
+      { "name": "Reveal scratch card", "request": { "method": "POST", "url": "{{base_url}}v1/user/scratch-cards/reveal" } },
+      { "name": "Trade Win products", "request": { "method": "GET", "url": "{{base_url}}v1/user/trade-win/products" } },
+      { "name": "Trade Win claim", "request": { "method": "POST", "url": "{{base_url}}v1/user/trade-win/claim" } }
+    ] },
+    { "name": "12 Support Tickets", "description": "Screens: ticket list/create/detail/reply/close/attachments. Local: pagination, refresh-after-mutation, upload state, confirmation and toasts.", "item": [
+      { "name": "Departments", "request": { "method": "GET", "url": "{{base_url}}user/tickets/departments" } },
+      { "name": "Ticket list", "request": { "method": "GET", "url": "{{base_url}}user/tickets" } },
+      { "name": "Create ticket", "request": { "method": "POST", "url": "{{base_url}}user/tickets" } },
+      { "name": "Ticket detail", "request": { "method": "GET", "url": "{{base_url}}user/tickets/{{id}}" } },
+      { "name": "Reply", "request": { "method": "POST", "url": "{{base_url}}user/tickets/{{id}}/reply" } },
+      { "name": "Close", "request": { "method": "POST", "url": "{{base_url}}user/tickets/{{id}}/close" } },
+      { "name": "Attachment", "request": { "method": "POST", "url": "{{base_url}}user/tickets/attachment" } }
+    ] },
+    { "name": "13 Demo Contest", "description": "Screens: contests, details, enrollment, steps, leaderboard, stats, history, violations, winners. Local: route-id state, loading/error/empty states and enrollment/step parsing.", "item": [
+      { "name": "Contests", "request": { "method": "GET", "url": "{{base_url}}user/demo-contest/contests" } },
+      { "name": "My stats", "request": { "method": "GET", "url": "{{base_url}}user/demo-contest/my-stats" } },
+      { "name": "Enroll preview", "request": { "method": "GET", "url": "{{base_url}}user/demo-contest/{{id}}/enroll-preview" } },
+      { "name": "Enroll", "request": { "method": "POST", "url": "{{base_url}}user/demo-contest/{{id}}/enroll" } },
+      { "name": "Leaderboard", "request": { "method": "GET", "url": "{{base_url}}user/demo-contest/{{id}}/leaderboard" } }
+    ] }
+  ]
+}

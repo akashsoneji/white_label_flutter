@@ -1,0 +1,2179 @@
+{
+  "info": {
+    "name": "White Label API — Exhaustive Screen Inventory",
+    "description": "Generated from 261 screen Dart files. Requests are inventory records; use WhiteLabel_App_API.postman_collection.json for executable endpoint bodies.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://my.pipze.com/api/",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth — screens",
+      "item": [
+        {
+          "name": "IquoteCreateAccountScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/brands/iquote/pages/iquote_create_account_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "RiyadexCreateAccountScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/brands/riyadex/pages/riyadex_create_account_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "RiyadexGetStartedScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/brands/riyadex/pages/riyadex_get_started_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "account_created_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/brands/vantage/pages/account_created_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "VantageCreateAccountScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/brands/vantage/pages/create_account_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "VantageCreateNewPasswordScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/brands/vantage/pages/create_new_password_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "VantageForgotPasswordScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/brands/vantage/pages/forgot_password_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "VantageGetStartedScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/brands/vantage/pages/get_started_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "legal_documents_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/brands/vantage/pages/legal_documents_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "VantageLoginScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/brands/vantage/pages/login_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "privacy_policy_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/brands/vantage/pages/privacy_policy_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "splash_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/brands/vantage/pages/splash_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "VantageVerifyCodeScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/brands/vantage/pages/verify_code_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "AccountCreatedScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/pages/account_created_screen.dart\\nRoute: ACCOUNT_CREATED\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CreateAccountScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/pages/create_account_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CreateNewPasswordScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/pages/create_new_password_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "ForgotPasswordScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/pages/forgot_password_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "GetStartedScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/pages/get_started_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "GoogleLoginOtpScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/pages/google_login_otp_screen.dart\\nRoute: GOOGLE_LOGIN_OTP\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "LegalDocumentsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/pages/legal_documents_screen.dart\\nRoute: LEGAL_DOCUMENTS\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "LoginScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/pages/login_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; WebView/chart or external navigation"
+          }
+        },
+        {
+          "name": "PrivacyPolicyScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/pages/privacy_policy_screen.dart\\nRoute: PRIVACY_POLICY\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "SplashScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/pages/splash_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; WebView/chart or external navigation; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "VerifyCodeScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/auth/presentation/pages/verify_code_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bonus — screens",
+      "item": [
+        {
+          "name": "bonus_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/bonus/presentation/brands/xelthio/pages/bonus_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "scratch_card_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/bonus/presentation/brands/xelthio/pages/scratch_card_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "EligibleBonus",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/bonus/presentation/pages/bonus_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: bonusClaim, bonusClaimList, bonusList\\nLocal logic: presentation only"
+          }
+        },
+        {
+          "name": "ScratchCardApiModel",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/bonus/presentation/pages/scratch_card_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Brand / Core — screens",
+      "item": [
+        {
+          "name": "CelestialChartScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/celestial/celestial_chart_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; WebView/chart or external navigation"
+          }
+        },
+        {
+          "name": "CelestialHistoryScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/celestial/celestial_history_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CelestialSettingsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/celestial/celestial_settings_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "CelestialTradeScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/celestial/celestial_trade_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "CelestialTradingAccountScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/celestial/celestial_trading_account_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CelestialWatchlistScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/celestial/celestial_watchlist_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "DemoGetStartedScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/demo/ui/demo_get_started_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MetaChartScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/meta/meta_chart_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; WebView/chart or external navigation"
+          }
+        },
+        {
+          "name": "MetaClosePositionScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/meta/meta_close_position_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MetaHistoryScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/meta/meta_history_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MetaModifyPositionScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/meta/meta_modify_position_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MetaNewOrderScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/meta/meta_new_order_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MetaSettingsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/meta/meta_settings_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "MetaTradeScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/meta/meta_trade_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; WebView/chart or external navigation; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "MetaTradingAccountScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/meta/meta_trading_account_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MetaWatchlistScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/brands/meta/meta_watchlist_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "WebViewScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/common/webview_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; WebView/chart or external navigation"
+          }
+        },
+        {
+          "name": "ExampleRTLComponentsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/example_rtl_components_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "ExampleUpdatedScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/example_updated_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Copy Trading — screens",
+      "item": [
+        {
+          "name": "AddInvestmentScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/copy_trading/add_investment_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "ChangeProportionScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/copy_trading/change_proportion_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CopyTradingMainScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/copy_trading/copy_trading_main_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CopyTradingDepositScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/copy_trading/finance/deposit_screen.dart\\nRoute: COPY_TRADING_DEPOSIT\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CopyTradingInternalTransferScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/copy_trading/finance/internal_transfer_screen.dart\\nRoute: COPY_TRADING_INTERNAL_TRANSFER\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CopyTradingPaymentMethodsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/copy_trading/finance/payment_methods_screen.dart\\nRoute: COPY_TRADING_PAYMENT_METHODS\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "InvestmentDetailScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/copy_trading/investment_detail_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: copyTradingCopierSubscriptionDetail, copyTradingCopierSubscriptionTrades\\nLocal logic: presentation only"
+          }
+        },
+        {
+          "name": "ReduceInvestmentScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/copy_trading/reduce_investment_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CopyTradingInviteFriendScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/copy_trading/settings/invite_friend_screen.dart\\nRoute: COPY_TRADING_INVITE_FRIEND\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CopyTradingWalletScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/copy_trading/settings/wallet_screen.dart\\nRoute: ORDER_CONFIRMATION\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "SubscriptionSetupScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/copy_trading/subscription_setup_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "TraderDetailsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/copy_trading/trader_details_screen.dart\\nRoute: TRADER_DETAILS\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "TradersFilterScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/copy_trading/traders_filter_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Demo Contest — screens",
+      "item": [
+        {
+          "name": "demo_contest_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/demo_contest/presentation/brands/xelthio/pages/demo_contest_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "ContestDetailsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/demo_contest/presentation/pages/contest_details_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "ContestRulesScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/demo_contest/presentation/pages/contest_rules_screen.dart\\nRoute: DEMO_CONTEST_RULES\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "DemoContestMyStatsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/demo_contest/presentation/pages/demo_contest_my_stats_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "DemoContestScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/demo_contest/presentation/pages/demo_contest_screen.dart\\nRoute: DEMO_CONTEST\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "JoinContestScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/demo_contest/presentation/pages/join_contest_screen.dart\\nRoute: DEMO_CONTEST_JOIN\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "LeaderboardScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/demo_contest/presentation/pages/leaderboard_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MyContestHistoryScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/demo_contest/presentation/pages/my_contest_history_screen.dart\\nRoute: DEMO_CONTEST_DETAILS\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "WinnersScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/demo_contest/presentation/pages/winners_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Finance — screens",
+      "item": [
+        {
+          "name": "deposit_camera_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/brands/vantage/pages/deposit_camera_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "deposit_instruction_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/brands/vantage/pages/deposit_instruction_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "deposit_real_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/brands/vantage/pages/deposit_real_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "DepositScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/brands/vantage/pages/deposit_screen.dart\\nRoute: DEPOSIT\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "finance_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/brands/vantage/pages/finance_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "InternalTransferScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/brands/vantage/pages/internal_transfer_screen.dart\\nRoute: INTERNAL_TRANSFER\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PaymentMethodsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/brands/vantage/pages/payment_methods_screen.dart\\nRoute: PAYMENT_METHOD\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "VantageTransactionHistoryScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/brands/vantage/pages/transaction_history_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "WalletScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/brands/vantage/pages/wallet_screen.dart\\nRoute: WALLET\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "WithdrawalScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/brands/vantage/pages/withdrawal_screen.dart\\nRoute: WITHDRAWAL\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CregisAddressScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/pages/cregis_address_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "CregisSuccessScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/pages/cregis_success_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "DepositCameraScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/pages/deposit_camera_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "DepositInstructionScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/pages/deposit_instruction_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "DepositRealScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/pages/deposit_real_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "DepositScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/pages/deposit_screen.dart\\nRoute: DEPOSIT\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "FinanceScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/pages/finance_screen.dart\\nRoute: FINANCE\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "InternalTransferHistoryScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/pages/internal_transfer_history_screen.dart\\nRoute: INTERNAL_TRANSFER_HISTORY\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "InternalTransferScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/pages/internal_transfer_screen.dart\\nRoute: INTERNAL_TRANSFER\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "PaymentMethodsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/pages/payment_methods_screen.dart\\nRoute: PAYMENT_METHOD\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "TransactionHistoryScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/pages/transaction_history_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "WalletScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/pages/wallet_screen.dart\\nRoute: WALLET\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "WithdrawalScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/finance/presentation/pages/withdrawal_screen.dart\\nRoute: WITHDRAWAL\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        }
+      ]
+    },
+    {
+      "name": "IB — screens",
+      "item": [
+        {
+          "name": "commission_group_form_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/commission_group_form_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "commission_groups_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/commission_groups_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "commission_history_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/commission_history_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "ib_clients_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/ib_clients_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "ib_dashboard_new_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/ib_dashboard_new_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "ib_dashboard_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/ib_dashboard_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "ib_main_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/ib_main_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "ib_more_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/ib_more_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "ib_requests_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/ib_requests_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "ib_structure_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/ib_structure_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "ib_support_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/ib_support_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "marketing_tools_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/marketing_tools_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "my_clients_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/my_clients_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "my_structure_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/my_structure_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "overview_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/overview_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "payout_request_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/payout_request_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "referral_links_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/brands/xelthio/pages/referral_links_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "CommissionGroupFormScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/commission_group_form_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CommissionGroupsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/commission_groups_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CommissionHistoryScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/commission_history_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IBClientsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/ib_clients_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbCombinedStructureScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/ib_combined_structure_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbDashboardNewScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/ib_dashboard_new_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "IbDashboardScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/ib_dashboard_screen.dart\\nRoute: IB_DASHBOARD\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbMainScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/ib_main_screen.dart\\nRoute: IB_MAIN\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "IBMoreScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/ib_more_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IBRequestsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/ib_requests_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IBStructureScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/ib_structure_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbSupportScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/ib_support_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbTransferCommissionScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/ib_transfer_commission_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbTransferCreateScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/ib_transfer_create_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "MarketingToolsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/marketing_tools_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MyClientsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/my_clients_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "MyStructureScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/my_structure_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "OverviewScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/overview_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PayoutRequestScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/payout_request_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "ReferralLinksScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ib/presentation/pages/referral_links_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CreateEditPlanScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ibm/presentation/pages/create_edit_plan_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbmApplicationScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ibm/presentation/pages/ibm_application_screen.dart\\nRoute: IBM_APPLICATION\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbmClientProfileScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ibm/presentation/pages/ibm_client_profile_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbmClientsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ibm/presentation/pages/ibm_clients_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbmLinksScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ibm/presentation/pages/ibm_links_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbmManagerPortalScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ibm/presentation/pages/ibm_manager_portal_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbmMarketingScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ibm/presentation/pages/ibm_marketing_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbmMoreScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ibm/presentation/pages/ibm_more_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbmPromotionScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ibm/presentation/pages/ibm_promotion_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: tradeWinClaim\\nLocal logic: presentation only"
+          }
+        },
+        {
+          "name": "IbmSettingsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ibm/presentation/pages/ibm_settings_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IbmWalletScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/ibm/presentation/pages/ibm_wallet_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        }
+      ]
+    },
+    {
+      "name": "KYC — screens",
+      "item": [
+        {
+          "name": "bank_list_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/brands/xelthio/pages/bank_list_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "kyc_bank_camera_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/brands/xelthio/pages/kyc_bank_camera_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "kyc_bank_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/brands/xelthio/pages/kyc_bank_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "kyc_camera_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/brands/xelthio/pages/kyc_camera_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "kyc_details_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/brands/xelthio/pages/kyc_details_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "kyc_docs_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/brands/xelthio/pages/kyc_docs_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "kyc_intro_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/brands/xelthio/pages/kyc_intro_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "kyc_success_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/brands/xelthio/pages/kyc_success_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "BankListScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/pages/bank_list_screen.dart\\nRoute: BANK_LIST\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "KycBankCameraScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/pages/kyc_bank_camera_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "KycBankScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/pages/kyc_bank_screen.dart\\nRoute: KYC_BANK\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "KycCameraScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/pages/kyc_camera_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "KycDetailsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/pages/kyc_details_screen.dart\\nRoute: KYC_DETAILS\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "KycDocsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/pages/kyc_docs_screen.dart\\nRoute: KYC_DOCS\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "KycIntroScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/pages/kyc_intro_screen.dart\\nRoute: KYC_INTRO\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "KycSuccessScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/kyc/presentation/pages/kyc_success_screen.dart\\nRoute: KYC_SUCCESS\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        }
+      ]
+    },
+    {
+      "name": "More / Settings — screens",
+      "item": [
+        {
+          "name": "NotificationsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/notifications/presentation/pages/notifications_screen.dart\\nRoute: NOTIFICATIONS\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "account_management_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/settings/presentation/brands/xelthio/pages/account_management_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "language_selector_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/settings/presentation/brands/xelthio/pages/language_selector_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "AccountManagementScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/settings/presentation/pages/account_management_screen.dart\\nRoute: ACCOUNT_MANAGEMENT\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "LanguageSelectorScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/settings/presentation/pages/language_selector_screen.dart\\nRoute: LANGUAGE_SELECTOR\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Other — screens",
+      "item": [
+        {
+          "name": "FeatureUnavailableScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/core/routing/feature_unavailable_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MaintenanceScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/services/app_status/maintenance_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "NoInternetScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/services/connectivity/no_internet_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Trade & Win — screens",
+      "item": [
+        {
+          "name": "TradeWinMainScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trade_win/trade_win_main_screen.dart\\nRoute: TRADE_WIN_MAIN\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "TradeWinPastWinDetailScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trade_win/trade_win_past_win_detail_screen.dart\\nRoute: TRADE_WIN_PAST_WIN_DETAIL\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "TradeWinProductDetailScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trade_win/trade_win_product_detail_screen.dart\\nRoute: TRADE_WIN_PRODUCT_DETAIL\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "TradeWinRedeemScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trade_win/trade_win_redeem_screen.dart\\nRoute: TRADE_WIN_REDEEM\\nAPI refs: tradeWinSavedAddresses\\nLocal logic: presentation only"
+          }
+        },
+        {
+          "name": "TradeWinRedemptionSuccessScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trade_win/trade_win_redemption_success_screen.dart\\nRoute: TRADE_WIN_REDEMPTION_SUCCESS\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Trading — screens",
+      "item": [
+        {
+          "name": "IQuoteChartScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/brands/iquote/iquote_chart_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; WebView/chart or external navigation"
+          }
+        },
+        {
+          "name": "IquoteMarketScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/brands/iquote/iquote_market_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IQuoteOrderDetailsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/brands/iquote/iquote_order_details_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IQuotePositionDetailScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/brands/iquote/iquote_position_detail_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IQuotePositionScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/brands/iquote/iquote_position_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "ChangeLeverageScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/change_leverage_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "ChangePasswordScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/change_password_screen.dart\\nRoute: CHANGE_PASSWORD\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "ChartScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/chart_screen.dart\\nRoute: CHART\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; WebView/chart or external navigation; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "ChooseAccountScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/choose_account_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "ClosePositionScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/close_position_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; WebView/chart or external navigation; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "CreateCrmAppAccountScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/create_crm_app_account_screen.dart\\nRoute: CHOOSE_ACCOUNT\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "DashboardScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/dashboard_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "EditOrderScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/edit_order_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; WebView/chart or external navigation; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "InstrumentsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/instruments_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "IquoteHomeScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/iquote_home_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "CameraScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/camera_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "ChatWithUsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/chat_with_us_screen.dart\\nRoute: CHAT_WITH_US\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CopyTradingCreatePlanScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/copytrading/copy_trading_create_plan_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CopyTradingEditPlanScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/copytrading/copy_trading_edit_plan_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CopyTradingHubScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/copytrading/copy_trading_hub_screen.dart\\nRoute: COPY_TRADING_MAIN\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "ExploreMastersScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/copytrading/explore_masters_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MasterDashboardScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/copytrading/master_dashboard_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MasterDetailsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/copytrading/master_details_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MasterPlanDetailScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/copytrading/master_plan_detail_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MyCopiesScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/copytrading/my_copies_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MyInvestmentsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/copytrading/my_investments_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "SubscribeToPlanScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: copyTradingCopierSubscriptionDetail\\nLocal logic: presentation only"
+          }
+        },
+        {
+          "name": "EditProfile",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/edit_profile_screen.dart\\nRoute: EDIT_PROFILE\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "IdUploadScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/id_upload_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "KycVerificationScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/kyc_verification_screen.dart\\nRoute: TRANSACTION_HISTORY\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "MoreScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/more_screen.dart\\nRoute: MORE\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "OneClickTradingDisclaimerScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/one_click_trading_disclaimer_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PartnershipProgramScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/partnership_program_screen.dart\\nRoute: PARTNERSHIP_PROGRAM\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "PmamBecomeManagerScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/pmam/pmam_become_manager_screen.dart\\nRoute: PMAM_BECOME_MANAGER\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PmamCreatePlanScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/pmam/pmam_create_plan_screen.dart\\nRoute: PMAM_CREATE_PLAN\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PmamExploreManagersScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/pmam/pmam_explore_managers_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PmamFundManagerViewScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/pmam/pmam_fund_manager_view_screen.dart\\nRoute: PMAM_FUND_MANAGER_VIEW\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PmamInvestorPortalScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/pmam/pmam_investor_portal_screen.dart\\nRoute: PMAM_INVESTOR_PORTAL\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "PmamMainScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/pmam/pmam_main_screen.dart\\nRoute: PMAM_MAIN\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PmamManagerDashboardScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/pmam/pmam_manager_dashboard_screen.dart\\nRoute: PMAM_MANAGER_DASHBOARD\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PmamManagerDetailScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/pmam/pmam_manager_detail_screen.dart\\nRoute: PMAM_MANAGER_DETAIL\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PmamManagerInvestorDetailScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/pmam/pmam_manager_investor_detail_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PmamManagerPlanDetailScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/pmam/pmam_manager_plan_detail_screen.dart\\nRoute: PMAM_MANAGER_PLAN_DETAIL\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PmamManagerPortalScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/pmam/pmam_manager_portal_screen.dart\\nRoute: PMAM_MANAGER_PORTAL\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PmamMyInvestmentScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/pmam/pmam_my_investment_screen.dart\\nRoute: PMAM_MY_INVESTMENT\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PmamTradeHistoryScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/pmam/pmam_trade_history_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PromotionalScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/promotional/promotional_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "SettingScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/setting/setting_screen.dart\\nRoute: SETTING\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "SupportScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/support/support_screen.dart\\nRoute: SUPPORT\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "CreateTicketScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/ticket/create_ticket_screen.dart\\nRoute: TICKET_CREATE\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "TicketDetailScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/ticket/ticket_detail_screen.dart\\nRoute: TICKET_DETAIL\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "TicketListScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/ticket/ticket_list_screen.dart\\nRoute: TICKET_LIST\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "ToolsEducationScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/tools_education/tools_education_screen.dart\\nRoute: TOOLS_EDUCATION\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "TwoFactorAuthScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/two_factor_auth_screen.dart\\nRoute: TWO_FACTOR_AUTH\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "ViewProfileScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/more/view_profile_screen.dart\\nRoute: VIEW_PROFILE\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "OpenAccountScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/open_account_screen.dart\\nRoute: OPEN_ACCOUNT\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "OrderConfirmationScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/order_confirmation_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "CloseOrderScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/order_history_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "PendingOrderScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/pending_order_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; WebView/chart or external navigation; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "SearchInstrumentsScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/search_instruments_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service"
+          }
+        },
+        {
+          "name": "TabMetricConfig",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/trade_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; timer/delayed UI or polling logic"
+          }
+        },
+        {
+          "name": "TradingMainScreen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/home/trading_main_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: no direct endpoint reference; inspect injected controller/service; WebView/chart or external navigation"
+          }
+        },
+        {
+          "name": "change_leverage_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/change_leverage_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "change_password_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/change_password_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "chart_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/chart_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "choose_account_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/choose_account_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "close_position_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/close_position_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "create_crm_app_account_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/create_crm_app_account_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "dashboard_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/dashboard_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "edit_order_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/edit_order_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "instruments_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/instruments_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "open_account_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/open_account_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "order_confirmation_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/order_confirmation_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "order_history_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/order_history_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "pending_order_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/pending_order_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "trade_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/trade_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "trading_main_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/brands/xelthio/pages/trading_main_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "change_leverage_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/change_leverage_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "change_password_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/change_password_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "chart_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/chart_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "choose_account_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/choose_account_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "close_position_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/close_position_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "create_crm_app_account_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/create_crm_app_account_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "dashboard_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/dashboard_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "edit_order_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/edit_order_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "instruments_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/instruments_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "open_account_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/open_account_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "order_confirmation_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/order_confirmation_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "order_history_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/order_history_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "pending_order_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/pending_order_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "trade_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/trade_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        },
+        {
+          "name": "trading_main_screen",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}__screen__",
+            "description": "File: lib/screens/trading/presentation/pages/trading_main_screen.dart\\nRoute: embedded/no GetPage\\nAPI refs: controller/repository inherited\\nLocal logic: export/wrapper; API owned by shared target"
+          }
+        }
+      ]
+    }
+  ]
+}
