@@ -52,7 +52,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
         backgroundColor: AppColors.whiteColor,
         elevation: 0,
         leading: Padding(
-          padding: EdgeInsets.only(left: 10.w),
+          padding: EdgeInsetsDirectional.only(start: 10.w),
           child: AppBackButton(onPressed: () => NavigationHelper.safeBack(context: context),
           ),
         ),

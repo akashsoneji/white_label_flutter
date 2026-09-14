@@ -336,7 +336,10 @@ class TicketController extends GetxController {
 
       if (response.statusCode != 200) {
         CustomToastService.showError(
-          message: 'Could not download attachment (${response.statusCode})',
+          message: TranslationUtils.trArgs(
+            'ticket_attachment_download_failed',
+            {'code': '${response.statusCode}'},
+          ),
         );
         return;
       }
@@ -351,7 +354,8 @@ class TicketController extends GetxController {
       final result = await OpenFilex.open(file.path);
       if (result.type != ResultType.done) {
         CustomToastService.showError(
-          message: 'Could not open attachment: ${result.message}',
+          message:
+              '${TranslationUtils.tr('ticket_attachment_open_failed')} ${result.message}',
         );
       }
     } catch (e) {

@@ -68,7 +68,7 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
             ),
             SizedBox(height: 8.h),
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: Text(
                 '${TranslationUtils.tr('reduce_investment_screen_available_for_withdrawal')} : \$${_amountController.text}',
                 style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),

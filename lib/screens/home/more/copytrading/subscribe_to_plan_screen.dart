@@ -401,7 +401,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     required bool isEditMode,
   }) {
     return ListView(
-      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 22.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 10.h, 16.w, 22.h),
       children: [
                     if (effectiveStep == 0) ...[
                       _PlanPickerCard(
@@ -1784,7 +1784,7 @@ class _AccountListPicker extends StatelessWidget {
               return InkWell(
                 onTap: belowMin ? null : () => onChanged(a),
                 child: Container(
-                  padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
+                  padding: EdgeInsetsDirectional.fromSTEB(12.w, 12.h, 12.w, 12.h),
                   decoration: BoxDecoration(
                     color: isSelected ? AppColors.primary.withOpacity(0.06) : Colors.transparent,
                     borderRadius: BorderRadius.only(

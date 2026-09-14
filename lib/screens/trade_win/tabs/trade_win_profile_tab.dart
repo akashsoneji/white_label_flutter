@@ -19,7 +19,7 @@ class TradeWinProfileTab extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(8.w, 8.h, 16.w, 0),
+          padding: EdgeInsetsDirectional.fromSTEB(8.w, 8.h, 16.w, 0),
           child: Row(
             children: [
               const AppBackButton(),
@@ -47,7 +47,7 @@ class TradeWinProfileTab extends StatelessWidget {
             }
 
             return ListView(
-              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 100.h),
+              padding: EdgeInsetsDirectional.fromSTEB(16.w, 16.h, 16.w, 100.h),
               children: [
                 _StatCard(
                   title: languageService.tr('tw_available_points'),

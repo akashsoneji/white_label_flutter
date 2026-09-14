@@ -254,7 +254,7 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildHeaderIconButton({
     required String assetPath,
     required VoidCallback onPressed,
-    EdgeInsets? margin,
+    EdgeInsetsGeometry? margin,
     String? label,
   }) {
     // Label variant renders a wider pill with a leading "+" icon plus the
@@ -355,9 +355,9 @@ class DashboardScreen extends StatelessWidget {
                     )
                   else
                     SliverPadding(
-                      padding: EdgeInsets.only(
-                        left: 16.w,
-                        right: 16.w,
+                      padding: EdgeInsetsDirectional.only(
+                        start: 16.w,
+                        end: 16.w,
                         top: 8.h,
                         bottom:
                             16 + 77.h + MediaQuery.of(context).padding.bottom,
@@ -395,7 +395,7 @@ class DashboardScreen extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
         child: Container(
           width: double.infinity,
-          padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 16.h),
+          padding: EdgeInsetsDirectional.fromSTEB(20.w, 18.h, 20.w, 16.h),
           decoration: BoxDecoration(
             color: CelTheme.card(context),
             borderRadius: BorderRadius.circular(12.r),
@@ -529,7 +529,7 @@ class DashboardScreen extends StatelessWidget {
                     )
                   else
                     SliverPadding(
-                      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 24.h),
+                      padding: EdgeInsetsDirectional.fromSTEB(12.w, 12.h, 12.w, 24.h),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate((context, index) {
                           final account = accounts[index];
@@ -1016,7 +1016,7 @@ class DashboardScreen extends StatelessWidget {
           children: [
             // ── Top row: account# + LIVE/DEMO pill + actions (compact) ───────────
             Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 10.h, 6.w, 0),
+              padding: EdgeInsetsDirectional.fromSTEB(12.w, 10.h, 6.w, 0),
               child: Row(
                 children: [
                   Expanded(
@@ -1121,7 +1121,7 @@ class DashboardScreen extends StatelessWidget {
 
             // ── Compact balance + P/L pill (single row) ───────────────────
             Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 0),
+              padding: EdgeInsetsDirectional.fromSTEB(12.w, 8.h, 12.w, 0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -1138,14 +1138,17 @@ class DashboardScreen extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 2.h),
-                      Text(
-                        '\$${balance.toStringAsFixed(2)}',
-                        style: AppTextStyles.bodyText.copyWith(
-                          color: CelTheme.mainText(context),
-                          fontSize: 19.sp,
-                          fontWeight: FontWeight.w800,
-                          height: 1.15,
-                          letterSpacing: -0.2,
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Text(
+                          '\$${balance.toStringAsFixed(2)}',
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: CelTheme.mainText(context),
+                            fontSize: 19.sp,
+                            fontWeight: FontWeight.w800,
+                            height: 1.15,
+                            letterSpacing: -0.2,
+                          ),
                         ),
                       ),
                     ],
@@ -1165,6 +1168,7 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
+                      textDirection: TextDirection.ltr,
                       children: [
                         Icon(
                           pnl >= 0
@@ -1190,7 +1194,7 @@ class DashboardScreen extends StatelessWidget {
 
             // 3-col compact stat strip
             Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 0),
+              padding: EdgeInsetsDirectional.fromSTEB(12.w, 10.h, 12.w, 0),
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
                 decoration: BoxDecoration(
@@ -1229,7 +1233,7 @@ class DashboardScreen extends StatelessWidget {
 
             // Server meta
             Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 0),
+              padding: EdgeInsetsDirectional.fromSTEB(12.w, 8.h, 12.w, 0),
               child: Row(
                 children: [
                   Icon(
@@ -1623,9 +1627,9 @@ class DashboardScreen extends StatelessWidget {
                     )
                   else
                     SliverPadding(
-                      padding: EdgeInsets.only(
-                        left: 16,
-                        right: 16,
+                      padding: EdgeInsetsDirectional.only(
+                        start: 16,
+                        end: 16,
                         top: isVantage ? 8.h : 16,
                         bottom:
                             16 +
@@ -1687,9 +1691,9 @@ class DashboardScreen extends StatelessWidget {
               centerTitle: true,
               leadingWidth: 180.w,
               leading: Padding(
-                padding: EdgeInsets.only(left: 16.w),
+                padding: EdgeInsetsDirectional.only(start: 16.w),
                 child: Align(
-                  alignment: Alignment.centerLeft,
+                  alignment: AlignmentDirectional.centerStart,
                   child: _buildWalletHeaderButton(),
                 ),
               ),
@@ -1699,7 +1703,7 @@ class DashboardScreen extends StatelessWidget {
                   label: TranslationUtils.tr('settings_account'),
                   assetPath: 'assets/svg/deshboard/add-square.svg',
                   onPressed: controller.showOpenAccountSheet,
-                  margin: EdgeInsets.only(right: 16.w),
+                  margin: EdgeInsetsDirectional.only(end: 16.w),
                 ),
               ],
             )
@@ -1713,13 +1717,13 @@ class DashboardScreen extends StatelessWidget {
               titleSpacing: 0,
               leadingWidth: 220.w,
               leading: Padding(
-                padding: EdgeInsets.only(left: 16.w),
+                padding: EdgeInsetsDirectional.only(start: 16.w),
                 child: Row(
                   children: [
                     GestureDetector(
                       onTap: () => Get.back(),
                       child: Padding(
-                        padding: EdgeInsets.only(right: 12.w),
+                        padding: EdgeInsetsDirectional.only(end: 12.w),
                         child: Icon(
                           Icons.arrow_back_ios_new_rounded,
                           size: 20.r,
@@ -1759,13 +1763,13 @@ class DashboardScreen extends StatelessWidget {
               automaticallyImplyLeading: false,
               leadingWidth: 220.w,
               leading: Padding(
-                padding: EdgeInsets.only(left: 16.w),
+                padding: EdgeInsetsDirectional.only(start: 16.w),
                 child: Row(
                   children: [
                     GestureDetector(
                       onTap: () => Get.back(),
                       child: Padding(
-                        padding: EdgeInsets.only(right: 12.w),
+                        padding: EdgeInsetsDirectional.only(end: 12.w),
                         child: Icon(
                           Icons.arrow_back_ios_new_rounded,
                           size: 20.r,
@@ -1784,7 +1788,7 @@ class DashboardScreen extends StatelessWidget {
                   label: TranslationUtils.tr('settings_account'),
                   assetPath: 'assets/svg/deshboard/add-square.svg',
                   onPressed: controller.showOpenAccountSheet,
-                  margin: EdgeInsets.only(right: 16.w),
+                  margin: EdgeInsetsDirectional.only(end: 16.w),
                 ),
               ],
             );
@@ -2550,7 +2554,7 @@ class DashboardScreen extends StatelessWidget {
         children: [
           // ── Header strip (compact, deep primary tint) ─────────────────
           Container(
-            padding: EdgeInsets.fromLTRB(12.w, 8.h, 10.w, 8.h),
+            padding: EdgeInsetsDirectional.fromSTEB(12.w, 8.h, 10.w, 8.h),
             decoration: BoxDecoration(
               color: headerBg,
               borderRadius: BorderRadius.only(
@@ -2670,7 +2674,7 @@ class DashboardScreen extends StatelessWidget {
 
           // ── Action row (compact, primary-only) ─────────────────────────
           Padding(
-            padding: EdgeInsets.fromLTRB(8.w, 8.h, 8.w, 8.h),
+            padding: EdgeInsetsDirectional.fromSTEB(8.w, 8.h, 8.w, 8.h),
             child: Column(
               children: [
                 Row(
@@ -3008,7 +3012,10 @@ class AccountInfoBottomSheet extends StatelessWidget {
                             child: Container(
                               height: 15.h,
                               // width: 29.w,
-                              padding: EdgeInsets.only(left: 4.w, right: 4.w),
+                              padding: EdgeInsetsDirectional.only(
+                                start: 4.w,
+                                end: 4.w,
+                              ),
                               decoration: BoxDecoration(
                                 color:
                                     AppColors.isDarkMode
@@ -3692,7 +3699,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsetsDirectional.only(start: 8),
                       child: Text(
                         languageService.tr('dashboard_reset_investor_password'),
                         style: AppTextStyles.bodyText.copyWith(
@@ -3772,7 +3779,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Padding(
-                      padding: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsetsDirectional.only(start: 8),
                       child: Text(
                         languageService.tr(
                           'dashboard_screen_password_requirements_hint',
@@ -3851,7 +3858,10 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         passwordController.text !=
                             confirmPasswordController.text)
                       Padding(
-                        padding: const EdgeInsets.only(left: 8, top: 4),
+                        padding: const EdgeInsetsDirectional.only(
+                          start: 8,
+                          top: 4,
+                        ),
                         child: Text(
                           languageService.tr('password_mismatch_error'),
                           style: AppTextStyles.bodyText.copyWith(
@@ -3964,7 +3974,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 24),
         child: SafeArea(
           top: false,
           child: Column(
@@ -4236,7 +4246,7 @@ class OpenAccountBottomSheet extends StatelessWidget {
                   ),
 
                   Align(
-                    alignment: Alignment.topLeft,
+                    alignment: AlignmentDirectional.topStart,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(20.r),
                       onTap: () => Get.back(),

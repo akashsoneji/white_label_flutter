@@ -159,10 +159,12 @@ class AdvancedChartInAppWebViewState extends State<AdvancedChartInAppWebView> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: double.infinity,
-      child: Stack(
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: SizedBox(
+        width: double.infinity,
+        height: double.infinity,
+        child: Stack(
         children: [
           InAppWebView(
             initialFile: _assetFile,
@@ -292,7 +294,8 @@ class AdvancedChartInAppWebViewState extends State<AdvancedChartInAppWebView> {
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -126,7 +126,7 @@ class _ExploreMastersScreenState extends State<ExploreMastersScreen> {
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
             ),
-            padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 100.h),
+            padding: EdgeInsetsDirectional.fromSTEB(14.w, 12.h, 14.w, 100.h),
             children: [
               // 1. Hero Performance Hub Banner
               const _HeroPerformanceBanner(),
@@ -191,8 +191,8 @@ class _HeroPerformanceBanner extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
           colors: isDark
               ? [
                   const Color(0xFF1E1B4B),
@@ -965,8 +965,8 @@ class _ProMasterCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        Positioned(
-                          right: -1,
+                        PositionedDirectional(
+                          end: -1,
                           bottom: -1,
                           child: Container(
                             padding: const EdgeInsets.all(2),

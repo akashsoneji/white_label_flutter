@@ -310,7 +310,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
     final sub = MetaTheme.subText(c);
     final plColor = netPL < 0 ? MetaTheme.sell(c) : MetaTheme.buy(c);
     return Padding(
-      padding: EdgeInsets.fromLTRB(8.w, 6.h, 12.w, 6.h),
+      padding: EdgeInsetsDirectional.fromSTEB(8.w, 6.h, 12.w, 6.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -422,7 +422,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
     }
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 6.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 6.h, 16.w, 6.h),
       child: Column(
         children: [
           row(TranslationUtils.tr('meta_trade_balance'), group3(f(a?.balance))),
@@ -450,7 +450,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
     final bg = isDark ? const Color(0xFF202325) : const Color(0xFFF0F2F5);
     return Container(
       color: bg,
-      padding: EdgeInsets.fromLTRB(16.w, 0.h, 4.w, 0.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 0.h, 4.w, 0.h),
       child: SizedBox(
         height: 28.h,
         child: Row(
@@ -478,7 +478,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
 
   Widget _emptyState(BuildContext c, String label) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 6.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 6.h, 16.w, 6.h),
       child: Text(label,
           style: AppTextStyles.bodyText.copyWith(
             color: MetaTheme.subText(c),
@@ -623,7 +623,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
 
     return Container(
       color: MetaTheme.bg(c),
-      padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 8.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 8.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1539,7 +1539,7 @@ class _OrderTicketState extends State<_OrderTicket> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
+              padding: EdgeInsetsDirectional.fromSTEB(12.w, 10.h, 12.w, 10.h),
               decoration: BoxDecoration(
                 color: _isSell ? MetaTheme.pillBg(c) : MetaTheme.buyTint(c),
                 borderRadius: BorderRadius.circular(10.r),
@@ -2024,7 +2024,7 @@ class _Sheet extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(c).viewInsets.bottom),
           child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 12.h),
+            padding: EdgeInsetsDirectional.fromSTEB(16.w, 16.h, 16.w, 12.h),
             child: child,
           ),
         ),

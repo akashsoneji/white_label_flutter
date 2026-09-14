@@ -49,7 +49,7 @@ class WinnersScreen extends StatelessWidget {
         final contestIds = grouped.keys.toList();
 
         return ListView(
-          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 32.h),
+          padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 32.h),
           children: [
             Container(
               width: double.infinity,
@@ -112,7 +112,7 @@ class WinnersScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 8.h),
+                        padding: EdgeInsetsDirectional.fromSTEB(14.w, 14.h, 14.w, 8.h),
                         child: Row(
                           children: [
                             Container(

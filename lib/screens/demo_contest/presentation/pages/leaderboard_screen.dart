@@ -228,7 +228,7 @@ class _SelectedContestHeader extends StatelessWidget {
     final languageService = Get.find<LanguageService>();
     final live = contest.isLive;
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 4.h),
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.all(14.w),

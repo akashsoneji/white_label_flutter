@@ -419,9 +419,9 @@ class _TradeScreenState extends State<TradeScreen> {
                                 )
                               else
                                 SliverPadding(
-                                  padding: EdgeInsets.only(
-                                    left: 16.w,
-                                    right: 16.w,
+                                  padding: EdgeInsetsDirectional.only(
+                                    start: 16.w,
+                                    end: 16.w,
                                     bottom:
                                         77.h +
                                         MediaQuery.of(context).padding.bottom,
@@ -865,7 +865,7 @@ class _TradeScreenState extends State<TradeScreen> {
                     child: Opacity(
                       opacity: 0,
                       child: Padding(
-                        padding: EdgeInsets.only(left: 4.w),
+                        padding: EdgeInsetsDirectional.only(start: 4.w),
                         child: badge,
                       ),
                     ),
@@ -881,7 +881,10 @@ class _TradeScreenState extends State<TradeScreen> {
                   ),
                 ),
                 if (count > 0 && index != 2)
-                  Padding(padding: EdgeInsets.only(left: 4.w), child: badge),
+                  Padding(
+                    padding: EdgeInsetsDirectional.only(start: 4.w),
+                    child: badge,
+                  ),
               ],
             ),
           );
@@ -1006,8 +1009,8 @@ class _TradeScreenState extends State<TradeScreen> {
                           ),
                           // Badge showing count when filter is active
                           if (hasDateFilter)
-                            Positioned(
-                              right: 0,
+                            PositionedDirectional(
+                              end: 0,
                               top: 0,
                               child: Container(
                                 padding: EdgeInsets.symmetric(
@@ -1075,8 +1078,8 @@ class _TradeScreenState extends State<TradeScreen> {
                         ),
                         // Badge showing count when filter is active
                         if (isInstrumentFilterActive)
-                          Positioned(
-                            right: 0,
+                          PositionedDirectional(
+                            end: 0,
                             top: 0,
                             child: Container(
                               padding: EdgeInsets.symmetric(
@@ -1145,8 +1148,8 @@ class _TradeScreenState extends State<TradeScreen> {
                         ),
                         // Badge showing count when filter is active
                         if (isFilterActive)
-                          Positioned(
-                            right: 0,
+                          PositionedDirectional(
+                            end: 0,
                             top: 0,
                             child: Container(
                               padding: EdgeInsets.symmetric(
@@ -1201,7 +1204,10 @@ class _TradeScreenState extends State<TradeScreen> {
                         isAnyActive
                             ? Padding(
                               key: const ValueKey('reset_btn'),
-                              padding: EdgeInsets.only(left: 4.w, right: 2.w),
+                              padding: EdgeInsetsDirectional.only(
+                                start: 4.w,
+                                end: 2.w,
+                              ),
                               child: InkWell(
                                 onTap: () async {
                                   await tradingController.resetAllFilters();
@@ -1248,7 +1254,7 @@ class _TradeScreenState extends State<TradeScreen> {
     }
 
     return Container(
-      margin: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 16.h),
+      margin: EdgeInsetsDirectional.fromSTEB(16.w, 6.h, 16.w, 16.h),
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       decoration: BoxDecoration(
         color: AppColors.cardBackGround,
@@ -1472,7 +1478,7 @@ class _TradeScreenState extends State<TradeScreen> {
                 ),
                 // Expand icon
                 Padding(
-                  padding: EdgeInsets.only(top: 8.h, right: 8.w),
+                  padding: EdgeInsetsDirectional.only(top: 8.h, end: 8.w),
                   child: Icon(
                     isExpanded ? Icons.expand_less : Icons.expand_more,
                     color: AppColors.textGrey,
@@ -1555,7 +1561,7 @@ class _TradeScreenState extends State<TradeScreen> {
         },
         background: Container(
           margin: EdgeInsets.only(bottom: 16.h),
-          alignment: Alignment.centerRight,
+          alignment: AlignmentDirectional.centerEnd,
           decoration: BoxDecoration(
             color: AppColors.error,
             borderRadius: BorderRadius.circular(12.r),
@@ -1581,9 +1587,9 @@ class _TradeScreenState extends State<TradeScreen> {
           ),
         ),
         secondaryBackground: Container(
-          alignment: Alignment.centerRight,
+          alignment: AlignmentDirectional.centerEnd,
           margin: EdgeInsets.only(bottom: 8.h),
-          padding: EdgeInsets.only(right: 20.w),
+          padding: EdgeInsetsDirectional.only(end: 20.w),
           decoration: BoxDecoration(
             color: AppColors.error,
             borderRadius: BorderRadius.circular(12.r),
@@ -2828,7 +2834,13 @@ class _TradeScreenState extends State<TradeScreen> {
                             SizedBox(height: 4.h),
                             Text(
                               tradingController.selectedTab == 1
-                                  ? 'Order: ${currentPosition.entryPrice} | Current: ${currentPosition.currentPrice}'
+                                  ? TranslationUtils.trArgs(
+                                    'trade_screen_order_current_prices',
+                                    {
+                                      'order': currentPosition.entryPrice,
+                                      'current': currentPosition.currentPrice,
+                                    },
+                                  )
                                   : '${currentPosition.entryPrice} → ${currentPosition.currentPrice}',
                               style: AppTextStyles.label.copyWith(
                                 fontSize: 12.sp,
@@ -2851,7 +2863,10 @@ class _TradeScreenState extends State<TradeScreen> {
                                     currentPosition.stopLoss != '0' &&
                                     currentPosition.stopLoss != '0.0') ...[
                                   Text(
-                                    'SL: ${currentPosition.stopLoss}',
+                                    TranslationUtils.trArgs(
+                                      'trade_screen_sl_value',
+                                      {'value': currentPosition.stopLoss},
+                                    ),
                                     style: AppTextStyles.label.copyWith(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w400,
@@ -2866,7 +2881,10 @@ class _TradeScreenState extends State<TradeScreen> {
                                     currentPosition.takeProfit != '0' &&
                                     currentPosition.takeProfit != '0.0') ...[
                                   Text(
-                                    'TP: ${currentPosition.takeProfit}',
+                                    TranslationUtils.trArgs(
+                                      'trade_screen_tp_value',
+                                      {'value': currentPosition.takeProfit},
+                                    ),
                                     style: AppTextStyles.label.copyWith(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w400,
@@ -2884,7 +2902,7 @@ class _TradeScreenState extends State<TradeScreen> {
                                         currentPosition.takeProfit == '0' ||
                                         currentPosition.takeProfit == '0.0'))
                                   Text(
-                                    'SL: -  TP: -',
+                                    TranslationUtils.tr('trade_screen_sl_tp'),
                                     style: AppTextStyles.label.copyWith(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w400,
@@ -2895,7 +2913,9 @@ class _TradeScreenState extends State<TradeScreen> {
                             ),
                             // Right side: Position ID
                             Text(
-                              'ID: ${currentPosition.orderId}',
+                              TranslationUtils.trArgs('trade_screen_id_value', {
+                                'id': currentPosition.orderId,
+                              }),
                               style: AppTextStyles.label.copyWith(
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.w400,
@@ -2909,7 +2929,7 @@ class _TradeScreenState extends State<TradeScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Open: ${_formatPositionTime(displayOpenTime)}',
+                              '${TranslationUtils.tr('meta_history_screen_open')} ${_formatPositionTime(displayOpenTime)}',
                               style: AppTextStyles.label.copyWith(
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.w400,
@@ -2917,7 +2937,7 @@ class _TradeScreenState extends State<TradeScreen> {
                               ),
                             ),
                             Text(
-                              'Swap: ${_formatSwapValue(displaySwap)}',
+                              '${TranslationUtils.tr('meta_history_screen_swap')} ${_formatSwapValue(displaySwap)}',
                               style: AppTextStyles.label.copyWith(
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.w400,
@@ -3555,7 +3575,7 @@ class _TradeScreenState extends State<TradeScreen> {
                   maxWidth: 400.w,
                   maxHeight: MediaQuery.of(dialogContext).size.height * 0.6,
                 ),
-                padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 24.h),
+                padding: EdgeInsetsDirectional.fromSTEB(24.w, 24.h, 24.w, 24.h),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -3758,7 +3778,7 @@ class _TradeScreenState extends State<TradeScreen> {
                   maxWidth: 400.w,
                   maxHeight: MediaQuery.of(dialogContext).size.height * 0.6,
                 ),
-                padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 24.h),
+                padding: EdgeInsetsDirectional.fromSTEB(24.w, 24.h, 24.w, 24.h),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -4421,7 +4441,7 @@ class _TradeScreenState extends State<TradeScreen> {
               Expanded(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerRight,
+                  alignment: AlignmentDirectional.centerEnd,
                   child: Text(
                     value1,
                     style: AppTextStyles.bodyText.copyWith(
@@ -4452,7 +4472,7 @@ class _TradeScreenState extends State<TradeScreen> {
               Expanded(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerRight,
+                  alignment: AlignmentDirectional.centerEnd,
                   child: Text(
                     value2,
                     style: AppTextStyles.bodyText.copyWith(

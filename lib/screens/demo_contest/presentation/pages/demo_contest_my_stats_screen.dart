@@ -109,7 +109,7 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
                   onRefresh: _loadStats,
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 32.h),
+                    padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 32.h),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [

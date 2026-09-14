@@ -34,7 +34,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text(
-          'Account Management',
+          languageService.tr('account_management_title'),
           style: AppTextStyles.label.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -98,18 +98,25 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
               ),
             ),
             title: Text(
-              '${account.type} Account',
+              languageService.tr('account_management_type_account', {
+                'type': '${account.type}',
+              }),
               style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.w600, fontSize: 16.sp),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'ID: ${account.id}',
+                  languageService.tr('account_management_id_value', {
+                    'id': '${account.id}',
+                  }),
                   style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 12.sp),
                 ),
                 Text(
-                  'Balance: ${account.currency} ${account.balance.toStringAsFixed(2)}',
+                  languageService.tr('account_management_balance_value', {
+                    'currency': account.currency,
+                    'balance': account.balance.toStringAsFixed(2),
+                  }),
                   style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 14.sp,
@@ -130,7 +137,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Text(
-                        'Active',
+                        languageService.tr('scratch_card_screen_status_active'),
                         style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.whiteColor,
                           fontSize: 10.sp,
@@ -168,7 +175,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                                   ),
                                   SizedBox(width: 8),
                                   Text(
-                                    'Delete',
+                                    languageService.tr('meta_watchlist_delete'),
                                     style: AppTextStyles.bodyText.copyWith(color: Colors.red),
                                   ),
                                 ],
@@ -245,7 +252,9 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: 'Account Type'),
+              decoration: InputDecoration(
+                labelText: languageService.tr('wallet_account_type'),
+              ),
               items:
                   ['REAL', 'DEMO'].map((type) {
                     return DropdownMenuItem(value: type, child: Text(type));
@@ -257,7 +266,11 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
             SizedBox(height: 16),
             TextFormField(
               controller: balanceController,
-              decoration: const InputDecoration(labelText: 'Initial Balance'),
+              decoration: InputDecoration(
+                labelText: languageService.tr(
+                  'account_management_screen_initial_balance',
+                ),
+              ),
               keyboardType: TextInputType.number,
             ),
           ],

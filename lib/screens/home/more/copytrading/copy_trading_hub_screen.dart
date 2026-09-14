@@ -470,7 +470,7 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 4.w),
+                      padding: EdgeInsetsDirectional.only(start: 4.w),
                       child: Text(
                         TranslationUtils.tr('copy_trading_hub_screen_accept_the_terms_conditions'),
                         style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textPrimary),

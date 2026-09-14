@@ -79,7 +79,7 @@ class MasterDetailsScreen extends StatelessWidget {
           child: DefaultTabController(
             length: 2,
             child: ListView(
-              padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 22.h),
+              padding: EdgeInsetsDirectional.fromSTEB(16.w, 10.h, 16.w, 22.h),
               children: [
                 _MasterHeroCard(profile: profile, masterCode: masterCode),
                 SizedBox(height: 12.h),
@@ -415,7 +415,7 @@ class _ViewByPlanCard extends StatelessWidget {
                   ),
                   ...plans.map(
                     (plan) => Padding(
-                      padding: EdgeInsets.only(left: 8.w),
+                      padding: EdgeInsetsDirectional.only(start: 8.w),
                       child: _PlanChip(
                         label: plan.planName,
                         selected:
@@ -638,7 +638,7 @@ class _PerfStat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(right: 6.w),
+      padding: EdgeInsetsDirectional.only(end: 6.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -858,7 +858,7 @@ class _PerformanceChart extends StatelessWidget {
                       t = '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
                     }
                     return BarTooltipItem(
-                      '$t\nTrade: \$${point.profit.toStringAsFixed(2)}\nCumulative: \$${point.cumulativeProfit.toStringAsFixed(2)}',
+                      '$t\n${TranslationUtils.tr('ct_tooltip_trade')}: \$${point.profit.toStringAsFixed(2)}\n${TranslationUtils.tr('ct_tooltip_cumulative')}: \$${point.cumulativeProfit.toStringAsFixed(2)}',
                       AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.onColoredBackground, fontWeight: FontWeight.w600),
                     );
                   },

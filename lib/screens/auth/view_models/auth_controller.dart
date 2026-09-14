@@ -1337,6 +1337,7 @@ class AuthController extends GetxController {
               final message = messageRaw.toLowerCase();
 
               final isExplicitUnauthorized =
+                  message.contains('unauthenticated') ||
                   message.contains('unauthorized') ||
                   message.contains('session expired') ||
                   message.contains('session has expired') ||

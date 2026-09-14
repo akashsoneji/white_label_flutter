@@ -648,8 +648,8 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
                 // Main Content
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(16.w, isVantage ? 10.h : 16.h,
-                        16.w, 16.h),
+                    padding: EdgeInsetsDirectional.fromSTEB(
+                        16.w, isVantage ? 10.h : 16.h, 16.w, 16.h),
                     child: isVantage
                         ? VantagePendingOrderContent(
                             selectedPendingOrderType: _selectedPendingOrderType,
@@ -755,7 +755,11 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
           if (showChart)
             Expanded(
               child: Padding(
-                padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 8.h),
+                padding: EdgeInsetsDirectional.only(
+                  start: 16.w,
+                  end: 16.w,
+                  bottom: 8.h,
+                ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12.r),
                   child: FlavorConfig.instance.useNewChart

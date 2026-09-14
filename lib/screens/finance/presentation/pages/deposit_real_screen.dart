@@ -458,8 +458,10 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
   Widget _buildFeeDisplay() {
     return Align(
-      alignment: Alignment.centerRight,
-      child: RichText(
+      alignment: AlignmentDirectional.centerEnd,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
         text: TextSpan(
           children: [
             TextSpan(
@@ -479,6 +481,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
@@ -615,7 +618,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
               padding: EdgeInsets.all(24.0),
               child: Center(
                 child: Text(
-                  "No accounts available",
+                  TranslationUtils.tr('common_no_accounts'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w500,

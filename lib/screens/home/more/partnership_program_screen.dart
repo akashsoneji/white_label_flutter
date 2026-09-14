@@ -151,7 +151,7 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
     return Container(
       width: 163.5,
       height: 98,
-      padding: EdgeInsets.fromLTRB(14, 16, 14, 16),
+      padding: EdgeInsetsDirectional.fromSTEB(14, 16, 14, 16),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(10),
@@ -194,9 +194,9 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                     ),
                   ),
                   // Status indicator
-                  Positioned(
+                  PositionedDirectional(
                     top: 0,
-                    right: 0,
+                    end: 0,
                     child: Container(
                       width: 20.w,
                       height: 20.w,

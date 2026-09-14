@@ -113,7 +113,7 @@ class _TicketListScreenState extends State<TicketListScreen> {
                 onRefresh: () => controller.fetchTickets(refresh: true),
                 child: ListView.builder(
                   controller: _scrollController,
-                  padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 90.h),
+                  padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 90.h),
                   itemCount: controller.tickets.length +
                       (controller.hasMorePages.value ? 1 : 0),
                   itemBuilder: (context, index) {

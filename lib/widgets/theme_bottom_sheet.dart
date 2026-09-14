@@ -79,7 +79,7 @@ void showThemeBottomSheet(BuildContext context) {
       ),
       child: SafeArea(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 18.h),
+          padding: EdgeInsetsDirectional.fromSTEB(18.w, 16.h, 18.w, 18.h),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,7 +153,7 @@ void _showLockedThemeSheet(
         ),
         child: SafeArea(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 18.h),
+            padding: EdgeInsetsDirectional.fromSTEB(18.w, 16.h, 18.w, 18.h),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,

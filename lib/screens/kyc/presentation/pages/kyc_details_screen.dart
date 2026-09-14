@@ -663,7 +663,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
           ),
           SizedBox(width: 8.w),
           Expanded(
-            child: TextFormField(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: TextFormField(
               controller: _phoneController,
               readOnly: true,
               keyboardType: TextInputType.phone,
@@ -718,6 +720,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                 }
                 return null;
               },
+            ),
             ),
           ),
         ],

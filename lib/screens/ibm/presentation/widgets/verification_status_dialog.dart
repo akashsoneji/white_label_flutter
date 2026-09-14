@@ -46,7 +46,7 @@ class VerificationStatusDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Align(
-              alignment: Alignment.topRight,
+              alignment: AlignmentDirectional.topEnd,
               child: IconButton(
                 icon: Icon(Icons.close, color: AppColors.textPrimary),
                 onPressed: () => Navigator.pop(context),

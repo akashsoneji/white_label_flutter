@@ -173,7 +173,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
               children: [
                 if (err.isNotEmpty)
                   Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+                    padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 0),
                     child: _InlineError(
                       message: err,
                       onRetry: () => controller.load(showLoading: true),
@@ -461,11 +461,11 @@ class _SummarySection extends StatelessWidget {
           children: [
             // Status chips
             Container(
-              padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 12.h),
+              padding: EdgeInsetsDirectional.fromSTEB(14.w, 12.h, 14.w, 12.h),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
                   colors: [
                     AppColors.primary.withValues(alpha: 0.10),
                     AppColors.primary.withValues(alpha: 0.04),

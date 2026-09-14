@@ -131,7 +131,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
         ),
         actions: [
           Padding(
-            padding: EdgeInsets.only(right: 14.w),
+            padding: EdgeInsetsDirectional.only(end: 14.w),
             child: GestureDetector(
               onTap: () => _openCreatePlanScreen(controller),
               child: Container(
@@ -430,7 +430,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                   } else {
                     listChild = ListView.separated(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 100.h),
+                      padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 100.h),
                       itemCount: filteredSortedPlans.length,
                       separatorBuilder: (_, index) => SizedBox(height: 14.h),
                       itemBuilder: (context, index) {
@@ -643,8 +643,8 @@ class _PlanCardItem extends StatelessWidget {
                   AppColors.primary,
                   AppColors.primary.withValues(alpha: 0.80),
                 ],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
+                begin: AlignmentDirectional.centerStart,
+                end: AlignmentDirectional.centerEnd,
               ),
             ),
             child: Row(

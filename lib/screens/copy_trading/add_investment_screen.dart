@@ -72,10 +72,13 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
             ),
             SizedBox(height: 8.h),
             Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                '${_amountController.text} USD',
-                style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
+              alignment: AlignmentDirectional.centerStart,
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Text(
+                  '${_amountController.text} USD',
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
+                ),
               ),
             ),
             SizedBox(height: 20.h),

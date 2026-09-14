@@ -75,7 +75,7 @@ class CongratulationsDialog extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(24.w, 36.h, 24.w, 24.h),
+              padding: EdgeInsetsDirectional.fromSTEB(24.w, 36.h, 24.w, 24.h),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -345,9 +345,9 @@ class CongratulationsDialog extends StatelessWidget {
             ),
 
             // Close Button (Top Right)
-            Positioned(
+            PositionedDirectional(
               top: 16.h,
-              right: 16.w,
+              end: 16.w,
               child: GestureDetector(
                 onTap: _refreshAccountsAndNavigateBack,
                 child: Container(

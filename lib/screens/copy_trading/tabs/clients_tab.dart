@@ -77,7 +77,7 @@ class _ClientsTabState extends State<ClientsTab> {
           _tradeHistory.isEmpty
               ? _buildEmptyState()
               : ListView.builder(
-                padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 80.h),
+                padding: EdgeInsetsDirectional.fromSTEB(16.w, 16.h, 16.w, 80.h),
                 itemCount: _tradeHistory.length,
                 itemBuilder: (context, index) {
                   return _TradeHistoryCard(data: _tradeHistory[index]);
@@ -301,7 +301,7 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
             ),
           ),
           Align(
-            alignment: Alignment.bottomRight,
+            alignment: AlignmentDirectional.bottomEnd,
             child: DashedUnderline(
               color: AppColors.dashLineColor,
               dashSpace: 3,

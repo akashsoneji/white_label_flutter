@@ -219,7 +219,8 @@ class CopyTradingMastersController extends GetxController {
         );
       }
       masters.clear();
-      errorMessage.value = 'Load error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_load_error')}: $e';
     } finally {
       if (showLoading) isLoading.value = false;
     }

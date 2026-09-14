@@ -29,10 +29,10 @@ class AppNotificationStack extends StatelessWidget {
       );
     }
 
-    return Positioned(
+    return PositionedDirectional(
       top: MediaQuery.of(context).padding.top + 10.h,
-      left: 16.w,
-      right: 16.w,
+      start: 16.w,
+      end: 16.w,
       child: const _NotificationContent(),
     );
   }

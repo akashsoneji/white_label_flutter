@@ -100,7 +100,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
         centerTitle: true,
         actions: [
           Padding(
-            padding: EdgeInsets.only(right: 12.w),
+            padding: EdgeInsetsDirectional.only(end: 12.w),
             child: GestureDetector(
               onTap: () => Get.toNamed(AppPages.PMAM_CREATE_PLAN),
               child: Container(

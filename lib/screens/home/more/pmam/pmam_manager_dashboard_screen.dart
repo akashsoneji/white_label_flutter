@@ -130,7 +130,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
         children: ['Today', '7d', '30d', '90d', '1y', 'all'].map((range) {
           final isSelected = _ctrl.dashboardRange.value == range;
           return Padding(
-            padding: EdgeInsets.only(right: 8.w),
+            padding: EdgeInsetsDirectional.only(end: 8.w),
             child: ChoiceChip(
               label: Text(range.toUpperCase()),
               selected: isSelected,
@@ -246,7 +246,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                     });
                   },
                   child: Container(
-                    margin: EdgeInsets.only(right: 12.w),
+                    margin: EdgeInsetsDirectional.only(end: 12.w),
                     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                     decoration: BoxDecoration(
                       color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,

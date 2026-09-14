@@ -106,7 +106,7 @@ class _TradeWinProductDetailScreenState
         leading: const AppBackButton(),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 24.h),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 0, 16.w, 24.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

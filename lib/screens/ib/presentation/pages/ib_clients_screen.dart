@@ -217,7 +217,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
 
   Widget _buildHierarchyBreadcrumb(String userFullName) {
     return Container(
-      margin: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 12.h),
+      margin: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 12.h),
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
@@ -237,7 +237,9 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
             children: [
               // Master IB chip
               _buildBreadcrumbChip(
-                label: '$userFullName (You)',
+                label: TranslationUtils.trArgs('ib_name_you_suffix', {
+                  'name': userFullName,
+                }),
                 icon: Icons.star,
                 isActive: ibController.clientsSelectedSubIB.value == null,
               ),
@@ -305,7 +307,9 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                 ),
                 const Spacer(),
                 Text(
-                  '${ibController.ibClients.length} clients',
+                  TranslationUtils.trArgs('ib_n_clients_lower', {
+                    'count': '${ibController.ibClients.length}',
+                  }),
                   style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textGrey),
                 ),
               ],
@@ -1013,7 +1017,9 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                             ),
                             SizedBox(width: 4.w),
                             Text(
-                              '${subIB.totalClients ?? 0} clients',
+                              TranslationUtils.trArgs('ib_n_clients_lower', {
+                                'count': '${subIB.totalClients ?? 0}',
+                              }),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,
@@ -1027,7 +1033,9 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                             ),
                             SizedBox(width: 4.w),
                             Text(
-                              '${subIB.totalSubIBs ?? 0} sub-IBs',
+                              TranslationUtils.trArgs('ib_n_sub_ibs_lower', {
+                                'count': '${subIB.totalSubIBs ?? 0}',
+                              }),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,

@@ -92,7 +92,9 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
                           SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'RTL (Right-to-Left) layout is enabled for this language. The interface will automatically adjust for better readability.',
+                              _languageService.tr(
+                                'language_selector_rtl_notice',
+                              ),
                               style: AppTextStyles.subheading.copyWith(
                                 color: AppColors.primary,
                               ),
@@ -205,7 +207,7 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
                       ),
                       if (isRTL)
                         Text(
-                          'RTL Layout',
+                          _languageService.tr('rtl_wrapper_rtl'),
                           style: AppTextStyles.subheading.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -293,7 +295,7 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
           message: 'Failed to change language: $e',
-          title: 'Error',
+          title: _languageService.tr('general_error_prefix'),
         );
       }
     }

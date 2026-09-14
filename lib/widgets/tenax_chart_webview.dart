@@ -232,22 +232,25 @@ class TenaxChartWebViewState extends State<TenaxChartWebView> {
     // MediaQuery.removePadding strips any top/bottom safe-area insets injected
     // by the parent Scaffold's SafeArea so the WebView fills edge-to-edge
     // without a blank gap at the top or bottom.
-    return MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
-      removeBottom: true,
-      child: TenaxChartView(
-        // Stable ValueKey → WebView is never torn down on symbol change.
-        key: const ValueKey('tenax_chart_pipze'),
-        api: _api!,
-        initialSymbol: _initialSymbol,
-        initialResolution: '15m',
-        theme: widget.isDark ? ChartTheme.dark : ChartTheme.light,
-        onControllerReady: (c) {
-          _controller = c;
-          _syncOrders();
-        },
-        onError: (e) => debugPrint('TenaxChartWebView: $e'),
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        removeBottom: true,
+        child: TenaxChartView(
+          // Stable ValueKey → WebView is never torn down on symbol change.
+          key: const ValueKey('tenax_chart_pipze'),
+          api: _api!,
+          initialSymbol: _initialSymbol,
+          initialResolution: '15m',
+          theme: widget.isDark ? ChartTheme.dark : ChartTheme.light,
+          onControllerReady: (c) {
+            _controller = c;
+            _syncOrders();
+          },
+          onError: (e) => debugPrint('TenaxChartWebView: $e'),
+        ),
       ),
     );
   }

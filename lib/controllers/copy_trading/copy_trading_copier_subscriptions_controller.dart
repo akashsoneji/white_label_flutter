@@ -360,7 +360,8 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
     } catch (e,t) {
       subscriptions.clear();
       print('Load error: $e\n$t');
-      errorMessage.value = 'Load error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_load_error')}: $e';
     } finally {
       if (showLoading) isLoading.value = false;
     }
@@ -438,7 +439,9 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
 
       if (!res.success || res.data == null) {
         trades.clear();
-        tradeError.value = res.message ?? 'Failed to load trades';
+        tradeError.value =
+            res.message ??
+            TranslationUtils.tr('my_investments_screen_failed_to_load_trades');
         return;
       }
 
@@ -448,7 +451,7 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
       final data = nestedData is Map ? nestedData['data'] : null;
       if (data is! List) {
         trades.clear();
-        tradeError.value = 'Invalid response';
+        tradeError.value = TranslationUtils.tr('copy_trading_invalid_response');
         return;
       }
 
@@ -507,7 +510,9 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
-      return ApiResponse.error('Pause error: $e');
+      return ApiResponse.error(
+        '${TranslationUtils.tr('copy_trading_pause_error')}: $e',
+      );
     } finally {
       actionLoading.value = false;
     }
@@ -523,7 +528,9 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
-      return ApiResponse.error('Resume error: $e');
+      return ApiResponse.error(
+        '${TranslationUtils.tr('copy_trading_resume_error')}: $e',
+      );
     } finally {
       actionLoading.value = false;
     }
@@ -539,7 +546,9 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
-      return ApiResponse.error('Stop error: $e');
+      return ApiResponse.error(
+        '${TranslationUtils.tr('copy_trading_stop_error')}: $e',
+      );
     } finally {
       actionLoading.value = false;
     }
@@ -555,7 +564,9 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
-      return ApiResponse.error('Add capital error: $e');
+      return ApiResponse.error(
+        '${TranslationUtils.tr('copy_trading_add_capital_error')}: $e',
+      );
     } finally {
       actionLoading.value = false;
     }

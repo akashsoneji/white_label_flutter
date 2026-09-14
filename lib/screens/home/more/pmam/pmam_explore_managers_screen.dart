@@ -165,7 +165,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
         : list.fold<double>(0, (s, m) => s + m.avgCommission) / list.length;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 4.h),
+      padding: EdgeInsetsDirectional.fromSTEB(12.w, 12.h, 12.w, 4.h),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),

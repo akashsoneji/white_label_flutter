@@ -254,9 +254,9 @@ class _ContestCard extends StatelessWidget {
                     child: Center(child: Text(contest.bannerEmoji, style: TextStyle(fontSize: 22.sp))),
                   ),
                 ),
-                Positioned(
+                PositionedDirectional(
                   top: 16.h,
-                  right: 16.w,
+                  end: 16.w,
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                     decoration: BoxDecoration(
@@ -446,7 +446,7 @@ class _ContestCard extends StatelessWidget {
                         ),
                         if (contest.isEnrolled)
                           Padding(
-                            padding: EdgeInsets.only(left: 4.w),
+                            padding: EdgeInsetsDirectional.only(start: 4.w),
                             child: Icon(Icons.arrow_forward, color: isDark ? AppColors.pureBlack : Colors.white, size: 16.sp),
                           ),
                       ],

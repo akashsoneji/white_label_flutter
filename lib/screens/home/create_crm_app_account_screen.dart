@@ -235,10 +235,10 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(
+        padding: EdgeInsetsDirectional.only(
           bottom: MediaQuery.of(context).padding.bottom + 10,
-          left: 24.w,
-          right: 24.w,
+          start: 24.w,
+          end: 24.w,
         ),
         child: _buildCreateAccountButton(),
       ),

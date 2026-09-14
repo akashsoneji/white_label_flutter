@@ -619,7 +619,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
         Row(
           children: [
             Text(
-              'Transaction ID / UTR',
+              TranslationUtils.tr(
+                'deposit_instruction_screen_transaction_id_utr',
+              ),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
@@ -675,7 +677,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
         ),
         SizedBox(height: 8),
         Text(
-          'Transaction ID is filled automatically when you upload your payment screenshot.',
+          TranslationUtils.tr(
+            'deposit_instruction_screen_transaction_id_is_filled_automatically_when',
+          ),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 11.sp,
             color: Colors.grey,
@@ -1144,7 +1148,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                     if ((type == 'bank' || requireUtr) &&
                         transactionNumberController.text.trim().isEmpty) {
                       CustomToastService.showError(
-                        message: 'Please enter transaction number / UTR',
+                        message: TranslationUtils.tr(
+                          'deposit_instruction_screen_please_enter_transaction_number_utr',
+                        ),
                       );
                       return;
                     }
@@ -1376,7 +1382,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Payment page ready',
+                          TranslationUtils.tr(
+                            'deposit_instruction_screen_payment_page_ready',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -1385,7 +1393,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Tap Confirm to open the payment page in your browser.',
+                          TranslationUtils.tr(
+                            'deposit_instruction_screen_tap_confirm_to_open_the_payment',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12,
                             color: AppColors.textGrey,
@@ -1488,7 +1498,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'Payment verification timed out. Check Transaction History.',
+                  TranslationUtils.tr(
+                    'deposit_instruction_screen_payment_verification_timed_out_check_transaction',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(fontSize: 13, color: Colors.orange.shade800),
                 ),
               );
@@ -1515,7 +1527,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Waiting for payment... polling…',
+                        TranslationUtils.tr(
+                          'deposit_instruction_screen_waiting_for_payment_polling',
+                        ),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13,
                           color: Colors.blue.shade800,
@@ -1661,7 +1675,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          margin: EdgeInsets.only(top: 8, right: 8),
+          margin: EdgeInsetsDirectional.only(top: 8, end: 8),
           width: 4,
           height: 4,
           decoration: BoxDecoration(

@@ -320,7 +320,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       color: MetaTheme.bg(context),
-      padding: EdgeInsets.fromLTRB(4, 4, 4, 8),
+      padding: EdgeInsetsDirectional.fromSTEB(4, 4, 4, 8),
       child: Row(
         children: [
           IconButton(
@@ -462,7 +462,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
 
   Widget _buildErrorState(BuildContext context, String message) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(24, 60, 24, 0),
+      padding: EdgeInsetsDirectional.fromSTEB(24, 60, 24, 0),
       child: Column(children: [
         Icon(Icons.error_outline, color: MetaTheme.sell(context), size: 48),
         SizedBox(height: 12),

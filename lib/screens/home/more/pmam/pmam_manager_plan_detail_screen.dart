@@ -82,7 +82,7 @@ class _PmamManagerPlanDetailScreenState
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               child: Align(
-                alignment: Alignment.centerLeft,
+                alignment: AlignmentDirectional.centerStart,
                 child: Text(
                   plan['plan_name'] ?? '',
                   style: AppTextStyles.bodyText.copyWith(

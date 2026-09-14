@@ -81,15 +81,15 @@
       "value": "window.__renderOrderLines(${jsonEncode(lines)});"
     },
     {
-      "line": 629,
+      "line": 633,
       "value": "${e.value}"
     },
     {
-      "line": 630,
+      "line": 634,
       "value": "Etc/UTC"
     },
     {
-      "line": 725,
+      "line": 729,
       "value": "${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${widget.isDark ?"
     }
   ],
@@ -201,11 +201,11 @@
   ],
   "lib/brands/celestial/celestial_settings_screen.dart": [
     {
-      "line": 1091,
+      "line": 1093,
       "value": "No longer needed"
     },
     {
-      "line": 1204,
+      "line": 1206,
       "value": "demo-account"
     }
   ],
@@ -285,14 +285,6 @@
     {
       "line": 2008,
       "value": "$spread"
-    },
-    {
-      "line": 2041,
-      "value": "Sell"
-    },
-    {
-      "line": 2043,
-      "value": "Buy"
     }
   ],
   "lib/brands/celestial/celestial_watchlist_screen.dart": [
@@ -337,15 +329,15 @@
       "value": "${change >= 0 ?"
     },
     {
-      "line": 530,
+      "line": 534,
       "value": "${e.value}"
     },
     {
-      "line": 531,
+      "line": 535,
       "value": "Etc/UTC"
     },
     {
-      "line": 698,
+      "line": 702,
       "value": "${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${widget.isDark ?"
     }
   ],
@@ -681,17 +673,13 @@
   ],
   "lib/brands/meta/meta_new_order_screen.dart": [
     {
-      "line": 334,
-      "value": "Order placed"
-    },
-    {
       "line": 830,
       "value": "native_chart|$_symbol|${_accounts.activeMT5Account?.metaAccountNumber ??"
     }
   ],
   "lib/brands/meta/meta_settings_screen.dart": [
     {
-      "line": 1088,
+      "line": 1090,
       "value": "No longer needed"
     }
   ],
@@ -731,19 +719,19 @@
       "value": "${item.symbol}: ${action.name}"
     },
     {
-      "line": 375,
+      "line": 384,
       "value": "${pct >= 0 ?"
     },
     {
-      "line": 376,
+      "line": 385,
       "value": "${change >= 0 ?"
     },
     {
-      "line": 554,
+      "line": 563,
       "value": "$digits"
     },
     {
-      "line": 1239,
+      "line": 1248,
       "value": "${symbol.symbol}: ${symbol.category}"
     }
   ],
@@ -1567,44 +1555,6 @@
     {
       "line": 281,
       "value": "${commissionPercentage.toStringAsFixed(0)}%"
-    },
-    {
-      "line": 363,
-      "value": "Load error: $e"
-    },
-    {
-      "line": 441,
-      "value": "Failed to load trades"
-    },
-    {
-      "line": 451,
-      "value": "Invalid response"
-    },
-    {
-      "line": 510,
-      "value": "Pause error: $e"
-    },
-    {
-      "line": 526,
-      "value": "Resume error: $e"
-    },
-    {
-      "line": 542,
-      "value": "Stop error: $e"
-    },
-    {
-      "line": 558,
-      "value": "Add capital error: $e"
-    }
-  ],
-  "lib/controllers/copy_trading/copy_trading_hub_controller.dart": [
-    {
-      "line": 57,
-      "value": "Failed to load copy trading status: $e"
-    },
-    {
-      "line": 166,
-      "value": "Apply error: $e"
     }
   ],
   "lib/controllers/copy_trading/copy_trading_master_copiers_controller.dart": [
@@ -1627,26 +1577,6 @@
     {
       "line": 182,
       "value": "${parts[0][0]}${parts[1][0]}"
-    },
-    {
-      "line": 315,
-      "value": "Load error: $e"
-    },
-    {
-      "line": 414,
-      "value": "Pause error: $e"
-    },
-    {
-      "line": 430,
-      "value": "Resume error: $e"
-    },
-    {
-      "line": 446,
-      "value": "Stop error: $e"
-    },
-    {
-      "line": 462,
-      "value": "Add capital error: $e"
     }
   ],
   "lib/controllers/copy_trading/copy_trading_master_dashboard_controller.dart": [
@@ -1671,96 +1601,24 @@
       "value": "→ preset=\"$normalised\" (was: \"${overviewRange.value}\")"
     },
     {
-      "line": 499,
-      "value": "Failed to load dashboard: $e"
-    },
-    {
-      "line": 525,
+      "line": 526,
       "value": "[MasterDashboard] loadDashboardOverview → range=\"$range\""
     },
     {
-      "line": 534,
-      "value": "[MasterDashboard] loadDashboardOverview ← success=${res.success}"
-    },
-    {
       "line": 535,
-      "value": "hasData=${res.data != null}"
+      "value": "[MasterDashboard] loadDashboardOverview ← success=${res.success}"
     },
     {
-      "line": 538,
-      "value": "[MasterDashboard] loadDashboardOverview ← success=${res.success}"
+      "line": 536,
+      "value": "hasData=${res.data != null}"
     },
     {
       "line": 539,
+      "value": "[MasterDashboard] loadDashboardOverview ← success=${res.success}"
+    },
+    {
+      "line": 540,
       "value": "hasData=${res.data != null}"
-    },
-    {
-      "line": 693,
-      "value": "Failed to load eligible accounts: $e"
-    },
-    {
-      "line": 714,
-      "value": "Create plan error: $e"
-    },
-    {
-      "line": 737,
-      "value": "Inactivate plan error: $e"
-    },
-    {
-      "line": 760,
-      "value": "Pause plan error: $e"
-    },
-    {
-      "line": 783,
-      "value": "Resume plan error: $e"
-    },
-    {
-      "line": 806,
-      "value": "Update plan error: $e"
-    }
-  ],
-  "lib/controllers/copy_trading/copy_trading_master_details_controller.dart": [
-    {
-      "line": 327,
-      "value": "Load error: $e"
-    }
-  ],
-  "lib/controllers/copy_trading/copy_trading_master_plan_detail_controller.dart": [
-    {
-      "line": 676,
-      "value": "Load error: $e"
-    },
-    {
-      "line": 695,
-      "value": "Failed to pause plan"
-    },
-    {
-      "line": 699,
-      "value": "Pause plan error: $e"
-    },
-    {
-      "line": 718,
-      "value": "Failed to resume plan"
-    },
-    {
-      "line": 722,
-      "value": "Resume plan error: $e"
-    },
-    {
-      "line": 741,
-      "value": "Failed to update plan"
-    },
-    {
-      "line": 745,
-      "value": "Update plan error: $e"
-    },
-    {
-      "line": 764,
-      "value": "Failed to inactivate plan"
-    },
-    {
-      "line": 768,
-      "value": "Inactivate plan error: $e"
     }
   ],
   "lib/controllers/copy_trading/copy_trading_masters_controller.dart": [
@@ -1807,10 +1665,6 @@
     {
       "line": 216,
       "value": "[CopyTradingMasters] loadMasters threw: $e"
-    },
-    {
-      "line": 222,
-      "value": "Load error: $e"
     }
   ],
   "lib/controllers/copy_trading/copy_trading_settings_controller.dart": [
@@ -1911,20 +1765,6 @@
       "value": "All"
     }
   ],
-  "lib/controllers/copy_trading/copy_trading_subscribe_controller.dart": [
-    {
-      "line": 137,
-      "value": "Load error: $e"
-    },
-    {
-      "line": 215,
-      "value": "Subscribe error: $e"
-    },
-    {
-      "line": 321,
-      "value": "Update error: $e"
-    }
-  ],
   "lib/controllers/demo_contest_controller.dart": [
     {
       "line": 217,
@@ -1933,152 +1773,12 @@
   ],
   "lib/controllers/pmam/pmam_controller.dart": [
     {
-      "line": 126,
-      "value": "Failed to submit application"
-    },
-    {
-      "line": 131,
-      "value": "Error: $e"
-    },
-    {
-      "line": 163,
-      "value": "Failed to load dashboard"
-    },
-    {
-      "line": 328,
-      "value": "Plan paused successfully."
-    },
-    {
-      "line": 330,
-      "value": "Failed to pause plan."
-    },
-    {
-      "line": 352,
-      "value": "Plan resumed successfully."
-    },
-    {
-      "line": 355,
-      "value": "Failed to resume plan."
-    },
-    {
-      "line": 372,
-      "value": "Plan updated successfully."
-    },
-    {
-      "line": 374,
-      "value": "Failed to update plan."
-    },
-    {
-      "line": 413,
-      "value": "Plan created successfully!"
-    },
-    {
-      "line": 419,
-      "value": "Failed to create plan"
-    },
-    {
-      "line": 424,
-      "value": "Error: $e"
-    },
-    {
-      "line": 443,
-      "value": "Cannot inactivate plan"
-    },
-    {
-      "line": 448,
-      "value": "Error: $e"
-    },
-    {
-      "line": 501,
-      "value": "Investor request approved"
-    },
-    {
-      "line": 508,
-      "value": "Failed to approve"
-    },
-    {
-      "line": 513,
-      "value": "Error: $e"
-    },
-    {
-      "line": 522,
-      "value": "Investor request rejected"
-    },
-    {
-      "line": 529,
-      "value": "Failed to reject"
-    },
-    {
-      "line": 534,
-      "value": "Error: $e"
-    },
-    {
-      "line": 606,
-      "value": "Failed to load plans"
-    },
-    {
-      "line": 620,
-      "value": "Failed to load enrollments"
-    },
-    {
-      "line": 634,
-      "value": "Failed to load open allocations"
-    },
-    {
-      "line": 669,
-      "value": "Failed to load fund entries"
-    },
-    {
-      "line": 684,
-      "value": "Failed to load eligible accounts"
-    },
-    {
-      "line": 705,
-      "value": "Deposit added"
-    },
-    {
-      "line": 710,
-      "value": "Failed to add funds"
-    },
-    {
-      "line": 714,
-      "value": "Error: $e"
-    },
-    {
-      "line": 737,
+      "line": 800,
       "value": "[PMAM] getManagerTrades(managerCode=$managerCode, planId=$planId, investorId=$investorId, date_from=$dateFrom, date_to=$dateTo, page=$page, per_page=$perPage)"
     },
     {
-      "line": 769,
+      "line": 832,
       "value": "[PMAM] trades pagination total=${tradesTotal.value} page=${tradesPage.value} per_page=${tradesPerPage.value} total_pages=${tradesTotalPages.value} rows=${parsed.length}"
-    },
-    {
-      "line": 844,
-      "value": "Error: $e"
-    },
-    {
-      "line": 865,
-      "value": "Join request submitted! Waiting for manager approval."
-    },
-    {
-      "line": 871,
-      "value": "Failed to submit join request"
-    },
-    {
-      "line": 876,
-      "value": "Error: $e"
-    },
-    {
-      "line": 892,
-      "value": "Unsubscribe request accepted"
-    },
-    {
-      "line": 897,
-      "value": "Failed to unsubscribe"
-    },
-    {
-      "line": 902,
-      "value": "Error: $e"
     }
   ],
   "lib/core/config/app_config_model.dart": [
@@ -3215,10 +2915,6 @@
       "value": "$day/$month/$year $hour:$minute"
     },
     {
-      "line": 1782,
-      "value": "Dismiss"
-    },
-    {
       "line": 1866,
       "value": "${bonus.bonusPercentage}% ${bonus.bonusType}"
     },
@@ -3241,260 +2937,248 @@
       "value": "${dt.day} ${months[dt.month - 1]} $h:$m"
     },
     {
-      "line": 734,
-      "value": "Error"
-    },
-    {
-      "line": 734,
+      "line": 736,
       "value": "Error: $e"
     },
     {
-      "line": 802,
-      "value": "Error"
-    },
-    {
-      "line": 802,
+      "line": 807,
       "value": "Error: $e"
     },
     {
-      "line": 931,
+      "line": 937,
       "value": "Scratch Card"
     },
     {
-      "line": 1269,
+      "line": 1275,
       "value": "\\$${r.amount.toStringAsFixed(2)}"
     },
     {
-      "line": 1381,
+      "line": 1387,
       "value": "${doneLots.toStringAsFixed(2)} / ${targetLots.toStringAsFixed(2)}"
     },
     {
-      "line": 1434,
+      "line": 1440,
       "value": "${firstStep.thresholdPercent}%"
     },
     {
-      "line": 1553,
+      "line": 1559,
       "value": "\\$${amount.toStringAsFixed(2)}"
     },
     {
-      "line": 1575,
+      "line": 1581,
       "value": "ScratchCard"
     },
     {
-      "line": 1579,
+      "line": 1585,
       "value": "ScratchCard"
-    },
-    {
-      "line": 1628,
-      "value": "Daily Streak"
-    },
-    {
-      "line": 1629,
-      "value": "7 Days Strong"
-    },
-    {
-      "line": 1630,
-      "value": "Bonus unlocks at 10 days"
-    },
-    {
-      "line": 1631,
-      "value": "3 more days to go →"
     },
     {
       "line": 1634,
-      "value": "Credit → Withdrawal Unlock"
+      "value": "Daily Streak"
+    },
+    {
+      "line": 1635,
+      "value": "7 Days Strong"
     },
     {
       "line": 1636,
+      "value": "Bonus unlocks at 10 days"
+    },
+    {
+      "line": 1637,
+      "value": "3 more days to go →"
+    },
+    {
+      "line": 1640,
+      "value": "Credit → Withdrawal Unlock"
+    },
+    {
+      "line": 1642,
       "value": "Complete 6 lots of trading to withdraw \\$30 to your main balance"
     },
     {
-      "line": 1645,
+      "line": 1651,
       "value": "Full Unlock"
     },
     {
-      "line": 1649,
+      "line": 1655,
       "value": "Scratch Leaderboard"
     },
     {
-      "line": 1650,
+      "line": 1656,
       "value": "Apr 7 – 13"
     },
     {
-      "line": 1663,
+      "line": 1669,
       "value": "Reward Unlocked"
-    },
-    {
-      "line": 1664,
-      "value": "13 Apr · 12:54"
-    },
-    {
-      "line": 1665,
-      "value": "Credited to account"
     },
     {
       "line": 1670,
-      "value": "Reward Unlocked"
+      "value": "13 Apr · 12:54"
     },
     {
       "line": 1671,
-      "value": "12 Apr · 10:22"
-    },
-    {
-      "line": 1672,
       "value": "Credited to account"
     },
     {
-      "line": 1677,
+      "line": 1676,
       "value": "Reward Unlocked"
     },
     {
-      "line": 1678,
-      "value": "11 Apr · 09:15"
+      "line": 1677,
+      "value": "12 Apr · 10:22"
     },
     {
-      "line": 1679,
+      "line": 1678,
       "value": "Credited to account"
     },
     {
-      "line": 1852,
+      "line": 1683,
+      "value": "Reward Unlocked"
+    },
+    {
+      "line": 1684,
+      "value": "11 Apr · 09:15"
+    },
+    {
+      "line": 1685,
+      "value": "Credited to account"
+    },
+    {
+      "line": 1858,
       "value": "Target"
     },
     {
-      "line": 1861,
+      "line": 1867,
       "value": "${targetLots.toStringAsFixed(0)} Lots"
     },
     {
-      "line": 1890,
+      "line": 1896,
       "value": "lots traded"
     },
     {
-      "line": 1902,
+      "line": 1908,
       "value": "of ${targetLots.toStringAsFixed(1)} lots"
     },
     {
-      "line": 1948,
+      "line": 1954,
       "value": "Only"
     },
     {
-      "line": 1951,
+      "line": 1957,
       "value": "${remaining.toStringAsFixed(1)} more lots to trade"
     },
     {
-      "line": 1957,
+      "line": 1963,
       "value": "— and your full"
     },
     {
-      "line": 1966,
+      "line": 1972,
       "value": "will be withdrawable to your main balance!"
     },
     {
-      "line": 1989,
+      "line": 1995,
       "value": "Lots Completed"
     },
     {
-      "line": 1998,
+      "line": 2004,
       "value": "Withdrawable Amount"
     },
     {
-      "line": 2029,
+      "line": 2035,
       "value": "$lots Lot${lots == \"1\" ? \"\" : \"s\"}"
     },
     {
-      "line": 2068,
+      "line": 2074,
       "value": "\\$${amount.toStringAsFixed(2)}${label.isNotEmpty ?"
     },
     {
-      "line": 2095,
+      "line": 2101,
       "value": "Withdraw \\$30.00 — Locked"
     },
     {
-      "line": 2104,
+      "line": 2110,
       "value": "Complete ${remaining.toStringAsFixed(1)} more lots to unlock withdrawal"
     },
     {
-      "line": 2245,
+      "line": 2251,
       "value": "You"
     },
     {
-      "line": 2258,
+      "line": 2264,
       "value": "\\$${amount.toStringAsFixed(2)}"
     },
     {
-      "line": 2286,
+      "line": 2292,
       "value": "History"
     },
     {
-      "line": 2368,
+      "line": 2374,
       "value": "+\\$${amount.toStringAsFixed(2)}"
     },
     {
-      "line": 2508,
+      "line": 2514,
       "value": "\\$${reward.toStringAsFixed(2)}"
     },
     {
-      "line": 2556,
+      "line": 2562,
       "value": "ScratchCard"
     },
     {
-      "line": 2560,
+      "line": 2566,
       "value": "ScratchCard"
     },
     {
-      "line": 2689,
+      "line": 2695,
       "value": "---> \\$${earned.toStringAsFixed(2)}"
     },
     {
-      "line": 2745,
+      "line": 2751,
       "value": "\\$${balance.toStringAsFixed(2)}"
     },
     {
-      "line": 2750,
+      "line": 2756,
       "value": "\\$${credit.toStringAsFixed(2)}"
     },
     {
-      "line": 2755,
+      "line": 2761,
       "value": "\\$${equity.toStringAsFixed(2)}"
     },
     {
-      "line": 2791,
+      "line": 2797,
       "value": "ScratchCard"
     },
     {
-      "line": 2795,
+      "line": 2801,
       "value": "ScratchCard"
     },
     {
-      "line": 3322,
+      "line": 3328,
       "value": "\\$${card.rewardAmount!.toStringAsFixed(2)}"
     },
     {
-      "line": 3368,
+      "line": 3374,
       "value": "scratch_${card.id}"
     },
     {
-      "line": 3381,
+      "line": 3387,
       "value": "Scratch Card"
     },
     {
-      "line": 3505,
+      "line": 3511,
       "value": "scratch_dialog_${card.id}"
     },
     {
-      "line": 3859,
+      "line": 3870,
       "value": "\\$${rewardAmount!.toStringAsFixed(2)}"
     },
     {
-      "line": 3957,
+      "line": 3968,
       "value": "\\$${card.rewardAmount!.toStringAsFixed(2)}"
     },
     {
-      "line": 4091,
+      "line": 4102,
       "value": "\\$${reveal.rewardAmount.toStringAsFixed(2)}"
-    },
-    {
-      "line": 4167,
-      "value": "Credit failed: ${reveal.creditError.isNotEmpty ? reveal.creditError :"
     }
   ],
   "lib/screens/common/view_models/app_notification_controller.dart": [
@@ -3523,11 +3207,11 @@
   ],
   "lib/screens/copy_trading/add_investment_screen.dart": [
     {
-      "line": 77,
+      "line": 79,
       "value": "${_amountController.text} USD"
     },
     {
-      "line": 149,
+      "line": 152,
       "value": "Prime_traders"
     }
   ],
@@ -4143,15 +3827,15 @@
   ],
   "lib/screens/demo_contest/presentation/pages/widgets/leaderboard_row.dart": [
     {
-      "line": 53,
+      "line": 55,
       "value": "${entry.rank}"
     },
     {
-      "line": 134,
+      "line": 139,
       "value": "${entry.pnlPercent >= 0 ?"
     },
     {
-      "line": 143,
+      "line": 148,
       "value": "\\$${entry.pnl.toStringAsFixed(0)}"
     }
   ],
@@ -4531,83 +4215,31 @@
       "value": "Custom"
     },
     {
-      "line": 696,
-      "value": "Today"
-    },
-    {
-      "line": 698,
-      "value": "Yesterday"
-    },
-    {
       "line": 700,
       "value": "${date.day} ${_getMonthName(date.month)} ${date.year}"
     },
     {
-      "line": 706,
-      "value": "Jan"
-    },
-    {
-      "line": 707,
-      "value": "Feb"
-    },
-    {
-      "line": 708,
-      "value": "Mar"
-    },
-    {
-      "line": 709,
-      "value": "Apr"
-    },
-    {
-      "line": 711,
-      "value": "Jun"
-    },
-    {
-      "line": 712,
-      "value": "Jul"
-    },
-    {
-      "line": 713,
-      "value": "Aug"
-    },
-    {
-      "line": 714,
-      "value": "Sep"
-    },
-    {
-      "line": 715,
-      "value": "Oct"
-    },
-    {
-      "line": 716,
-      "value": "Nov"
-    },
-    {
-      "line": 717,
-      "value": "Dec"
-    },
-    {
-      "line": 755,
+      "line": 756,
       "value": "${transactions.length}"
     },
     {
-      "line": 867,
+      "line": 868,
       "value": "$amountPrefix${transaction.amount ??"
     },
     {
-      "line": 1004,
+      "line": 1005,
       "value": "All Time"
     },
     {
-      "line": 1005,
+      "line": 1006,
       "value": "All"
     },
     {
-      "line": 1020,
+      "line": 1021,
       "value": "${date.day}/${date.month}/${date.year}"
     },
     {
-      "line": 1032,
+      "line": 1033,
       "value": "$day $month, $hour:$minute $period"
     }
   ],
@@ -4791,34 +4423,6 @@
     {
       "line": 213,
       "value": "Accept"
-    },
-    {
-      "line": 622,
-      "value": "Transaction ID / UTR"
-    },
-    {
-      "line": 678,
-      "value": "Transaction ID is filled automatically when you upload your payment screenshot."
-    },
-    {
-      "line": 1147,
-      "value": "Please enter transaction number / UTR"
-    },
-    {
-      "line": 1379,
-      "value": "Payment page ready"
-    },
-    {
-      "line": 1388,
-      "value": "Tap Confirm to open the payment page in your browser."
-    },
-    {
-      "line": 1491,
-      "value": "Payment verification timed out. Check Transaction History."
-    },
-    {
-      "line": 1518,
-      "value": "Waiting for payment... polling…"
     }
   ],
   "lib/screens/finance/presentation/pages/deposit_real_screen.dart": [
@@ -4903,15 +4507,11 @@
       "value": "${raw.isEmpty ? \"0.00\" : raw} $selectedCurrency"
     },
     {
-      "line": 474,
+      "line": 476,
       "value": "${fee.toStringAsFixed(2)}"
     },
     {
-      "line": 618,
-      "value": "No accounts available"
-    },
-    {
-      "line": 726,
+      "line": 729,
       "value": ".${parts.sublist(1).join("
     }
   ],
@@ -4933,23 +4533,23 @@
   ],
   "lib/screens/finance/presentation/pages/internal_transfer_history_screen.dart": [
     {
-      "line": 406,
+      "line": 421,
       "value": "${pagination.from}"
     },
     {
-      "line": 407,
+      "line": 422,
       "value": "${pagination.to}"
     },
     {
-      "line": 408,
+      "line": 423,
       "value": "${pagination.total}"
     },
     {
-      "line": 524,
+      "line": 539,
       "value": "\\$${item.amount}"
     },
     {
-      "line": 680,
+      "line": 695,
       "value": "dd MMM yyyy, hh:mm a"
     }
   ],
@@ -4987,43 +4587,27 @@
       "value": "${ibmWallet.referenceLinkId} - \\$ ${ibmWallet.balance}"
     },
     {
-      "line": 761,
-      "value": "Wallet"
-    },
-    {
-      "line": 765,
-      "value": "IB Wallet"
-    },
-    {
-      "line": 935,
+      "line": 937,
       "value": "${account.metaAccountNumber} - \\$ ${account.balance}"
     },
     {
-      "line": 944,
+      "line": 946,
       "value": "${wallet.walletId} - \\$ ${wallet.walletBalance}"
     },
     {
-      "line": 953,
+      "line": 955,
       "value": "${account.metaAccountNumber} - \\$ ${account.balance}"
     },
     {
-      "line": 962,
+      "line": 964,
       "value": "${ibmWallet.referenceLinkId} - \\$ ${ibmWallet.balance}"
     },
     {
-      "line": 994,
-      "value": "Wallet"
-    },
-    {
-      "line": 998,
-      "value": "IB Wallet"
-    },
-    {
-      "line": 1309,
+      "line": 1313,
       "value": "\\$${limit.toStringAsFixed(2)}"
     },
     {
-      "line": 1461,
+      "line": 1465,
       "value": ".${parts.sublist(1).join("
     }
   ],
@@ -5093,10 +4677,6 @@
     {
       "line": 27,
       "value": "All Time"
-    },
-    {
-      "line": 72,
-      "value": "Wallet"
     },
     {
       "line": 94,
@@ -5211,99 +4791,11 @@
       "value": "${_formatType(transaction.type)}: ${transaction.mt5AccountId}"
     },
     {
-      "line": 777,
-      "value": "Jan"
-    },
-    {
-      "line": 778,
-      "value": "Feb"
-    },
-    {
-      "line": 779,
-      "value": "Mar"
-    },
-    {
-      "line": 780,
-      "value": "Apr"
-    },
-    {
-      "line": 782,
-      "value": "Jun"
-    },
-    {
-      "line": 783,
-      "value": "Jul"
-    },
-    {
-      "line": 784,
-      "value": "Aug"
-    },
-    {
-      "line": 785,
-      "value": "Sep"
-    },
-    {
-      "line": 786,
-      "value": "Oct"
-    },
-    {
-      "line": 787,
-      "value": "Nov"
-    },
-    {
-      "line": 788,
-      "value": "Dec"
-    },
-    {
-      "line": 790,
-      "value": "${date.day} ${months[date.month - 1]} ${date.year}"
-    },
-    {
-      "line": 797,
-      "value": "Jan"
-    },
-    {
-      "line": 798,
-      "value": "Feb"
-    },
-    {
-      "line": 799,
-      "value": "Mar"
-    },
-    {
-      "line": 800,
-      "value": "Apr"
-    },
-    {
-      "line": 802,
-      "value": "Jun"
-    },
-    {
-      "line": 803,
-      "value": "Jul"
-    },
-    {
-      "line": 804,
-      "value": "Aug"
-    },
-    {
-      "line": 805,
-      "value": "Sep"
-    },
-    {
-      "line": 806,
-      "value": "Oct"
+      "line": 794,
+      "value": "${date.day} ${_monthShort(date.month)} ${date.year}"
     },
     {
       "line": 807,
-      "value": "Nov"
-    },
-    {
-      "line": 808,
-      "value": "Dec"
-    },
-    {
-      "line": 816,
       "value": "$day $month, $hour:$minute $period"
     }
   ],
@@ -5337,63 +4829,87 @@
       "value": "All Status"
     },
     {
-      "line": 500,
-      "value": "$from to $to"
-    },
-    {
-      "line": 736,
-      "value": "All Types"
-    },
-    {
       "line": 737,
-      "value": "Deposit"
+      "value": "All Types"
     },
     {
       "line": 738,
-      "value": "Withdrawal"
+      "value": "Deposit"
     },
     {
       "line": 739,
+      "value": "Withdrawal"
+    },
+    {
+      "line": 740,
       "value": "Transfer"
     },
     {
-      "line": 767,
-      "value": "All Status"
-    },
-    {
       "line": 768,
-      "value": "Approved"
+      "value": "All Status"
     },
     {
       "line": 769,
-      "value": "Pending"
+      "value": "Approved"
     },
     {
       "line": 770,
+      "value": "Pending"
+    },
+    {
+      "line": 771,
       "value": "Rejected"
     },
     {
-      "line": 788,
+      "line": 789,
       "value": "All Types"
     },
     {
-      "line": 789,
+      "line": 790,
       "value": "All Status"
     },
     {
-      "line": 1058,
+      "line": 917,
+      "value": "All Types"
+    },
+    {
+      "line": 919,
+      "value": "Deposit"
+    },
+    {
+      "line": 921,
+      "value": "Withdrawal"
+    },
+    {
+      "line": 923,
+      "value": "Transfer"
+    },
+    {
+      "line": 925,
+      "value": "All Status"
+    },
+    {
+      "line": 927,
+      "value": "Approved"
+    },
+    {
+      "line": 929,
+      "value": "Pending"
+    },
+    {
+      "line": 931,
+      "value": "Rejected"
+    },
+    {
+      "line": 1082,
       "value": "MMM dd, yyyy hh:mm a"
     },
     {
-      "line": 1139,
-      "value": "Transaction Details"
-    },
-    {
-      "line": 1224,
+      "line": 1248,
       "value": "MT5: ${tx.mt5AccountId}"
     },
     {
-      "line": 1234,
+      "line": 1258,
       "value": "MMMM dd, yyyy hh:mm a"
     }
   ],
@@ -5567,104 +5083,32 @@
       "value": "UGIGfjdsofijofijwesef"
     },
     {
-      "line": 129,
-      "value": "Error"
-    },
-    {
-      "line": 144,
-      "value": "No camera available on this device."
-    },
-    {
-      "line": 145,
-      "value": "Error"
-    },
-    {
-      "line": 172,
+      "line": 174,
       "value": "Failed to start camera: ${e.toString()}"
     },
     {
-      "line": 173,
+      "line": 175,
       "value": "Error"
     },
     {
-      "line": 190,
-      "value": "Camera is not ready. Please wait."
-    },
-    {
-      "line": 191,
-      "value": "Error"
-    },
-    {
-      "line": 218,
-      "value": "Payment proof captured successfully!"
-    },
-    {
-      "line": 219,
-      "value": "Success"
-    },
-    {
-      "line": 226,
+      "line": 232,
       "value": "Failed to capture image: ${e.toString()}"
     },
     {
-      "line": 227,
+      "line": 233,
       "value": "Error"
     },
     {
-      "line": 258,
-      "value": "Image selected from gallery"
-    },
-    {
-      "line": 259,
-      "value": "Success"
-    },
-    {
-      "line": 267,
-      "value": "Failed to pick image from gallery. Please try again."
-    },
-    {
-      "line": 268,
-      "value": "Error"
-    },
-    {
-      "line": 278,
-      "value": "Copied"
-    },
-    {
-      "line": 287,
-      "value": "Please upload a payment proof file"
-    },
-    {
-      "line": 346,
+      "line": 360,
       "value": "Error while submitting deposit: $e"
     },
     {
-      "line": 359,
-      "value": "Please upload a payment proof file"
-    },
-    {
-      "line": 415,
+      "line": 431,
       "value": "Error while submitting deposit: $e"
     },
     {
-      "line": 429,
-      "value": "Please select a network"
-    },
-    {
-      "line": 471,
-      "value": "Deposit address created. Send crypto to the address shown."
-    },
-    {
-      "line": 475,
-      "value": "No deposit address or checkout URL returned"
-    },
-    {
-      "line": 489,
+      "line": 512,
       "value": "Error creating deposit address: $e"
-    },
-    {
-      "line": 517,
-      "value": "Please generate a deposit address first"
     }
   ],
   "lib/screens/finance/view_models/internal_transfer_history_controller.dart": [
@@ -5725,243 +5169,227 @@
   ],
   "lib/screens/finance/view_models/transaction_history_controller.dart": [
     {
-      "line": 203,
+      "line": 204,
       "value": "\\n⚠️⚠️⚠️ TRANSACTION HISTORY CONTROLLER: fetchTransactionHistory() CALLED ⚠️⚠️⚠️\\n"
     },
     {
-      "line": 215,
+      "line": 216,
       "value": "⚠️⚠️⚠️ TRANSACTION HISTORY CONTROLLER - MT5 Accounts Response: $data"
     },
     {
-      "line": 230,
+      "line": 231,
       "value": ": Updated mt5Accounts observable with ${accounts.length} accounts"
     },
     {
-      "line": 277,
+      "line": 278,
       "value": "📤 TRANSACTION HISTORY API REQUEST"
     },
     {
-      "line": 286,
+      "line": 287,
       "value": "Token exists: ${token != null && token.isNotEmpty}"
     },
     {
-      "line": 311,
+      "line": 312,
       "value": "📥 TRANSACTION HISTORY API RESPONSE"
     },
     {
-      "line": 317,
+      "line": 318,
       "value": "Has Data: ${response.data != null}"
     },
     {
-      "line": 332,
+      "line": 333,
       "value": "Response Data Type: ${response.data.runtimeType}"
     },
     {
-      "line": 372,
+      "line": 373,
       "value": "Data keys: ${data.keys.toList()}"
     },
     {
-      "line": 393,
+      "line": 394,
       "value": "Data value type: ${dataValue.runtimeType}"
     },
     {
-      "line": 399,
+      "line": 400,
       "value": "Data is List with ${dataValue.length} items"
     },
     {
-      "line": 405,
+      "line": 406,
       "value": "First item: ${dataValue[0]}"
     },
     {
-      "line": 412,
+      "line": 413,
       "value": "Data is Map with keys: ${dataValue.keys.toList()}"
     },
     {
-      "line": 429,
+      "line": 430,
       "value": "✅ Successfully parsed Transaction model"
     },
     {
-      "line": 435,
+      "line": 436,
       "value": "❌ ERROR PARSING TRANSACTION MODEL"
     },
     {
-      "line": 443,
+      "line": 444,
       "value": "Error parsing transaction data: $parseError"
     },
     {
-      "line": 458,
+      "line": 459,
       "value": "Transaction Response Success: ${transactionResponse.success}"
     },
     {
-      "line": 462,
+      "line": 463,
       "value": "Transaction Response Message: ${transactionResponse.message}"
     },
     {
-      "line": 466,
+      "line": 467,
       "value": "Transactions Count: ${transactionResponse.data?.length ?? 0}"
     },
     {
-      "line": 471,
+      "line": 472,
       "value": "Current Page: ${transactionResponse.pagination?.currentPage ??"
     },
     {
-      "line": 475,
+      "line": 476,
       "value": "Last Page: ${transactionResponse.pagination?.lastPage ??"
     },
     {
-      "line": 479,
+      "line": 480,
       "value": "Per Page: ${transactionResponse.pagination?.perPage ??"
     },
     {
-      "line": 483,
+      "line": 484,
       "value": "Total: ${transactionResponse.pagination?.total ??"
     },
     {
-      "line": 494,
+      "line": 495,
       "value": "Current Page: ${transactionResponse.pagination?.currentPage ??"
     },
     {
-      "line": 497,
+      "line": 498,
       "value": "Last Page: ${transactionResponse.pagination?.lastPage ??"
     },
     {
-      "line": 500,
+      "line": 501,
       "value": "Per Page: ${transactionResponse.pagination?.perPage ??"
     },
     {
-      "line": 507,
+      "line": 508,
       "value": "Transaction Details (first 3):"
     },
     {
-      "line": 516,
+      "line": 517,
       "value": "Type: ${tx.transactionType ?? tx.type}"
     },
     {
-      "line": 522,
+      "line": 523,
       "value": "Account: ${tx.mt5AccountId}"
     },
     {
-      "line": 526,
+      "line": 527,
       "value": "Created: ${tx.createdAt}"
     },
     {
-      "line": 530,
+      "line": 531,
       "value": "Reference: ${tx.referenceNumber}"
     },
     {
-      "line": 544,
+      "line": 545,
       "value": "⚠️ WARNING: transactionResponse.data is null or empty!"
     },
     {
-      "line": 548,
+      "line": 549,
       "value": "transactionResponse.data == null: ${transactionResponse.data == null}"
     },
     {
-      "line": 553,
+      "line": 554,
       "value": "transactionResponse.data == null: ${transactionResponse.data == null}"
     },
     {
-      "line": 557,
+      "line": 558,
       "value": "transactionResponse.data.length: ${transactionResponse.data!.length}"
     },
     {
-      "line": 561,
+      "line": 562,
       "value": "transactionResponse.data.length: ${transactionResponse.data!.length}"
     },
     {
-      "line": 581,
+      "line": 582,
       "value": "✅ Updated userTransactions list"
     },
     {
-      "line": 585,
+      "line": 586,
       "value": "Before: $beforeCount transactions"
     },
     {
-      "line": 589,
+      "line": 590,
       "value": "After: $afterCount transactions"
     },
     {
-      "line": 593,
+      "line": 594,
       "value": "Added: ${afterCount - beforeCount} transactions"
     },
     {
-      "line": 618,
+      "line": 619,
       "value": "❌ ERROR: transactionResponse.data is null, cannot update list"
     },
     {
-      "line": 622,
+      "line": 623,
       "value": "❌ ERROR: transactionResponse.data is null, cannot update list"
     },
     {
-      "line": 628,
+      "line": 629,
       "value": "❌ Transaction History API failed"
     },
     {
-      "line": 641,
-      "value": "Failed to fetch user transactions"
-    },
-    {
-      "line": 661,
+      "line": 664,
       "value": "Error while fetching user transactions: $e"
     },
     {
-      "line": 666,
+      "line": 669,
       "value": "✅ fetchUserTransactions completed. Loading: false"
     },
     {
-      "line": 742,
+      "line": 745,
       "value": "exception:$e"
     },
     {
-      "line": 765,
+      "line": 768,
       "value": "🔍 TRANSACTION HISTORY STATE DEBUG"
     },
     {
-      "line": 770,
+      "line": 773,
       "value": "User Transactions Count: ${userTransactions.length}"
     },
     {
-      "line": 777,
+      "line": 780,
       "value": "Success Message: $successMessage"
     },
     {
-      "line": 785,
+      "line": 788,
       "value": "Type: ${first.transactionType}"
     },
     {
-      "line": 809,
-      "value": "Downloading receipt..."
-    },
-    {
-      "line": 813,
+      "line": 820,
       "value": "Authorization"
     },
     {
-      "line": 813,
+      "line": 820,
       "value": "Bearer $token"
     },
     {
-      "line": 861,
+      "line": 868,
       "value": "${dir.path}/receipt_$id.$extension"
     },
     {
-      "line": 865,
-      "value": "Receipt downloaded successfully"
-    },
-    {
-      "line": 872,
+      "line": 881,
       "value": "Could not open file: ${result.message}"
     },
     {
-      "line": 876,
-      "value": "Proof not available"
-    },
-    {
-      "line": 879,
+      "line": 892,
       "value": "Failed to download receipt: ${response.statusCode}"
     },
     {
-      "line": 883,
+      "line": 896,
       "value": "Download error: $e"
     }
   ],
@@ -6171,43 +5599,43 @@
       "value": "${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}"
     },
     {
-      "line": 287,
+      "line": 291,
       "value": "#$accNumber"
     },
     {
-      "line": 328,
+      "line": 332,
       "value": "${profit >= 0 ?"
     },
     {
-      "line": 396,
+      "line": 400,
       "value": "${targets.length}"
     },
     {
-      "line": 583,
+      "line": 587,
       "value": "${symbolPositions.length}"
     },
     {
-      "line": 629,
+      "line": 633,
       "value": "${totalPL >= 0 ?"
     },
     {
-      "line": 1663,
+      "line": 1672,
       "value": "$sideLabel $kindLabel"
     },
     {
-      "line": 1969,
+      "line": 1978,
       "value": "$label:"
     },
     {
-      "line": 2186,
+      "line": 2195,
       "value": "$count"
     },
     {
-      "line": 2715,
+      "line": 2724,
       "value": "${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}"
     },
     {
-      "line": 2724,
+      "line": 2733,
       "value": "${symbol.replaceAll("
     }
   ],
@@ -6507,7 +5935,7 @@
       "value": "🔧 VantageChartLayout: onSettingsTap fired, onNavigateToTab=${widget.onNavigateToTab != null}"
     },
     {
-      "line": 941,
+      "line": 945,
       "value": "${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${widget.isDark ?"
     }
   ],
@@ -6581,63 +6009,79 @@
       "value": "Sell Limit"
     },
     {
-      "line": 1087,
+      "line": 1081,
+      "value": "Take Profit"
+    },
+    {
+      "line": 1090,
       "value": "tp_pnl_${_pnlCalculationKey}_$value"
     },
     {
-      "line": 1154,
+      "line": 1148,
+      "value": "Stop Loss"
+    },
+    {
+      "line": 1157,
       "value": "sl_pnl_${_pnlCalculationKey}_$value"
     },
     {
-      "line": 1227,
+      "line": 1218,
       "value": "Take Profit"
     },
     {
-      "line": 1228,
+      "line": 1220,
       "value": "Stop Loss"
     },
     {
-      "line": 1238,
+      "line": 1243,
       "value": "Take Profit"
-    },
-    {
-      "line": 1239,
-      "value": "Stop Loss"
     },
     {
       "line": 1244,
-      "value": "Take Profit"
-    },
-    {
-      "line": 1245,
       "value": "Stop Loss"
     },
     {
-      "line": 1248,
+      "line": 1254,
       "value": "Take Profit"
-    },
-    {
-      "line": 1249,
-      "value": "Stop Loss"
     },
     {
       "line": 1255,
-      "value": "Take Profit"
-    },
-    {
-      "line": 1256,
       "value": "Stop Loss"
     },
     {
-      "line": 1262,
+      "line": 1260,
       "value": "Take Profit"
     },
     {
-      "line": 1263,
+      "line": 1261,
       "value": "Stop Loss"
     },
     {
-      "line": 1371,
+      "line": 1264,
+      "value": "Take Profit"
+    },
+    {
+      "line": 1265,
+      "value": "Stop Loss"
+    },
+    {
+      "line": 1271,
+      "value": "Take Profit"
+    },
+    {
+      "line": 1272,
+      "value": "Stop Loss"
+    },
+    {
+      "line": 1278,
+      "value": "Take Profit"
+    },
+    {
+      "line": 1279,
+      "value": "Stop Loss"
+    },
+    {
+      "line": 1387,
       "value": "\\$${PrecisionHelper.formatPnL(pnl, decimals: digits)}"
     }
   ],
@@ -6647,11 +6091,11 @@
       "value": "1:$leverage"
     },
     {
-      "line": 204,
+      "line": 209,
       "value": "Failed to change leverage"
     },
     {
-      "line": 208,
+      "line": 213,
       "value": "Error: $e"
     }
   ],
@@ -6717,217 +6161,133 @@
       "value": "Chart: Showing price alert dialog for ${selectedSymbol} at price ${currentPrice} with ${digits} digits"
     },
     {
-      "line": 1114,
-      "value": "Price Debug Info"
-    },
-    {
-      "line": 1121,
-      "value": "Symbol: $selectedSymbol"
-    },
-    {
-      "line": 1128,
-      "value": "Bid Price (SELL): ${PrecisionHelper.formatPrice(bidPrice, decimals: _getCurrentDigits())}"
-    },
-    {
-      "line": 1131,
-      "value": "Ask Price (BUY): ${PrecisionHelper.formatPrice(askPrice, decimals: _getCurrentDigits())}"
-    },
-    {
-      "line": 1134,
-      "value": "Market Price (Alert): ${PrecisionHelper.formatPrice(marketPrice, decimals: _getCurrentDigits())}"
-    },
-    {
-      "line": 1142,
-      "value": "Monitoring Status:"
-    },
-    {
-      "line": 1153,
-      "value": "Active Alerts:"
-    },
-    {
-      "line": 1168,
-      "value": "No active alerts"
-    },
-    {
-      "line": 1175,
-      "value": "Test Actions:"
-    },
-    {
-      "line": 1199,
+      "line": 1200,
       "value": "Test alert added: $selectedSymbol above 1.80950"
     },
     {
-      "line": 1207,
-      "value": "Add Test Alert\\n(1.80950 above)"
-    },
-    {
-      "line": 1231,
-      "value": "Test Trigger\\nNow"
-    },
-    {
-      "line": 1252,
-      "value": "Test notification sent!"
-    },
-    {
-      "line": 1260,
-      "value": "Test Notification\\nSystem"
-    },
-    {
-      "line": 1286,
-      "value": "ChartSocket connection checked!"
-    },
-    {
-      "line": 1294,
-      "value": "Fix WebSocket\\nConnection"
-    },
-    {
-      "line": 1310,
-      "value": "Close"
-    },
-    {
-      "line": 1318,
+      "line": 1329,
       "value": "Debug info error: $e"
     },
     {
-      "line": 1340,
+      "line": 1351,
       "value": "Test alert triggered! Check notifications. Current: $selectedSymbol at \\$${PrecisionHelper.formatPrice(currentPrice, decimals: _getCurrentDigits())}"
     },
     {
-      "line": 1347,
+      "line": 1358,
       "value": "Test failed: $e"
     },
     {
-      "line": 1553,
+      "line": 1564,
       "value": "📊 Chart Screen: Detected symbol change from ValueNotifier (from instrument screen): $notifierSymbol"
     },
     {
-      "line": 1567,
+      "line": 1578,
       "value": "📊 Chart Screen: No symbol set, using default cached/notifier: $defaultSymbol"
     },
     {
-      "line": 1594,
+      "line": 1605,
       "value": "📊 Chart: Updating symbol dynamically from instruments: ${preferredInstrument.symbol}"
     },
     {
-      "line": 1807,
-      "value": "Change: ${isPositive ?"
-    },
-    {
-      "line": 1923,
+      "line": 1934,
       "value": "${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}"
     },
     {
-      "line": 1961,
+      "line": 1975,
       "value": "Cannot find preferred instrument: instruments list is empty"
     },
     {
-      "line": 1968,
+      "line": 1982,
       "value": "XAUUSD.C"
     },
     {
-      "line": 1969,
+      "line": 1983,
       "value": "XAUUSD.R"
     },
     {
-      "line": 1970,
+      "line": 1984,
       "value": "XAUUSD."
     },
     {
-      "line": 2098,
+      "line": 2112,
       "value": "Active"
     },
     {
-      "line": 2098,
+      "line": 2112,
       "value": "Market closed"
     },
     {
-      "line": 2421,
+      "line": 2435,
       "value": "${accountController.activeMT5Account?.metaAccountNumber}"
     },
     {
-      "line": 2422,
+      "line": 2436,
       "value": "${selectedSymbol}"
     },
     {
-      "line": 2492,
+      "line": 2506,
       "value": "⚠️ Warning: Could not parse execution price: $executionPrice"
     },
     {
-      "line": 2658,
+      "line": 2672,
       "value": "${accountController.activeMT5Account?.metaAccountNumber}"
     },
     {
-      "line": 2659,
+      "line": 2673,
       "value": "${selectedSymbol}"
     },
     {
-      "line": 2729,
+      "line": 2743,
       "value": "⚠️ Warning: Could not parse execution price: $executionPrice"
     },
     {
-      "line": 3108,
+      "line": 3122,
       "value": "${price.toStringAsFixed(2)}"
     },
     {
-      "line": 3184,
-      "value": "Take Profit"
-    },
-    {
-      "line": 3417,
-      "value": "Stop Loss"
-    },
-    {
-      "line": 3668,
-      "value": "$symbol $type $volume done"
-    },
-    {
-      "line": 3704,
+      "line": 3719,
       "value": "${accountController.activeMT5Account?.metaAccountNumber}"
     },
     {
-      "line": 3722,
+      "line": 3737,
       "value": "Buy"
     },
     {
-      "line": 3722,
+      "line": 3737,
       "value": "Sell"
     },
     {
-      "line": 3741,
-      "value": "Failed to place order: $error"
-    },
-    {
-      "line": 4309,
+      "line": 4327,
       "value": "Take Profit"
     },
     {
-      "line": 4311,
+      "line": 4329,
       "value": "Stop Loss"
     },
     {
-      "line": 4494,
+      "line": 4514,
       "value": "MMM dd, yyyy"
     },
     {
-      "line": 4844,
+      "line": 4868,
       "value": "Asset Price"
     },
     {
-      "line": 4848,
+      "line": 4872,
       "value": "Profit in \\$"
     },
     {
-      "line": 4876,
+      "line": 4900,
       "value": "$time +$value% S:${value.split("
     },
     {
-      "line": 4876,
+      "line": 4900,
       "value": ")[0]}.${value.split("
     }
   ],
   "lib/screens/home/choose_account_screen.dart": [
     {
-      "line": 192,
+      "line": 197,
       "value": "${accountType.tradingPlatform ??"
     }
   ],
@@ -6953,99 +6313,91 @@
       "value": "🚀 _editOrder: Calling API with TP: $finalTakeProfit, SL: $finalStopLoss"
     },
     {
-      "line": 687,
-      "value": "${widget.position.action} ${widget.position.volume} $_displaySymbol at ${widget.position.openPrice}"
+      "line": 691,
+      "value": "${widget.position.volume}"
     },
     {
-      "line": 828,
+      "line": 693,
+      "value": "${widget.position.openPrice}"
+    },
+    {
+      "line": 836,
       "value": "${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$symbol&theme=${AppColors.chartTheme}"
     },
     {
-      "line": 1337,
+      "line": 1345,
       "value": "Take Profit"
     },
     {
-      "line": 1400,
+      "line": 1408,
       "value": "Take Profit"
     },
     {
-      "line": 1414,
+      "line": 1422,
       "value": "Potential Profit at TP"
     },
     {
-      "line": 1424,
+      "line": 1432,
       "value": "Potential Profit at TP"
     },
     {
-      "line": 1438,
+      "line": 1446,
       "value": "Stop Loss"
     },
     {
-      "line": 1492,
+      "line": 1500,
       "value": "Stop Loss"
     },
     {
-      "line": 1506,
+      "line": 1514,
       "value": "Potential Loss at SL"
     },
     {
-      "line": 1516,
+      "line": 1524,
       "value": "Potential Loss at SL"
     },
     {
-      "line": 1534,
+      "line": 1542,
       "value": "Take Profit"
     },
     {
-      "line": 1536,
+      "line": 1544,
       "value": "Stop Loss"
     },
     {
-      "line": 1538,
+      "line": 1546,
       "value": "Potential Profit at TP"
     },
     {
-      "line": 1540,
+      "line": 1548,
       "value": "Potential Loss at SL"
     },
     {
-      "line": 1624,
+      "line": 1632,
       "value": "\\$${PrecisionHelper.formatPnL(fullPositionProfit)}"
     },
     {
-      "line": 1649,
-      "value": "${PrecisionHelper.formatVolume(closeVolume)} lots"
-    },
-    {
-      "line": 1665,
+      "line": 1675,
       "value": "\\$${PrecisionHelper.formatPnL(profitLoss)}"
     },
     {
-      "line": 1718,
+      "line": 1728,
       "value": "+$formattedProfitLoss"
     },
     {
-      "line": 1729,
+      "line": 1739,
       "value": "+$formattedProfitLoss"
     },
     {
-      "line": 1754,
+      "line": 1764,
       "value": "Close Trade"
     },
     {
-      "line": 1826,
+      "line": 1836,
       "value": "Take Profit"
     },
     {
-      "line": 1828,
-      "value": "Stop Loss"
-    },
-    {
-      "line": 1860,
-      "value": "Take Profit"
-    },
-    {
-      "line": 1862,
+      "line": 1838,
       "value": "Stop Loss"
     },
     {
@@ -7057,59 +6409,67 @@
       "value": "Stop Loss"
     },
     {
-      "line": 1883,
+      "line": 1880,
       "value": "Take Profit"
     },
     {
-      "line": 1885,
+      "line": 1882,
       "value": "Stop Loss"
     },
     {
-      "line": 1912,
+      "line": 1893,
       "value": "Take Profit"
     },
     {
-      "line": 1914,
+      "line": 1895,
       "value": "Stop Loss"
     },
     {
-      "line": 1935,
+      "line": 1922,
       "value": "Take Profit"
     },
     {
-      "line": 1937,
+      "line": 1924,
       "value": "Stop Loss"
     },
     {
-      "line": 1994,
+      "line": 1945,
+      "value": "Take Profit"
+    },
+    {
+      "line": 1947,
+      "value": "Stop Loss"
+    },
+    {
+      "line": 2004,
       "value": "ClosePositionScreen: Symbol details not found in cache for ${widget.position.symbol}"
     },
     {
-      "line": 2002,
+      "line": 2012,
       "value": "ClosePositionScreen: Invalid contract size for ${widget.position.symbol}"
-    },
-    {
-      "line": 2039,
-      "value": "ClosePositionScreen: SL P&L - Invalid SL price: ${stopLossController.text}"
     },
     {
       "line": 2049,
+      "value": "ClosePositionScreen: SL P&L - Invalid SL price: ${stopLossController.text}"
+    },
+    {
+      "line": 2059,
       "value": "ClosePositionScreen: SL P&L - Invalid entry price: ${widget.position.entryPrice}"
     },
     {
-      "line": 2055,
+      "line": 2065,
       "value": "ClosePositionScreen: SL P&L - Calculating for symbol: ${widget.position.symbol}"
     },
     {
-      "line": 2062,
+      "line": 2072,
       "value": "ClosePositionScreen: SL P&L - Symbol details not found in cache for ${widget.position.symbol}"
     },
     {
-      "line": 2074,
+      "line": 2084,
       "value": "ClosePositionScreen: Invalid contract size for ${widget.position.symbol}"
     },
     {
-      "line": 2225,
+      "line": 2235,
       "value": "\\$${PrecisionHelper.formatPnL(pnl, decimals: digits)}"
     }
   ],
@@ -7159,119 +6519,119 @@
       "value": "• $leverage"
     },
     {
-      "line": 1142,
+      "line": 1144,
       "value": "\\$${balance.toStringAsFixed(2)}"
     },
     {
-      "line": 1177,
+      "line": 1181,
       "value": "${pnl >= 0 ?"
     },
     {
-      "line": 1177,
+      "line": 1181,
       "value": "}\\$${pnl.abs().toStringAsFixed(2)}"
     },
     {
-      "line": 1206,
+      "line": 1210,
       "value": "\\$${equity.toStringAsFixed(2)}"
     },
     {
-      "line": 1214,
+      "line": 1218,
       "value": "\\$${margin.toStringAsFixed(2)}"
     },
     {
-      "line": 1222,
+      "line": 1226,
       "value": "\\$${marginFree.toStringAsFixed(2)}"
     },
     {
-      "line": 1242,
+      "line": 1246,
       "value": "${account.tradingServer.capitalizeFirst} • ${account.masterGroupId}"
     },
     {
-      "line": 2019,
+      "line": 2023,
       "value": "\\$${accountInfo.equity.toStringAsFixed(2)}"
     },
     {
-      "line": 2020,
+      "line": 2024,
       "value": "\\$${account.equity}"
     },
     {
-      "line": 2058,
+      "line": 2062,
       "value": "${account.accountType.capitalizeFirst}\\t\\t"
     },
     {
-      "line": 2074,
+      "line": 2078,
       "value": "\\t${account.masterGroupId}"
     },
     {
-      "line": 2437,
+      "line": 2441,
       "value": "\\$${accountInfo.equity.toStringAsFixed(2)}"
     },
     {
-      "line": 2438,
+      "line": 2442,
       "value": "\\$${account.equity}"
     },
     {
-      "line": 3028,
+      "line": 3035,
       "value": "${account.masterGroupId}"
     },
     {
-      "line": 3059,
+      "line": 3066,
       "value": "$symbol${accountInfo.equity.toStringAsFixed(2)} $code"
     },
     {
-      "line": 3066,
+      "line": 3073,
       "value": "$symbol${account.equity} $code"
     },
     {
-      "line": 3098,
+      "line": 3105,
       "value": "$symbol${accountInfo.balance.toStringAsFixed(2)} $code"
     },
     {
-      "line": 3099,
+      "line": 3106,
       "value": "$symbol${account.balance} $code"
     },
     {
-      "line": 3115,
+      "line": 3122,
       "value": "$symbol${accountInfo.equity.toStringAsFixed(2)} $code"
     },
     {
-      "line": 3116,
+      "line": 3123,
       "value": "$symbol${account.equity} $code"
     },
     {
-      "line": 3129,
+      "line": 3136,
       "value": "$symbol$value $code"
     },
     {
-      "line": 3140,
+      "line": 3147,
       "value": "$symbol${accountInfo.margin.toStringAsFixed(2)} $code"
     },
     {
-      "line": 3141,
+      "line": 3148,
       "value": "$symbol${account.margin} $code"
     },
     {
-      "line": 3152,
+      "line": 3159,
       "value": "$symbol${accountInfo.marginFree.toStringAsFixed(2)} $code"
     },
     {
-      "line": 3153,
+      "line": 3160,
       "value": "$symbol${account.freeMargin} $code"
     },
     {
-      "line": 3159,
+      "line": 3166,
       "value": "${accountInfo.marginLevel.toStringAsFixed(2)}%"
     },
     {
-      "line": 3162,
+      "line": 3169,
       "value": "${account.marginLevel}%"
     },
     {
-      "line": 3579,
+      "line": 3586,
       "value": "Error: $e"
     },
     {
-      "line": 3904,
+      "line": 3914,
       "value": "Error: $e"
     }
   ],
@@ -7521,11 +6881,11 @@
   ],
   "lib/screens/home/iquote_home_screen.dart": [
     {
-      "line": 409,
+      "line": 429,
       "value": "${item.symbol.replaceAll("
     },
     {
-      "line": 574,
+      "line": 594,
       "value": "$sign${changePct.abs().toStringAsFixed(2)}%"
     }
   ],
@@ -7655,119 +7015,75 @@
   ],
   "lib/screens/home/more/copytrading/master_dashboard_overview_tab.dart": [
     {
-      "line": 57,
+      "line": 59,
       "value": "overview-${overview.range.preset}-"
     },
     {
-      "line": 58,
+      "line": 60,
       "value": "${overview.range.from}-${overview.range.to}"
     },
     {
-      "line": 73,
+      "line": 75,
       "value": "$from → $to"
     },
     {
-      "line": 295,
+      "line": 297,
       "value": "${copiers.current}"
     },
     {
-      "line": 298,
+      "line": 300,
       "value": "${copiers.delta > 0 ?"
     },
     {
-      "line": 320,
+      "line": 322,
       "value": "${roi.currentPct.toStringAsFixed(2)}%"
     },
     {
-      "line": 492,
+      "line": 494,
       "value": "${value >= 0 ?"
     },
     {
-      "line": 496,
+      "line": 498,
       "value": "${positive ?"
     },
     {
-      "line": 497,
+      "line": 499,
       "value": "${absVal.toStringAsFixed(2)}$suffix"
     },
     {
-      "line": 848,
-      "value": "Jan"
-    },
-    {
-      "line": 849,
-      "value": "Feb"
-    },
-    {
-      "line": 850,
-      "value": "Mar"
-    },
-    {
-      "line": 851,
-      "value": "Apr"
-    },
-    {
-      "line": 853,
-      "value": "Jun"
-    },
-    {
-      "line": 854,
-      "value": "Jul"
-    },
-    {
-      "line": 855,
-      "value": "Aug"
-    },
-    {
-      "line": 856,
-      "value": "Sep"
-    },
-    {
-      "line": 857,
-      "value": "Oct"
-    },
-    {
-      "line": 858,
-      "value": "Nov"
-    },
-    {
-      "line": 859,
-      "value": "Dec"
-    },
-    {
-      "line": 915,
+      "line": 917,
       "value": "${days}d"
     },
     {
-      "line": 957,
+      "line": 959,
       "value": "$total"
     },
     {
-      "line": 999,
+      "line": 1001,
       "value": "${health.newInWindow}"
     },
     {
-      "line": 1005,
+      "line": 1007,
       "value": "${health.churnedInWindow}"
     },
     {
-      "line": 1017,
+      "line": 1019,
       "value": "${health.retentionPct.toStringAsFixed(0)}%"
     },
     {
-      "line": 1096,
+      "line": 1098,
       "value": "$value"
     },
     {
-      "line": 1235,
+      "line": 1237,
       "value": "${plan.activeCopiersCount}"
     },
     {
-      "line": 1241,
+      "line": 1245,
       "value": "${positive ?"
     },
     {
-      "line": 1520,
+      "line": 1525,
       "value": "$sign\\$${v.abs().toStringAsFixed(2)}"
     }
   ],
@@ -7815,10 +7131,6 @@
     {
       "line": 858,
       "value": "${dt.hour.toString().padLeft(2,"
-    },
-    {
-      "line": 861,
-      "value": "$t\\nTrade: \\$${point.profit.toStringAsFixed(2)}\\nCumulative: \\$${point.cumulativeProfit.toStringAsFixed(2)}"
     },
     {
       "line": 942,
@@ -8403,31 +7715,27 @@
       "value": "${_openPositions.length}"
     },
     {
-      "line": 1357,
-      "value": "${lot.toStringAsFixed(2)} lot"
-    },
-    {
-      "line": 1452,
+      "line": 1454,
       "value": "${_trades.length}"
     },
     {
-      "line": 1569,
+      "line": 1571,
       "value": "${diff.inDays}d ${diff.inHours % 24}h"
     },
     {
-      "line": 1571,
+      "line": 1573,
       "value": "${diff.inHours}h ${diff.inMinutes % 60}m"
     },
     {
-      "line": 1573,
+      "line": 1575,
       "value": "${diff.inMinutes}m"
     },
     {
-      "line": 1628,
+      "line": 1630,
       "value": "+\\$${profit.toStringAsFixed(2)}"
     },
     {
-      "line": 1629,
+      "line": 1631,
       "value": "-\\$${profit.abs().toStringAsFixed(2)}"
     }
   ],
@@ -8621,10 +7929,6 @@
     {
       "line": 112,
       "value": "$label:"
-    },
-    {
-      "line": 333,
-      "value": "Failed to load investor details"
     }
   ],
   "lib/screens/home/more/pmam/pmam_manager_plan_detail_screen.dart": [
@@ -8775,23 +8079,19 @@
       "value": "Bearer $token"
     },
     {
-      "line": 339,
-      "value": "Could not download attachment (${response.statusCode})"
+      "line": 341,
+      "value": "${response.statusCode}"
     },
     {
-      "line": 347,
+      "line": 350,
       "value": "attachment_${DateTime.now().millisecondsSinceEpoch}"
     },
     {
-      "line": 348,
+      "line": 351,
       "value": "${dir.path}/$safeName"
     },
     {
-      "line": 354,
-      "value": "Could not open attachment: ${result.message}"
-    },
-    {
-      "line": 358,
+      "line": 362,
       "value": "Could not open attachment: $e"
     }
   ],
@@ -9287,19 +8587,19 @@
       "value": "${_orderTypeLabel(orderType)} $_displaySymbol"
     },
     {
-      "line": 770,
+      "line": 774,
       "value": "${selectedSymbol}|${accountController.activeMT5Account?.metaAccountNumber ??"
     },
     {
-      "line": 913,
+      "line": 917,
       "value": "${selectedSymbol}|${accountController.activeMT5Account?.metaAccountNumber ??"
     },
     {
-      "line": 952,
+      "line": 956,
       "value": "$accountNumberStr|$selectedSymbol"
     },
     {
-      "line": 1010,
+      "line": 1014,
       "value": "${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$effectiveDatafeedSymbol&theme=$themeParam"
     }
   ],
@@ -9339,159 +8639,135 @@
       "value": "Sell"
     },
     {
-      "line": 959,
+      "line": 962,
       "value": "${positions.length}"
     },
     {
-      "line": 961,
+      "line": 964,
       "value": "\\$${PrecisionHelper.formatPnL(totalProfitLoss)}"
     },
     {
-      "line": 1118,
+      "line": 1121,
       "value": "All"
     },
     {
-      "line": 1394,
+      "line": 1400,
       "value": "$displaySymbol"
     },
     {
-      "line": 1402,
+      "line": 1408,
       "value": "${position.action.toLowerCase()} ${position.volume}"
     },
     {
-      "line": 1418,
+      "line": 1424,
       "value": "${position.entryPrice} -> ${position.currentPrice}"
     },
     {
-      "line": 1446,
+      "line": 1452,
       "value": "\\$${PrecisionHelper.formatPnL(position.profitLoss)}"
     },
     {
-      "line": 1624,
+      "line": 1630,
       "value": "${PrecisionHelper.formatPnL(position.profitLoss)}"
     },
     {
-      "line": 1672,
+      "line": 1678,
       "value": "${position.action.toUpperCase()} ${position.volume}"
     },
     {
-      "line": 1699,
+      "line": 1705,
       "value": "${position.entryPrice} → ${position.currentPrice}"
     },
     {
-      "line": 1752,
+      "line": 1758,
       "value": "${position.action.toUpperCase()} ${position.volume}"
     },
     {
-      "line": 1763,
+      "line": 1769,
       "value": "${position.entryPrice} -> ${position.currentPrice}"
     },
     {
-      "line": 2376,
+      "line": 2382,
       "value": "${startDate!.day}/${startDate!.month}/${startDate!.year}"
     },
     {
-      "line": 2459,
+      "line": 2465,
       "value": "${endDate!.day}/${endDate!.month}/${endDate!.year}"
     },
     {
-      "line": 2777,
+      "line": 2783,
       "value": "\\$${PrecisionHelper.formatPnL(currentProfitLoss)}"
     },
     {
-      "line": 2797,
+      "line": 2803,
       "value": "Buy"
     },
     {
-      "line": 2808,
+      "line": 2814,
       "value": "${currentPosition.action}"
     },
     {
-      "line": 2816,
+      "line": 2822,
       "value": "${currentPosition.volume}"
     },
     {
-      "line": 2831,
-      "value": "Order: ${currentPosition.entryPrice} | Current: ${currentPosition.currentPrice}"
-    },
-    {
-      "line": 2832,
+      "line": 2844,
       "value": "${currentPosition.entryPrice} → ${currentPosition.currentPrice}"
     },
     {
-      "line": 2854,
-      "value": "SL: ${currentPosition.stopLoss}"
-    },
-    {
-      "line": 2869,
-      "value": "TP: ${currentPosition.takeProfit}"
-    },
-    {
-      "line": 2898,
-      "value": "ID: ${currentPosition.orderId}"
-    },
-    {
-      "line": 2912,
-      "value": "Open: ${_formatPositionTime(displayOpenTime)}"
-    },
-    {
-      "line": 2920,
-      "value": "Swap: ${_formatSwapValue(displaySwap)}"
-    },
-    {
-      "line": 3265,
+      "line": 3285,
       "value": "$count"
     },
     {
-      "line": 3274,
+      "line": 3294,
       "value": "+\\$${PrecisionHelper.formatPnL(pnl)}"
     },
     {
-      "line": 3281,
+      "line": 3301,
       "value": "\\$${PrecisionHelper.formatPnL(pnl)}"
     },
     {
-      "line": 3292,
+      "line": 3312,
       "value": "🔘 Bottom sheet confirm button clicked!"
     },
     {
-      "line": 3295,
+      "line": 3315,
       "value": "📊 Selected option: $selectedOption"
     },
     {
-      "line": 3394,
+      "line": 3414,
       "value": "\\$${PrecisionHelper.formatPnL(profitLoss)}"
     },
     {
-      "line": 3585,
+      "line": 3605,
       "value": "${position.volume}"
     },
     {
-      "line": 3593,
+      "line": 3613,
       "value": "${position.volume}"
     },
     {
-      "line": 3785,
+      "line": 3805,
       "value": "${position.volume}"
     },
     {
-      "line": 3843,
+      "line": 3863,
       "value": "🔘 CANCEL ORDER BUTTON CLICKED IN DIALOG!"
     },
     {
-      "line": 4272,
+      "line": 4292,
       "value": "$displayValue%"
     },
     {
-      "line": 4390,
+      "line": 4410,
       "value": "#${position.orderId}"
     },
     {
-      "line": 4415,
+      "line": 4435,
       "value": "$label1:"
     },
     {
-      "line": 4446,
+      "line": 4466,
       "value": "$label2:"
     }
   ],
@@ -9515,11 +8791,7 @@
       "value": "${masterGroup.id}_${category.id}"
     },
     {
-      "line": 197,
-      "value": "Failed to save group: $e"
-    },
-    {
-      "line": 673,
+      "line": 675,
       "value": "${masterGroup.id}_${category.id}"
     }
   ],
@@ -9543,91 +8815,87 @@
       "value": "sub-ib"
     },
     {
-      "line": 240,
-      "value": "$userFullName (You)"
+      "line": 311,
+      "value": "${ibController.ibClients.length}"
     },
     {
-      "line": 308,
-      "value": "${ibController.ibClients.length} clients"
-    },
-    {
-      "line": 377,
+      "line": 381,
       "value": "\\$${(stats.totalDeposited ?? 0).toStringAsFixed(2)}"
     },
     {
-      "line": 383,
+      "line": 387,
       "value": "\\$${(stats.totalWithdrawal ?? 0).toStringAsFixed(2)}"
     },
     {
-      "line": 391,
+      "line": 395,
       "value": "\\$${stats.availableRebate ??"
     },
     {
-      "line": 611,
+      "line": 615,
       "value": "🔍 Building client list with ${filteredClients.length} clients (key: ${controller.clientsDataKey.value})"
     },
     {
-      "line": 630,
+      "line": 634,
       "value": "sub-ib"
     },
     {
-      "line": 641,
+      "line": 645,
       "value": "🔍 Building sub-IB list with ${filteredSubIBs.length} sub-IBs (key: ${controller.clientsDataKey.value})"
     },
     {
-      "line": 669,
+      "line": 673,
       "value": "🔍 Building trade history with ${filteredTrades.length} trades (key: ${controller.clientsDataKey.value})"
     },
     {
-      "line": 881,
+      "line": 885,
       "value": "\\$${(client.deposit ?? 0.0).toStringAsFixed(2)}"
     },
     {
-      "line": 885,
+      "line": 889,
       "value": "\\$${(client.withdraw ?? 0.0).toStringAsFixed(2)}"
     },
     {
-      "line": 889,
+      "line": 893,
       "value": "\\$${(client.rebate ?? 0.0).toStringAsFixed(2)}"
     },
     {
-      "line": 899,
+      "line": 903,
       "value": "\\$${client.equity!.toStringAsFixed(2)}"
     },
     {
-      "line": 1016,
-      "value": "${subIB.totalClients ?? 0} clients"
-    },
-    {
-      "line": 1030,
-      "value": "${subIB.totalSubIBs ?? 0} sub-IBs"
-    },
-    {
-      "line": 1078,
+      "line": 1021,
       "value": "${subIB.totalClients ?? 0}"
     },
     {
-      "line": 1082,
-      "value": "\\$${(subIB.totalDeposit ?? 0.0).toStringAsFixed(2)}"
-    },
-    {
-      "line": 1086,
-      "value": "\\$${(subIB.totalRebate ?? 0.0).toStringAsFixed(2)}"
-    },
-    {
-      "line": 1090,
+      "line": 1037,
       "value": "${subIB.totalSubIBs ?? 0}"
     },
     {
-      "line": 1165,
+      "line": 1086,
+      "value": "${subIB.totalClients ?? 0}"
+    },
+    {
+      "line": 1090,
+      "value": "\\$${(subIB.totalDeposit ?? 0.0).toStringAsFixed(2)}"
+    },
+    {
+      "line": 1094,
+      "value": "\\$${(subIB.totalRebate ?? 0.0).toStringAsFixed(2)}"
+    },
+    {
+      "line": 1098,
+      "value": "${subIB.totalSubIBs ?? 0}"
+    },
+    {
+      "line": 1173,
       "value": "${trade.symbol ??"
     },
     {
-      "line": 1181,
+      "line": 1189,
       "value": "\\$${trade.profit?.toStringAsFixed(2) ??"
     },
     {
-      "line": 1238,
+      "line": 1246,
       "value": "\\$${trade.profit?.toStringAsFixed(2) ??"
     }
   ],
@@ -9741,15 +9009,15 @@
       "value": "dd MMM yyyy, HH:mm"
     },
     {
-      "line": 410,
-      "value": "Client #${item.toClientUserId}"
+      "line": 412,
+      "value": "${item.toClientUserId}"
     },
     {
-      "line": 424,
+      "line": 427,
       "value": "#${item.id}"
     },
     {
-      "line": 457,
+      "line": 460,
       "value": "\\$${item.amount != null ? (double.tryParse(item.amount!)?.toStringAsFixed(2) ?? item.amount!) : \"0.00\"}"
     }
   ],
@@ -9777,147 +9045,119 @@
       "value": "sub-ib"
     },
     {
-      "line": 853,
-      "value": "$userFullName (You)"
-    },
-    {
-      "line": 947,
+      "line": 949,
       "value": "${ibController.ibClients.length}"
     },
     {
-      "line": 1297,
+      "line": 1299,
       "value": "\\$${(stats.totalDeposited ?? 0.0).toStringAsFixed(2)}"
     },
     {
-      "line": 1302,
+      "line": 1304,
       "value": "\\$${(stats.totalWithdrawal ?? 0.0).toStringAsFixed(2)}"
     },
     {
-      "line": 1308,
+      "line": 1310,
       "value": "\\$${(stats.totalEquity ?? 0.0).toStringAsFixed(2)}"
     },
     {
-      "line": 1323,
+      "line": 1325,
       "value": "\\$${totalRebateValue.toStringAsFixed(2)}"
     },
     {
-      "line": 1330,
+      "line": 1332,
       "value": "\\$${(stats.ibWithdrawalRebate ?? 0.0).toStringAsFixed(2)}"
     },
     {
-      "line": 1337,
+      "line": 1339,
       "value": "\\$${availableRebateValue.toStringAsFixed(2)}"
     },
     {
-      "line": 1420,
+      "line": 1422,
       "value": "sub-ib"
     },
     {
-      "line": 1576,
+      "line": 1578,
       "value": "sub-ib"
     },
     {
-      "line": 1625,
+      "line": 1627,
       "value": "${clientCount}"
     },
     {
-      "line": 1629,
+      "line": 1631,
       "value": "\\$${(client.deposit ?? client.totalDeposit ?? 0.0).toStringAsFixed(2)}"
     },
     {
-      "line": 1633,
+      "line": 1635,
       "value": "\\$${(client.withdraw ?? 0.0).toStringAsFixed(2)}"
     },
     {
-      "line": 1637,
+      "line": 1639,
       "value": "\\$${(client.rebate ?? client.totalRebate ?? 0.0).toStringAsFixed(2)}"
     },
     {
-      "line": 1649,
+      "line": 1651,
       "value": "\\$${client.equity!.toStringAsFixed(2)}"
     },
     {
-      "line": 1653,
+      "line": 1655,
       "value": "$subIbCount"
     },
     {
-      "line": 1701,
+      "line": 1703,
       "value": "sub-ib"
     },
     {
-      "line": 1780,
-      "value": "${clientCount} Clients"
+      "line": 1783,
+      "value": "$clientCount"
     },
     {
-      "line": 1795,
+      "line": 1799,
       "value": "$subIbCount"
-    },
-    {
-      "line": 1872,
-      "value": "${clientCount}"
     },
     {
       "line": 1876,
-      "value": "\\$${(subIB.deposit ?? subIB.totalDeposit ?? 0.0).toStringAsFixed(2)}"
+      "value": "${clientCount}"
     },
     {
       "line": 1880,
-      "value": "\\$${(subIB.withdraw ?? 0.0).toStringAsFixed(2)}"
+      "value": "\\$${(subIB.deposit ?? subIB.totalDeposit ?? 0.0).toStringAsFixed(2)}"
     },
     {
       "line": 1884,
+      "value": "\\$${(subIB.withdraw ?? 0.0).toStringAsFixed(2)}"
+    },
+    {
+      "line": 1888,
       "value": "\\$${(subIB.rebate ?? subIB.totalRebate ?? 0.0).toStringAsFixed(2)}"
     },
     {
-      "line": 1896,
+      "line": 1900,
       "value": "\\$${subIB.equity!.toStringAsFixed(2)}"
     },
     {
-      "line": 1900,
+      "line": 1904,
       "value": "$subIbCount"
     },
     {
-      "line": 2209,
-      "value": "AC: ${client.accountNumber ??"
-    },
-    {
-      "line": 2214,
-      "value": "Lots: ${client.lots?.toStringAsFixed(1) ??"
-    },
-    {
-      "line": 2219,
-      "value": "Rebate: \\$${client.rebate?.toStringAsFixed(2) ??"
-    },
-    {
-      "line": 2362,
-      "value": "Vol: ${trade.volume?.toStringAsFixed(2) ??"
-    },
-    {
-      "line": 2376,
+      "line": 2391,
       "value": "${isProfit ?"
     },
     {
-      "line": 2385,
-      "value": "Comm: \\$${trade.commission?.toStringAsFixed(2) ??"
-    },
-    {
-      "line": 2425,
-      "value": "${trade.volume?.toString() ??"
-    },
-    {
-      "line": 2429,
+      "line": 2449,
       "value": "\\$${trade.commission?.toStringAsFixed(2) ??"
     },
     {
-      "line": 2433,
+      "line": 2453,
       "value": "${isProfit ?"
     },
     {
-      "line": 2455,
+      "line": 2475,
       "value": "${dt.hour.toString().padLeft(2,"
     },
     {
-      "line": 2465,
+      "line": 2485,
       "value": "${dt.day}/${dt.month}/${dt.year} ${dt.hour.toString().padLeft(2,"
     }
   ],
@@ -10213,295 +9453,299 @@
   ],
   "lib/screens/ibm/presentation/pages/ibm_client_profile_screen.dart": [
     {
-      "line": 37,
-      "value": "Today"
-    },
-    {
       "line": 38,
-      "value": "All"
+      "value": "Today"
     },
     {
       "line": 39,
-      "value": "Custom"
+      "value": "All"
     },
     {
-      "line": 43,
-      "value": "Overview"
+      "line": 40,
+      "value": "Custom"
     },
     {
       "line": 44,
-      "value": "Trades"
+      "value": "Overview"
     },
     {
       "line": 45,
-      "value": "Network"
+      "value": "Trades"
     },
     {
       "line": 46,
-      "value": "Symbol-wise commission"
+      "value": "Network"
     },
     {
       "line": 47,
+      "value": "Symbol-wise commission"
+    },
+    {
+      "line": 48,
       "value": "Commission plan"
     },
     {
-      "line": 131,
+      "line": 132,
       "value": "Trades"
-    },
-    {
-      "line": 133,
-      "value": "Network"
     },
     {
       "line": 134,
-      "value": "Symbol-wise commission"
+      "value": "Network"
     },
     {
       "line": 135,
-      "value": "Commission plan"
-    },
-    {
-      "line": 167,
-      "value": "Overview"
-    },
-    {
-      "line": 180,
-      "value": "Trades"
-    },
-    {
-      "line": 187,
-      "value": "Network"
-    },
-    {
-      "line": 194,
       "value": "Symbol-wise commission"
     },
     {
-      "line": 201,
+      "line": 136,
       "value": "Commission plan"
     },
     {
-      "line": 208,
+      "line": 168,
+      "value": "Overview"
+    },
+    {
+      "line": 181,
+      "value": "Trades"
+    },
+    {
+      "line": 188,
+      "value": "Network"
+    },
+    {
+      "line": 195,
+      "value": "Symbol-wise commission"
+    },
+    {
+      "line": 202,
+      "value": "Commission plan"
+    },
+    {
+      "line": 209,
       "value": "Today"
     },
     {
-      "line": 216,
+      "line": 217,
       "value": "All"
     },
     {
-      "line": 218,
+      "line": 219,
       "value": "Custom"
     },
     {
-      "line": 297,
+      "line": 300,
       "value": "\\$$balance"
     },
     {
-      "line": 401,
-      "value": "Trades"
-    },
-    {
-      "line": 403,
-      "value": "Network"
-    },
-    {
       "line": 405,
-      "value": "Symbol-wise commission"
+      "value": "Trades"
     },
     {
       "line": 407,
-      "value": "Commission plan"
+      "value": "Network"
     },
     {
       "line": 409,
+      "value": "Symbol-wise commission"
+    },
+    {
+      "line": 411,
+      "value": "Commission plan"
+    },
+    {
+      "line": 413,
       "value": "Overview"
     },
     {
-      "line": 496,
+      "line": 500,
       "value": "$email"
     },
     {
-      "line": 518,
+      "line": 522,
       "value": "$joinedStr"
     },
     {
-      "line": 557,
+      "line": 561,
       "value": "Custom"
     },
     {
-      "line": 602,
+      "line": 606,
       "value": "Custom"
     },
     {
-      "line": 617,
+      "line": 621,
       "value": "Custom"
     },
     {
-      "line": 618,
+      "line": 622,
       "value": "${DateFormat("
     },
     {
-      "line": 788,
+      "line": 792,
       "value": "$clientsOwn / $clientsTotal"
     },
     {
-      "line": 799,
+      "line": 803,
       "value": "$subIbs"
     },
     {
-      "line": 816,
+      "line": 820,
       "value": "\\$${branchDeposits.toStringAsFixed(2)}"
     },
     {
-      "line": 829,
+      "line": 833,
       "value": "\\$${branchWithdrawals.toStringAsFixed(2)}"
     },
     {
-      "line": 844,
+      "line": 848,
       "value": "\\$${branchNetFunding.toStringAsFixed(2)}"
     },
     {
-      "line": 855,
+      "line": 859,
       "value": "\\$${branchEquity.toStringAsFixed(2)}"
     },
     {
-      "line": 881,
+      "line": 885,
       "value": "\\$${branchYouEarned.toStringAsFixed(2)}"
     },
     {
-      "line": 1044,
+      "line": 1048,
       "value": "$curr ${dep.toStringAsFixed(2)}"
     },
     {
-      "line": 1056,
+      "line": 1060,
       "value": "$curr ${withdr.toStringAsFixed(2)}"
     },
     {
-      "line": 1070,
+      "line": 1074,
       "value": "$curr ${net.toStringAsFixed(2)}"
     },
     {
-      "line": 1081,
+      "line": 1085,
       "value": "$curr ${eq.toStringAsFixed(2)}"
     },
     {
-      "line": 1105,
+      "line": 1109,
       "value": "$curr ${comm.toStringAsFixed(2)}"
     },
     {
-      "line": 1137,
+      "line": 1141,
       "value": "${accounts.length}"
     },
     {
-      "line": 1157,
+      "line": 1161,
       "value": "Standard"
     },
     {
-      "line": 1177,
+      "line": 1181,
       "value": "#$accNum · $curr · $grp"
     },
     {
-      "line": 1200,
+      "line": 1204,
       "value": "Trades"
     },
     {
-      "line": 1417,
+      "line": 1421,
       "value": "$signedUp"
     },
     {
-      "line": 1423,
+      "line": 1427,
       "value": "$funded"
     },
     {
-      "line": 1452,
+      "line": 1456,
       "value": "All"
     },
     {
-      "line": 1462,
+      "line": 1466,
       "value": "All"
     },
     {
-      "line": 1673,
+      "line": 1677,
       "value": "#$ticket"
     },
     {
-      "line": 1698,
-      "value": "Lots: $lots"
-    },
-    {
-      "line": 1705,
-      "value": "Open: $openPrice → Close: $closePrice"
-    },
-    {
-      "line": 1712,
-      "value": "P/L: \\$$profit"
-    },
-    {
-      "line": 1726,
-      "value": "Open: $openTime"
-    },
-    {
-      "line": 1733,
-      "value": "Close: $closeTime"
-    },
-    {
-      "line": 1846,
-      "value": "#$account"
-    },
-    {
-      "line": 1945,
-      "value": "$apiLevel"
-    },
-    {
-      "line": 2026,
-      "value": "\\$${deposits.toStringAsFixed(2)}"
-    },
-    {
-      "line": 2031,
-      "value": "\\$${net.toStringAsFixed(2)}"
-    },
-    {
-      "line": 2041,
-      "value": "\\$${earned.toStringAsFixed(2)}"
-    },
-    {
-      "line": 2050,
-      "value": "$subIbs"
-    },
-    {
-      "line": 2051,
-      "value": "$clientsTree"
-    },
-    {
-      "line": 2059,
-      "value": "\\$${branchEarned.toStringAsFixed(2)}"
-    },
-    {
-      "line": 2305,
-      "value": "\\$$earned"
-    },
-    {
-      "line": 2320,
-      "value": "$trades"
-    },
-    {
-      "line": 2321,
+      "line": 1703,
       "value": "$lots"
     },
     {
-      "line": 2394,
+      "line": 1713,
+      "value": "$openPrice"
+    },
+    {
+      "line": 1713,
+      "value": "$closePrice"
+    },
+    {
+      "line": 1722,
+      "value": "$profit"
+    },
+    {
+      "line": 1738,
+      "value": "$openTime"
+    },
+    {
+      "line": 1747,
+      "value": "$closeTime"
+    },
+    {
+      "line": 1861,
+      "value": "#$account"
+    },
+    {
+      "line": 1960,
+      "value": "$apiLevel"
+    },
+    {
+      "line": 2041,
+      "value": "\\$${deposits.toStringAsFixed(2)}"
+    },
+    {
+      "line": 2046,
+      "value": "\\$${net.toStringAsFixed(2)}"
+    },
+    {
+      "line": 2056,
+      "value": "\\$${earned.toStringAsFixed(2)}"
+    },
+    {
+      "line": 2065,
+      "value": "$subIbs"
+    },
+    {
+      "line": 2066,
+      "value": "$clientsTree"
+    },
+    {
+      "line": 2074,
+      "value": "\\$${branchEarned.toStringAsFixed(2)}"
+    },
+    {
+      "line": 2320,
+      "value": "\\$$earned"
+    },
+    {
+      "line": 2335,
+      "value": "$trades"
+    },
+    {
+      "line": 2336,
+      "value": "$lots"
+    },
+    {
+      "line": 2409,
       "value": "$totalTrades"
     },
     {
-      "line": 2405,
+      "line": 2420,
       "value": "\\$${totalEarned.toStringAsFixed(2)}"
     },
     {
-      "line": 2542,
+      "line": 2557,
       "value": "${rates.length}"
     },
     {
-      "line": 2619,
+      "line": 2634,
       "value": "\\$${rate.toStringAsFixed(2)}"
     }
   ],
@@ -11021,7 +10265,7 @@
   ],
   "lib/screens/ibm/presentation/pages/ibm_more_screen.dart": [
     {
-      "line": 75,
+      "line": 77,
       "value": "\\$$balance"
     }
   ],
@@ -11095,15 +10339,7 @@
       "value": "$title ${prizeValue > 0 ?"
     },
     {
-      "line": 1520,
-      "value": "Reference: $ref"
-    },
-    {
-      "line": 1529,
-      "value": "Submitted: $date"
-    },
-    {
-      "line": 1574,
+      "line": 1580,
       "value": "#$rank"
     }
   ],
@@ -11119,107 +10355,107 @@
       "value": "\\$${controller.walletBalance}"
     },
     {
-      "line": 221,
+      "line": 224,
       "value": "Earnings"
     },
     {
-      "line": 225,
+      "line": 228,
       "value": "Earnings"
     },
     {
-      "line": 226,
+      "line": 229,
       "value": "Payouts"
     },
     {
-      "line": 227,
+      "line": 230,
       "value": "My Commission Plan"
-    },
-    {
-      "line": 231,
-      "value": "Everything"
-    },
-    {
-      "line": 232,
-      "value": "Commission earned"
-    },
-    {
-      "line": 233,
-      "value": "Paid out"
     },
     {
       "line": 234,
-      "value": "Payouts returned"
+      "value": "Everything"
     },
     {
       "line": 235,
-      "value": "Adjustments"
-    },
-    {
-      "line": 236,
-      "value": "Clawbacks"
-    },
-    {
-      "line": 245,
-      "value": "Everything"
-    },
-    {
-      "line": 249,
-      "value": "Everything"
-    },
-    {
-      "line": 250,
       "value": "Commission earned"
     },
     {
-      "line": 251,
+      "line": 236,
       "value": "Paid out"
     },
     {
-      "line": 252,
+      "line": 237,
       "value": "Payouts returned"
     },
     {
-      "line": 253,
+      "line": 238,
       "value": "Adjustments"
     },
     {
-      "line": 254,
+      "line": 239,
       "value": "Clawbacks"
     },
     {
-      "line": 397,
+      "line": 248,
+      "value": "Everything"
+    },
+    {
+      "line": 252,
+      "value": "Everything"
+    },
+    {
+      "line": 253,
+      "value": "Commission earned"
+    },
+    {
+      "line": 254,
+      "value": "Paid out"
+    },
+    {
+      "line": 255,
+      "value": "Payouts returned"
+    },
+    {
+      "line": 256,
+      "value": "Adjustments"
+    },
+    {
+      "line": 257,
+      "value": "Clawbacks"
+    },
+    {
+      "line": 400,
       "value": "Error: $e"
     },
     {
-      "line": 581,
+      "line": 584,
       "value": "My Commission Plan"
     },
     {
-      "line": 621,
+      "line": 624,
       "value": "Earnings"
     },
     {
-      "line": 739,
+      "line": 742,
       "value": "$account"
     },
     {
-      "line": 768,
+      "line": 771,
       "value": "Payouts"
     },
     {
-      "line": 972,
+      "line": 975,
       "value": "${rates.length}"
     },
     {
-      "line": 1115,
+      "line": 1118,
       "value": "${blocked.length}"
     },
     {
-      "line": 1346,
+      "line": 1349,
       "value": "Error loading plans: $e"
     },
     {
-      "line": 1571,
+      "line": 1574,
       "value": "$partnersUsing"
     }
   ],
@@ -11235,7 +10471,7 @@
       "value": "$badgeCount"
     },
     {
-      "line": 116,
+      "line": 118,
       "value": "\\$$balance"
     }
   ],
@@ -11369,11 +10605,11 @@
       "value": "${country.flagEmoji} +${country.phoneCode}"
     },
     {
-      "line": 1861,
+      "line": 1864,
       "value": "${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}"
     },
     {
-      "line": 1954,
+      "line": 1957,
       "value": "$_selectedCountryCode$digits"
     }
   ],
@@ -11687,70 +10923,28 @@
       "value": "Error loading more screen data: $e"
     }
   ],
-  "lib/screens/notifications/presentation/pages/notifications_screen.dart": [
-    {
-      "line": 101,
-      "value": "Notification"
-    }
-  ],
   "lib/screens/settings/presentation/pages/account_management_screen.dart": [
     {
-      "line": 37,
-      "value": "Account Management"
-    },
-    {
-      "line": 101,
-      "value": "${account.type} Account"
-    },
-    {
-      "line": 108,
-      "value": "ID: ${account.id}"
-    },
-    {
-      "line": 112,
-      "value": "Balance: ${account.currency} ${account.balance.toStringAsFixed(2)}"
-    },
-    {
-      "line": 133,
-      "value": "Active"
-    },
-    {
-      "line": 171,
-      "value": "Delete"
-    },
-    {
-      "line": 210,
+      "line": 102,
       "value": "${account.type}"
     },
     {
-      "line": 211,
+      "line": 111,
       "value": "${account.id}"
     },
     {
-      "line": 248,
-      "value": "Account Type"
+      "line": 217,
+      "value": "${account.type}"
     },
     {
-      "line": 260,
-      "value": "Initial Balance"
+      "line": 218,
+      "value": "${account.id}"
     }
   ],
   "lib/screens/settings/presentation/pages/language_selector_screen.dart": [
     {
-      "line": 95,
-      "value": "RTL (Right-to-Left) layout is enabled for this language. The interface will automatically adjust for better readability."
-    },
-    {
-      "line": 208,
-      "value": "RTL Layout"
-    },
-    {
-      "line": 295,
+      "line": 297,
       "value": "Failed to change language: $e"
-    },
-    {
-      "line": 296,
-      "value": "Error"
     }
   ],
   "lib/screens/trade_win/tabs/trade_win_home_tab.dart": [
@@ -11769,11 +10963,11 @@
   ],
   "lib/screens/trade_win/tabs/trade_win_leaderboard_tab.dart": [
     {
-      "line": 235,
+      "line": 237,
       "value": "#${entry.rank}"
     },
     {
-      "line": 276,
+      "line": 281,
       "value": "$lotsLabel"
     }
   ],
@@ -12177,195 +11371,183 @@
   ],
   "lib/screens/trading/view_models/dashboard_controller.dart": [
     {
-      "line": 126,
+      "line": 127,
       "value": "DashboardController: Auth flag not ready but token present, fetching accounts"
     },
     {
-      "line": 131,
+      "line": 132,
       "value": "DashboardController: User not authenticated, deferring checkMT5Accounts until auth resolves"
     },
     {
-      "line": 187,
+      "line": 188,
       "value": "Standard"
     },
     {
-      "line": 196,
+      "line": 197,
       "value": "Standard"
     },
     {
-      "line": 205,
+      "line": 206,
       "value": "Standard"
     },
     {
-      "line": 214,
+      "line": 215,
       "value": "Standard"
     },
     {
-      "line": 265,
+      "line": 266,
       "value": "DashboardController: Found ${accountsData.length} accounts in response"
     },
     {
-      "line": 278,
+      "line": 279,
       "value": "DashboardController: Parsed ${parsedAccounts.length} MT5 accounts"
     },
     {
-      "line": 282,
+      "line": 283,
       "value": "Account: ${account.metaAccountNumber} - ${account.accountType} - Primary: ${account.isPrimaryAccount}"
     },
     {
-      "line": 296,
+      "line": 297,
       "value": "DashboardController: Updated mt5Accounts observable with ${mt5Accounts.length} accounts"
     },
     {
-      "line": 304,
+      "line": 305,
       "value": "DashboardController: Updated WebSocketEndpointHelper with primary account: ${primaryAccount.metaAccountNumber} (${primaryAccount.tradingServer})"
     },
     {
-      "line": 314,
+      "line": 315,
       "value": "DashboardController: Saved ${parsedAccounts.length} accounts to cache"
     },
     {
-      "line": 328,
+      "line": 329,
       "value": "Dashboard WS: WebSocket not connected after account load, retrying initialization"
     },
     {
-      "line": 368,
-      "value": "Failed to fetch MT5 accounts"
-    },
-    {
-      "line": 371,
+      "line": 375,
       "value": "Failed to fetch MT5 accounts from dashboard controller: $errorMsg"
     },
     {
-      "line": 391,
+      "line": 395,
       "value": "DashboardController: checkMT5Accounts completed. hasMT5Accounts: ${hasMT5Accounts.value}, mt5Accounts count: ${mt5Accounts.length}"
     },
     {
-      "line": 452,
+      "line": 456,
       "value": "DashboardController: Triggering centralized WebSocket reconnection via AccountController"
     },
     {
-      "line": 480,
+      "line": 484,
       "value": "DashboardController: Error triggering reconnection, falling back to unsubscribeAndResubscribe: $e"
     },
     {
-      "line": 489,
-      "value": "Failed to change primary account"
-    },
-    {
-      "line": 492,
+      "line": 499,
       "value": "Failed to fetch MT5 accounts from dashboard controller: $errorMsg"
     },
     {
-      "line": 567,
+      "line": 574,
       "value": "DashboardController: onDepositRealAccount called with accountNumber: $accountNumber (type: ${accountNumber.runtimeType})"
     },
     {
-      "line": 709,
+      "line": 716,
       "value": "DashboardController: Create account API response success: ${response.success}"
     },
     {
-      "line": 712,
+      "line": 719,
       "value": "DashboardController: Create account API response data: ${response.data}"
     },
     {
-      "line": 724,
-      "value": "Failed to create MT5 account"
-    },
-    {
-      "line": 769,
+      "line": 779,
       "value": "Notified AccountController about MT5 account changes: ${mt5Accounts.length} accounts"
     },
     {
-      "line": 789,
+      "line": 799,
       "value": "DashboardController: Refreshed InstrumentsController socket data"
     },
     {
-      "line": 800,
+      "line": 810,
       "value": "DashboardController: TradingController found, account data updated"
     },
     {
-      "line": 820,
+      "line": 830,
       "value": "Dashboard WS: User not logged in, skipping WebSocket initialization"
     },
     {
-      "line": 830,
+      "line": 840,
       "value": "Dashboard WS: Accounts not yet loaded, deferring WebSocket initialization. Will retry after accounts are loaded."
     },
     {
-      "line": 854,
+      "line": 864,
       "value": "Dashboard WS: Using stored primary account from initialization"
     },
     {
-      "line": 871,
+      "line": 881,
       "value": "Dashboard WS: Connected successfully to $wsUrl (Primary Account: ${primaryAccount?.metaAccountNumber ?? \"N/A\"}, Trading Server: ${primaryAccount?.tradingServer ?? \"N/A\"}, Account Type: $accountType)"
     },
     {
-      "line": 951,
+      "line": 961,
       "value": "Dashboard WS: Requesting data for PRIMARY account: $accountNumber (Trading Server: ${primaryAccount.tradingServer})"
     },
     {
-      "line": 960,
+      "line": 970,
       "value": "Dashboard WS: Primary account number is empty or invalid: $accountNumber"
     },
     {
-      "line": 968,
+      "line": 978,
       "value": "Dashboard WS: No primary account found (primary or cached), skipping request to prevent null account data"
     },
     {
-      "line": 1228,
+      "line": 1238,
       "value": "Dashboard WS: Detected OLD format (No Credit field). Length: ${accountArray.length}"
     },
     {
-      "line": 1344,
+      "line": 1354,
       "value": "Not connected"
     },
     {
-      "line": 1352,
+      "line": 1362,
       "value": "📤 WEBSOCKET REQUEST (Dashboard - AccountInfoBottomSheet Data Source)"
     },
     {
-      "line": 1372,
+      "line": 1382,
       "value": "Dashboard WS: Error sending event: $e"
     },
     {
-      "line": 1449,
+      "line": 1459,
       "value": "Dashboard WS: User not authenticated, skipping WebSocket initialization"
     },
     {
-      "line": 1457,
+      "line": 1467,
       "value": "Dashboard WS: AuthController not found, skipping WebSocket: $e"
     },
     {
-      "line": 1467,
+      "line": 1477,
       "value": "Dashboard WS: Ensuring WebSocket initialization (called from screen)"
     },
     {
-      "line": 1482,
+      "line": 1492,
       "value": "Dashboard WS: Account info not yet received, requesting data"
     },
     {
-      "line": 1492,
+      "line": 1502,
       "value": "Dashboard WS: Accounts not yet loaded, will initialize when accounts are available"
     },
     {
-      "line": 1502,
+      "line": 1512,
       "value": "Dashboard WS: Accounts now available, initializing WebSocket"
     },
     {
-      "line": 1530,
+      "line": 1540,
       "value": "Dashboard WS: Cannot unsubscribeAndResubscribe - accounts not yet loaded"
     },
     {
-      "line": 1574,
+      "line": 1584,
       "value": "Primary Account: ${primaryAccount?.metaAccountNumber ?? \"N/A\"}"
     },
     {
-      "line": 1597,
+      "line": 1607,
       "value": "Dashboard WS: Unsubscribing and resubscribing for screen appearance"
     },
     {
-      "line": 1671,
+      "line": 1681,
       "value": "Dashboard WS: Disconnecting and reconnecting for screen appearance"
     }
   ],
@@ -13067,91 +12249,47 @@
       "value": "Live Account 002"
     },
     {
-      "line": 309,
-      "value": "Insufficient balance for this transfer"
-    },
-    {
-      "line": 315,
-      "value": "Failed to check balance"
-    },
-    {
-      "line": 321,
+      "line": 324,
       "value": "Error checking balance: $e"
     },
     {
-      "line": 345,
-      "value": "OTP sent successfully"
-    },
-    {
-      "line": 349,
-      "value": "Failed to send OTP"
-    },
-    {
-      "line": 351,
-      "value": "Failed to send OTP"
-    },
-    {
-      "line": 356,
+      "line": 364,
       "value": "Error: $e"
     },
     {
-      "line": 358,
+      "line": 366,
       "value": "Error sending OTP: $e"
     },
     {
-      "line": 376,
-      "value": "Please enter OTP"
-    },
-    {
-      "line": 414,
-      "value": "Transfer completed successfully"
-    },
-    {
-      "line": 426,
-      "value": "Transfer failed"
-    },
-    {
-      "line": 432,
+      "line": 443,
       "value": "Error processing transfer: $e"
     },
     {
-      "line": 467,
-      "value": "Please Enter amount"
-    },
-    {
-      "line": 493,
-      "value": "OTP sent"
-    },
-    {
-      "line": 498,
-      "value": "Failed to send OTP"
-    },
-    {
-      "line": 505,
+      "line": 519,
       "value": "Error sending OTP: $e"
     },
     {
-      "line": 575,
+      "line": 589,
       "value": "MT5 Account"
     },
     {
-      "line": 621,
+      "line": 635,
       "value": "Error while fetching wallet data: $e"
     },
     {
-      "line": 678,
+      "line": 692,
       "value": "All Types"
     },
     {
-      "line": 679,
+      "line": 693,
       "value": "All Status"
     },
     {
-      "line": 755,
+      "line": 769,
       "value": "All Types"
     },
     {
-      "line": 756,
+      "line": 770,
       "value": "All Status"
     }
   ],
@@ -15643,11 +14781,11 @@
       "value": "if (typeof window.__setTheme === \"function\") { window.__setTheme(${jsonEncode(theme)}); }"
     },
     {
-      "line": 264,
+      "line": 266,
       "value": "Chart unavailable"
     },
     {
-      "line": 282,
+      "line": 284,
       "value": "Retry"
     }
   ],
@@ -15707,23 +14845,23 @@
       "value": "window.__resolveDfCallback($cbId, $resultJson);"
     },
     {
-      "line": 487,
+      "line": 489,
       "value": "⏱️ Chart WebView: CREATED at ${startTime.toIso8601String()}"
     },
     {
-      "line": 513,
+      "line": 515,
       "value": "⏱️ Chart WebView: LOAD START at ${DateTime.now().toIso8601String()} for url: $url"
     },
     {
-      "line": 525,
+      "line": 527,
       "value": "⏱️ Chart WebView: LOAD STOP at ${DateTime.now().toIso8601String()} for url: $url"
     },
     {
-      "line": 593,
+      "line": 595,
       "value": "Chart unavailable"
     },
     {
-      "line": 611,
+      "line": 613,
       "value": "Retry"
     }
   ],
@@ -15861,31 +14999,31 @@
       "value": "Enter the ${widget.otpLength}-digit code we\\'ve sent to your number"
     },
     {
-      "line": 220,
+      "line": 225,
       "value": "Verify"
     },
     {
-      "line": 236,
+      "line": 241,
       "value": "Didn\\'t receive the code?"
     },
     {
-      "line": 245,
+      "line": 250,
       "value": "Resend"
     },
     {
-      "line": 490,
+      "line": 495,
       "value": "Please enter a valid ${widget.otpLength}-digit OTP"
     },
     {
-      "line": 491,
+      "line": 496,
       "value": "Error"
     },
     {
-      "line": 505,
+      "line": 510,
       "value": "OTP resent successfully!"
     },
     {
-      "line": 506,
+      "line": 511,
       "value": "Success"
     }
   ],
@@ -16039,65 +15177,65 @@
       "value": "Retry"
     },
     {
-      "line": 274,
+      "line": 277,
       "value": "Authorization"
     },
     {
-      "line": 274,
+      "line": 277,
       "value": "Bearer $token"
     },
     {
-      "line": 275,
+      "line": 278,
       "value": "Content-Type"
     },
     {
-      "line": 284,
+      "line": 287,
       "value": "${hours * 60}"
     },
     {
-      "line": 325,
+      "line": 328,
       "value": "$from"
     },
     {
-      "line": 327,
+      "line": 330,
       "value": "$count"
     },
     {
-      "line": 395,
+      "line": 398,
       "value": "$baseUrl/api/user/instruments/$_accountNumber"
     },
     {
-      "line": 424,
+      "line": 427,
       "value": "Euro / US Dollar"
     },
     {
-      "line": 425,
+      "line": 428,
       "value": "Great Britain Pound / US Dollar"
     },
     {
-      "line": 426,
+      "line": 429,
       "value": "US Dollar / Japanese Yen"
     },
     {
-      "line": 427,
+      "line": 430,
       "value": "Gold / US Dollar"
     },
     {
-      "line": 428,
+      "line": 431,
       "value": "Bitcoin / US Dollar"
     },
     {
-      "line": 429,
+      "line": 432,
       "value": "Ethereum / US Dollar"
     },
     {
-      "line": 543,
+      "line": 546,
       "value": "wss://"
     }
   ],
   "lib/widgets/trading_bottom_navigation.dart": [
     {
-      "line": 372,
+      "line": 376,
       "value": "$badgeCount"
     }
   ]

@@ -259,7 +259,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                     Transform.scale(scale: value, child: child),
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
-              padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 18.h),
+              padding: EdgeInsetsDirectional.fromSTEB(18.w, 16.h, 18.w, 18.h),
               decoration: BoxDecoration(
                 color: AppColors.whiteColor,
                 borderRadius: BorderRadius.circular(18.r),
@@ -506,7 +506,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                 ),
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
-              padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 18.h),
+              padding: EdgeInsetsDirectional.fromSTEB(18.w, 16.h, 18.w, 18.h),
               decoration: BoxDecoration(
                 color: AppColors.whiteColor,
                 borderRadius: BorderRadius.circular(18.r),
@@ -679,7 +679,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(
+          padding: EdgeInsetsDirectional.fromSTEB(
             16.w,
             8.h,
             16.w,
@@ -1709,7 +1709,7 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: 4.w, bottom: 7.h, top: 2.h),
+      padding: EdgeInsetsDirectional.only(start: 4.w, bottom: 7.h, top: 2.h),
       child: Row(
         children: [
           Container(
@@ -1945,7 +1945,9 @@ class _OneClickTradingMenuItemState extends State<_OneClickTradingMenuItem> {
               child: AnimatedAlign(
                 duration: const Duration(milliseconds: 200),
                 alignment:
-                    _isEnabled ? Alignment.centerRight : Alignment.centerLeft,
+                    _isEnabled
+                        ? AlignmentDirectional.centerEnd
+                        : AlignmentDirectional.centerStart,
                 curve: Curves.easeOut,
                 child: Container(
                   padding: EdgeInsets.all(2.w),
@@ -2219,7 +2221,9 @@ class _BiometricLoginMenuItemState extends State<_BiometricLoginMenuItem> {
                 child: AnimatedAlign(
                   duration: const Duration(milliseconds: 200),
                   alignment:
-                      _isEnabled ? Alignment.centerRight : Alignment.centerLeft,
+                      _isEnabled
+                          ? AlignmentDirectional.centerEnd
+                          : AlignmentDirectional.centerStart,
                   curve: Curves.easeOut,
                   child: Container(
                     padding: EdgeInsets.all(2.w),

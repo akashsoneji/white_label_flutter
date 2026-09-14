@@ -704,18 +704,21 @@ class _KycBankScreenState extends State<KycBankScreen> {
       children: [
         Text(languageService.tr('kyc_enter_otp'), style: AppTextStyles.heading),
         SizedBox(height: 16.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(6, (index) {
-            return SizedBox(
-              width: 50.w,
-              height: 56.h,
-              child:
-                  Platform.isAndroid
-                      ? _buildOtpBoxAndroid(index)
-                      : _buildOtpBox(index),
-            );
-          }),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(6, (index) {
+              return SizedBox(
+                width: 50.w,
+                height: 56.h,
+                child:
+                    Platform.isAndroid
+                        ? _buildOtpBoxAndroid(index)
+                        : _buildOtpBox(index),
+              );
+            }),
+          ),
         ),
         SizedBox(height: 16.h),
         Container(
@@ -752,7 +755,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
         // Resend OTP Button
         SizedBox(height: 12.h),
         Align(
-          alignment: Alignment.centerRight,
+          alignment: AlignmentDirectional.centerEnd,
           child: Obx(
             () => TextButton(
               onPressed:
@@ -1487,7 +1490,9 @@ class _KycBankScreenState extends State<KycBankScreen> {
           ),
           SizedBox(height: 16.h),
           // Right field - Code input
-          RTLHelper.rtlTextField(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: RTLHelper.rtlTextField(
             controller: _ifscIbanCodeController,
             onChanged: (value) => controller.ifscIbanCode.value = value,
             labelText: languageService.tr('kyc_bank_screen_code'),
@@ -1500,6 +1505,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
               labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
               floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
               hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+            ),
             ),
           ),
         ],
@@ -1550,7 +1556,9 @@ class _KycBankScreenState extends State<KycBankScreen> {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
       child: Obx(
-        () => RTLHelper.rtlTextField(
+        () => Directionality(
+          textDirection: TextDirection.ltr,
+          child: RTLHelper.rtlTextField(
           controller: controller,
           onChanged: (value) {
             onChanged?.call(value);
@@ -1609,6 +1617,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: Colors.red),
             ),
+          ),
           ),
         ),
       ),

@@ -35,17 +35,12 @@ class ApiService {
   // Flag to prevent multiple simultaneous 401 error handlers
   static bool _isHandlingUnauthenticated = false;
 
-  // ✅ FIX: Retry mechanism to prevent logout on app restart
-  // Track retry attempts to prevent infinite loops
-  static int _retryCount = 0;
-  static const int _maxRetries = 1;
-  static DateTime? _lastRetryTime;
-
   /// GET: Fetch data with optional query parameters
   static Future<ApiResponse> get({
     required String endpoint,
     Map<String, dynamic>? queryParameters,
     String? token,
+    bool isRetry = false,
   }) async {
     _initializeLogging();
     try {
@@ -116,12 +111,9 @@ class ApiService {
 
       // Check for 401 status code
       if (response.statusCode == 401) {
-        final errorResponse = _handleError(response);
+        final errorResponse = _handleError(response, allowRetry: !isRetry);
 
-        // ✅ FIX: Check if we should retry the request
-        if (errorResponse.message == 'RETRY_REQUEST' &&
-            errorResponse.data != null &&
-            errorResponse.data['shouldRetry'] == true) {
+        if (_shouldRetry(errorResponse)) {
           if (kDebugMode) {
             developer.log(
               'ApiService: Retrying GET request to $endpoint',
@@ -133,14 +125,12 @@ class ApiService {
             endpoint: endpoint,
             queryParameters: queryParameters,
             token: token,
+            isRetry: true,
           );
         }
 
         return errorResponse;
       }
-
-      // Reset retry count on successful request
-      _retryCount = 0;
 
       return _parseApiResponse(response.body);
     } catch (e, t) {
@@ -154,6 +144,7 @@ class ApiService {
     required String endpoint,
     Map<String, dynamic>? data,
     String? token,
+    bool isRetry = false,
   }) async {
     _initializeLogging();
     try {
@@ -234,12 +225,9 @@ class ApiService {
 
       // Check for 401 status code
       if (response.statusCode == 401) {
-        final errorResponse = _handleError(response);
+        final errorResponse = _handleError(response, allowRetry: !isRetry);
 
-        // ✅ FIX: Check if we should retry the request
-        if (errorResponse.message == 'RETRY_REQUEST' &&
-            errorResponse.data != null &&
-            errorResponse.data['shouldRetry'] == true) {
+        if (_shouldRetry(errorResponse)) {
           if (kDebugMode) {
             developer.log(
               'ApiService: Retrying POST request to $endpoint',
@@ -247,14 +235,16 @@ class ApiService {
             );
           }
           // Retry the request with fresh connection
-          return post(endpoint: endpoint, data: data, token: token);
+          return post(
+            endpoint: endpoint,
+            data: data,
+            token: token,
+            isRetry: true,
+          );
         }
 
         return errorResponse;
       }
-
-      // Reset retry count on successful request
-      _retryCount = 0;
 
       return _parseApiResponse(response.body);
     } catch (e, t) {
@@ -268,6 +258,7 @@ class ApiService {
     required String endpoint,
     Map<String, dynamic>? data,
     String? token,
+    bool isRetry = false,
   }) async {
     try {
       // If no token provided, try to get from secure storage
@@ -312,12 +303,9 @@ class ApiService {
 
       // Check for 401 status code
       if (response.statusCode == 401) {
-        final errorResponse = _handleError(response);
+        final errorResponse = _handleError(response, allowRetry: !isRetry);
 
-        // ✅ FIX: Check if we should retry the request
-        if (errorResponse.message == 'RETRY_REQUEST' &&
-            errorResponse.data != null &&
-            errorResponse.data['shouldRetry'] == true) {
+        if (_shouldRetry(errorResponse)) {
           if (kDebugMode) {
             developer.log(
               'ApiService: Retrying PUT request to $endpoint',
@@ -325,14 +313,16 @@ class ApiService {
             );
           }
           // Retry the request with fresh connection
-          return put(endpoint: endpoint, data: data, token: token);
+          return put(
+            endpoint: endpoint,
+            data: data,
+            token: token,
+            isRetry: true,
+          );
         }
 
         return errorResponse;
       }
-
-      // Reset retry count on successful request
-      _retryCount = 0;
 
       return _parseApiResponse(response.body);
     } catch (e, t) {
@@ -346,6 +336,7 @@ class ApiService {
     required String endpoint,
     String? token,
     Map<String, dynamic>? data,
+    bool isRetry = false,
   }) async {
     _initializeLogging();
     try {
@@ -381,12 +372,9 @@ class ApiService {
 
       // Check for 401 status code
       if (response.statusCode == 401) {
-        final errorResponse = _handleError(response);
+        final errorResponse = _handleError(response, allowRetry: !isRetry);
 
-        // Check if we should retry the request
-        if (errorResponse.message == 'RETRY_REQUEST' &&
-            errorResponse.data != null &&
-            errorResponse.data['shouldRetry'] == true) {
+        if (_shouldRetry(errorResponse)) {
           if (kDebugMode) {
             developer.log(
               'ApiService: Retrying DELETE request to $endpoint',
@@ -394,14 +382,16 @@ class ApiService {
             );
           }
           // Retry the request with fresh connection
-          return delete(endpoint: endpoint, token: token);
+          return delete(
+            endpoint: endpoint,
+            token: token,
+            data: data,
+            isRetry: true,
+          );
         }
 
         return errorResponse;
       }
-
-      // Reset retry count on successful request
-      _retryCount = 0;
 
       return _parseApiResponse(response.body);
     } catch (e, t) {
@@ -561,6 +551,14 @@ class ApiService {
         }
 
         if (isError) {
+          // Some endpoints answer 200/4xx-with-body instead of 401 when the
+          // token is rejected, so the body message is checked too.
+          final normalizedMessage = message.toLowerCase();
+          if (normalizedMessage.contains('unauthenticated') ||
+              normalizedMessage.contains('unauthorized')) {
+            _handleUnauthenticatedError(message);
+          }
+
           // API returned status: false or success: false, treat as error
           // Only use data if it's actually a map (not an empty array)
           final errorData = responseData['data'];
@@ -726,42 +724,37 @@ class ApiService {
     }
   }
 
-  static ApiResponse _handleError(dynamic e) {
+  /// True when [response] is the sentinel produced by [_handleError] asking the
+  /// caller to replay the request once on a fresh connection.
+  static bool _shouldRetry(ApiResponse response) {
+    return response.message == 'RETRY_REQUEST' &&
+        response.data is Map &&
+        response.data['shouldRetry'] == true;
+  }
+
+  static ApiResponse _handleError(dynamic e, {bool allowRetry = false}) {
     if (e is http.ClientException || e is Exception) {
       return ApiResponse.error('Network error. Please check your connection.');
     } else if (e is http.Response) {
       if (e.statusCode == 401) {
-        // ✅ FIX: Check if we should retry before logging out
-        // This prevents logout on app restart when HTTP connection was closed
-        final now = DateTime.now();
-        final shouldRetry =
-            _retryCount < _maxRetries &&
-            (_lastRetryTime == null ||
-                now.difference(_lastRetryTime!).inSeconds > 5);
-
-        if (shouldRetry) {
-          _retryCount++;
-          _lastRetryTime = now;
-
+        // A dropped keep-alive connection can surface as a 401, so the request
+        // is replayed once on a fresh client before the session is torn down.
+        if (allowRetry) {
           if (kDebugMode) {
             developer.log(
-              'ApiService: Got 401, attempting retry ${_retryCount}/$_maxRetries (might be connection issue)',
+              'ApiService: Got 401, retrying once on a fresh connection',
               name: 'ApiService',
             );
           }
 
-          // Recreate HTTP client to establish fresh connection
           HttpClientService.instance.forceReconnect();
 
-          // Return a special error that tells the caller to retry
           return ApiResponse.error(
             'RETRY_REQUEST', // Special message to trigger retry
             data: {'shouldRetry': true},
           );
         }
 
-        // Reset retry count after successful retry or max retries reached
-        _retryCount = 0;
 
         // Parse the response body to get the actual error message
         try {
@@ -837,56 +830,17 @@ class ApiService {
     try {
       _isHandlingUnauthenticated = true;
 
-      // Check if user is actually authenticated before auto-logout
-      // This prevents auto-logout during app reconnection when session is still valid
-      bool shouldLogout = false;
-      try {
-        final authController = g.Get.find<AuthController>();
-        // Only logout if user is actually authenticated
-        // If not authenticated, this might be a reconnection issue, not a real session expiry
-        if (authController.isAuthenticated) {
-          // Verify token still exists in storage
-          final token = await SecureStorageService.getAuthToken();
-          if (token != null && token.isNotEmpty) {
-            shouldLogout = true;
-            if (kDebugMode) {
-              developer.log(
-                'ApiService: User is authenticated with valid token, session expired - logging out',
-              );
-            }
-          } else {
-            if (kDebugMode) {
-              developer.log(
-                'ApiService: Token not found in storage, user may already be logged out - skipping auto-logout',
-              );
-            }
-          }
-        } else {
-          if (kDebugMode) {
-            developer.log(
-              'ApiService: User not authenticated, 401 might be from reconnection - skipping auto-logout',
-            );
-          }
-        }
-      } catch (e) {
+      // A stored token is the only reliable signal that this 401 is a real
+      // session expiry. The AuthController may not be registered yet (or may
+      // have been disposed), so its state must not gate the redirect.
+      final token = await SecureStorageService.getAuthToken();
+      if (token == null || token.isEmpty) {
         if (kDebugMode) {
           developer.log(
-            'ApiService: Error checking auth state: $e - proceeding with caution',
+            'ApiService: No stored token - already logged out, skipping redirect',
+            name: 'ApiService',
           );
         }
-        // If we can't check auth state, be conservative and don't auto-logout
-        // This prevents logout during app reconnection issues
-        shouldLogout = false;
-      }
-
-      // Only proceed with logout if user is actually authenticated
-      if (!shouldLogout) {
-        if (kDebugMode) {
-          developer.log(
-            'ApiService: Skipping auto-logout - user not authenticated or token missing',
-          );
-        }
-        _isHandlingUnauthenticated = false;
         return;
       }
 

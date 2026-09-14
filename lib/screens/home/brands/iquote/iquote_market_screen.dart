@@ -150,7 +150,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
     final isDark = AppColors.isDarkMode;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 6.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 10.h, 16.w, 6.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -315,7 +315,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
             _tabs.map((tab) {
               final selected = tab == _selectedTab;
               return Padding(
-                padding: EdgeInsets.only(right: 18.w),
+                padding: EdgeInsetsDirectional.only(end: 18.w),
                 child: GestureDetector(
                   onTap: () => _selectTab(tab),
                   child: Column(
@@ -404,7 +404,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
               key: ValueKey('market_fav_${item.symbol}'),
               direction: DismissDirection.endToStart,
               background: Container(
-                alignment: Alignment.centerRight,
+                alignment: AlignmentDirectional.centerEnd,
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 color: Colors.redAccent,
                 child: Icon(
@@ -467,7 +467,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
               key: ValueKey('market_non_fav_${item.symbol}'),
               direction: DismissDirection.endToStart,
               background: Container(
-                alignment: Alignment.centerRight,
+                alignment: AlignmentDirectional.centerEnd,
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 color: Colors.redAccent,
                 child: Icon(
@@ -635,7 +635,7 @@ class _IquoteInstrumentRow extends StatelessWidget {
       return GestureDetector(
         onTap: () => onTap?.call(sym),
         child: Container(
-          padding: EdgeInsets.fromLTRB(
+          padding: EdgeInsetsDirectional.fromSTEB(
             showDragHandle ? 4.w : 14.w,
             6.h,
             14.w,
@@ -660,7 +660,12 @@ class _IquoteInstrumentRow extends StatelessWidget {
                       ReorderableDragStartListener(
                         index: dragHandleIndex!,
                         child: Padding(
-                          padding: EdgeInsets.fromLTRB(4.w, 8.h, 2.w, 8.h),
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                            4.w,
+                            8.h,
+                            2.w,
+                            8.h,
+                          ),
                           child: Icon(
                             Icons.drag_handle_rounded,
                             size: 20.r,
@@ -729,8 +734,12 @@ class _IquoteInstrumentRow extends StatelessWidget {
                   //   ),
                   // ),
                   SizedBox(height: 2.h),
-                  // Buy/Sell side-by-side with overlapping center spread badge
-                  Stack(
+                  // Buy/Sell side-by-side with overlapping center spread badge.
+                  // Ask / bid / spread are numeric market data — the column
+                  // order stays left-to-right even in Arabic.
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Stack(
                     alignment: Alignment.center,
                     clipBehavior: Clip.none,
                     children: [
@@ -842,6 +851,7 @@ class _IquoteInstrumentRow extends StatelessWidget {
                         ),
                       ),
                     ],
+                    ),
                   ),
                   // SizedBox(height: 2.h),
                   // // Spread Cost

@@ -684,7 +684,15 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        '${widget.position.action} ${widget.position.volume} $_displaySymbol at ${widget.position.openPrice}',
+                        TranslationUtils.trArgs(
+                          'close_position_action_volume_symbol_at_price',
+                          {
+                            'action': widget.position.action,
+                            'volume': '${widget.position.volume}',
+                            'symbol': _displaySymbol,
+                            'price': '${widget.position.openPrice}',
+                          },
+                        ),
                         maxLines: 1,
                         overflow:
                             TextOverflow
@@ -1646,7 +1654,9 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                 ),
               ),
               Text(
-                '${PrecisionHelper.formatVolume(closeVolume)} lots',
+                TranslationUtils.trArgs('tw_lots_amount', {
+                  'lots': PrecisionHelper.formatVolume(closeVolume),
+                }),
                 style: AppTextStyles.label.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
@@ -2233,7 +2243,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
             : AppColors.error; // SL is always a loss, always show in red
 
     return Padding(
-      padding: EdgeInsets.only(top: 8.h, left: 12.w, right: 12.w),
+      padding: EdgeInsetsDirectional.only(top: 8.h, start: 12.w, end: 12.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

@@ -828,7 +828,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                               flex: 3,
                                               child: Text(
                                                 'COMMISSION',
-                                                textAlign: TextAlign.right,
+                                                textAlign: TextAlign.end,
                                                 style: AppTextStyles.bodyText.copyWith(
                                                   fontSize: 10.sp,
                                                   color: AppColors.textGrey,

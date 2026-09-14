@@ -93,7 +93,7 @@ class ChatWithUsScreen extends StatelessWidget {
             Container(
               width: 32,
               height: 32,
-              margin: EdgeInsets.only(right: 8),
+              margin: EdgeInsetsDirectional.only(end: 8),
               decoration: BoxDecoration(
                 color: AppColors.primary,
                 shape: BoxShape.circle,
@@ -116,7 +116,7 @@ class ChatWithUsScreen extends StatelessWidget {
               children: [
                 if (!message.isUser && message.sender != null)
                   Padding(
-                    padding: EdgeInsets.only(bottom: 4, left: 8),
+                    padding: EdgeInsetsDirectional.only(bottom: 4, start: 8),
                     child: Text(
                       message.sender!,
                       style: AppTextStyles.bodyText.copyWith(
@@ -179,7 +179,7 @@ class ChatWithUsScreen extends StatelessWidget {
 
   Widget _buildLanguageSelectionCard(ChatController controller) {
     return Container(
-      margin: EdgeInsets.only(bottom: 16, left: 40),
+      margin: EdgeInsetsDirectional.only(bottom: 16, start: 40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -229,7 +229,7 @@ class ChatWithUsScreen extends StatelessWidget {
 
   Widget _buildTypingIndicator() {
     return Container(
-      margin: EdgeInsets.only(bottom: 16, left: 40),
+      margin: EdgeInsetsDirectional.only(bottom: 16, start: 40),
       child: Row(
         children: [
           Container(

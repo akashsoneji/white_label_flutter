@@ -173,9 +173,13 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
   }
 
   Widget _buildCodeInput() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: List.generate(6, (index) {
+    // OTP boxes are positional: box 1 is always the first digit typed, so the
+    // row must stay LTR even in Arabic.
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: List.generate(6, (index) {
         return SizedBox(
           width: 50.w,
           height: 46.h,
@@ -219,7 +223,8 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
             ),
           ),
         );
-      }),
+        }),
+      ),
     );
   }
 

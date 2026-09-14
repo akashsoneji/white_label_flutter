@@ -239,7 +239,7 @@ class _VantageTransactionHistoryScreenState
       backgroundColor: Colors.transparent,
       elevation: 0,
       leading: Padding(
-        padding: EdgeInsets.only(left: 8.w),
+        padding: EdgeInsetsDirectional.only(start: 8.w),
         child: AppBackButton(
           onPressed: _handleBack,
         ),
@@ -573,7 +573,7 @@ class _VantageTransactionHistoryScreenState
                           });
                         },
                         child: Container(
-                          margin: EdgeInsets.only(right: 8.w),
+                          margin: EdgeInsetsDirectional.only(end: 8.w),
                           padding: EdgeInsets.symmetric(
                             horizontal: 14.w,
                             vertical: 8.h,
@@ -637,7 +637,7 @@ class _VantageTransactionHistoryScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
+              padding: EdgeInsetsDirectional.only(start: 4.w, bottom: 12.h),
               child: Row(
                 children: [
                   Icon(
@@ -693,30 +693,31 @@ class _VantageTransactionHistoryScreenState
     final transactionDate = DateTime(date.year, date.month, date.day);
 
     if (transactionDate == today) {
-      return 'Today';
+      return languageService.tr('dc_range_today');
     } else if (transactionDate == yesterday) {
-      return 'Yesterday';
+      return languageService.tr('time_yesterday');
     } else {
       return '${date.day} ${_getMonthName(date.month)} ${date.year}';
     }
   }
 
+  static const List<String> _monthKeys = [
+    'month_short_jan',
+    'month_short_feb',
+    'month_short_mar',
+    'month_short_apr',
+    'month_short_may',
+    'month_short_jun',
+    'month_short_jul',
+    'month_short_aug',
+    'month_short_sep',
+    'month_short_oct',
+    'month_short_nov',
+    'month_short_dec',
+  ];
+
   String _getMonthName(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return months[month - 1];
+    return languageService.tr(_monthKeys[month - 1]);
   }
 
   Widget _buildDateGroup(String dateLabel, List<Data> transactions) {
@@ -724,7 +725,7 @@ class _VantageTransactionHistoryScreenState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(left: 4.w, top: 8.h, bottom: 10.h),
+          padding: EdgeInsetsDirectional.only(start: 4.w, top: 8.h, bottom: 10.h),
           child: Row(
             children: [
               Container(

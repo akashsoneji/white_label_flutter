@@ -324,7 +324,8 @@ class CopyTradingMasterDetailsController extends GetxController {
       await loadTradeHistory();
     } catch (e) {
       profile.value = null;
-      errorMessage.value = 'Load error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_load_error')}: $e';
     } finally {
       if (isTimeframeReload || isPlanReload) {
         isTimeframeLoading.value = false;

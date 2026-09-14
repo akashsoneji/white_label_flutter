@@ -787,11 +787,11 @@ class _KpiHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(12, 10, 12, 10),
+      padding: EdgeInsetsDirectional.fromSTEB(12, 10, 12, 10),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
           colors: [
             accent.withValues(alpha: tokens.isDark ? 0.18 : 0.10),
             accent.withValues(alpha: tokens.isDark ? 0.08 : 0.04),
@@ -835,7 +835,7 @@ class _KpiHeroCard extends StatelessWidget {
           SizedBox(height: 6),
           FittedBox(
             fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
+            alignment: AlignmentDirectional.centerStart,
             child: Text(
               value,
               style: AppTextStyles.bodyText.copyWith(
@@ -1054,7 +1054,7 @@ class _PerfCell extends StatelessWidget {
           SizedBox(height: 4),
           FittedBox(
             fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
+            alignment: AlignmentDirectional.centerStart,
             child: Text(
               value,
               style: AppTextStyles.bodyText.copyWith(
@@ -1319,7 +1319,7 @@ class _SummaryCell extends StatelessWidget {
         SizedBox(height: 6),
         FittedBox(
           fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
+          alignment: AlignmentDirectional.centerStart,
           child: Text(
             value,
             style: AppTextStyles.bodyText.copyWith(

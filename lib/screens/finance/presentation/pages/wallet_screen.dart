@@ -75,7 +75,7 @@ class _WalletScreenState extends State<WalletScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: Padding(
-          padding: EdgeInsets.only(left: 10.w),
+          padding: EdgeInsetsDirectional.only(start: 10.w),
           child: AppBackButton(
             onPressed: () => NavigationHelper.safeBack(context: context),
           ),
@@ -253,8 +253,8 @@ class _WalletScreenState extends State<WalletScreen> {
         child: Stack(
           children: [
           // Background circles decoration
-          Positioned(
-            right: -20.w,
+          PositionedDirectional(
+            end: -20.w,
             top: -20.h,
             child: CircleAvatar(
               radius: 60.r,
@@ -264,8 +264,8 @@ class _WalletScreenState extends State<WalletScreen> {
                       : Colors.white.withOpacity(0.08),
             ),
           ),
-          Positioned(
-            left: -40.w,
+          PositionedDirectional(
+            start: -40.w,
             bottom: -40.h,
             child: CircleAvatar(
               radius: 80.r,
@@ -463,7 +463,7 @@ class _WalletScreenState extends State<WalletScreen> {
         chips.add(
           _buildFilterChip(
             label:
-                '${languageService.tr('transaction_history_transaction_type')}: ${controller.filterType.value}',
+                '${languageService.tr('transaction_history_transaction_type')}: ${_filterLabel(controller.filterType.value)}',
             onDeleted: () {
               controller.filterType.value = 'All Types';
               controller.applyFilters();
@@ -476,7 +476,7 @@ class _WalletScreenState extends State<WalletScreen> {
         chips.add(
           _buildFilterChip(
             label:
-                '${languageService.tr('common_status')}: ${controller.filterStatus.value}',
+                '${languageService.tr('common_status')}: ${_filterLabel(controller.filterStatus.value)}',
             onDeleted: () {
               controller.filterStatus.value = 'All Status';
               controller.applyFilters();
@@ -497,7 +497,8 @@ class _WalletScreenState extends State<WalletScreen> {
                 : languageService.tr('wallet_screen_any');
         chips.add(
           _buildFilterChip(
-            label: '$from to $to',
+            label:
+                '$from ${languageService.tr('pmam_trade_history_to')} $to',
             onDeleted: () {
               controller.filterDateFrom.value = '';
               controller.filterDateTo.value = '';
@@ -561,7 +562,7 @@ class _WalletScreenState extends State<WalletScreen> {
                               chips
                                   .map(
                                     (c) => Padding(
-                                      padding: EdgeInsets.only(right: 6.w),
+                                      padding: EdgeInsetsDirectional.only(end: 6.w),
                                       child: c,
                                     ),
                                   )
@@ -640,7 +641,7 @@ class _WalletScreenState extends State<WalletScreen> {
       ),
       builder: (context) {
         return Container(
-          padding: EdgeInsets.fromLTRB(
+          padding: EdgeInsetsDirectional.fromSTEB(
             24.w,
             24.h,
             24.w,
@@ -910,6 +911,29 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
+  /// Display label for a filter logic value (raw values drive the API query).
+  String _filterLabel(String value) {
+    switch (value) {
+      case 'All Types':
+        return languageService.tr('wallet_screen_all_types');
+      case 'Deposit':
+        return languageService.tr('common_deposit');
+      case 'Withdrawal':
+        return languageService.tr('general_withdrawal');
+      case 'Transfer':
+        return languageService.tr('general_transfer');
+      case 'All Status':
+        return languageService.tr('ticket_all_status');
+      case 'Approved':
+        return languageService.tr('kyc_verification_approved');
+      case 'Pending':
+        return languageService.tr('transaction_history_pending');
+      case 'Rejected':
+        return languageService.tr('kyc_verification_rejected');
+    }
+    return value;
+  }
+
   Widget _buildFilterDropdownWidget({
     required String value,
     required List<String> options,
@@ -933,7 +957,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 return DropdownMenuItem(
                   value: opt,
                   child: Text(
-                    opt,
+                    _filterLabel(opt),
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: AppColors.textPrimary,
@@ -1122,7 +1146,7 @@ class _WalletScreenState extends State<WalletScreen> {
       ),
       builder: (context) {
         return Container(
-          padding: EdgeInsets.fromLTRB(
+          padding: EdgeInsetsDirectional.fromSTEB(
             24.w,
             24.h,
             24.w,
@@ -1136,7 +1160,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Transaction Details',
+                    languageService.tr('ibm_transaction_details'),
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
@@ -1310,7 +1334,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.end,
             ),
           ),
         ],

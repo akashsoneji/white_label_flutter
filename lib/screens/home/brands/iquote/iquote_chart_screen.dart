@@ -182,16 +182,20 @@ class _IQuoteChartScreenState extends State<IQuoteChartScreen> {
                 children: [
                   _Header(ctrl: ctrl, palette: palette),
                   Expanded(
-                    child: FlavorConfig.instance.useNewChart
-                        ? TenaxChartWebView(
-                            symbol: ctrl.symbol,
-                            isDark: AppColors.chartTheme == 'dark',
-                          )
-                        : ChartInAppWebView(
-                            key: _webViewKey,
-                            symbol: ctrl.symbol,
-                            url: stableUrl,
-                          ),
+                    // Candle chart: never mirror the price/time axes.
+                    child: Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: FlavorConfig.instance.useNewChart
+                          ? TenaxChartWebView(
+                              symbol: ctrl.symbol,
+                              isDark: AppColors.chartTheme == 'dark',
+                            )
+                          : ChartInAppWebView(
+                              key: _webViewKey,
+                              symbol: ctrl.symbol,
+                              url: stableUrl,
+                            ),
+                    ),
                   ),
                   _BottomBar(ctrl: ctrl, palette: palette),
                 ],
@@ -214,7 +218,7 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: palette.bg,
-      padding: EdgeInsets.fromLTRB(8.w, 4.h, 12.w, 4.h),
+      padding: EdgeInsetsDirectional.fromSTEB(8.w, 4.h, 12.w, 4.h),
       child: Row(
         children: [
           if (Navigator.canPop(context))
@@ -373,7 +377,7 @@ class _BottomBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(12.r),
           ),
           child: Padding(
-            padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 16.h),
+            padding: EdgeInsetsDirectional.fromSTEB(18.w, 18.h, 18.w, 16.h),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -683,7 +687,11 @@ class _BottomBar extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Stack(
+                    // Ask / bid / spread are numeric market data — the price
+                    // columns stay left-to-right even in Arabic.
+                    child: Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Stack(
                       alignment: Alignment.center,
                       clipBehavior: Clip.none,
                       children: [
@@ -782,6 +790,7 @@ class _BottomBar extends StatelessWidget {
                           ),
                         ),
                       ],
+                      ),
                     ),
                   ),
                   SizedBox(width: 8.w),
@@ -1193,9 +1202,9 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: EdgeInsets.only(
-          left: 16.w,
-          right: 16.w,
+        padding: EdgeInsetsDirectional.only(
+          start: 16.w,
+          end: 16.w,
           top: 12.h,
           bottom: MediaQuery.of(context).viewInsets.bottom + 12.h,
         ),
@@ -1309,7 +1318,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                       .map(
                         (lot) => Expanded(
                           child: Padding(
-                            padding: EdgeInsets.only(right: 6.w),
+                            padding: EdgeInsetsDirectional.only(end: 6.w),
                             child: GestureDetector(
                               onTap:
                                   () => setState(
@@ -2152,7 +2161,7 @@ class _FavoritesWatchlistSheetState extends State<_FavoritesWatchlistSheet> {
           ),
           // ── title row ─────────────────────────────────────────────
           Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 4.h, 8.w, 8.h),
+            padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 8.w, 8.h),
             child: Row(
               children: [
                 Icon(
@@ -2204,7 +2213,7 @@ class _FavoritesWatchlistSheetState extends State<_FavoritesWatchlistSheet> {
           ),
           // ── search field ──────────────────────────────────────────
           Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 8.h),
+            padding: EdgeInsetsDirectional.fromSTEB(16.w, 0, 16.w, 8.h),
             child: Container(
               decoration: BoxDecoration(
                 color: palette.sheetFieldBg,
@@ -2730,12 +2739,16 @@ class IQuoteFullscreenChartScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: FlavorConfig.instance.useNewChart
-            ? TenaxChartWebView(
-                symbol: symbol,
-                isDark: AppColors.chartTheme == 'dark',
-              )
-            : ChartInAppWebView(symbol: symbol, url: chartUrl),
+        // Candle chart: never mirror the price/time axes.
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FlavorConfig.instance.useNewChart
+              ? TenaxChartWebView(
+                  symbol: symbol,
+                  isDark: AppColors.chartTheme == 'dark',
+                )
+              : ChartInAppWebView(symbol: symbol, url: chartUrl),
+        ),
       ),
     );
   }
@@ -2831,7 +2844,7 @@ class _OrderTypePickerSheet extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
               child: Align(
-                alignment: Alignment.centerLeft,
+                alignment: AlignmentDirectional.centerStart,
                 child: Text(
                   TranslationUtils.tr(
                     'enhanced_pending_order_content_select_order_type',

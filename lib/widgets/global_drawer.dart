@@ -23,12 +23,12 @@ class GlobalDrawer extends StatelessWidget {
             // Header
             Container(
               width: double.infinity,
-              padding: EdgeInsets.fromLTRB(16.w, 60.h, 16.w, 20.h),
+              padding: EdgeInsetsDirectional.fromSTEB(16.w, 60.h, 16.w, 20.h),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [AppColors.primary, AppColors.primary],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
                 ),
               ),
               child: Column(

@@ -287,7 +287,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                   listChild = ListView.separated(
                     controller: _scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 80.h),
+                    padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 80.h),
                     itemCount:
                         allCopiers.length +
                         (controller.isLoadingMore.value ? 1 : 0),

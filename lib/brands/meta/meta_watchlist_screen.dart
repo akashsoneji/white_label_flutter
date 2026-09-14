@@ -154,7 +154,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
   // ── Header: hamburger | Quotes | + | ✎ ───────────────────────────────
   Widget _header(BuildContext c) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(8.w, 6.h, 8.w, 4.h),
+      padding: EdgeInsetsDirectional.fromSTEB(8.w, 6.h, 8.w, 4.h),
       child: Row(
         children: [
           IconButton(
@@ -203,7 +203,11 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
 
   // ── Simple view (image #2): Symbol/Bid/Ask header + minimal rows ─────
   Widget _simpleInstrumentList(BuildContext c, List<ListElement> items) {
-    return ListView.separated(
+    // Price ladder: the Symbol | Bid | Ask columns are numeric market data
+    // and must keep their left-to-right order in Arabic.
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.separated(
       padding: EdgeInsets.only(bottom: 8.h),
       itemCount: items.length + 1,
       separatorBuilder: (_, __) => Divider(
@@ -255,6 +259,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
         }
         return _simpleRow(c, items[i - 1]);
       },
+      ),
     );
   }
 
@@ -335,12 +340,16 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
   }
 
   Widget _instrumentList(BuildContext c, List<ListElement> items) {
-    return ListView.separated(
-      padding: EdgeInsets.only(bottom: 8.h),
-      itemCount: items.length,
-      separatorBuilder: (_, __) => Divider(
-          color: MetaTheme.divider(c), height: 1, thickness: 0.5),
-      itemBuilder: (_, i) => _row(c, items[i]),
+    // Price ladder: bid / ask / day-high / day-low columns stay left-to-right.
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.separated(
+        padding: EdgeInsets.only(bottom: 8.h),
+        itemCount: items.length,
+        separatorBuilder: (_, __) => Divider(
+            color: MetaTheme.divider(c), height: 1, thickness: 0.5),
+        itemBuilder: (_, i) => _row(c, items[i]),
+      ),
     );
   }
 
@@ -659,7 +668,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
 
   Widget _searchBar(BuildContext c) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 8.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 8.h),
       child: Row(
         children: [
           Icon(Icons.search, color: MetaTheme.subText(c), size: 20.sp),
@@ -695,7 +704,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
   Widget _breadcrumb(BuildContext c) {
     if (_activeFolderId == null) {
       return Padding(
-        padding: EdgeInsets.fromLTRB(20.w, 14.h, 16.w, 4.h),
+        padding: EdgeInsetsDirectional.fromSTEB(20.w, 14.h, 16.w, 4.h),
         child: Row(
           children: [
             _homeIcon(18.sp),
@@ -707,7 +716,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
     }
     final label = _activeFolderLabel ?? _capitalize(_activeFolderId ?? '');
     return Padding(
-      padding: EdgeInsets.fromLTRB(20.w, 14.h, 16.w, 4.h),
+      padding: EdgeInsetsDirectional.fromSTEB(20.w, 14.h, 16.w, 4.h),
       child: Row(
         children: [
           _homeIcon(18.sp),
@@ -1234,7 +1243,7 @@ class _RowActionSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 12.h),
+              padding: EdgeInsetsDirectional.fromSTEB(20.w, 4.h, 20.w, 12.h),
               child: Text(
                 '${symbol.symbol}: ${symbol.category}',
                 style: AppTextStyles.bodyText.copyWith(

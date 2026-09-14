@@ -47,10 +47,10 @@ class KycVerificationScreen extends StatelessWidget {
         children: [
           // App Bar
           Container(
-            padding: EdgeInsets.only(
+            padding: EdgeInsetsDirectional.only(
               top: MediaQuery.of(Get.context!).padding.top,
-              left: isTablet ? 32.0 : 16.0,
-              right: isTablet ? 32.0 : 16.0,
+              start: isTablet ? 32.0 : 16.0,
+              end: isTablet ? 32.0 : 16.0,
               bottom: 16.0,
             ),
             decoration: BoxDecoration(
@@ -189,10 +189,10 @@ class KycVerificationScreen extends StatelessWidget {
       child: Stack(
         children: [
           // Documents stack
-          Positioned(left: 20, top: 20, child: _buildDocumentStack()),
+          PositionedDirectional(start: 20, top: 20, child: _buildDocumentStack()),
 
           // Character
-          Positioned(right: 0, bottom: 0, child: _buildCharacter()),
+          PositionedDirectional(end: 0, bottom: 0, child: _buildCharacter()),
         ],
       ),
     );
@@ -277,7 +277,7 @@ class KycVerificationScreen extends StatelessWidget {
             Expanded(
               child: Container(
                 width: double.infinity,
-                margin: EdgeInsets.fromLTRB(8, 4, 8, 8),
+                margin: EdgeInsetsDirectional.fromSTEB(8, 4, 8, 8),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(4),

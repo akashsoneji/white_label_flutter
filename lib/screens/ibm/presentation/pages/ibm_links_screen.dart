@@ -57,7 +57,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
         showBackButton: false,
         extraActions: [
           Padding(
-            padding: EdgeInsets.only(right: 8.w),
+            padding: EdgeInsetsDirectional.only(end: 8.w),
             child: InkWell(
               onTap: () => _openCreateEditDialog(context),
               borderRadius: BorderRadius.circular(8.r),
@@ -706,7 +706,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
           }),
           style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
         ),
-        actionsPadding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+        actionsPadding: EdgeInsetsDirectional.fromSTEB(16.w, 0, 16.w, 16.h),
         actions: [
           Row(
             children: [
@@ -860,7 +860,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                     children: [
                       // Top Header Row with title & close button
                       Padding(
-                        padding: EdgeInsets.fromLTRB(20.w, 16.h, 16.w, 12.h),
+                        padding: EdgeInsetsDirectional.fromSTEB(20.w, 16.h, 16.w, 12.h),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

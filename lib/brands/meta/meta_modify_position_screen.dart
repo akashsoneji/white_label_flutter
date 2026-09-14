@@ -443,7 +443,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 16.h),
+              padding: EdgeInsetsDirectional.fromSTEB(16.w, 18.h, 16.w, 16.h),
               child: Obx(() {
                 final live = _resolveBidAsk();
                 return Row(
@@ -511,7 +511,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
             ),
 
             Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+              padding: EdgeInsetsDirectional.fromSTEB(16.w, 16.h, 16.w, 16.h),
               child: Text(
                 TranslationUtils.tr('meta_modify_position_stops_hint'),
                 style: AppTextStyles.bodyText.copyWith(
@@ -526,7 +526,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
             SizedBox(height: 12.h),
 
             Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 24.h),
+              padding: EdgeInsetsDirectional.fromSTEB(16.w, 0, 16.w, 24.h),
               child: SizedBox(
                 width: double.infinity,
                 height: 44.h,

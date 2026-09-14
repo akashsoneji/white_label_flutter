@@ -225,7 +225,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
 
               // ── Header title ──────────────────────────────────────────────
               Padding(
-                padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
+                padding: EdgeInsetsDirectional.only(start: 4.w, bottom: 12.h),
                 child: Text(languageService.tr('settings_title'),
                     style: MetaTheme.title(context)),
               ),
@@ -280,7 +280,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
 
   Widget _sectionLabel(BuildContext c, String label) {
     return Padding(
-      padding: EdgeInsets.only(left: 4.w),
+      padding: EdgeInsetsDirectional.only(start: 4.w),
       child: Text(
         label.toUpperCase(),
         style: AppTextStyles.bodyText.copyWith(
@@ -788,7 +788,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
               _buildMenuRow(c, item),
               if (idx < items.length - 1)
                 Padding(
-                  padding: EdgeInsets.only(left: 52.w),
+                  padding: EdgeInsetsDirectional.only(start: 52.w),
                   child: Divider(
                     height: 1,
                     color: MetaTheme.divider(c),
@@ -873,7 +873,9 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 200),
           alignment:
-              value ? Alignment.centerRight : Alignment.centerLeft,
+              value
+                  ? AlignmentDirectional.centerEnd
+                  : AlignmentDirectional.centerStart,
           child: Container(
             margin: EdgeInsets.all(2.5.w),
             width: 19.w,

@@ -171,7 +171,7 @@ class _InvestmentTabState extends State<InvestmentTab> {
             iconColor: AppColors.textPrimary,
             collapsedIconColor: AppColors.textGrey,
             tilePadding: EdgeInsets.symmetric(horizontal: 10),
-            childrenPadding: EdgeInsets.only(left: 10, right: 16, bottom: 12),
+            childrenPadding: EdgeInsetsDirectional.only(start: 10, end: 16, bottom: 12),
             title: Text(
               TranslationUtils.tr('investment_tab_your_stats'),
               style: AppTextStyles.bodyText.copyWith(
@@ -271,7 +271,7 @@ class _MasterCardState extends State<_MasterCard> {
           children: [
             // ── Header: Avatar + Name/Badge ──
             Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 10.h),
+              padding: EdgeInsetsDirectional.fromSTEB(14.w, 14.h, 14.w, 10.h),
               child: Row(
                 children: [
                   _TraderAvatar(),

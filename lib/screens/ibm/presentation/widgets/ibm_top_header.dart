@@ -95,7 +95,7 @@ class IbmTopHeader extends StatelessWidget implements PreferredSizeWidget {
         Obx(() {
           final balance = controller.walletBalance;
           return Padding(
-            padding: EdgeInsets.only(right: 16.w),
+            padding: EdgeInsetsDirectional.only(end: 16.w),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
               decoration: BoxDecoration(
@@ -112,12 +112,15 @@ class IbmTopHeader extends StatelessWidget implements PreferredSizeWidget {
                     color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
                   ),
                   SizedBox(width: 4.w),
-                  Text(
-                    '\$$balance',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Text(
+                      '\$$balance',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+                      ),
                     ),
                   ),
                 ],

@@ -16,7 +16,7 @@ import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'dart:convert';
 
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import '../../constants/color.dart';
 import '../../constants/text_styles.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
@@ -1111,27 +1111,28 @@ Placing Order:
         context: context,
         builder:
             (context) => AlertDialog(
-              title: Text('Price Debug Info'),
+              title: Text(languageService.tr('chart_price_debug_info')),
               content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Symbol: $selectedSymbol',
+                      '${languageService.tr('chart_debug_symbol')} $selectedSymbol',
                       style: AppTextStyles.bodyText.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Bid Price (SELL): ${PrecisionHelper.formatPrice(bidPrice, decimals: _getCurrentDigits())}',
+                      '${languageService.tr('chart_debug_bid_price_sell')} ${PrecisionHelper.formatPrice(bidPrice, decimals: _getCurrentDigits())}',
                     ),
                     Text(
-                      'Ask Price (BUY): ${PrecisionHelper.formatPrice(askPrice, decimals: _getCurrentDigits())}',
+                      '${languageService.tr('chart_debug_ask_price_buy')} ${PrecisionHelper.formatPrice(askPrice, decimals: _getCurrentDigits())}',
                     ),
                     Text(
-                      'Market Price (Alert): ${PrecisionHelper.formatPrice(marketPrice, decimals: _getCurrentDigits())}',
+                      '${languageService.tr('chart_debug_market_price_alert')} ${PrecisionHelper.formatPrice(marketPrice, decimals: _getCurrentDigits())}',
+
                       style: AppTextStyles.bodyText.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.blue,
@@ -1139,7 +1140,7 @@ Placing Order:
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Monitoring Status:',
+                      languageService.tr('chart_screen_monitoring_status'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -1150,14 +1151,14 @@ Placing Order:
                     if (status['alerts'] != null &&
                         (status['alerts'] as List).isNotEmpty) ...[
                       Text(
-                        'Active Alerts:',
+                        languageService.tr('chart_screen_active_alerts'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       ...(status['alerts'] as List).map(
                         (alert) => Padding(
-                          padding: EdgeInsets.only(left: 8, top: 4),
+                          padding: EdgeInsetsDirectional.only(start: 8, top: 4),
                           child: Text(
                             '${alert['symbol']} ${alert['condition']} ${PrecisionHelper.formatPrice(alert['targetPrice'] ?? 0.0, decimals: _getCurrentDigits())}',
                           ),
@@ -1165,14 +1166,14 @@ Placing Order:
                       ),
                     ] else
                       Text(
-                        'No active alerts',
+                        languageService.tr('chart_screen_no_active_alerts'),
                         style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.textGrey,
                         ),
                       ),
                     SizedBox(height: 16),
                     Text(
-                      'Test Actions:',
+                      languageService.tr('chart_screen_test_actions'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -1204,7 +1205,7 @@ Placing Order:
                               backgroundColor: AppColors.blue,
                             ),
                             child: Text(
-                              'Add Test Alert\n(1.80950 above)',
+                              languageService.tr('chart_screen_add_test_alert'),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 10,
                                 color: AppColors.whiteColor,
@@ -1228,7 +1229,9 @@ Placing Order:
                               backgroundColor: AppColors.warning,
                             ),
                             child: Text(
-                              'Test Trigger\nNow',
+                              languageService.tr(
+                                'chart_screen_test_trigger_now',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 10,
                                 color: AppColors.whiteColor,
@@ -1249,7 +1252,9 @@ Placing Order:
                               >()) {
                                 Get.find<AppNotificationController>()
                                     .showSuccess(
-                                      message: 'Test notification sent!',
+                                      message: languageService.tr(
+                                        'chart_test_notification_sent',
+                                      ),
                                     );
                               }
                             },
@@ -1257,7 +1262,9 @@ Placing Order:
                               backgroundColor: AppColors.green,
                             ),
                             child: Text(
-                              'Test Notification\nSystem',
+                              languageService.tr(
+                                'chart_screen_test_notification_system',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 9,
                                 color: AppColors.whiteColor,
@@ -1283,7 +1290,9 @@ Placing Order:
                                 AppNotificationController
                               >()) {
                                 Get.find<AppNotificationController>().showInfo(
-                                  message: 'ChartSocket connection checked!',
+                                  message: languageService.tr(
+                                    'chart_screen_chartsocket_connection_checked',
+                                  ),
                                 );
                               }
                             },
@@ -1291,7 +1300,9 @@ Placing Order:
                               backgroundColor: AppColors.quickActionPurple,
                             ),
                             child: Text(
-                              'Fix WebSocket\nConnection',
+                              languageService.tr(
+                                'chart_debug_fix_websocket_connection',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 9,
                                 color: AppColors.whiteColor,
@@ -1307,7 +1318,7 @@ Placing Order:
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text('Close'),
+                  child: Text(languageService.tr('bank_list_close')),
                 ),
               ],
             ),
@@ -1804,7 +1815,7 @@ Placing Order:
       child: Row(
         children: [
           Text(
-            'Change: ${isPositive ? '+' : ''}${changePercent.toStringAsFixed(2)}%',
+            '${languageService.tr('chart_screen_change_label')} ${isPositive ? '+' : ''}${changePercent.toStringAsFixed(2)}%',
             style: AppTextStyles.label.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
@@ -1929,19 +1940,22 @@ Placing Order:
       height: MediaQuery.of(context).size.height * 0.4,
       padding: EdgeInsets.zero,
       margin: EdgeInsets.zero,
-      child:
-          FlavorConfig.instance.useNewChart
-              ? TenaxChartWebView(
-                symbol: effectiveDatafeedSymbol,
-                isDark: AppColors.chartTheme == 'dark',
-              )
-              : ChartInAppWebView(
-                key: _webViewKey,
-                symbol:
-                    effectiveDatafeedSymbol, // JS-updated for fast in-session switches
-                url:
-                    chartUrl, // stable URL triggers fast JS updates under didUpdateWidget
-              ),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child:
+            FlavorConfig.instance.useNewChart
+                ? TenaxChartWebView(
+                  symbol: effectiveDatafeedSymbol,
+                  isDark: AppColors.chartTheme == 'dark',
+                )
+                : ChartInAppWebView(
+                  key: _webViewKey,
+                  symbol:
+                      effectiveDatafeedSymbol, // JS-updated for fast in-session switches
+                  url:
+                      chartUrl, // stable URL triggers fast JS updates under didUpdateWidget
+                ),
+      ),
     );
   }
 
@@ -3059,9 +3073,9 @@ Placing Order:
                       Expanded(
                         child: SingleChildScrollView(
                           controller: scrollController,
-                          padding: EdgeInsets.only(
-                            left: 16.w,
-                            right: 16.w,
+                          padding: EdgeInsetsDirectional.only(
+                            start: 16.w,
+                            end: 16.w,
                             top: 16.w,
                             bottom:
                                 MediaQuery.of(context).viewInsets.bottom +
@@ -3181,7 +3195,7 @@ Placing Order:
 
         // Take Profit
         _buildSwitchTile(
-          'Take Profit',
+          languageService.tr('general_take_profit'),
           _takeProfitEnabled,
           onChanged: (value) {
             _takeProfitEnabled.value = value;
@@ -3210,7 +3224,7 @@ Placing Order:
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Padding(
-                            padding: EdgeInsets.only(left: 17.0),
+                            padding: EdgeInsetsDirectional.only(start: 17.0),
                             child: Container(
                               width: 22.w,
                               height: 22.h,
@@ -3350,7 +3364,7 @@ Placing Order:
                           ),
                           SizedBox(width: 8.w),
                           Padding(
-                            padding: EdgeInsets.only(right: 14.0),
+                            padding: EdgeInsetsDirectional.only(end: 14.0),
                             child: Container(
                               width: 22.w,
                               height: 22.h,
@@ -3414,7 +3428,7 @@ Placing Order:
 
         // Stop Loss
         _buildSwitchTile(
-          'Stop Loss',
+          languageService.tr('general_stop_loss'),
           _stopLossEnabled,
           onChanged: (value) {
             _stopLossEnabled.value = value;
@@ -3465,7 +3479,7 @@ Placing Order:
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Padding(
-                            padding: EdgeInsets.only(left: 17.0),
+                            padding: EdgeInsetsDirectional.only(start: 17.0),
                             child: Container(
                               width: 22.w,
                               height: 22.h,
@@ -3556,7 +3570,7 @@ Placing Order:
                           ),
                           SizedBox(width: 8.w),
                           Padding(
-                            padding: EdgeInsets.only(right: 14.0),
+                            padding: EdgeInsetsDirectional.only(end: 14.0),
                             child: Container(
                               width: 22.w,
                               height: 22.h,
@@ -3665,7 +3679,8 @@ Placing Order:
   ) {
     if (!mounted || !context.mounted) return;
 
-    final message = '$symbol $type $volume done';
+    final message =
+        '$symbol $type $volume ${languageService.tr('chart_trade_done')}';
 
     // Use post-frame callback to avoid draw frame errors
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -3727,7 +3742,8 @@ Placing Order:
         // Don't force reconnect as it clears prices - prices will update naturally via WebSocket
       } else {
         // Show error notification
-        final errorMessage = result['error'] ?? 'Failed to place order';
+        final errorMessage =
+            result['error'] ?? languageService.tr('chart_order_place_failed');
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
             message: errorMessage,
@@ -3738,7 +3754,9 @@ Placing Order:
       // Show error notification
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Failed to place order: $error',
+          message:
+              '${languageService.tr('chart_order_place_failed')}: $error',
+
         );
       }
     } finally {
@@ -3789,7 +3807,7 @@ Placing Order:
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
-                padding: EdgeInsets.only(left: 17.0),
+                padding: EdgeInsetsDirectional.only(start: 17.0),
                 child: Container(
                   width: 22.w,
                   height: 22.h,
@@ -3879,7 +3897,7 @@ Placing Order:
               ),
               SizedBox(width: 8.w),
               Padding(
-                padding: EdgeInsets.only(right: 14.0),
+                padding: EdgeInsetsDirectional.only(end: 14.0),
                 child: Container(
                   width: 22.w,
                   height: 22.h,
@@ -4121,7 +4139,7 @@ Placing Order:
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Padding(
-            padding: EdgeInsets.only(left: 17.0),
+            padding: EdgeInsetsDirectional.only(start: 17.0),
             child: Container(
               width: 22.w,
               height: 22.h,
@@ -4195,7 +4213,7 @@ Placing Order:
           ),
           SizedBox(width: 8.w),
           Padding(
-            padding: EdgeInsets.only(right: 14.0),
+            padding: EdgeInsetsDirectional.only(end: 14.0),
             child: Container(
               width: 22.w,
               height: 22.h,
@@ -4467,7 +4485,7 @@ Placing Order:
               child: Container(
                 width: 150.w,
                 height: 50.h,
-                padding: EdgeInsets.only(left: 12.w, top: 6.h),
+                padding: EdgeInsetsDirectional.only(start: 12.w, top: 6.h),
                 decoration: BoxDecoration(
                   color: AppColors.whiteColor,
                   borderRadius: BorderRadius.circular(8.r),
@@ -4490,12 +4508,15 @@ Placing Order:
                       child: ValueListenableBuilder<DateTime>(
                         valueListenable: _orderExpirationDate,
                         builder: (context, dateTime, child) {
-                          return Text(
-                            DateFormat('MMM dd, yyyy').format(dateTime),
-                            style: AppTextStyles.label.copyWith(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
+                          return Directionality(
+                            textDirection: TextDirection.ltr,
+                            child: Text(
+                              DateFormat('MMM dd, yyyy').format(dateTime),
+                              style: AppTextStyles.label.copyWith(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                           );
                         },
@@ -4509,7 +4530,7 @@ Placing Order:
             Container(
               width: 150.w,
               height: 50.h,
-              padding: EdgeInsets.only(left: 12.w, top: 6.h),
+              padding: EdgeInsetsDirectional.only(start: 12.w, top: 6.h),
               decoration: BoxDecoration(
                 color: AppColors.whiteColor,
                 borderRadius: BorderRadius.circular(8.r),
@@ -4534,12 +4555,15 @@ Placing Order:
                     ValueListenableBuilder<DateTime>(
                       valueListenable: _orderExpirationTime,
                       builder: (context, dateTime, child) {
-                        return Text(
-                          DateFormat('hh:MM').format(dateTime),
-                          style: AppTextStyles.label.copyWith(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
+                        return Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: Text(
+                            DateFormat('hh:MM').format(dateTime),
+                            style: AppTextStyles.label.copyWith(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                         );
                       },
@@ -4642,7 +4666,7 @@ Placing Order:
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Padding(
-                        padding: EdgeInsets.only(left: 17.0),
+                        padding: EdgeInsetsDirectional.only(start: 17.0),
                         child: Container(
                           width: 22.w,
                           height: 22.h,
@@ -4729,7 +4753,7 @@ Placing Order:
                       ),
                       SizedBox(width: 8.w),
                       Padding(
-                        padding: EdgeInsets.only(right: 14.0),
+                        padding: EdgeInsetsDirectional.only(end: 14.0),
                         child: Container(
                           width: 22.w,
                           height: 22.h,

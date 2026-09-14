@@ -186,18 +186,23 @@ class _OtpModalState extends State<OtpModal> {
               SizedBox(height: 24.h),
 
               // OTP Input Fields - ✅ Generates fields based on otpLength (will be 6)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(widget.otpLength, (index) {
-                  return Container(
-                    width: 51.w,
-                    height: 50.h,
-                    child:
-                        Platform.isAndroid
-                            ? _buildOtpBoxAndroid(index)
-                            : _buildOtpBox(index),
-                  );
-                }),
+              // Boxes are positional (box 1 = first digit typed), so the row
+              // must stay LTR even in Arabic.
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(widget.otpLength, (index) {
+                    return Container(
+                      width: 51.w,
+                      height: 50.h,
+                      child:
+                          Platform.isAndroid
+                              ? _buildOtpBoxAndroid(index)
+                              : _buildOtpBox(index),
+                    );
+                  }),
+                ),
               ),
               SizedBox(height: 32.h),
 

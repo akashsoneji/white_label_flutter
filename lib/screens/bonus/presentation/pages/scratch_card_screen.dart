@@ -731,7 +731,10 @@ class ScratchCardController extends GetxController {
     } catch (e, t) {
       debugPrint('ScratchCardScreen revealCard exception: $e');
       debugPrint('Stacktrace: $t');
-      CustomToastService.showError(title: 'Error', message: 'Error: $e');
+      CustomToastService.showError(
+        title: TranslationUtils.tr('general_error_prefix'),
+        message: 'Error: $e',
+      );
     } finally {
       isRevealing.value = false;
     }
@@ -799,7 +802,10 @@ class ScratchCardController extends GetxController {
     } catch (e, t) {
       debugPrint('ScratchCardScreen createScratchAccount exception: $e');
       debugPrint('Stacktrace: $t');
-      CustomToastService.showError(title: 'Error', message: 'Error: $e');
+      CustomToastService.showError(
+        title: TranslationUtils.tr('general_error_prefix'),
+        message: 'Error: $e',
+      );
     } finally {
       isCreatingAccount.value = false;
     }
@@ -1394,7 +1400,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                 height: 10.h,
                 color: AppColors.primary,
                 child: Align(
-                  alignment: Alignment.centerLeft,
+                  alignment: AlignmentDirectional.centerStart,
                   child: FractionallySizedBox(
                     widthFactor: safePct,
                     child: Container(
@@ -1916,7 +1922,7 @@ class _MockUnlockCard extends StatelessWidget {
               height: 10.h,
               color: AppColors.surfacePurpleLight,
               child: Align(
-                alignment: Alignment.centerLeft,
+                alignment: AlignmentDirectional.centerStart,
                 child: FractionallySizedBox(
                   widthFactor: pct,
                   child: Container(color: AppColors.primary),
@@ -2972,7 +2978,7 @@ class _NextCardCountdownBannerState extends State<_NextCardCountdownBanner> {
                           borderRadius: BorderRadius.circular(3.r),
                         ),
                         child: FractionallySizedBox(
-                          alignment: Alignment.centerLeft,
+                          alignment: AlignmentDirectional.centerStart,
                           widthFactor: progress,
                           child: Container(
                             decoration: BoxDecoration(
@@ -3757,39 +3763,44 @@ class _ActiveScratchCardState extends State<_ActiveScratchCard> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.r),
-        child: Stack(
-          children: [
-            // ── LAYER 1 (bottom): Scratcher ──
-            if (_svgBytes != null)
-              Positioned.fill(
-                child: Scratcher(
-                  key: widget.ctrl.scratchKey,
-                  accuracy: ScratchAccuracy.low,
-                  brushSize: 70,
-                  threshold: 100,
-                  color: AppColors.prizeDarkBg,
-                  image: Image.memory(_svgBytes!, fit: BoxFit.cover),
-                  onChange: widget.ctrl.onProgress,
-                  onScratchEnd: widget.ctrl.onScratchEnd,
-                  child: _RewardContent(rewardAmount: null, hasResult: false),
+        // Scratcher's brush/mask coordinates are computed in raw local space;
+        // pinning this subtree to LTR keeps them correct under an RTL locale.
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: [
+              // ── LAYER 1 (bottom): Scratcher ──
+              if (_svgBytes != null)
+                Positioned.fill(
+                  child: Scratcher(
+                    key: widget.ctrl.scratchKey,
+                    accuracy: ScratchAccuracy.low,
+                    brushSize: 70,
+                    threshold: 100,
+                    color: AppColors.prizeDarkBg,
+                    image: Image.memory(_svgBytes!, fit: BoxFit.cover),
+                    onChange: widget.ctrl.onProgress,
+                    onScratchEnd: widget.ctrl.onScratchEnd,
+                    child: _RewardContent(rewardAmount: null, hasResult: false),
+                  ),
                 ),
-              ),
 
-            // ── LAYER 2 (top): SVG overlay — fades out when bytes ready ──
-            Positioned.fill(
-              child: IgnorePointer(
-                ignoring: _svgBytes != null,
-                child: AnimatedOpacity(
-                  opacity: _svgBytes == null ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 400),
-                  child: RepaintBoundary(
-                    key: _svgRepaintKey,
-                    child: const _ScratchCoverFace(),
+              // ── LAYER 2 (top): SVG overlay — fades out when bytes ready ──
+              Positioned.fill(
+                child: IgnorePointer(
+                  ignoring: _svgBytes != null,
+                  child: AnimatedOpacity(
+                    opacity: _svgBytes == null ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 400),
+                    child: RepaintBoundary(
+                      key: _svgRepaintKey,
+                      child: const _ScratchCoverFace(),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -4164,7 +4175,12 @@ class _CreditStatusBadge extends StatelessWidget {
             SizedBox(width: 6.w),
             Flexible(
               child: Text(
-                'Credit failed: ${reveal.creditError.isNotEmpty ? reveal.creditError : 'Please contact support'}',
+                TranslationUtils.trArgs('scratch_credit_failed_reason', {
+                  'reason':
+                      reveal.creditError.isNotEmpty
+                          ? reveal.creditError
+                          : TranslationUtils.tr('scratch_please_contact_support'),
+                }),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 11.sp,
                   color: Colors.orange.shade200,

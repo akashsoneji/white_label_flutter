@@ -319,7 +319,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                     flex: 2,
                     child: Text(
                       TranslationUtils.tr('actions_section_title'),
-                      textAlign: TextAlign.right,
+                      textAlign: TextAlign.end,
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,

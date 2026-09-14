@@ -147,9 +147,9 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.r),
       ),
-      titlePadding: EdgeInsets.fromLTRB(20.w, 16.h, 8.w, 8.h),
-      contentPadding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 0),
-      actionsPadding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 12.h),
+      titlePadding: EdgeInsetsDirectional.fromSTEB(20.w, 16.h, 8.w, 8.h),
+      contentPadding: EdgeInsetsDirectional.fromSTEB(20.w, 8.h, 20.w, 0),
+      actionsPadding: EdgeInsetsDirectional.fromSTEB(12.w, 8.h, 12.w, 12.h),
       title: Row(
         children: [
           Expanded(

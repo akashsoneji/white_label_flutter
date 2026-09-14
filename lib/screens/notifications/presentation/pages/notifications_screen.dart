@@ -98,7 +98,9 @@ class NotificationsScreen extends GetView<NotificationController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            item.title ?? item.type ?? 'Notification',
+                            item.title ??
+                                item.type ??
+                                TranslationUtils.tr('settings_tab_notification'),
                             style: AppTextStyles.cardSubtitle.copyWith(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,

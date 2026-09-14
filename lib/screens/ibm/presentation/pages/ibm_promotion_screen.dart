@@ -204,7 +204,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                           controller.selectedCategory.value.toLowerCase() ==
                           cat.toLowerCase();
                       return Padding(
-                        padding: EdgeInsets.only(right: 6.w),
+                        padding: EdgeInsetsDirectional.only(end: 6.w),
                         child: _buildPillChip(
                           label: cat.toUpperCase(),
                           isSelected: isSelected,
@@ -694,7 +694,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                 color: AppColors.card,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
               ),
-              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
+              padding: EdgeInsetsDirectional.fromSTEB(20.w, 16.h, 20.w, 24.h),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1517,7 +1517,10 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                               ),
                               SizedBox(height: 3.h),
                               Text(
-                                'Reference: $ref',
+                                TranslationUtils.trArgs(
+                                  'cregis_address_screen_reference_number',
+                                  {'reference': ref},
+                                ),
                                 style: TextStyle(
                                   fontSize: 10.sp,
                                   color: AppColors.textGrey,
@@ -1526,7 +1529,10 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                               if (date.isNotEmpty) ...[
                                 SizedBox(height: 2.h),
                                 Text(
-                                  'Submitted: $date',
+                                  TranslationUtils.trArgs(
+                                    'ibm_promotion_submitted_date',
+                                    {'date': date},
+                                  ),
                                   style: TextStyle(
                                     fontSize: 9.5.sp,
                                     color: AppColors.textGrey,

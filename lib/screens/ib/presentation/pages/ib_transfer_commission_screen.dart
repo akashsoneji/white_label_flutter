@@ -73,7 +73,7 @@ class _IbTransferCommissionScreenState
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: Padding(
-          padding: EdgeInsets.only(left: 10.w),
+          padding: EdgeInsetsDirectional.only(start: 10.w),
           // child: AppBackButton(onPressed: () => Get.back()),
           child: IconButton(
             icon: SvgPicture.asset(
@@ -233,8 +233,8 @@ class _IbTransferCommissionScreenState
                 ? AppColors.secondary.withOpacity(0.15)
                 : AppColors.secondary.withOpacity(0.9),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
         ),
         boxShadow: [
           BoxShadow(
@@ -252,8 +252,8 @@ class _IbTransferCommissionScreenState
         child: Stack(
           children: [
             // Background circles decoration
-            Positioned(
-              right: -20.w,
+            PositionedDirectional(
+              end: -20.w,
               top: -20.h,
               child: CircleAvatar(
                 radius: 60.r,
@@ -263,8 +263,8 @@ class _IbTransferCommissionScreenState
                         : Colors.white.withOpacity(0.08),
               ),
             ),
-            Positioned(
-              left: -40.w,
+            PositionedDirectional(
+              start: -40.w,
               bottom: -40.h,
               child: CircleAvatar(
                 radius: 80.r,
@@ -407,7 +407,10 @@ class _IbTransferCommissionScreenState
                     Text(
                       item.toClientName ??
                           (item.toClientUserId != null
-                              ? 'Client #${item.toClientUserId}'
+                              ? TranslationUtils.trArgs(
+                                'ib_transfer_client_number',
+                                {'id': '${item.toClientUserId}'},
+                              )
                               : TranslationUtils.tr('ib_transfer_unknown_client')),
                       style: TextStyle(
                         color: AppColors.textPrimary,

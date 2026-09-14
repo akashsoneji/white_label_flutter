@@ -97,7 +97,12 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
 
   Widget _buildInstructionalText() {
     return Padding(
-      padding: EdgeInsets.only(left: 40.w, right: 40.w, top: 16.h, bottom: 8.h),
+      padding: EdgeInsetsDirectional.only(
+        start: 40.w,
+        end: 40.w,
+        top: 16.h,
+        bottom: 8.h,
+      ),
       child: Text(
         languageService.tr(
           'choose_account_screen_choose_an_account_type_you_like',

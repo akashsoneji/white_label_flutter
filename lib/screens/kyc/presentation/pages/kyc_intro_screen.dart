@@ -79,7 +79,7 @@ class KycIntroScreen extends StatelessWidget {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 24.h),
+                padding: EdgeInsetsDirectional.fromSTEB(20.w, 8.h, 20.w, 24.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -207,8 +207,8 @@ class KycIntroScreen extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18.r),
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: AlignmentDirectional.topStart,
+                end: AlignmentDirectional.bottomEnd,
                 colors: [
                   AppColors.primary,
                   Color.lerp(AppColors.primary, Colors.black, 0.30)!,
@@ -327,8 +327,8 @@ class KycIntroScreen extends StatelessWidget {
             locked
                 ? null
                 : LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
                   colors: [
                     AppColors.primary,
                     Color.lerp(AppColors.primary, Colors.black, 0.30)!,
@@ -556,7 +556,7 @@ class KycIntroScreen extends StatelessWidget {
   Widget _buildFooter() {
     return Container(
       color: AppColors.scaffold,
-      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 12.h),
+      padding: EdgeInsetsDirectional.fromSTEB(20.w, 12.h, 20.w, 12.h),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -568,8 +568,8 @@ class KycIntroScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14.r),
                 gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+                  begin: AlignmentDirectional.centerStart,
+                  end: AlignmentDirectional.centerEnd,
                   colors: [
                     Color.lerp(AppColors.primary.withValues(alpha: 0.3), AppColors.primary.withValues(alpha: 0.4), 0.9)!,
                     AppColors.primary,

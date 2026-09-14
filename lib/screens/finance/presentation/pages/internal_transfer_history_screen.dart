@@ -11,8 +11,23 @@ import 'package:crm_app/services/language_service.dart';
 import '../../../../widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
+/// Display label for an internal-transfer status filter (raw values are API params).
+String _statusLabel(InternalTransferStatusFilter status) {
+  switch (status.value) {
+    case 'approved':
+      return TranslationUtils.tr('kyc_verification_approved');
+    case 'pending':
+      return TranslationUtils.tr('transaction_history_pending');
+    case 'failed':
+      return TranslationUtils.tr('transaction_history_failed');
+    default:
+      return TranslationUtils.tr('ticket_all_status');
+  }
+}
+
 class InternalTransferHistoryScreen extends GetView<InternalTransferHistoryController> {
   const InternalTransferHistoryScreen({super.key});
+
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +56,11 @@ class InternalTransferHistoryScreen extends GetView<InternalTransferHistoryContr
           children: [
             // Fixed top part
             Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
+              padding: EdgeInsetsDirectional.fromSTEB(20.w, 12.h, 20.w, 0),
               child: InternalTransferFilterCard(),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 10.h),
+              padding: EdgeInsetsDirectional.fromSTEB(20.w, 16.h, 20.w, 10.h),
               child: const InternalTransferSummaryHeader(),
             ),
             // Scrollable list part
@@ -67,7 +82,7 @@ class InternalTransferHistoryScreen extends GetView<InternalTransferHistoryContr
                   child: ListView.builder(
                     controller: controller.scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 24.h),
+                    padding: EdgeInsetsDirectional.fromSTEB(20.w, 4.h, 20.w, 24.h),
                     itemCount: controller.items.length + 1, // +1 for loading indicator
                     itemBuilder: (context, index) {
                       if (index == controller.items.length) {
@@ -154,7 +169,7 @@ class InternalTransferFilterCard extends GetView<InternalTransferHistoryControll
           SizedBox(height: 10.h),
           Obx(() => _buildFilterField(
             label: TranslationUtils.tr('common_status'),
-            value: controller.selectedStatus.value.label,
+            value: _statusLabel(controller.selectedStatus.value),
             icon: Icons.keyboard_arrow_down_rounded,
             onTap: () => _showStatusSheet(context),
           )),
@@ -325,7 +340,7 @@ class InternalTransferFilterCard extends GetView<InternalTransferHistoryControll
               maxHeight: MediaQuery.of(context).size.height * 0.5,
             ),
             child: Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
+              padding: EdgeInsetsDirectional.fromSTEB(20.w, 12.h, 20.w, 20.h),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -360,7 +375,7 @@ class InternalTransferFilterCard extends GetView<InternalTransferHistoryControll
                         return ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: Text(
-                            status.label,
+                            _statusLabel(status),
                             style: AppTextStyles.bodyText.copyWith(
                               color: isSelected
                                   ? AppColors.primary

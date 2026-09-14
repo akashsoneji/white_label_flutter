@@ -219,7 +219,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                                 () => setState(() => _selectedProportion = i),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
-                              margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
+                              margin: EdgeInsetsDirectional.only(end: i < 2 ? 8 : 0),
                               padding: EdgeInsets.symmetric(
                                 horizontal: 8,
                                 vertical: 12,
@@ -297,7 +297,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                     ),
                     SizedBox(height: 6),
                     Padding(
-                      padding: EdgeInsets.only(left: 2),
+                      padding: EdgeInsetsDirectional.only(start: 2),
                       child: Text(
                         TranslationUtils.tr(
                           'subscription_setup_screen_required_investment_188',
@@ -400,7 +400,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                     ),
                     SizedBox(height: 6),
                     Padding(
-                      padding: EdgeInsets.only(left: 2),
+                      padding: EdgeInsetsDirectional.only(start: 2),
                       child: Text(
                         TranslationUtils.tr(
                           'subscription_setup_screen_39_percent_of_required',
@@ -541,9 +541,9 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
             ),
           ),
         ),
-        Positioned(
+        PositionedDirectional(
           top: -10,
-          left: 12,
+          start: 12,
           child: Container(
             color: AppColors.whiteColor,
             padding: EdgeInsets.symmetric(horizontal: 4),

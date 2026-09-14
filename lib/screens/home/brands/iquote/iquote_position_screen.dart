@@ -205,7 +205,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
 
         return Container(
           width: double.infinity,
-          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
+padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 12.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -670,7 +670,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
           ].join('  •  ');
 
           return Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 6.h),
+padding: EdgeInsetsDirectional.fromSTEB(16.w, 10.h, 16.w, 6.h),
             child: InkWell(
               onTap: _openHistoryFilterSheet,
               borderRadius: BorderRadius.circular(12.r),
@@ -863,7 +863,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
           },
           child: ListView.separated(
             controller: _scrollController,
-            padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 90.h),
+padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 90.h),
             itemCount:
                 positions.length +
                 (controller.hasMoreHistoryPages && selectedTab == 2 ? 1 : 0),
@@ -1002,7 +1002,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         }
       },
       child: Container(
-        padding: EdgeInsets.fromLTRB(10.w, 5.h, 4.w, 5.h),
+padding: EdgeInsetsDirectional.fromSTEB(10.w, 5.h, 4.w, 5.h),
         decoration: BoxDecoration(
           color: _cardColor,
           borderRadius: BorderRadius.circular(8.r),
@@ -1071,7 +1071,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                       }
                     },
                     child: Padding(
-                      padding: EdgeInsets.only(left: 4.w, right: 2.w),
+padding: EdgeInsetsDirectional.only(start: 4.w, end: 2.w),
                       child: Icon(
                         Icons.close_rounded,
                         color: AppColors.textPrimary,
@@ -1393,7 +1393,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   ),
                   SafeArea(
                     child: Padding(
-                      padding: EdgeInsets.only(left: 16.w, right: 16.w),
+padding: EdgeInsetsDirectional.only(start: 16.w, end: 16.w),
                       child: Row(
                         children: [
                           Expanded(
@@ -1692,7 +1692,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Padding(
-                padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 16.h),
+padding: EdgeInsetsDirectional.fromSTEB(18.w, 18.h, 18.w, 16.h),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1909,7 +1909,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             children: [
               // Title
               Padding(
-                padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 14.h),
+padding: EdgeInsetsDirectional.fromSTEB(18.w, 18.h, 18.w, 14.h),
                 child: Center(
                   child: Text(
                     TranslationUtils.tr('iquote_position_cancel_pending'),
@@ -1923,7 +1923,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
               ),
               Divider(color: AppColors.divider, height: 1),
               Padding(
-                padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 16.h),
+padding: EdgeInsetsDirectional.fromSTEB(18.w, 16.h, 18.w, 16.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -2085,7 +2085,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 20.h),
+padding: EdgeInsetsDirectional.fromSTEB(14.w, 10.h, 14.w, 20.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -2203,7 +2203,7 @@ class _AccountRow extends StatelessWidget {
       borderRadius: BorderRadius.circular(10.r),
       child: Container(
         margin: EdgeInsets.only(bottom: 10.h),
-        padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 10.h),
+padding: EdgeInsetsDirectional.fromSTEB(10.w, 10.h, 10.w, 10.h),
         decoration: BoxDecoration(
           color:
               isActive ? AppColors.primary.withOpacity(0.10) : AppColors.card,

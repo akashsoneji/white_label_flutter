@@ -661,9 +661,9 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                           ),
                         ),
                       ),
-                      Positioned(
+                      PositionedDirectional(
                         bottom: 0,
-                        right: 0,
+                        end: 0,
                         child: Container(
                           width: 12.r,
                           height: 12.r,
@@ -1495,7 +1495,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
 
   Widget _buildDivider() {
     return Padding(
-      padding: EdgeInsets.only(left: 64.w, right: 14.w),
+      padding: EdgeInsetsDirectional.only(start: 64.w, end: 14.w),
       child: Divider(
         height: 1,
         thickness: 0.5,

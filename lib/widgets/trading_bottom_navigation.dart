@@ -166,7 +166,11 @@ class TradingBottomNavigation extends StatelessWidget {
 
     return SafeArea(
       child: Padding(
-        padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 12.h),
+        padding: EdgeInsetsDirectional.only(
+          start: 16.w,
+          end: 16.w,
+          bottom: 12.h,
+        ),
         child: Container(
           height: 64.h,
           decoration: BoxDecoration(
@@ -351,9 +355,9 @@ class TradingBottomNavigation extends StatelessWidget {
                 size: 22.r,
               ),
               if (badgeCount > 0)
-                Positioned(
+                PositionedDirectional(
                   top: -4.h,
-                  right: -8.w,
+                  end: -8.w,
                   child: Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 4.w,

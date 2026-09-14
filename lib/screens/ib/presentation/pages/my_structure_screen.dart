@@ -463,7 +463,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
         ),
         SizedBox(height: 4.h),
         Align(
-          alignment: Alignment.centerRight,
+          alignment: AlignmentDirectional.centerEnd,
           child: Text(
             remaining,
             style: TextStyle(

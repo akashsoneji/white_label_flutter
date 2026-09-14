@@ -453,7 +453,7 @@ class _IQuotePositionDetailScreenState
             children: [
               // Title
               Padding(
-                padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 14.h),
+                padding: EdgeInsetsDirectional.fromSTEB(18.w, 18.h, 18.w, 14.h),
                 child: Center(
                   child: Text(
                     TranslationUtils.tr('iquote_position_cancel_pending'),
@@ -467,7 +467,7 @@ class _IQuotePositionDetailScreenState
               ),
               Divider(color: palette.divider, height: 1),
               Padding(
-                padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 16.h),
+                padding: EdgeInsetsDirectional.fromSTEB(18.w, 16.h, 18.w, 16.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1008,7 +1008,7 @@ class _TpSlPanel extends StatelessWidget {
     final d = pos.digits;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 16.h),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1449,7 +1449,7 @@ class _ActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final label = primaryLabel;
     return Container(
-      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h + MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 8.h + MediaQuery.of(context).padding.bottom),
       decoration: BoxDecoration(
         color: palette.bg,
         border: Border(top: BorderSide(color: palette.divider)),

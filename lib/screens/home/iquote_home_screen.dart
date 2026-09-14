@@ -94,7 +94,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
             children: [
               // 1. Top Header: User Profile Icon (Left) + App Logo (60x60) Centered (Center)
               Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 6.h),
+                padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 6.h),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -181,7 +181,12 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0.h),
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                          16.w,
+                          12.h,
+                          16.w,
+                          0.h,
+                        ),
                         child: Text(
                           TranslationUtils.tr('iquote_home_quick_shortcuts'),
                           style: AppTextStyles.bodyText.copyWith(
@@ -193,7 +198,12 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                       ),
                       SizedBox(height: 10.h),
                       Padding(
-                        padding: EdgeInsets.fromLTRB(12.w, 0.h, 12.w, 12.h),
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                          12.w,
+                          0.h,
+                          12.w,
+                          12.h,
+                        ),
                         child: GridView.count(
                           padding: EdgeInsets.zero,
                           crossAxisCount: 4,
@@ -304,7 +314,12 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                   child: Column(
                     children: [
                       Padding(
-                        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0.h),
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                          16.w,
+                          12.h,
+                          16.w,
+                          0.h,
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -331,7 +346,12 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                       ),
                       SizedBox(height: 4.h),
                       Padding(
-                        padding: EdgeInsets.fromLTRB(12.w, 0.h, 12.w, 12.h),
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                          12.w,
+                          0.h,
+                          12.w,
+                          12.h,
+                        ),
                         child: _buildLiveFavouritesGrid(
                           cardBg,
                           textPrimary,
@@ -391,7 +411,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                 key: Key('fav_${item.symbol}'),
                 direction: DismissDirection.endToStart,
                 background: Container(
-                  alignment: Alignment.centerRight,
+                  alignment: AlignmentDirectional.centerEnd,
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
                   decoration: BoxDecoration(
                     color: Colors.redAccent,
@@ -475,9 +495,9 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                 ),
               ),
               if (isHot)
-                Positioned(
+                PositionedDirectional(
                   top: -2.h,
-                  right: -2.w,
+                  end: -2.w,
                   child: Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 4.w,
@@ -765,7 +785,7 @@ Widget build(BuildContext context) {
       final banners = _bannerController.banners;
 
       return Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 4.h),
         child: Stack(
           alignment: Alignment.bottomCenter,
           children: [

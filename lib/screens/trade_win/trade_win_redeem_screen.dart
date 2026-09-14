@@ -205,7 +205,7 @@ class _TradeWinRedeemScreenState extends State<TradeWinRedeemScreen> {
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+                padding: EdgeInsetsDirectional.fromSTEB(16.w, 0, 16.w, 16.h),
                 child:
                     step == 1
                         ? _StepConfirm(
@@ -289,7 +289,7 @@ class _RedeemProductHeader extends StatelessWidget {
     final valueText = TradeWinFormat.currency(product.prizeValue);
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -674,7 +674,7 @@ class _StepShipping extends StatelessWidget {
               ),
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(top: 3.h, left: 5.w),
+                  padding: EdgeInsetsDirectional.only(top: 3.h, start: 5.w),
                   child: Text(
                     languageService.tr('tw_remember_address'),
                     style: AppTextStyles.subheading.copyWith(
@@ -816,7 +816,7 @@ class _BottomActions extends StatelessWidget {
 
       return SafeArea(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+          padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 16.h),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

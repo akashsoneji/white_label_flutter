@@ -319,7 +319,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
     }
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 8.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 6.h, 16.w, 8.h),
       child: Column(
         children: [
           Row(
@@ -366,7 +366,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                         ? '${languageService.tr('instruments_favorites')} (${_controller.favoritesCount})'
                         : filter;
                 return Padding(
-                  padding: EdgeInsets.only(right: 8.w),
+                  padding: EdgeInsetsDirectional.only(end: 8.w),
                   child: GestureDetector(
                     onTap: () {
                       if (_isSearching) {
@@ -566,7 +566,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                 ReorderableDragStartListener(
                   index: reorderIndex,
                   child: Padding(
-                    padding: EdgeInsets.only(right: 2.w),
+                    padding: EdgeInsetsDirectional.only(end: 2.w),
                     child: SizedBox(
                       height: 30.h,
                       width: 24.w,
@@ -733,8 +733,8 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
         key: Key('dismiss_${instrument.symbol}'),
         direction: DismissDirection.endToStart,
         background: Container(
-          alignment: Alignment.centerRight,
-          padding: EdgeInsets.only(right: 20.w),
+          alignment: AlignmentDirectional.centerEnd,
+          padding: EdgeInsetsDirectional.only(end: 20.w),
           color: Colors.red,
           child: Icon(Icons.delete, color: Colors.white, size: 24.sp),
         ),
@@ -1252,7 +1252,7 @@ class _BidPriceColumn extends StatelessWidget {
               if (dayLowValue != null) ...[
                 SizedBox(height: (compact ? 3.0 : 1.0).h),
                 RichText(
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.end,
                   text: TextSpan(
                     children: [
                       TextSpan(
@@ -1394,7 +1394,7 @@ class _AskPriceColumn extends StatelessWidget {
           if (dayHighValue != null) ...[
             SizedBox(height: (compact ? 3.0 : 1.0).h),
             RichText(
-              textAlign: TextAlign.left,
+              textAlign: TextAlign.start,
               text: TextSpan(
                 children: [
                   TextSpan(

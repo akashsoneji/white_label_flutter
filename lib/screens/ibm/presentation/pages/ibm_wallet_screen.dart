@@ -76,7 +76,7 @@ class _IbmWalletScreenState extends State<IbmWalletScreen>
           Obx(() {
             final balanceStr = '\$${controller.walletBalance}';
             return Padding(
-              padding: EdgeInsets.only(right: 16.w),
+              padding: EdgeInsetsDirectional.only(end: 16.w),
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 decoration: BoxDecoration(
@@ -92,12 +92,15 @@ class _IbmWalletScreenState extends State<IbmWalletScreen>
                       color: AppColors.textPrimary,
                     ),
                     SizedBox(width: 4.w),
-                    Text(
-                      balanceStr,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Text(
+                        balanceStr,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
                   ],
@@ -572,7 +575,7 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
                     _subTabs.map((tabName) {
                       final isSelected = _selectedSubTab == tabName;
                       return Padding(
-                        padding: EdgeInsets.only(right: 8.w),
+                        padding: EdgeInsetsDirectional.only(end: 8.w),
                         child: InkWell(
                           onTap: () {
                             setState(() {

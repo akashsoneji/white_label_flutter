@@ -92,7 +92,7 @@ class GetStartedScreen extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(24, 0, 24, 16),
+              padding: EdgeInsetsDirectional.fromSTEB(24, 0, 24, 16),
               child: Text.rich(
                 TextSpan(
                   style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),

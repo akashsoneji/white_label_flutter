@@ -54,7 +54,8 @@ class CopyTradingHubController extends GetxController {
     try {
       await Future.wait([_loadMasterStatus(), _loadCopierSubscriptions()]);
     } catch (e) {
-      errorMessage.value = 'Failed to load copy trading status: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_failed_to_load_status')}: $e';
     } finally {
       if (showLoading) {
         isLoading.value = false;
@@ -163,7 +164,8 @@ class CopyTradingHubController extends GetxController {
       }
       return res;
     } catch (e) {
-      errorMessage.value = 'Apply error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_apply_error')}: $e';
       return ApiResponse.error(errorMessage.value);
     } finally {
       isLoading.value = false;

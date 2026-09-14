@@ -100,7 +100,7 @@ class _PmamManagerInvestorDetailScreenState
     required String label,
     required String value,
     Color? valueColor,
-    TextAlign align = TextAlign.left,
+    TextAlign align = TextAlign.start,
   }) {
     return RichText(
       maxLines: 1,
@@ -330,7 +330,9 @@ class _PmamManagerInvestorDetailScreenState
       final resp = await PmamService.getManagerInvestorDetail(widget.investorId);
       if (!resp.success || resp.data == null) {
         setState(() {
-          _error = resp.message ?? 'Failed to load investor details';
+          _error =
+              resp.message ??
+              TranslationUtils.tr('pmam_failed_load_investor_details');
           _loading = false;
         });
         return;

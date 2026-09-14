@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'dart:ui' as ui show TextDirection;
 import 'package:intl/intl.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
@@ -277,7 +278,7 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
           Obx(() {
             final balance = controller.walletBalance;
             return Padding(
-              padding: EdgeInsets.only(right: 16.w),
+              padding: EdgeInsetsDirectional.only(end: 16.w),
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 decoration: BoxDecoration(
@@ -293,12 +294,15 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
                       color: AppColors.textPrimary,
                     ),
                     SizedBox(width: 4.w),
-                    Text(
-                      '\$$balance',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                    Directionality(
+                      textDirection: ui.TextDirection.ltr,
+                      child: Text(
+                        '\$$balance',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
                   ],
@@ -321,7 +325,7 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
                   child: Align(
-                    alignment: Alignment.centerLeft,
+                    alignment: AlignmentDirectional.centerStart,
                     child: Container(
                       padding: EdgeInsets.all(3.w),
                       decoration: BoxDecoration(
@@ -1482,7 +1486,7 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
                   .map((side) {
                     final isSel = _tradeSideFilter == side;
                     return Padding(
-                      padding: EdgeInsets.only(right: 8.w),
+                      padding: EdgeInsetsDirectional.only(end: 8.w),
                       child: ChoiceChip(
                         label: Text(side),
                         selected: isSel,
@@ -1506,7 +1510,7 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
               ...['Buy', 'Sell'].map((side) {
                 final isSel = _tradeSideFilter == side;
                 return Padding(
-                  padding: EdgeInsets.only(right: 8.w),
+                  padding: EdgeInsetsDirectional.only(end: 8.w),
                   child: ChoiceChip(
                     label: Text(side),
                     selected: isSel,
@@ -1695,21 +1699,28 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Lots: $lots',
+                          TranslationUtils.trArgs('ibm_trade_lots_value', {
+                            'lots': '$lots',
+                          }),
                           style: TextStyle(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
                           ),
                         ),
                         Text(
-                          'Open: $openPrice → Close: $closePrice',
+                          TranslationUtils.trArgs(
+                            'ibm_trade_open_close_price',
+                            {'open': '$openPrice', 'close': '$closePrice'},
+                          ),
                           style: TextStyle(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
                           ),
                         ),
                         Text(
-                          'P/L: \$$profit',
+                          TranslationUtils.trArgs('ibm_trade_pl_value', {
+                            'profit': '$profit',
+                          }),
                           style: TextStyle(
                             fontSize: 11.sp,
                             color: profitValue < 0 ? Colors.red : Colors.green,
@@ -1723,14 +1734,18 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Open: $openTime',
+                          TranslationUtils.trArgs('ibm_trade_open_time', {
+                            'time': '$openTime',
+                          }),
                           style: TextStyle(
                             fontSize: 10.sp,
                             color: AppColors.textGrey,
                           ),
                         ),
                         Text(
-                          'Close: $closeTime',
+                          TranslationUtils.trArgs('ibm_trade_close_time', {
+                            'time': '$closeTime',
+                          }),
                           style: TextStyle(
                             fontSize: 10.sp,
                             color: AppColors.textGrey,
@@ -1909,7 +1924,7 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
                                         () => _togglePersonExpansion(partnerId),
                                     behavior: HitTestBehavior.opaque,
                                     child: Padding(
-                                      padding: EdgeInsets.only(right: 2.w),
+                                      padding: EdgeInsetsDirectional.only(end: 2.w),
                                       child: Icon(
                                         isExpanded
                                             ? Icons.expand_more
@@ -2074,7 +2089,7 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
 
     if (!canExpand) {
       return Padding(
-        padding: EdgeInsets.only(left: (level - 1) * 12.w),
+        padding: EdgeInsetsDirectional.only(start: (level - 1) * 12.w),
         child: card,
       );
     }
@@ -2082,7 +2097,7 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
     Widget expandArea;
     if (isLoadingChildren) {
       expandArea = Padding(
-        padding: EdgeInsets.only(left: (level) * 12.w, top: 4.h, bottom: 8.h),
+        padding: EdgeInsetsDirectional.only(start: (level) * 12.w, top: 4.h, bottom: 8.h),
         child: Row(
           children: [
             SizedBox(
@@ -2105,7 +2120,7 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
       expandArea = const SizedBox.shrink();
     } else if (children.isEmpty) {
       expandArea = Padding(
-        padding: EdgeInsets.only(left: (level) * 12.w, top: 4.h, bottom: 8.h),
+        padding: EdgeInsetsDirectional.only(start: (level) * 12.w, top: 4.h, bottom: 8.h),
         child: Text(
           TranslationUtils.tr('ibm_no_downline'),
           style: TextStyle(color: AppColors.textGrey, fontSize: 12.sp),
@@ -2126,7 +2141,7 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
     }
 
     return Padding(
-      padding: EdgeInsets.only(left: (level - 1) * 12.w),
+      padding: EdgeInsetsDirectional.only(start: (level - 1) * 12.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

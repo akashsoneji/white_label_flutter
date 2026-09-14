@@ -143,7 +143,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           title: Column(
             children: [
               Align(
-                alignment: Alignment.topRight,
+                alignment: AlignmentDirectional.topEnd,
                 child: GestureDetector(
                   onTap: () {
                     Navigator.of(context).pop();
@@ -473,7 +473,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
   Widget _buildStepLine(bool isDone) {
     return Expanded(
       child: Padding(
-        padding: EdgeInsets.only(left: 4.w, right: 4.w, bottom: 16.h),
+        padding: EdgeInsetsDirectional.only(start: 4.w, end: 4.w, bottom: 16.h),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           height: 2.h,
@@ -1065,8 +1065,8 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  margin: EdgeInsets.only(
-                    right: opt == options.last ? 0 : 10.w,
+                  margin: EdgeInsetsDirectional.only(
+                    end: opt == options.last ? 0 : 10.w,
                   ),
                   padding: EdgeInsets.symmetric(vertical: 12.h),
                   decoration: BoxDecoration(
@@ -1361,9 +1361,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     ),
                   ),
 
-                Positioned(
+                PositionedDirectional(
                   top: 6.h,
-                  right: 6.w,
+                  end: 6.w,
                   child: GestureDetector(
                     onTap: () {
                       controller.clearDocument(key);
@@ -2086,9 +2086,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
     return SafeArea(
       bottom: true,
       child: Container(
-        padding: EdgeInsets.only(
-          left: 16.w,
-          right: 16.w,
+        padding: EdgeInsetsDirectional.only(
+          start: 16.w,
+          end: 16.w,
           top: 12.h,
           bottom: 12.h,
         ),
@@ -2367,7 +2367,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                             height: 20.h,
                             width: 1.w,
                             color: AppColors.border,
-                            margin: EdgeInsets.only(left: 4.w, right: 4.w),
+                            margin: EdgeInsetsDirectional.only(start: 4.w, end: 4.w),
                           ),
                         ],
                       ),
@@ -2408,7 +2408,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           Obx(() {
             if (controller.isCheckingMobile.value) {
               return Padding(
-                padding: EdgeInsets.only(top: 4.h, left: 4.w),
+                padding: EdgeInsetsDirectional.only(top: 4.h, start: 4.w),
                 child: Row(
                   children: [
                     SizedBox(
@@ -2436,7 +2436,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             if (!controller.isMobileAvailable.value &&
                 controller.mobileError.value.isNotEmpty) {
               return Padding(
-                padding: EdgeInsets.only(top: 4.h, left: 4.w),
+                padding: EdgeInsetsDirectional.only(top: 4.h, start: 4.w),
                 child: Text(
                   controller.mobileError.value,
                   style: AppTextStyles.bodyText.copyWith(

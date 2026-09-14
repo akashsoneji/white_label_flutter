@@ -710,7 +710,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
             height: 2,
             width: double.infinity,
             color: AppColors.border,
-            alignment: Alignment.centerLeft,
+            alignment: AlignmentDirectional.centerStart,
             child: Container(width: 80, height: 2, color: AppColors.primary),
           ),
           SizedBox(height: 16),
@@ -871,7 +871,7 @@ class SteppedActivityChart extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
-          padding: EdgeInsets.only(left: 16, top: 16, bottom: 8),
+          padding: EdgeInsetsDirectional.only(start: 16, top: 16, bottom: 8),
           child: Text(
             TranslationUtils.tr('trader_details_screen_activity'),
             style: AppTextStyles.bodyText.copyWith(

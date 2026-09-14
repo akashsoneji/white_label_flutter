@@ -84,7 +84,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 90.h),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 90.h),
         child: Obx(() {
           final status = hub.masterStatus.value;
           final code = hub.masterCode.value;

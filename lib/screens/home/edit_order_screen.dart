@@ -1197,7 +1197,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
             : AppColors.error;
 
     return Padding(
-      padding: EdgeInsets.only(top: 8.h, left: 12.w, right: 12.w),
+      padding: EdgeInsetsDirectional.only(top: 8.h, start: 12.w, end: 12.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -1402,7 +1402,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                 children: [
                   // Minus button
                   Padding(
-                    padding: EdgeInsets.only(left: 17.w),
+                    padding: EdgeInsetsDirectional.only(start: 17.w),
                     child: Container(
                       width: 22.w,
                       height: 22.h,
@@ -1528,7 +1528,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                   ),
                   // Plus button
                   Padding(
-                    padding: EdgeInsets.only(right: 17.w),
+                    padding: EdgeInsetsDirectional.only(end: 17.w),
                     child: Container(
                       width: 22.w,
                       height: 22.h,

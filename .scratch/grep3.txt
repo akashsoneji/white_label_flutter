@@ -1,2 +1,0 @@
-1593:    final navBarHeight =
-1631:                SizedBox(height: navBarHeight + 8.h),

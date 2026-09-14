@@ -254,7 +254,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                 children: [
                   // ── Header ──
                   Padding(
-                    padding: EdgeInsets.fromLTRB(20.w, 16.h, 12.w, 12.h),
+                    padding: EdgeInsetsDirectional.fromSTEB(20.w, 16.h, 12.w, 12.h),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -736,8 +736,8 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          Positioned(
-                            left: 3.w,
+                          PositionedDirectional(
+                            start: 3.w,
                             top: 1.h,
                             child: CircleAvatar(
                               radius: 22.r,
@@ -906,7 +906,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                 ),
                 SizedBox(height: 2.h),
                 Align(
-                  alignment: Alignment.centerRight,
+                  alignment: AlignmentDirectional.centerEnd,
                   child: Text(
                     '${TranslationUtils.tr('pmam_manager_detail_screen_min_investment')}: \$${minInv.toStringAsFixed(0)}',
                     style: AppTextStyles.bodyText.copyWith(
@@ -1067,7 +1067,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                   children: ['1W', '1M', '3M', '6M', '1Y', 'All'].map((e) {
                     final isSelected = e == '1M';
                     return Container(
-                      margin: EdgeInsets.only(left: 3.w),
+                      margin: EdgeInsetsDirectional.only(start: 3.w),
                       padding: EdgeInsets.symmetric(
                         horizontal: 7.w,
                         vertical: 3.h,
@@ -1354,7 +1354,9 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                       Expanded(
                         flex: 3,
                         child: Text(
-                          '${lot.toStringAsFixed(2)} lot',
+                          TranslationUtils.trArgs('pmam_lot_suffix', {
+                            'lots': lot.toStringAsFixed(2),
+                          }),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 10.sp,
                             color: AppColors.textGrey,

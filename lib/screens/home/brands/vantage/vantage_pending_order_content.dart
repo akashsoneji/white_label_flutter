@@ -557,7 +557,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                                 key: const ValueKey('trigger_off_small'),
                                 padding: EdgeInsets.only(top: 8.h),
                                 child: Align(
-                                  alignment: Alignment.centerLeft,
+                                  alignment: AlignmentDirectional.centerStart,
                                   child: _summaryPill(
                                     label: languageService.tr('pending_order_market_execution_label'),
                                     value: 'ON',
@@ -616,7 +616,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                               key: const ValueKey('risk_off'),
                               padding: EdgeInsets.only(top: 8.h),
                               child: Align(
-                                alignment: Alignment.centerLeft,
+                                alignment: AlignmentDirectional.centerStart,
                                 child: Wrap(
                                   spacing: 8.w,
                                   runSpacing: 6.h,
@@ -929,7 +929,10 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
           children: [
             ...presets.map(
               (v) =>
-                  Padding(padding: EdgeInsets.only(left: 6.w), child: chip(v)),
+                  Padding(
+                    padding: EdgeInsetsDirectional.only(start: 6.w),
+                    child: chip(v),
+                  ),
             ),
           ],
         ),
@@ -1075,7 +1078,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                           key: const ValueKey('tp_on'),
                           children: [
                             _buildPriceInput(
-                              languageService.tr('pending_order_take_profit_label'),
+                              'Take Profit',
                               widget.takeProfitController,
                               widget.takeProfitPrice.value,
                             ),
@@ -1142,7 +1145,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                           key: const ValueKey('sl_on'),
                           children: [
                             _buildPriceInput(
-                              languageService.tr('pending_order_stop_loss_label'),
+                              'Stop Loss',
                               widget.stopLossController,
                               widget.stopLossPrice.value,
                             ),
@@ -1208,6 +1211,19 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
   String _formatPrice(double value) =>
       PrecisionHelper.formatPrice(value, decimals: currentDigits);
 
+  /// Display-only translation for TP/SL labels. The raw label value is still
+  /// used for the `label == 'Take Profit'` logic checks.
+  String _fieldLabel(String label) {
+    switch (label) {
+      case 'Take Profit':
+        return languageService.tr('pending_order_take_profit_label');
+      case 'Stop Loss':
+        return languageService.tr('pending_order_stop_loss_label');
+      default:
+        return label;
+    }
+  }
+
   Widget _buildPriceInput(
     String label,
     TextEditingController controller,
@@ -1216,7 +1232,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
     return _stepperTextField(
       controller: controller,
       hintText: '',
-      labelText: label,
+      labelText: _fieldLabel(label),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       onMinus: () {
         final currentValue = double.tryParse(controller.text) ?? defaultValue;
@@ -1376,7 +1392,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
             : AppColors.error;
 
     return Padding(
-      padding: EdgeInsets.only(top: 6.h, left: 8.w, right: 8.w),
+      padding: EdgeInsetsDirectional.only(top: 6.h, start: 8.w, end: 8.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -1388,12 +1404,16 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
               color: AppColors.textGrey,
             ),
           ),
-          Text(
-            formatted,
-            style: AppTextStyles.label.copyWith(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w800,
-              color: color,
+          // Currency P&L amount stays left-to-right in Arabic.
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Text(
+              formatted,
+              style: AppTextStyles.label.copyWith(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w800,
+                color: color,
+              ),
             ),
           ),
         ],

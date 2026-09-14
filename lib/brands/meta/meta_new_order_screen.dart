@@ -331,7 +331,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
           arguments: {
             'orderData': {
               'status': true,
-              'message': 'Order placed',
+              'message': TranslationUtils.tr('pending_order_order_placed'),
               'data': {
                 'order_id': null,
                 'position_id': null,

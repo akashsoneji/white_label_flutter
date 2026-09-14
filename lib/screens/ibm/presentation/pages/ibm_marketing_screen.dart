@@ -164,7 +164,7 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
 
   Widget _buildCatPill(String key, String label, bool isSelected) {
     return Padding(
-      padding: EdgeInsets.only(right: 6.w),
+      padding: EdgeInsetsDirectional.only(end: 6.w),
       child: InkWell(
         onTap: () {
           controller.fetchMarketingMaterials(category: key);

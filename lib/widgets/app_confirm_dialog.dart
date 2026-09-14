@@ -60,7 +60,7 @@ Future<bool> showAppConfirmDialog({
             ),
             SizedBox(height: 22.h),
             Align(
-              alignment: Alignment.centerRight,
+              alignment: AlignmentDirectional.centerEnd,
               child: TextButton(
                 onPressed: () => Get.back(result: false),
                 child: Text(

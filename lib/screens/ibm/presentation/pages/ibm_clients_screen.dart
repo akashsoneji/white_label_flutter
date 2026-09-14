@@ -243,7 +243,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
           Obx(() {
             final balance = controller.walletBalance;
             return Padding(
-              padding: EdgeInsets.only(right: 16.w),
+              padding: EdgeInsetsDirectional.only(end: 16.w),
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 decoration: BoxDecoration(
@@ -1690,7 +1690,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
     }
 
     return Container(
-      margin: EdgeInsets.only(bottom: 8.h, left: leftIndent),
+      margin: EdgeInsetsDirectional.only(bottom: 8.h, start: leftIndent),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1789,8 +1789,8 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                                       });
                                     },
                                     child: Padding(
-                                      padding: EdgeInsets.only(
-                                        right: 6.w,
+                                      padding: EdgeInsetsDirectional.only(
+                                        end: 6.w,
                                         top: 2.h,
                                       ),
                                       child:
@@ -2009,8 +2009,8 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
               child:
                   _lazyLoadingKeys.contains(nodeKey)
                       ? Padding(
-                        padding: EdgeInsets.only(
-                          left: 14.w,
+                        padding: EdgeInsetsDirectional.only(
+                          start: 14.w,
                           top: 8.h,
                           bottom: 8.h,
                         ),
@@ -2564,7 +2564,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                     return GestureDetector(
                       onTap: () => setState(() => _selectedRequestTab = tab),
                       child: Container(
-                        margin: EdgeInsets.only(right: 8.w),
+                        margin: EdgeInsetsDirectional.only(end: 8.w),
                         padding: EdgeInsets.symmetric(
                           horizontal: 14.w,
                           vertical: 6.h,

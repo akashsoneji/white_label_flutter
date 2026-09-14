@@ -40,7 +40,7 @@ class TradeWinPastWinDetailScreen extends StatelessWidget {
         leading: const AppBackButton(closeOverlays: true),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 24.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

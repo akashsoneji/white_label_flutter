@@ -312,7 +312,8 @@ class CopyTradingMasterCopiersController extends GetxController {
       }
     } catch (e) {
       copiers.clear();
-      errorMessage.value = 'Load error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_load_error')}: $e';
     } finally {
       if (showLoading) isLoading.value = false;
     }
@@ -411,7 +412,9 @@ class CopyTradingMasterCopiersController extends GetxController {
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
-      return ApiResponse.error('Pause error: $e');
+      return ApiResponse.error(
+        '${TranslationUtils.tr('copy_trading_pause_error')}: $e',
+      );
     } finally {
       actionLoading.value = false;
     }
@@ -427,7 +430,9 @@ class CopyTradingMasterCopiersController extends GetxController {
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
-      return ApiResponse.error('Resume error: $e');
+      return ApiResponse.error(
+        '${TranslationUtils.tr('copy_trading_resume_error')}: $e',
+      );
     } finally {
       actionLoading.value = false;
     }
@@ -443,7 +448,9 @@ class CopyTradingMasterCopiersController extends GetxController {
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
-      return ApiResponse.error('Stop error: $e');
+      return ApiResponse.error(
+        '${TranslationUtils.tr('copy_trading_stop_error')}: $e',
+      );
     } finally {
       actionLoading.value = false;
     }
@@ -459,7 +466,9 @@ class CopyTradingMasterCopiersController extends GetxController {
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
-      return ApiResponse.error('Add capital error: $e');
+      return ApiResponse.error(
+        '${TranslationUtils.tr('copy_trading_add_capital_error')}: $e',
+      );
     } finally {
       actionLoading.value = false;
     }

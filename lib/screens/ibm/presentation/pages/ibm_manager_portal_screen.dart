@@ -333,7 +333,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
 
   Widget _buildHeaderCurrencySwitch() {
     return Padding(
-      padding: EdgeInsets.only(right: 12.w),
+      padding: EdgeInsetsDirectional.only(end: 12.w),
       child: Obx(() {
         final currencies = controller.dashboardData['currencies'];
         final List list = currencies is List ? currencies : const [];
@@ -543,15 +543,15 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
 
   Widget _buildHeroEarnedCard(double commission) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 18.h),
+      padding: EdgeInsetsDirectional.fromSTEB(20.w, 18.h, 20.w, 18.h),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             AppColors.primary,
             AppColors.primary.withValues(alpha: 0.78),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
         ),
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
@@ -594,7 +594,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           SizedBox(height: 12.h),
           FittedBox(
             fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
+            alignment: AlignmentDirectional.centerStart,
             child: Text(
               _fmt(commission),
               maxLines: 1,
@@ -655,12 +655,12 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   Widget _buildRebateCard(double rebate) {
     const accent = Color(0xFF00C48C);
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 18.h),
+      padding: EdgeInsetsDirectional.fromSTEB(20.w, 18.h, 20.w, 18.h),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [accent, accent.withValues(alpha: 0.78)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
         ),
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
@@ -702,7 +702,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           SizedBox(height: 12.h),
           FittedBox(
             fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
+            alignment: AlignmentDirectional.centerStart,
             child: Text(
               _fmt(rebate),
               maxLines: 1,
@@ -1712,7 +1712,7 @@ Widget _buildCommissionSummary(Map wallet) {
   ) {
     return Container(
       width: 220.w,
-      margin: EdgeInsets.only(right: 12.w),
+      margin: EdgeInsetsDirectional.only(end: 12.w),
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: AppColors.card,

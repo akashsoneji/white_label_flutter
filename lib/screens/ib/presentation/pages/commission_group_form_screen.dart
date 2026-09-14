@@ -194,7 +194,9 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
     } catch (e) {
       CustomToastService.showError(
         title: TranslationUtils.tr('close_position_error'),
-        message: 'Failed to save group: $e',
+        message: TranslationUtils.trArgs('ib_failed_save_group', {
+          'reason': '$e',
+        }),
       );
     } finally {
       setState(() {
@@ -713,7 +715,7 @@ style: OutlinedButton.styleFrom(
                           ? AppColors.textGrey
                           : AppColors.primary,
                 ),
-                textAlign: TextAlign.right,
+                textAlign: TextAlign.end,
                 decoration: InputDecoration(
                   prefixText: '\$ ',
                   prefixStyle: AppTextStyles.bodyText.copyWith(
@@ -757,7 +759,7 @@ style: OutlinedButton.styleFrom(
         ),
         SizedBox(height: 4.h),
         Align(
-          alignment: Alignment.centerRight,
+          alignment: AlignmentDirectional.centerEnd,
           child: Text(
             maxValue != null
                 ? TranslationUtils.trArgs('ib_max_amount', {

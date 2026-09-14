@@ -82,7 +82,7 @@ class CopyTradingInviteFriendScreen extends StatelessWidget {
 
             SizedBox(height: 30.h),
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: Text(
                 TranslationUtils.tr('invite_friend_screen_referral_statistic'),
                 style: AppTextStyles.label.copyWith(

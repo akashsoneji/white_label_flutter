@@ -254,7 +254,7 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
               final isSelected =
                   category == _searchController2.currentCategory.value;
               return Padding(
-                padding: EdgeInsets.only(right: 8.w),
+                padding: EdgeInsetsDirectional.only(end: 8.w),
                 child: GestureDetector(
                   onTap: () => _searchController2.filterByCategory(category),
                   child: Container(
@@ -321,7 +321,7 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
           children: [
             Container(
               width: 45.w,
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: _buildFlagIcon(symbol.displaySymbol),
             ),
             SizedBox(width: 12.w),
@@ -367,7 +367,7 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
                   );
                 },
                 child: Padding(
-                  padding: EdgeInsets.only(left: 8.w),
+                  padding: EdgeInsetsDirectional.only(start: 8.w),
                   child: Icon(
                     isFavorite
                         ? Icons.check_circle

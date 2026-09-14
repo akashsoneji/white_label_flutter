@@ -146,9 +146,15 @@ class _MetaNativeChartState extends State<MetaNativeChart> {
     if (_ticks.length < 2) {
       return _placeholder();
     }
-    return Padding(
-      padding: EdgeInsets.only(right: 8.w, top: 4.h, bottom: 4.h),
-      child: _buildChart(),
+    // Live bid/ask tick chart: the fl_chart geometry, the right-hand price
+    // axis and the price labels are all laid out left-to-right, so this
+    // subtree must not be mirrored in Arabic.
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Padding(
+        padding: EdgeInsets.only(right: 8.w, top: 4.h, bottom: 4.h),
+        child: _buildChart(),
+      ),
     );
   }
 

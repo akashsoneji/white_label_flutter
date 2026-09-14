@@ -224,7 +224,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
 
               // ── Header title ──────────────────────────────────────────────
               Padding(
-                padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
+                padding: EdgeInsetsDirectional.only(start: 4.w, bottom: 12.h),
                 child: Text(languageService.tr('settings_title'),
                     style: CelTheme.title(context)),
               ),
@@ -283,7 +283,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
 
   Widget _sectionLabel(BuildContext c, String label) {
     return Padding(
-      padding: EdgeInsets.only(left: 4.w),
+      padding: EdgeInsetsDirectional.only(start: 4.w),
       child: Text(
         label.toUpperCase(),
         style: AppTextStyles.bodyText.copyWith(
@@ -792,7 +792,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
               _buildMenuRow(c, item),
               if (idx < items.length - 1)
                 Padding(
-                  padding: EdgeInsets.only(left: 52.w),
+                  padding: EdgeInsetsDirectional.only(start: 52.w),
                   child: Divider(
                     height: 1,
                     color: CelTheme.divider(c),
@@ -877,7 +877,9 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 200),
           alignment:
-              value ? Alignment.centerRight : Alignment.centerLeft,
+              value
+                  ? AlignmentDirectional.centerEnd
+                  : AlignmentDirectional.centerStart,
           child: Container(
             margin: EdgeInsets.all(2.5.w),
             width: 19.w,
@@ -984,7 +986,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                   Expanded(
                     child: _dialogButton(
                       c,
-                      label: 'No',
+                      label: languageService.tr('celestial_settings_dialog_no'),
                       isPrimary: false,
                       onTap: () => Get.back(closeOverlays: true),
                     ),
@@ -1100,7 +1102,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                   Expanded(
                     child: _dialogButton(
                       c,
-                      label: 'No',
+                      label: languageService.tr('celestial_settings_dialog_no'),
                       isPrimary: false,
                       onTap: () => Get.back(closeOverlays: true),
                     ),

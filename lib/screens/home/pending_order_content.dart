@@ -1692,7 +1692,7 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
             : AppColors.error; // SL is always a loss, always show in red
 
     return Padding(
-      padding: EdgeInsets.only(top: 8.h, left: 12.w, right: 12.w),
+      padding: EdgeInsetsDirectional.only(top: 8.h, start: 12.w, end: 12.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

@@ -54,9 +54,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             Column(
               children: [
                 Padding(
-                  padding: EdgeInsets.only(top: 24.h, left: 24.0),
+                  padding: EdgeInsetsDirectional.only(top: 24.h, start: 24.0),
                   child: Align(
-                    alignment: Alignment.topLeft,
+                    alignment: AlignmentDirectional.topStart,
                     child: _buildHeader(),
                   ),
                 ),
@@ -147,7 +147,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.fromLTRB(24, 0, 24, 16),
+                  padding: EdgeInsetsDirectional.fromSTEB(24, 0, 24, 16),
                   child: Center(
                     child: RichText(
                       text: TextSpan(

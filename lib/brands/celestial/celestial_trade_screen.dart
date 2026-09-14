@@ -181,7 +181,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
       col = CelTheme.mainText(c);
     }
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 4.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -235,7 +235,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
       ),
     );
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 4.h),
       child: Column(
         children: [
           row2(
@@ -312,7 +312,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
     }
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 8.h, 12.w, 10.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 12.w, 10.h),
       child: Row(
         children: [
           pill(TranslationUtils.tr('chart_active'), activeCount, 0),
@@ -1469,7 +1469,7 @@ class _ModifySheetState extends State<_ModifySheet> {
             ),
             SizedBox(height: 4.h),
             Padding(
-              padding: EdgeInsets.only(left: 4.w, right: 4.w),
+              padding: EdgeInsetsDirectional.only(start: 4.w, end: 4.w),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -1965,7 +1965,7 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
           children: [
             // Symbol header
             Container(
-              padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
+              padding: EdgeInsetsDirectional.fromSTEB(12.w, 10.h, 12.w, 10.h),
               decoration: BoxDecoration(
                 color: _isSell ? CelTheme.pillBg(c) : CelTheme.buyTint(c),
                 borderRadius: BorderRadius.circular(10.r),
@@ -2038,9 +2038,13 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
             // Sell / Buy buttons
             Row(
               children: [
-                Expanded(child: _sideBtn(c, 'Sell', true)),
+                Expanded(
+                    child: _sideBtn(
+                        c, languageService.tr('general_sell'), true)),
                 SizedBox(width: 12.w),
-                Expanded(child: _sideBtn(c, 'Buy', false)),
+                Expanded(
+                    child: _sideBtn(
+                        c, languageService.tr('general_buy'), false)),
               ],
             ),
             SizedBox(height: 12.h),
@@ -2357,7 +2361,12 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
   }
 
   Widget _segment(BuildContext c) {
-    final labels = ['Market', 'Limit', 'Stop', 'Stop Limit'];
+    final labels = [
+      languageService.tr('iquote_tab_market'),
+      languageService.tr('celestial_trade_order_limit'),
+      languageService.tr('investment_detail_stop'),
+      languageService.tr('celestial_trade_order_stop_limit'),
+    ];
     return Container(
       decoration: BoxDecoration(
         color: CelTheme.softBg(c),
@@ -2550,7 +2559,7 @@ class _Sheet extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(c).viewInsets.bottom),
           child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 12.h),
+            padding: EdgeInsetsDirectional.fromSTEB(16.w, 16.h, 16.w, 12.h),
             child: child,
           ),
         ),

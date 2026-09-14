@@ -160,7 +160,7 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
         ),
         Expanded(
           child: Padding(
-            padding: EdgeInsets.only(top: 3.h, left: 5.h),
+            padding: EdgeInsetsDirectional.only(top: 3.h, start: 5.h),
             child: Text(
               languageService.tr("legal_documents_subtitle"),
               style: AppTextStyles.bodyText.copyWith(

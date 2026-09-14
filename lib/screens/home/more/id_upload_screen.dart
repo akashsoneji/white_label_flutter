@@ -154,9 +154,9 @@ class IdUploadScreen extends StatelessWidget {
                         height: 140,
                         fit: BoxFit.cover,
                       ),
-                      Positioned(
+                      PositionedDirectional(
                         top: 8,
-                        right: 8,
+                        end: 8,
                         child: Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: 8,

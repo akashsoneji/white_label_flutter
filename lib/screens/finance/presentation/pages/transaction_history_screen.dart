@@ -69,7 +69,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     if (raw == null || raw.isEmpty) return '';
     final v = raw.toLowerCase();
     if (v == 'mt5') return 'MT5';
-    if (v == 'wallet') return 'Wallet';
+    if (v == 'wallet') return languageService.tr('wallet');
     // Title-case fallback
     return v
         .split('_')
@@ -238,7 +238,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           scrolledUnderElevation: 0,
           elevation: 0,
           leading: Padding(
-            padding: EdgeInsets.only(left: 0.w),
+            padding: EdgeInsetsDirectional.only(start: 0.w),
             child: AppBackButton(onPressed: _handleBack),
           ),
           title: Text(
@@ -772,43 +772,34 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     );
   }
 
+  static const List<String> _monthKeys = [
+    'month_short_jan',
+    'month_short_feb',
+    'month_short_mar',
+    'month_short_apr',
+    'month_short_may',
+    'month_short_jun',
+    'month_short_jul',
+    'month_short_aug',
+    'month_short_sep',
+    'month_short_oct',
+    'month_short_nov',
+    'month_short_dec',
+  ];
+
+  String _monthShort(int month) =>
+      languageService.tr(_monthKeys[month - 1]);
+
   String _formatDate(DateTime date) {
-    final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
+    return '${date.day} ${_monthShort(date.month)} ${date.year}';
   }
 
   String _formatDateTime(String dateStr) {
     final date = DateTime.tryParse(dateStr)?.toLocal();
     if (date == null) return dateStr;
-    final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
+
     final day = date.day;
-    final month = months[date.month - 1];
+    final month = _monthShort(date.month);
     final hour24 = date.hour;
     final hour = hour24 > 12 ? hour24 - 12 : (hour24 == 0 ? 12 : hour24);
     final period = hour24 >= 12 ? 'PM' : 'AM';

@@ -107,7 +107,7 @@ class _TradersTabState extends State<TradersTab> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: EdgeInsets.only(left: 15),
+                            padding: EdgeInsetsDirectional.only(start: 15),
                             child: Text(
                               TranslationUtils.tr('traders_tab_whom_to_show_first'),
                               style: AppTextStyles.bodyText.copyWith(
@@ -118,7 +118,7 @@ class _TradersTabState extends State<TradersTab> {
                           ),
                           SizedBox(height: 8),
                           Padding(
-                            padding: EdgeInsets.only(left: 10.0),
+                            padding: EdgeInsetsDirectional.only(start: 10.0),
                             child: Wrap(
                               alignment: WrapAlignment.start,
                               spacing: 8,
@@ -150,7 +150,7 @@ class _TradersTabState extends State<TradersTab> {
                           ),
                           SizedBox(height: 8),
                           Padding(
-                            padding: EdgeInsets.only(left: 15),
+                            padding: EdgeInsetsDirectional.only(start: 15),
                             child: Text(
                               TranslationUtils.tr('traders_tab_for_what_time'),
                               style: AppTextStyles.bodyText.copyWith(
@@ -163,7 +163,7 @@ class _TradersTabState extends State<TradersTab> {
                           ),
                           SizedBox(height: 8),
                           Padding(
-                            padding: EdgeInsets.only(left: 10),
+                            padding: EdgeInsetsDirectional.only(start: 10),
                             child: Wrap(
                               alignment: WrapAlignment.start,
                               spacing: 8,

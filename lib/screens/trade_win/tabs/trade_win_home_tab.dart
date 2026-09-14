@@ -56,7 +56,7 @@ class TradeWinHomeTab extends StatelessWidget {
             slivers: [
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(0.w, 0.h, 0.w, 0),
+                  padding: EdgeInsetsDirectional.fromSTEB(0.w, 0.h, 0.w, 0),
                   child: Row(
                     children: [
                       const AppBackButton(closeOverlays: true),
@@ -83,7 +83,7 @@ class TradeWinHomeTab extends StatelessWidget {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 8.h),
+                  padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 8.h),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -135,7 +135,7 @@ class TradeWinHomeTab extends StatelessWidget {
                   );
                 }
                 return SliverPadding(
-                  padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+                  padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 0),
                   sliver: SliverGrid(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
@@ -329,7 +329,7 @@ class _OverviewCompactRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(10.w, 8.h, 12.w, 8.h),
+      padding: EdgeInsetsDirectional.fromSTEB(10.w, 8.h, 12.w, 8.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -553,7 +553,7 @@ class _ProductCatalogCard extends StatelessWidget {
           SizedBox(height: 6.h),
           FittedBox(
             fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
+            alignment: AlignmentDirectional.centerStart,
             child: Text(
               languageService.tr('tw_progress_lots', {
                 'current': TradeWinFormat.lots(product.availableLots),

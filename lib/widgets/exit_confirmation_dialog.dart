@@ -13,9 +13,9 @@ class ExitConfirmationDialog extends StatelessWidget {
       backgroundColor: AppColors.card,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
       insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
-      titlePadding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 12.h),
+      titlePadding: EdgeInsetsDirectional.fromSTEB(24.w, 24.h, 24.w, 12.h),
       contentPadding: EdgeInsets.symmetric(horizontal: 24.w),
-      actionsPadding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 20.h),
+      actionsPadding: EdgeInsetsDirectional.fromSTEB(24.w, 12.h, 24.w, 20.h),
       title: Row(
         children: [
           Icon(Icons.exit_to_app, color: AppColors.primary, size: 26.w),

@@ -181,7 +181,7 @@ class AppNotificationItem extends StatelessWidget {
           ),
           if (notification.status == NotificationStatus.loading)
             Padding(
-              padding: EdgeInsets.only(left: 8.w),
+              padding: EdgeInsetsDirectional.only(start: 8.w),
               child: SizedBox(
                 width: 16.w,
                 height: 16.h,

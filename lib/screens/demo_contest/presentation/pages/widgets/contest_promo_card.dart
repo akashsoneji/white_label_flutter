@@ -133,7 +133,7 @@ class ContestPromoCard extends StatelessWidget {
               ),
               SizedBox(height: 12.h),
               Padding(
-                padding: EdgeInsets.only(left: 2.w),
+                padding: EdgeInsetsDirectional.only(start: 2.w),
                 child: Text(
                   contest.description,
                   maxLines: 2,

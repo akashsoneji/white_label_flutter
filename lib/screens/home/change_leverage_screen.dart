@@ -87,7 +87,12 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
                 children: [
                   // Header
                   Padding(
-                    padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 16.h),
+                    padding: EdgeInsetsDirectional.fromSTEB(
+                      24.w,
+                      24.h,
+                      24.w,
+                      16.h,
+                    ),
                     child: Row(
                       children: [
                         Text(

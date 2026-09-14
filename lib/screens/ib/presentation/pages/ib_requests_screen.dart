@@ -161,7 +161,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
               statuses.map((status) {
                 final isSelected = _selectedStatus == status;
                 return Padding(
-                  padding: EdgeInsets.only(right: 10.w),
+                  padding: EdgeInsetsDirectional.only(end: 10.w),
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
@@ -262,7 +262,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
     final bottomPadding = 100.h;
 
     return ListView.builder(
-      padding: EdgeInsets.fromLTRB(16.w, 16.w, 16.w, bottomPadding),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 16.w, 16.w, bottomPadding),
       itemCount: filteredRequests.length,
       itemBuilder: (context, index) {
         final request = filteredRequests[index];
@@ -318,8 +318,8 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                         AppColors.primary.withOpacity(0.8),
                         AppColors.primary,
                       ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
                     ),
                     shape: BoxShape.circle,
                     boxShadow: [

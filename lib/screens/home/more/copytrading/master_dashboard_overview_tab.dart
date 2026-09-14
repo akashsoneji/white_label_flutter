@@ -1,3 +1,5 @@
+import 'dart:ui' as ui show TextDirection;
+
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_master_dashboard_controller.dart';
@@ -844,21 +846,21 @@ class _ChartXAxis extends StatelessWidget {
   String _short(String raw) {
     final dt = DateTime.tryParse(raw);
     if (dt == null) return raw;
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+    const monthKeys = [
+      'month_short_jan',
+      'month_short_feb',
+      'month_short_mar',
+      'month_short_apr',
+      'month_short_may',
+      'month_short_jun',
+      'month_short_jul',
+      'month_short_aug',
+      'month_short_sep',
+      'month_short_oct',
+      'month_short_nov',
+      'month_short_dec',
     ];
-    final mm = months[dt.month - 1];
+    final mm = TranslationUtils.tr(monthKeys[dt.month - 1]);
     final dd = dt.day.toString().padLeft(2, '0');
     return '$mm $dd';
   }
@@ -1237,13 +1239,16 @@ class _PlanRow extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Text(
-              '${positive ? '+' : ''}${plan.roiPct.toStringAsFixed(2)}%',
-              textAlign: TextAlign.right,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: _roiColor,
-                fontFeatures: [FontFeature.tabularFigures()],
+            child: Directionality(
+              textDirection: ui.TextDirection.ltr,
+              child: Text(
+                '${positive ? '+' : ''}${plan.roiPct.toStringAsFixed(2)}%',
+                textAlign: TextAlign.end,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: _roiColor,
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
               ),
             ),
           ),

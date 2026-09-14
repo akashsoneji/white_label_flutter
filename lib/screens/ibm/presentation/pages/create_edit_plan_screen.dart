@@ -872,7 +872,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                   flex: 2,
                   child: Text(
                     TranslationUtils.tr('ibm_you_keep'),
-                    textAlign: TextAlign.right,
+                    textAlign: TextAlign.end,
                     style: TextStyle(
                       fontSize: 10.sp,
                       fontWeight: FontWeight.bold,

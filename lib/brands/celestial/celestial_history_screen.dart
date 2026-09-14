@@ -134,7 +134,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
   // ── Header + period picker ─────────────────────────────────────────────────
   Widget _header(BuildContext c) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 4.h),
       child: Row(
         children: [
           Text(Get.find<LanguageService>().tr('celestial_history_title'), style: CelTheme.title(c)),
@@ -228,7 +228,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
       }
 
       return Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 6.h),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 6.h, 16.w, 6.h),
         child: Column(
           children: [
             Row(

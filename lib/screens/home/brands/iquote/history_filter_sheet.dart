@@ -156,7 +156,7 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
           Divider(height: 1, color: AppColors.divider),
           Flexible(
             child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 16.h),
+              padding: EdgeInsetsDirectional.fromSTEB(20.w, 16.h, 20.w, 16.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -236,7 +236,7 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(20.w, 8.h, 12.w, 12.h),
+      padding: EdgeInsetsDirectional.fromSTEB(20.w, 8.h, 12.w, 12.h),
       child: Row(
         children: [
           Container(
@@ -632,7 +632,7 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
 
   Widget _buildActionBar() {
     return Container(
-      padding: EdgeInsets.fromLTRB(
+      padding: EdgeInsetsDirectional.fromSTEB(
         20.w,
         12.h,
         20.w,

@@ -31,9 +31,9 @@ class CameraScreen extends StatelessWidget {
             ),
           ),
 
-          Positioned(
+          PositionedDirectional(
             top: MediaQuery.of(context).padding.top,
-            left: 4,
+            start: 4,
             child: const AppBackButton(),
           ),
 

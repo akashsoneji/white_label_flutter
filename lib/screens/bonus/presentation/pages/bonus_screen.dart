@@ -1779,7 +1779,7 @@ class BonusScreen extends StatelessWidget {
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
-      barrierLabel: 'Dismiss',
+      barrierLabel: TranslationUtils.tr('trading_dismiss'),
       transitionDuration: const Duration(milliseconds: 250),
       pageBuilder: (context, anim1, anim2) {
         return Align(
@@ -1942,7 +1942,7 @@ class BonusScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8.r),
                       border: Border.all(color: AppColors.border),
                     ),
-                    alignment: Alignment.centerLeft,
+                    alignment: AlignmentDirectional.centerStart,
                     child: Container(
                       padding: EdgeInsets.symmetric(
                         horizontal: 8.w,

@@ -49,12 +49,15 @@ class LeaderboardRow extends StatelessWidget {
                 width: 36.w,
                 child: Center(
                   child: medal ??
-                      Text(
-                        '${entry.rank}',
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Text(
+                          '${entry.rank}',
+                          style: AppTextStyles.bodyText.copyWith(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
                 ),
@@ -127,27 +130,30 @@ class LeaderboardRow extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 8.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '${entry.pnlPercent >= 0 ? '+' : ''}${entry.pnlPercent.toStringAsFixed(2)}%',
-                    style: AppTextStyles.bodyText.copyWith(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: pnlColor,
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${entry.pnlPercent >= 0 ? '+' : ''}${entry.pnlPercent.toStringAsFixed(2)}%',
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: pnlColor,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    '\$${entry.pnl.toStringAsFixed(0)}',
-                    style: AppTextStyles.bodyText.copyWith(
-                      fontSize: 11.sp,
-                      color: AppColors.textGrey,
-                      fontWeight: FontWeight.w500,
+                    SizedBox(height: 2.h),
+                    Text(
+                      '\$${entry.pnl.toStringAsFixed(0)}',
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontSize: 11.sp,
+                        color: AppColors.textGrey,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

@@ -45,7 +45,7 @@ class _OneClickTradingDisclaimerScreenState
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               child: Align(
-                alignment: Alignment.centerLeft,
+                alignment: AlignmentDirectional.centerStart,
                 child: Text(
                   TranslationUtils.tr('one_click_trading_disclaimer_title'),
                   style: AppTextStyles.heading.copyWith(

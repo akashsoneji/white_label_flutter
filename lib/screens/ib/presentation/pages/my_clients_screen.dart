@@ -691,7 +691,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
 
     return [
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 0),
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
             final client = filteredClients[index];
@@ -721,7 +721,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
 
     return [
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 0),
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
             final subIB = filteredSubIBs[index];
@@ -783,7 +783,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
         controller.tradeHistoryPage < controller.tradeHistoryTotalPages;
     slivers.add(
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0),
+        padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 0),
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
             if (index == trades.length) {
@@ -850,7 +850,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
   Widget _buildHierarchyBreadcrumb(String userFullName) {
     final bannerTitle =
         _selectedSubIB == null
-            ? '$userFullName (You)'
+            ? TranslationUtils.trArgs('ib_name_you_suffix', {
+              'name': userFullName,
+            })
             : (_selectedSubIB!.name ??
                 TranslationUtils.tr('ib_clients_screen_sub_ib'));
 
@@ -1777,7 +1779,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                             ),
                             SizedBox(width: 4.w),
                             Text(
-                              '${clientCount} Clients',
+                              TranslationUtils.trArgs('ib_n_clients', {
+                                'count': '$clientCount',
+                              }),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,
@@ -2206,17 +2210,24 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     Row(
                       children: [
                         _buildClientBadge(
-                          'AC: ${client.accountNumber ?? 'N/A'}',
+                          TranslationUtils.trArgs('ib_badge_account', {
+                            'account': client.accountNumber ?? 'N/A',
+                          }),
                           AppColors.blue,
                         ),
                         SizedBox(width: 6.w),
                         _buildClientBadge(
-                          'Lots: ${client.lots?.toStringAsFixed(1) ?? '0.0'}',
+                          TranslationUtils.trArgs('ib_badge_lots', {
+                            'lots': client.lots?.toStringAsFixed(1) ?? '0.0',
+                          }),
                           AppColors.primary,
                         ),
                         SizedBox(width: 6.w),
                         _buildClientBadge(
-                          'Rebate: \$${client.rebate?.toStringAsFixed(2) ?? '0.00'}',
+                          TranslationUtils.trArgs('ib_badge_rebate', {
+                            'rebate':
+                                client.rebate?.toStringAsFixed(2) ?? '0.00',
+                          }),
                           AppColors.green,
                         ),
                       ],
@@ -2359,7 +2370,11 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                         ),
                         SizedBox(height: 2.h),
                         Text(
-                          'Vol: ${trade.volume?.toStringAsFixed(2) ?? '0.00'} | ${_formatDate(trade.openTime)}',
+                          TranslationUtils.trArgs('ib_trade_vol_date', {
+                            'volume':
+                                trade.volume?.toStringAsFixed(2) ?? '0.00',
+                            'date': _formatDate(trade.openTime),
+                          }),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
@@ -2382,7 +2397,10 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        'Comm: \$${trade.commission?.toStringAsFixed(2) ?? '0.00'}',
+                        TranslationUtils.trArgs('ib_trade_commission_value', {
+                          'commission':
+                              trade.commission?.toStringAsFixed(2) ?? '0.00',
+                        }),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           color: AppColors.textGrey,
@@ -2422,7 +2440,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                   ),
                   _buildDetailRow(
                     TranslationUtils.tr('general_volume'),
-                    '${trade.volume?.toString() ?? '0'} lots',
+                    TranslationUtils.trArgs('ib_volume_lots_suffix', {
+                      'lots': trade.volume?.toString() ?? '0',
+                    }),
                   ),
                   _buildDetailRow(
                     TranslationUtils.tr('general_commission'),

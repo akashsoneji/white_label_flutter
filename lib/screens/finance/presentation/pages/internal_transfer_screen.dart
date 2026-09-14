@@ -758,11 +758,13 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                         ),
                         child: Text(
                           accountType == 'wallet'
-                              ? 'Wallet'
+                              ? TranslationUtils.tr('wallet_title')
                               : accountType == 'ib'
                               ? FlavorConfig.instance.appName
                               : accountType == 'ibmwallet'
-                              ? 'IB Wallet'
+                              ? TranslationUtils.tr(
+                                'withdrawal_screen_ib_wallet',
+                              )
                               : (item['account'] as UserMT5Account)
                                   .masterGroupId,
                           style: AppTextStyles.bodyText.copyWith(
@@ -991,11 +993,13 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                         ),
                         child: Text(
                           accountType == 'wallet'
-                              ? 'Wallet'
+                              ? TranslationUtils.tr('wallet_title')
                               : accountType == 'ib'
                               ? FlavorConfig.instance.appName
                               : accountType == 'ibmwallet'
-                              ? 'IB Wallet'
+                              ? TranslationUtils.tr(
+                                'withdrawal_screen_ib_wallet',
+                              )
                               : (item['account'] as UserMT5Account)
                                   .masterGroupId,
                           style: AppTextStyles.bodyText.copyWith(

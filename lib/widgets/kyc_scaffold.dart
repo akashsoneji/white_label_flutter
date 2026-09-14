@@ -73,7 +73,7 @@ class KycScaffold extends StatelessWidget {
           title: Column(
             children: [
               Align(
-                alignment: Alignment.topRight,
+                alignment: AlignmentDirectional.topEnd,
                 child: GestureDetector(
                   onTap: () => Get.back(),
                   child: Container(

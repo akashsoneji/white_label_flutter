@@ -108,7 +108,7 @@ class _ContestDetailsScreenState extends State<ContestDetailsScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 24.h),
+                padding: EdgeInsetsDirectional.fromSTEB(20.w, 8.h, 20.w, 24.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -144,7 +144,7 @@ class _ContestDetailsScreenState extends State<ContestDetailsScreen> {
             ),
             if (!ended)
               Container(
-                padding: EdgeInsets.fromLTRB(
+                padding: EdgeInsetsDirectional.fromSTEB(
                   20.w,
                   10.h,
                   20.w,
@@ -674,7 +674,7 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: 4.w),
+      padding: EdgeInsetsDirectional.only(start: 4.w),
       child: Text(
         text.toUpperCase(),
         style: AppTextStyles.bodyText.copyWith(

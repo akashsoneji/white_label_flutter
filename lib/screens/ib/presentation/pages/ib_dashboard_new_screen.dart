@@ -156,7 +156,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
             ),
             slivers: [
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+                padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 0),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     Obx(() {
@@ -281,7 +281,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
           if (referenceUrl != null && referenceUrl.isNotEmpty) ...[
             SizedBox(height: 10.h),
             Container(
-              padding: EdgeInsets.fromLTRB(10.w, 10.h, 6.w, 10.h),
+              padding: EdgeInsetsDirectional.fromSTEB(10.w, 10.h, 6.w, 10.h),
               decoration: BoxDecoration(
                 color: AppColors.cardBackGround,
                 borderRadius: BorderRadius.circular(10.r),
@@ -548,7 +548,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
             border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
           ),
           child: Padding(
-            padding: EdgeInsets.fromLTRB(8.w, 8.h, 6.w, 8.h),
+            padding: EdgeInsetsDirectional.fromSTEB(8.w, 8.h, 6.w, 8.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -582,7 +582,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
                     ),
                     if (onTap != null)
                       Padding(
-                        padding: EdgeInsets.only(left: 2.w, bottom: 1.h),
+                        padding: EdgeInsetsDirectional.only(start: 2.w, bottom: 1.h),
                         child: Icon(
                           Icons.chevron_right_rounded,
                           size: 16.sp,

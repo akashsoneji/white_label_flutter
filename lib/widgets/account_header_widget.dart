@@ -361,7 +361,7 @@ class AccountHeaderWidget extends StatelessWidget {
             ] else if (showSearchIcon) ...[
               if (FlavorConfig.isVantage())
                 Container(
-                  margin: EdgeInsets.only(left: 8.w),
+                  margin: EdgeInsetsDirectional.only(start: 8.w),
                   decoration: BoxDecoration(
                     color: AppColors.whiteColor,
                     borderRadius: BorderRadius.circular(24.r),

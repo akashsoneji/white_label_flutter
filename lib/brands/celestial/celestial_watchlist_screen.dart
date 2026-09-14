@@ -76,7 +76,7 @@ class _CelestialWatchlistScreenState
   // ── Header ────────────────────────────────────────────────────────────────
   Widget _header(BuildContext c) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 12.h, 8.w, 4.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 8.w, 4.h),
       child: Row(
         children: [
           Expanded(
@@ -416,7 +416,7 @@ class _SearchSheetState extends State<_SearchSheet> {
           children: [
             // ── Top bar: search field + X close ─────────────────────────
             Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 8.h, 8.w, 4.h),
+              padding: EdgeInsetsDirectional.fromSTEB(12.w, 8.h, 8.w, 4.h),
               child: Row(
                 children: [
                   Expanded(
@@ -579,7 +579,7 @@ class _SearchSheetState extends State<_SearchSheet> {
               hydrateAfterChange: true,
             ),
             child: Container(
-              padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 16.h, bottom: 16.h),
+              padding: EdgeInsetsDirectional.only(start: 16.w, end: 16.w, top: 16.h, bottom: 16.h),
               color: Colors.transparent,
               child: Obx(() {
                 final isFav = widget.ic.isFavorite(symbol);
@@ -604,7 +604,7 @@ class _SearchSheetState extends State<_SearchSheet> {
           // ── Symbol + description ──────────────────────────────────
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(right: 16.w, top: 12.h, bottom: 12.h),
+              padding: EdgeInsetsDirectional.only(end: 16.w, top: 12.h, bottom: 12.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,

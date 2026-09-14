@@ -134,7 +134,8 @@ class CopyTradingSubscribeController extends GetxController {
       }
     } catch (e) {
       eligibleAccounts.clear();
-      errorMessage.value = 'Load error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_load_error')}: $e';
     } finally {
       if (showLoading) isLoading.value = false;
     }
@@ -212,7 +213,8 @@ class CopyTradingSubscribeController extends GetxController {
       }
       return res;
     } catch (e) {
-      errorMessage.value = 'Subscribe error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_subscribe_error')}: $e';
       return ApiResponse.error(errorMessage.value);
     } finally {
       isLoading.value = false;
@@ -318,7 +320,8 @@ class CopyTradingSubscribeController extends GetxController {
       }
       return res;
     } catch (e) {
-      errorMessage.value = 'Update error: $e';
+      errorMessage.value =
+          '${TranslationUtils.tr('copy_trading_update_error')}: $e';
       return ApiResponse.error(errorMessage.value);
     } finally {
       isLoading.value = false;

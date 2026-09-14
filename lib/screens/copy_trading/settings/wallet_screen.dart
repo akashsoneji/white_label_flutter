@@ -31,7 +31,7 @@ class CopyTradingWalletScreen extends StatelessWidget {
           ),
         ),
         leading: Padding(
-          padding: EdgeInsets.only(left: 8.w),
+          padding: EdgeInsetsDirectional.only(start: 8.w),
           child: IconButton(
             icon: Icon(
               Icons.grid_view_rounded,

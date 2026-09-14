@@ -24,7 +24,7 @@ class TradeWinMyWinsTab extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(0.w, 0.h, 0.w, 0),
+          padding: EdgeInsetsDirectional.fromSTEB(0.w, 0.h, 0.w, 0),
           child: Row(
             children: [
               const AppBackButton(closeOverlays: true),
@@ -70,7 +70,7 @@ class TradeWinMyWinsTab extends StatelessWidget {
                 color: AppColors.primary,
                 onRefresh: () => controller.fetchPastWins(reset: true),
                 child: ListView.builder(
-                  padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 100.h),
+                  padding: EdgeInsetsDirectional.fromSTEB(16.w, 16.h, 16.w, 100.h),
                   itemCount:
                       wins.length +
                       (controller.isLoadingMorePastWins.value ? 1 : 0),
