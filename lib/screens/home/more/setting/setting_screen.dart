@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/theme_bottom_sheet.dart';
 
 import '../../../../constants/color.dart';
 import '../../../../constants/text_styles.dart';
@@ -24,7 +24,7 @@ class SettingScreen extends StatelessWidget {
         backgroundColor: AppColors.backgroundLight,
         elevation: 0,
         title: Text(
-          languageService.tr('more_settings'),
+          'App Settings',
           style: AppTextStyles.heading,
         ),
         leading: const AppBackButton(),
@@ -32,42 +32,23 @@ class SettingScreen extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 8.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          child: _CardGroup(
             children: [
               _MenuItem(
-                icon: 'profile-kyc',
-                label: languageService.tr('profile_kyc'),
-                onTap: () {
-                  // Get.toNamed(AppPages.DEPOSIT);
-                },
-                showTopBorder: true,
-                color: AppColors.textPrimary,
+                svgPath: 'assets/svg/language.svg',
+                label: languageService.tr('settings_language_title'),
+                onTap: () => Get.toNamed(AppPages.LANGUAGE_SELECTOR),
               ),
               _MenuItem(
-                icon: 'security',
-                label: languageService.tr('security'),
-                onTap: () {
-                  // Get.toNamed(AppPages.WITHDRAWAL);
-                },
-                color: AppColors.textPrimary,
+                svgPath: 'assets/svg/more/theme.svg',
+                label: languageService.tr('settings_theme'),
+                onTap: () => showThemeBottomSheet(context),
               ),
               _MenuItem(
-                icon: 'notifications',
-                label: languageService.tr('notifications'),
-                onTap: () {
-                  Get.toNamed(AppPages.NOTIFICATIONS);
-                },
-                color: AppColors.textPrimary,
-              ),
-              _MenuItem(
-                icon: 'app-preferences',
-                label: languageService.tr('app_preferences'),
-                onTap: () {
-                  // Get.toNamed(AppPages.TRANSACTION_HISTORY);
-                },
-                color: AppColors.textPrimary,
+                svgPath: 'assets/svg/more/change_password.svg',
+                label: languageService.tr('settings_change_password'),
+                onTap: () => Get.toNamed(AppPages.CHANGE_PASSWORD),
               ),
             ],
           ),
@@ -77,68 +58,106 @@ class SettingScreen extends StatelessWidget {
   }
 }
 
+class _CardGroup extends StatelessWidget {
+  final List<Widget> children;
+  const _CardGroup({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        children: children.asMap().entries.map((entry) {
+          int idx = entry.key;
+          Widget val = entry.value;
+          if (idx == children.length - 1) return val;
+          return Column(
+            children: [
+              val,
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 14.w),
+                child: Divider(
+                  height: 1,
+                  color: AppColors.icongrey.withValues(alpha: 0.14),
+                ),
+              ),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
 class _MenuItem extends StatelessWidget {
-  final String icon;
+  final String svgPath;
   final String label;
   final VoidCallback onTap;
-  final bool showTopBorder;
-  final Color color;
 
   const _MenuItem({
-    required this.icon,
+    required this.svgPath,
     required this.label,
     required this.onTap,
-    required this.color,
-    this.showTopBorder = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: Theme.of(context).copyWith(
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        hoverColor: Colors.transparent,
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top:
-                showTopBorder
-                    ? BorderSide(color: Colors.grey.shade300, width: 1)
-                    : BorderSide.none,
-            bottom:
-                BorderSide(color: Colors.grey.shade300, width: 1),
-          ),
-        ),
-        child: SizedBox(
-          height: 56.h,
-          child: ListTile(
-            contentPadding: EdgeInsets.zero,
-            minVerticalPadding: 0,
-            leading: SvgPicture.asset(
-              'assets/svg/more/setting/$icon.svg',
-              height: 24.h,
-              width: 24.w,
-              color: AppColors.primary,
-            ),
-            title: Text(
-              label,
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w400,
-                color: color,
-              ),
-            ),
-            trailing:
-                Icon(
-                  Icons.arrow_forward_ios_sharp,
-                  size: 14.h,
-                  color: AppColors.icongrey,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
+          child: Row(
+            children: [
+              Container(
+                width: 32.w,
+                height: 32.w,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.primary.withValues(alpha: 0.14),
+                      AppColors.primary.withValues(alpha: 0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(11.r),
                 ),
-            onTap: onTap,
-            minLeadingWidth: 10,
-            horizontalTitleGap: 8.w,
+                child: Center(
+                  child: SvgPicture.asset(
+                    svgPath,
+                    height: 16.h,
+                    width: 16.w,
+                    colorFilter: ColorFilter.mode(
+                      AppColors.primary,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14.sp,
+                color: AppColors.icongrey.withValues(alpha: 0.55),
+              ),
+            ],
           ),
         ),
       ),

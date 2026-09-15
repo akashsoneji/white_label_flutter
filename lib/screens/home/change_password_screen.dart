@@ -9,6 +9,7 @@ import 'package:crm_app/screens/auth/view_models/change_password_controller.dart
 import '../../services/language_service.dart';
 import '../../utils/trl_helper.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -34,10 +35,21 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   );
 
   Future<void> _changePassword() async {
-    if (_formKey.currentState!.validate()) {
-      await _changePasswordController.changePassword();
-      // Navigation to login is handled in controller after success
+    final error = _validateCurrentPassword(
+          _changePasswordController.currentPasswordController.text,
+        ) ??
+        _validateNewPassword(
+          _changePasswordController.newPasswordController.text,
+        ) ??
+        _validateConfirmPassword(
+          _changePasswordController.confirmPasswordController.text,
+        );
+    if (error != null) {
+      CustomToastService.showError(message: error);
+      return;
     }
+    await _changePasswordController.changePassword();
+    // Navigation to login is handled in controller after success
   }
 
   String? _validateCurrentPassword(String? value) {
@@ -73,7 +85,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget _buildPasswordField({
     required String label,
     required TextEditingController controller,
-    required String? Function(String?) validator,
     required bool obscureText,
     required VoidCallback onToggleVisibility,
   }) {
@@ -84,7 +95,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         child: RTLHelper.rtlTextField(
           obscureText: obscureText,
           controller: controller,
-          validator: validator,
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 16.sp,
             fontWeight: FontWeight.w400,
@@ -154,7 +164,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               _buildPasswordField(
                 label: languageService.tr('change_password_current_password'),
                 controller: _changePasswordController.currentPasswordController,
-                validator: _validateCurrentPassword,
                 obscureText: _obscureCurrentPassword,
                 onToggleVisibility: () {
                   setState(() {
@@ -165,7 +174,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               _buildPasswordField(
                 label: languageService.tr('create_password_new'),
                 controller: _changePasswordController.newPasswordController,
-                validator: _validateNewPassword,
                 obscureText: _obscureNewPassword,
                 onToggleVisibility: () {
                   setState(() {
@@ -176,7 +184,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               _buildPasswordField(
                 label: languageService.tr('create_new_password_confirm_password'),
                 controller: _changePasswordController.confirmPasswordController,
-                validator: _validateConfirmPassword,
                 obscureText: _obscureConfirmPassword,
                 onToggleVisibility: () {
                   setState(() {
@@ -226,7 +233,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       fontSize: 14.sp,
                       height: 1.71,
                       fontWeight: FontWeight.w400,
-                      color: AppColors.textPrimaryDark,
+                      color: AppColors.isDarkMode ? AppColors.textPrimaryLight : AppColors.textPrimaryDark,
                     ),
                   ),
         ),

@@ -1236,7 +1236,7 @@ class _EditProfileState extends State<EditProfile> {
                 ),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 56.h,
+                  height: 46.h,
                   child: Obx(
                     () => RTLHelper.rtlButton(
                       text:

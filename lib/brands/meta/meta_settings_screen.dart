@@ -694,10 +694,16 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
   List<_CelMenuItem> _securityItems(BuildContext c) {
     final themeService = Get.find<ThemeService>();
     return [
+      _CelMenuItem(
+        icon: Icons.language_rounded,
+        label: languageService.tr('settings_language_title'),
+        color: const Color(0xFF2196F3),
+        onTap: () => Get.toNamed(AppPages.LANGUAGE_SELECTOR),
+      ),
       if (themeService.canUserChangeTheme)
         _CelMenuItem(
           icon: Icons.color_lens_rounded,
-        label: languageService.tr('settings_theme'),
+          label: languageService.tr('settings_theme'),
           color: const Color(0xFF9C27B0),
           onTap: () => showThemeBottomSheet(context),
         ),

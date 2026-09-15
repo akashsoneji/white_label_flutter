@@ -1076,6 +1076,23 @@ Obx(() {
 
               SizedBox(height: 14.h),
 
+              // App Settings Section
+              _SectionHeader(
+                title: 'App Settings',
+              ),
+              _CardGroup(
+                children: [
+                  _MenuItem(
+                    icon: 'settings',
+                    label: 'App Settings',
+                    onTap: () => Get.toNamed(AppPages.SETTING),
+                    iconData: Icons.settings_outlined,
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 14.h),
+
               // Others Section
               _SectionHeader(
                 title: languageService.tr('general_account_security'),
@@ -1087,19 +1104,7 @@ Obx(() {
                     label: languageService.tr('ticket_title'),
                     onTap: () => Get.toNamed(AppPages.TICKET_LIST),
                   ),
-                  _MenuItem(
-                    icon: 'language',
-                    label: languageService.tr('settings_language_title'),
-                    onTap: () => Get.toNamed(AppPages.LANGUAGE_SELECTOR),
-                    iconData: Icons.language,
-                  ),
-                  _ThemeMenuItem(),
                   const _BiometricLoginMenuItem(),
-                  _MenuItem(
-                    icon: 'change_password',
-                    label: languageService.tr('change_password'),
-                    onTap: () => Get.toNamed(AppPages.CHANGE_PASSWORD),
-                  ),
                   _MenuItem(
                     icon: 'two_factor_auth',
                     label: languageService.tr('two_factor_authentication'),
@@ -1268,16 +1273,16 @@ Obx(() {
             mainAxisSize: MainAxisSize.min,
             children: [
               // App logo - replace asset path with your app logo svg or image
-              BrandLogo(
-                source: FlavorConfig.effectiveLogo,
-                height: 80.h,
-                width: 80.w,
-                color:
-                    FlavorConfig.isONSA && !FlavorConfig.hasRemoteLogo
-                        ? AppColors.primary
-                        : null,
-              ),
-              SizedBox(height: 24.h),
+              // BrandLogo(
+              //   source: FlavorConfig.effectiveLogo,
+              //   height: 80.h,
+              //   width: 80.w,
+              //   color:
+              //       FlavorConfig.isONSA && !FlavorConfig.hasRemoteLogo
+              //           ? AppColors.primary
+              //           : null,
+              // ),
+              // SizedBox(height: 24.h),
               Text(
                 languageService.tr('delete_account_confirm_message'),
                 textAlign: TextAlign.center,
@@ -1474,12 +1479,12 @@ class _AccountActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(18.r),
+      borderRadius: BorderRadius.circular(14.r),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 14.w),
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 12.w),
         decoration: BoxDecoration(
           color: filled ? color : AppColors.whiteColor,
-          borderRadius: BorderRadius.circular(18.r),
+          borderRadius: BorderRadius.circular(14.r),
           border: Border.all(
             color: filled ? color : color.withValues(alpha: 0.30),
             width: filled ? 0 : 1.4,
@@ -1489,65 +1494,53 @@ class _AccountActionButton extends StatelessWidget {
                   ? [
                     BoxShadow(
                       color: color.withValues(alpha: 0.30),
-                      blurRadius: 14,
-                      offset: const Offset(0, 6),
+                      blurRadius: 12,
+                      offset: const Offset(0, 5),
                     ),
                   ]
                   : null,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: 40.w,
-                  height: 40.w,
-                  decoration: BoxDecoration(
-                    color:
-                        filled
-                            ? AppColors.whiteColor.withValues(alpha: 0.20)
-                            : color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Center(
-                    child:
-                        iconData != null
-                            ? Icon(
-                              iconData,
-                              size: 21.sp,
-                              color: filled ? AppColors.whiteColor : color,
-                            )
-                            : SvgPicture.asset(
-                              'assets/svg/more/$icon.svg',
-                              width: 19.w,
-                              height: 19.w,
-                              color: filled ? AppColors.whiteColor : color,
-                            ),
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_outward_rounded,
-                  size: 18.sp,
-                  color:
-                      filled
-                          ? AppColors.whiteColor.withValues(alpha: 0.85)
-                          : color.withValues(alpha: 0.6),
-                ),
-              ],
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              label,
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 13.5.sp,
-                fontWeight: FontWeight.w700,
-                color: filled ? AppColors.whiteColor : AppColors.textPrimary,
-                height: 1.15,
+            Container(
+              width: 34.w,
+              height: 34.w,
+              decoration: BoxDecoration(
+                color:
+                    filled
+                        ? AppColors.whiteColor.withValues(alpha: 0.20)
+                        : color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10.r),
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+              child: Center(
+                child:
+                    iconData != null
+                        ? Icon(
+                          iconData,
+                          size: 18.sp,
+                          color: filled ? AppColors.whiteColor : color,
+                        )
+                        : SvgPicture.asset(
+                          'assets/svg/more/$icon.svg',
+                          width: 17.w,
+                          height: 17.w,
+                          color: filled ? AppColors.whiteColor : color,
+                        ),
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Text(
+                label,
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                  color: filled ? AppColors.whiteColor : AppColors.textPrimary,
+                  height: 1.15,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

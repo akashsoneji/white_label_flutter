@@ -14,6 +14,9 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/utils/trl_helper.dart';
+import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/utils/agreement_launcher.dart';
+import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
@@ -446,10 +449,29 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: 24.h),
+                      Center(
+                        child: Container(
+                          height: 80.w,
+                          width: 80.w,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withAlpha(30),
+                            shape: BoxShape.circle,
+                          ),
+                          padding: EdgeInsets.all(14.w),
+                          child: BrandLogo(
+                            source: FlavorConfig.instance.appIconPath,
+                            isCircle: true,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 24.h),
                       _buildTitleSection(),
                       SizedBox(height: 24.h),
                       _buildFormFields(),
-                      SizedBox(height: 24.h),
+                      SizedBox(height: 8.h),
+                      _buildTermsPrivacyText(),
+                      SizedBox(height: 16.h),
                       _buildCreateAccountButton(),
                       SizedBox(height: 12.h),
                       _buildLoginLink(),
@@ -640,6 +662,41 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 return null;
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTermsPrivacyText() {
+    final linkStyle = AppTextStyles.bodyText.copyWith(
+      fontSize: 13.sp,
+      color: AppColors.primary,
+      fontWeight: FontWeight.w600,
+    );
+    return RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        style: AppTextStyles.bodyText.copyWith(
+          fontSize: 13.sp,
+          color: AppColors.textGrey,
+        ),
+        children: [
+          TextSpan(
+            text: '${_languageService.tr("register_by_signing_up")} ',
+          ),
+          TextSpan(
+            text: _languageService.tr("legal_documents_customer_agreement"),
+            style: linkStyle,
+            recognizer: TapGestureRecognizer()
+              ..onTap = AgreementLauncher.openTerms,
+          ),
+          TextSpan(text: ' ${_languageService.tr("common_and")} '),
+          TextSpan(
+            text: _languageService.tr("legal_documents_privacy_policy"),
+            style: linkStyle,
+            recognizer: TapGestureRecognizer()
+              ..onTap = AgreementLauncher.openPrivacy,
           ),
         ],
       ),

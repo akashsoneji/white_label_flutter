@@ -157,11 +157,20 @@ class _LoginScreenState extends State<LoginScreen> {
                                 children: [
                                   SizedBox(height: 16.h),
                                   Center(
-                                    child: BrandLogo(
-                                      source: FlavorConfig.effectiveLogo,
-                                      // color: AppColors.primary,
-                                      height: 100.h,
-                                      width: 120.w,
+                                    child: Container(
+                                      height: 80.w,
+                                      width: 80.w,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withAlpha(30),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      padding: EdgeInsets.all(14.w),
+                                      child: BrandLogo(
+                                        source:
+                                            FlavorConfig.instance.appIconPath,
+                                        isCircle: true,
+                                        fit: BoxFit.contain,
+                                      ),
                                     ),
                                   ),
                                   Padding(

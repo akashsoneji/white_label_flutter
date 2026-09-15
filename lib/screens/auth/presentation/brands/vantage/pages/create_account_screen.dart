@@ -1,11 +1,13 @@
 import 'dart:ui' as ui;
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/utils/agreement_launcher.dart';
 
 import 'package:country_picker/country_picker.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:flutter/gestures.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/otp_modal.dart';
 import 'package:flutter/material.dart';
@@ -425,10 +427,42 @@ class _VantageCreateAccountScreenState
               ),
             ),
             SizedBox(height: 6.h),
-            Text(
-              _languageService.tr('create_account_screen_agree_terms'),
+            RichText(
               textAlign: TextAlign.center,
-              style: AppTextStyles.bodyText.copyWith(color: VantageAuthTheme.muted, fontSize: 11.sp),
+              text: TextSpan(
+                style: AppTextStyles.bodyText.copyWith(
+                  color: VantageAuthTheme.muted,
+                  fontSize: 11.sp,
+                ),
+                children: [
+                  TextSpan(
+                    text: '${_languageService.tr("register_by_signing_up")} ',
+                  ),
+                  TextSpan(
+                    text: _languageService.tr("legal_documents_customer_agreement"),
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: VantageAuthTheme.primary,
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = AgreementLauncher.openTerms,
+                  ),
+                  TextSpan(
+                    text: ' ${_languageService.tr("common_and")} ',
+                  ),
+                  TextSpan(
+                    text: _languageService.tr("legal_documents_privacy_policy"),
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: VantageAuthTheme.primary,
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = AgreementLauncher.openPrivacy,
+                  ),
+                ],
+              ),
             ),
             // SizedBox(height: 6.h),
             // if (_selectedCountryCode.isNotEmpty)

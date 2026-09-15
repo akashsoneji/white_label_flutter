@@ -113,12 +113,12 @@ class _LogoBubble extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       padding: EdgeInsets.all(14.w),
-      child: ClipOval(
-        child: BrandLogo(
-          source: FlavorConfig.effectiveLogo,
-          height: 44.w,
-          width: 44.w,
-        ),
+      child: BrandLogo(
+        source: FlavorConfig.instance.appIconPath,
+        height: 44.w,
+        width: 44.w,
+        isCircle: true,
+        fit: BoxFit.contain,
       ),
     );
   }
