@@ -3950,7 +3950,6 @@ class _TradeScreenState extends State<TradeScreen> {
           return true;
         }).toList();
 
-    // INNOVATIVE DESIGN: Grid view with icons for Vantage flavor
     if (FlavorConfig.isVantage()) {
       final screenWidth = MediaQuery.sizeOf(context).width;
       final isCompactScreen = screenWidth < 420;

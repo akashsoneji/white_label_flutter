@@ -207,7 +207,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   }
 
   /// Universal back handler for BOTH the AppBar arrow and device/swipe back.
-  /// If this screen was pushed normally (More / Celestial / Meta settings) the
+  /// If this screen was pushed normally the
   /// navigator can pop, so return to the origin. If it was reached via
   /// `Get.offAllNamed` (the Cregis deposit flow wipes the stack), there is
   /// nothing to pop, so land on the dashboard.

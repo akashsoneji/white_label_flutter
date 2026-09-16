@@ -42,11 +42,8 @@ import 'ui_slots.dart';
 
 /// Build-time selected client (no runtime switching).
 ///
-/// Use: `--dart-define=CLIENT=tenax|vantage|celestial|meta|iquote|pipze|telifox`
 ///
 /// Falls back to the build-time `FLAVOR` define when `CLIENT` is empty.
-/// Defaults to `tenax` only if neither define is set (matches the
-/// previous default so existing dev workflows keep working).
 String get activeClient {
   final clientFromDefine = String.fromEnvironment('CLIENT', defaultValue: '');
   if (clientFromDefine.isNotEmpty) return clientFromDefine.toLowerCase();
@@ -54,9 +51,7 @@ String get activeClient {
   // Read the active flavor that `main.dart` already resolved via
   // `_initializeFlavor()`. This makes UI routing honour the same brand
   // the rest of the app is configured for (colors, theme, API endpoints,
-  // etc.) — previously the UI registry used its own env-define and
-  // silently defaulted to 'tenax' for builds that only set FLAVOR,
-  // causing Tenax's UI to render for every other brand.
+  // etc.)
   try {
     final name = FlavorConfig.instance.flavor.name.toLowerCase();
     if (name.isNotEmpty) return name;
@@ -78,12 +73,7 @@ String get activeClient {
 
 /// Active UI parent selected at build time.
 ///
-/// Use: `--dart-define=PARENT=vantage|iquote|celestial|meta|tenax`
 ///
-/// This lets the SAME child flavor (pipze, skyriss, baazex) run with
-/// DIFFERENT design trees depending on the parent you pick in launch.json
-/// — Pipze (vantage) and Pipze (iquote) share the same brand.yaml and
-/// assets, but the UI routes through the parent's screen library.
 ///
 /// Resolution order:
 ///   1. `--dart-define=PARENT=...`           (the explicit override)
@@ -111,24 +101,17 @@ String get activeParent {
 /// The map MUST contain every brand that can be activated at runtime.
 /// Each entry points at the brand whose screen files should be used.
 ///
-/// Parents in this build:
-///   - vantage  → 4-tab Vantage design tree
-///   - iquote   → currently reuses Vantage screens (no dedicated UI yet)
-///   - celestial → its own 5-tab CelestialMainShell
-///   - meta     → its own MetaMainShell
-///   - tenax    → its own design
 const Map<String, String> _uiParentByClient = {
   // Parents
   'vantage': 'vantage',
   'iquote': 'vantage',
   'celestial': 'celestial',
+  'afx': 'celestial',
   'meta': 'meta',
   'tenax': 'tenax',
-  // iQuote children (also runnable as Vantage children via PARENT=vantage)
   'pipze': 'iquote',
   'skyriss': 'iquote',
   'baazex': 'iquote',
-  // Vantage children
   'telifox': 'vantage',
   'kantara': 'vantage',
   'gtxprime': 'vantage',
@@ -143,7 +126,6 @@ class UiRegistry implements UiSlots {
 
   static final UiRegistry instance = UiRegistry._();
 
-  /// Lower-cased client key (e.g. `pipze`, `tenax`, `vantage`).
   String get _uiBrand => activeClient;
 
   /// Build-time-selected parent for the active brand (PARENT env-define
@@ -158,14 +140,8 @@ class UiRegistry implements UiSlots {
     return _uiParentByClient[_uiBrand] ?? _uiBrand;
   }
 
-  /// True when the active parent is the Vantage design tree.
   bool get _usesVantageUi => _uiParent == 'vantage';
 
-  /// True when the active parent is iQuote. The iQuote screen tree
-  /// currently reuses the Vantage screens — once dedicated iQuote
-  /// screens exist under `lib/screens/auth/presentation/brands/iquote/`,
-  /// swap the `|| _usesIquoteUi` checks in the auth methods below for
-  /// direct `iquote.*` constructors.
   bool get _usesIquoteUi => _uiParent == 'iquote';
 
   bool get _usesCelestialUi => _uiParent == 'celestial';
@@ -174,7 +150,6 @@ class UiRegistry implements UiSlots {
 
   // ─── Auth flow ───────────────────────────────────────────────────────────
 
-  // Vantage has no dedicated splash screen — fall back to the generic one.
   @override
   Widget splash() => const SplashScreen();
 
@@ -229,8 +204,6 @@ class UiRegistry implements UiSlots {
   Widget tradingMain() {
     if (_usesMetaUi) return const MetaMainShell();
     if (_usesCelestialUi) return const CelestialMainShell();
-    // iQuote currently shares the Vantage 4-tab shell — swap to
-    // `IquoteMainShell()` once iQuote has its own shell widget.
     return const TradingMainScreen();
   }
 

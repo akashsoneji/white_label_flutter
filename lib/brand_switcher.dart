@@ -5,12 +5,6 @@ import 'flavor_config.dart';
 /// Provides easy methods to switch between different brands and inspect
 /// their runtime configuration.
 ///
-/// All 9 buildable flavors are supported:
-///   - Vantage (parent, 4-tab UI tree)
-///   - Celestial (parent, 5-tab standalone UI tree — lib/brands/celestial/)
-///   - Meta (parent, 5-tab standalone UI tree — lib/brands/meta/, Facebook blue)
-///   - Pipze / Tenax / Telifox / GTXPrime / Baazex / Skyriss
-///     (Vantage children — share the 4-tab UI tree)
 class BrandSwitcher {
   BrandSwitcher._();
 
@@ -19,52 +13,39 @@ class BrandSwitcher {
   // enum values so they work in single-client release builds where the
   // generated `enum Flavor` only contains the active brand.
 
-  /// `true` when the active flavor is literally `Vantage` (not a child).
   static bool get isVantage => _active == 'vantage';
 
-  /// `true` when the active flavor is literally `Celestial` (not a child).
+  
   static bool get isCelestial => _active == 'celestial';
 
-  /// `true` when the active flavor is `Pipze`.
   static bool get isPipze => _active == 'pipze';
 
-  /// `true` when the active flavor is `iQuote`.
   static bool get isIquote => _active == 'iquote';
 
-  /// `true` when the active flavor is `Tenax`.
   static bool get isTenax => _active == 'tenax';
 
-  /// `true` when the active flavor is `Telifox`.
   static bool get isTelifox => _active == 'telifox';
 
-  /// `true` when the active flavor is `GTX Prime`.
   static bool get isGtxprime => _active == 'gtxprime';
 
-  /// `true` when the active flavor is `Baazex`.
   static bool get isBaazex => _active == 'baazex';
 
-  /// `true` when the active flavor is `Skyriss`.
   static bool get isSkyriss => _active == 'skyriss';
 
-  /// `true` when the active flavor is `Kantara`.
   static bool get isKantara => _active == 'kantara';
 
   /// Lowercased name of the active flavor. Always safe to read, even when
   /// the `Flavor` enum is narrowed to a single client.
   static String get _active => FlavorConfig.instance.flavor.name.toLowerCase();
 
-  /// `true` when the active flavor is `Meta`.
   static bool get isMeta => _active == 'meta';
 
-  /// `true` when the active flavor should use Vantage's shared UI tree
-  /// (4-tab Prices/Markets/Accounts/Settings). Equivalent to
-  /// `FlavorConfig.usesVantageUi()`.
   static bool get usesVantageUi => FlavorConfig.usesVantageUi();
 
   /// The Flavor enum value of the active brand.
   static Flavor get currentFlavor => FlavorConfig.instance.flavor;
 
-  /// Display name of the active brand (e.g. "Baazex", "Celestial").
+  /// Display name of the active brand.
   static String get currentBrandName => FlavorConfig.instance.appName;
 
   /// Primary color of the active brand.
@@ -100,11 +81,9 @@ class BrandSwitcher {
   static String get currentSplashAsset => FlavorConfig.instance.splashLogoPath;
 
   // ── Switching ──────────────────────────────────────────────────────────────
-  /// Switch to the named brand. Falls back to Celestial if the name is
+  /// Switch to the named brand.
   /// unknown. No-op (logs only) when the brand is already active.
   ///
-  /// Brand names are case-insensitive. Supported: `vantage`, `celestial`,
-  /// `pipze`, `tenax`, `telifox`, `gtxprime`, `baazex`, `skyriss`.
   static void switchTo(String brandName) {
     final normalized = brandName.trim().toLowerCase();
     final previous = FlavorConfig.instance.flavor;
@@ -186,7 +165,7 @@ class BrandSwitcher {
     return _labelForName(flavor.name);
   }
 
-  /// Pretty display name for a brand id (e.g. `'gtxprime'` → `'GTX Prime'`).
+  /// Pretty display name for a brand id.
   /// Always safe to call — falls back to the raw input.
   static String labelForName(String name) => _labelForName(name);
 

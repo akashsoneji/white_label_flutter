@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 import '../base_config.dart';
 
-/// Auto-generated config for "Pipze".
 /// Change values in assets/config/brands/brands.yaml and re-run the generator.
 class PipzeConfig extends BaseClientConfig {
   const PipzeConfig()

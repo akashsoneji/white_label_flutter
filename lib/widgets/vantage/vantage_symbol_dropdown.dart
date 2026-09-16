@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 
-/// Vantage chart AppBar control: tap to pick a symbol from favorites.
 class VantageSymbolDropdown extends StatefulWidget {
   final String selectedSymbol;
   final List<String> favorites;

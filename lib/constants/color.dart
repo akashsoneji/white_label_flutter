@@ -6,7 +6,6 @@ import '../services/theme_service.dart';
 
 /// Central color system for the entire app.
 /// All colors flow through here — change once, update everywhere.
-/// Flavors (tenax/vantage) control brand colors automatically.
 class AppColors {
   static ThemeService? get _themeService =>
       Get.isRegistered<ThemeService>() ? Get.find<ThemeService>() : null;

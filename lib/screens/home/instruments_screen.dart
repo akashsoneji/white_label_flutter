@@ -313,8 +313,6 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
   Widget _buildSearchAndFilters() {
     final isVantage = FlavorConfig.isVantage();
     if (isVantage) {
-      // Vantage design: keep the header (account + search) only.
-      // Hide page title, sort dropdown, and segmented filters for a cleaner, more compact quote list.
       return const SizedBox.shrink();
     }
 

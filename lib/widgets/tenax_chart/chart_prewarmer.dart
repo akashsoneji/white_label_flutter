@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-/// Pre-warms the Tenax chart WebView so the first real chart open is fast.
 ///
 /// The chart is a local HTML bundle whose JavaScript (~736 KB) has to be parsed
 /// by the platform WebView the first time it is loaded. When that happens lazily

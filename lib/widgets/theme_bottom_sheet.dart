@@ -128,7 +128,7 @@ void showThemeBottomSheet(BuildContext context) {
   );
 }
 
-/// Sheet shown when the active brand has a locked theme (e.g. Celestial = dark).
+/// Sheet shown when the active brand has a locked theme.
 void _showLockedThemeSheet(
   BuildContext context,
   LanguageService languageService,

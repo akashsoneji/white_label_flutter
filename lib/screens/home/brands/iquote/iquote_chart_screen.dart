@@ -1,4 +1,3 @@
-// IQuote chart screen — designed to mirror the trading-app reference.
 //
 //   ┌─────────────────────────────────────────────────┐
 //   │  ←  [DEMO ▾]                  balance  (i)      │  ← header (AccountHeaderWidget)
@@ -886,7 +885,7 @@ class _PendingOrderButton extends StatelessWidget {
 }
 
 /// Small dark spread badge shown between the Buy and Sell pills. Style
-/// mirrors the badge on the iQuote market list rows.
+/// mirrors the market list rows.
 class _SpreadBadge extends StatelessWidget {
   const _SpreadBadge({required this.spread});
   final double spread;

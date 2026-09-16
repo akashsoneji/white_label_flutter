@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 import '../base_config.dart';
 
-/// Auto-generated config for "Riyadex".
 /// Change values in assets/config/brands/brands.yaml and re-run the generator.
 class RiyadexConfig extends BaseClientConfig {
   const RiyadexConfig()

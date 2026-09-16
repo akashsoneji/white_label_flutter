@@ -4,6 +4,34 @@
 default: vantage
 
 brands:
+  - name: afx
+    type: child
+    inheritsFrom: celestial
+    label: AFX
+    themeMode: both
+ android:
+ applicationId: "com.afx.app"
+ appName: "AFX"
+ ios:
+ bundleId: "com.afx.app"
+ appName: "AFX"
+ colors:
+ primary: "#182430"
+ secondary: "#E8F0F5"
+ accent: "#182430"
+ splashColor: "#182430"
+ launcherBackground: "#182430"
+ urls:
+ api: "https://member.alibabafx.com/api/"
+ websocket: "wss://member.alibabafx.com/trade-engine"
+ chart: "https://member.alibabafx.com"
+ assets:
+ appIcon: "assets/brands/afx/icon.png"
+ logo: "assets/brands/afx/logo.svg"
+ splashLogo: "assets/brands/afx/splash_logo.svg"
+ features:
+ useNewChart: "false"
+
   - name: baazex
     type: child
     inheritsFrom: vantage

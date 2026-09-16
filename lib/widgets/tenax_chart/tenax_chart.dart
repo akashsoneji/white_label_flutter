@@ -1,4 +1,3 @@
-/// Tenax Chart for Flutter.
 ///
 /// A WebView-hosted trading chart, driven entirely by push. The app owns the
 /// socket, the session and the order state; this package draws it and reports

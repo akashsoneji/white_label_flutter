@@ -63,7 +63,6 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   // Chart is now shown in tab, no longer pushed as full screen route
 
   void _switchToTradeTab(int tabIndex) {
-    // Vantage 5-tab layout: Trade is at index 2 (Chart shifted in at 1).
     final isIquote = FlavorConfig.usesIquoteUi();
     final tradeIndex = isIquote ? 2 : (_isVantage ? 2 : 2);
     _onTabChanged(tradeIndex);
@@ -75,7 +74,6 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     });
   }
 
-  // Tenax/default: switch to chart tab and set symbol.
   void _switchToChartTab(String symbol) {
     try {
       final isIquote = FlavorConfig.usesIquoteUi();
@@ -121,7 +119,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     // This allows navigating directly to a specific tab (e.g., dashboard at index 3)
     final arguments = Get.arguments;
     if (arguments != null && arguments is int) {
-      // If argument is a valid tab index, set it (vantage: 0-4, default: 0-4)
+      // If argument is a valid tab index, set it
       final maxIndex = isIquote ? 4 : (_isVantage ? 4 : 4);
       if (arguments >= 0 && arguments <= maxIndex) {
         _currentIndex = arguments;
@@ -255,7 +253,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       // so no need to warm it again here.
     });
 
-    // ✅ If initial tab is dashboard, refresh accounts (vantage index 3, default index 3)
+    // ✅ If initial tab is dashboard, refresh accounts
     final dashboardIndex = _isVantage ? 3 : 3;
     if (_currentIndex == dashboardIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -318,14 +316,11 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       _currentIndex = index;
     });
 
-    // Vantage 5-tab layout: Prices(0), Chart(1), Markets(2), Accounts(3), Settings(4).
     final isIquote = FlavorConfig.usesIquoteUi();
     final tradeIndex = isIquote ? -1 : (_isVantage ? 2 : 2);
     final dashboardIndex = isIquote ? 0 : (_isVantage ? 3 : 3);
     final moreIndex = isIquote ? 4 : (_isVantage ? 4 : 4);
 
-    // Vantage UI brands (pipze, baazex, gtxprime, kantara, skyriss,
-    // telifox, tenax, vantage): The Chart tab is now handled directly in the PageView
     // like other tabs, so we no longer push a new route on top.
 
     // Reset to Market tab when switching to Trade screen via bottom navigation

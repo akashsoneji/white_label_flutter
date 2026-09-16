@@ -12,3 +12,7 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Per-flavor signing secrets (android/keystore/<flavor>/<flavor>.properties)
+keystore/**/*.properties
+!keystore/keystore.properties.example

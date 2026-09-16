@@ -78,7 +78,6 @@ class DashboardScreen extends StatelessWidget {
   BoxDecoration _vantageSegmentedBarDecoration() =>
       VantageUiTokens.groupDecoration();
 
-  // ── Default (non-vantage, non-celestial) header wallet pill ────────────────
   Widget _buildWalletHeaderButton() {
     final walletCtrl =
         Get.isRegistered<WalletController>()
@@ -1844,7 +1843,6 @@ class DashboardScreen extends StatelessWidget {
       );
     }
 
-    // Non-vantage: keep existing scaffold behavior.
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
       appBar: appBar,
@@ -2425,7 +2423,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // ── Modern account card (non-Vantage / Pipze / default brands) ────────────
+  // ── Modern account card ────────────────────────────────────────────────────
   // Visual redesign only — every tap target & branch mirrors the legacy
   // _buildAccountCardContent path exactly.
   Widget _buildModernAccountCard(

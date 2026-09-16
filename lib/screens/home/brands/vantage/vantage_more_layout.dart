@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Vantage-only More screen layout wrapper.
 ///
 /// Entry `MoreScreen` keeps controllers and navigation. This widget is only
 /// responsible for presentation wrappers.

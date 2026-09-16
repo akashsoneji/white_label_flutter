@@ -134,7 +134,7 @@ class SymbolDetailsCacheService {
     // 4. If symbol already has a dot suffix (e.g. "UKOil.c"), keep it!
     if (symbol.contains('.')) return symbol;
 
-    // 5. If broker/flavor is known to use .c suffix (e.g. Pipze, or any .c in global lookup)
+    // 5. If broker/flavor is known to use .c suffix (any .c in global lookup)
     final hasDotCSuffix = _globalDatafeedLookup.values.any((v) => v.toLowerCase().endsWith('.c'));
     if (hasDotCSuffix || FlavorConfig.isPipze()) {
       return '$symbol.c';

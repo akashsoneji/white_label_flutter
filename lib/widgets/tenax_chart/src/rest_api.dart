@@ -8,7 +8,6 @@ import 'api.dart';
 import 'config.dart';
 import 'models.dart';
 
-/// A ready-made [TenaxChartApi] wired to the standard Tenax endpoints. The
 /// mobile dev does not touch any URL — they pass a [TenaxApiConfig] where **only
 /// `baseDomain` changes** per broker; every path (history, symbols, ticks,
 /// modify, close) is fixed and identical across brokers, matching the web build.

@@ -18,7 +18,6 @@ import '../../../../constants/text_styles.dart';
 import 'vantage_glass_tokens.dart';
 import '../../../../widgets/app_switch_tile.dart';
 
-/// Vantage-only compact Pending Order content.
 ///
 /// This is intentionally a presentation fork: business logic and interactions
 /// remain identical to the base `PendingOrderContent`.

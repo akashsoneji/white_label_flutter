@@ -5,7 +5,7 @@ import 'celestial_theme.dart';
 
 /// Celestial-only "Trading Account" screen.
 ///
-/// Wraps the shared [DashboardScreen] (used by Vantage / Pipze bottom-nav)
+/// Wraps the shared [DashboardScreen]
 /// inside a Celestial-themed scaffold. The Celestial AppBar (title +
 /// wallet pill + plus button) is rendered by [DashboardScreen] itself, so
 /// this wrapper deliberately adds no AppBar to avoid a double-header.

@@ -1,5 +1,3 @@
-// Analyzing celestial...
-// No issues found!
 
 import 'package:flutter/material.dart';
 import 'package:crm_app/constants/text_styles.dart';
@@ -8,7 +6,7 @@ import 'package:get/get.dart';
 
 import 'package:crm_app/services/language_service.dart';
 
-/// Global bus used to toggle light/dark theme from the Celestial settings
+/// Global bus used to toggle light/dark theme from settings
 /// screen. The app shell wires this to its `MaterialApp.themeMode` so the
 /// change propagates globally.
 class CelThemeBus {

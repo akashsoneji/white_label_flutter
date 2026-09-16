@@ -16,7 +16,6 @@ import 'celestial_watchlist_screen.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/services/chart_webview_prewarmer.dart';
 
-/// Celestial — Main app shell with 5-tab bottom navigation
 /// (WatchList, Chart, Trade, History, Settings)
 ///
 /// This is the new "parent" UI design. Wires `CelThemeController.mode` so the
@@ -151,7 +150,7 @@ class _CelestialMainShellState extends State<CelestialMainShell> {
                   setState(() => _index = i);
                   if (i == 3) {
                     // History tab — always re-fetch so the list is
-                    // fresh on arrival (mirrors Meta shell behavior).
+                    // fresh on arrival.
                     _refreshHistoryIfPossible();
                   }
                 },

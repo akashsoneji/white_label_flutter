@@ -589,8 +589,6 @@ class DashboardController extends GetxController {
 
   void onSettings(String accountNumber) {
     // Navigate to Settings (More) tab in bottom navigation.
-    // Vantage 5-tab nav (as of 2026-07-09): Settings is at index 4
-    // (Prices 0, Chart 1, Markets 2, Accounts 3, Settings=More 4).
     if (onNavigateToTab != null) {
       onNavigateToTab!(FlavorConfig.isVantage() ? 4 : 4);
     }

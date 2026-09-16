@@ -21,7 +21,6 @@ import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'widgets/meta_native_chart.dart';
 
-/// MetaTrader-style "New Order" screen, 1:1 with the design screenshots.
 class MetaNewOrderScreen extends StatefulWidget {
   const MetaNewOrderScreen({super.key, this.symbol});
 
@@ -1097,7 +1096,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
     if (selected != null) _orderType.value = selected;
   }
 
-  /// Thin horizontal hairline divider matching the Meta MT5 reference.
+  /// Thin horizontal hairline divider.
   Widget _divider({double indent = 0}) {
     return Container(
       width: double.infinity,

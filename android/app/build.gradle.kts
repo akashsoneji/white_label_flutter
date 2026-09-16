@@ -65,6 +65,34 @@ android {
 
     flavorDimensions += "brand"
 
+    signingConfigs {
+        // Global release config — fallback for flavors without their own key
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+            }
+        }
+        // Per-flavor keystores: android/keystore/<flavor>/<flavor>.properties
+        // Add a folder + properties file for any new flavor — no code change needed.
+        val brandFlavors = extra["brandFlavors"] as List<Map<String, Any?>>
+        brandFlavors.forEach { brand ->
+            val flavorName = brand["name"] as String
+            val propsFile = rootProject.file("keystore/$flavorName/$flavorName.properties")
+            if (propsFile.exists()) {
+                val props = Properties().apply { load(FileInputStream(propsFile)) }
+                create(flavorName) {
+                    keyAlias = props["keyAlias"] as String
+                    keyPassword = props["keyPassword"] as String
+                    storeFile = rootProject.file(props["storeFile"] as String)
+                    storePassword = props["storePassword"] as String
+                }
+            }
+        }
+    }
+
     productFlavors {
         val brandFlavors = extra["brandFlavors"] as List<Map<String, Any?>>
         brandFlavors.forEach { brand ->
@@ -80,17 +108,8 @@ android {
                 resValue("color", "ic_launcher_background", brand["launcherBackground"] as String)
                 buildConfigField("String", "FLAVOR", "\"$name\"")
                 manifestPlaceholders["FLAVOR"] = name
-            }
-        }
-    }
-
-    signingConfigs {
-        if (keystorePropertiesFile.exists()) {
-            create("release") {
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
+                // Use this flavor's own signing key if one was configured above
+                signingConfigs.findByName(name)?.let { signingConfig = it }
             }
         }
     }

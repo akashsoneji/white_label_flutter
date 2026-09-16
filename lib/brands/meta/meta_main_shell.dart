@@ -17,10 +17,8 @@ import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/services/chart_webview_prewarmer.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
 
-/// Meta — Main app shell with 5-tab bottom navigation
 /// (WatchList, Chart, Trade, History, Messages)
 ///
-/// This is Meta's parent UI design (Facebook-blue inspired). Wires
 /// `MetaThemeBus.mode` so the settings screen's dark-mode toggle changes
 /// the whole app's theme.
 class MetaMainShell extends StatefulWidget {

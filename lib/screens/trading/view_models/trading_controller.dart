@@ -1211,8 +1211,7 @@ class TradingController extends GetxController {
     );
   }
 
-  /// Bulk-close a caller-supplied list of positions (used by Meta/Celestial
-  /// bottom sheets). Sends a single POST with `position_ids`.
+  /// Bulk-close a caller-supplied list of positions. Sends a single POST with `position_ids`.
   Future<void> closePositions(List<TradePosition> positions) async {
     if (positions.isEmpty) {
       _setError(TranslationUtils.tr('trading_controller_no_positions_found_to_close'));

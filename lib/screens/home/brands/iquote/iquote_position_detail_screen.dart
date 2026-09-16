@@ -432,7 +432,6 @@ class _IQuotePositionDetailScreenState
     Get.to(() => ClosePositionScreen(position: pos));
   }
 
-  /// Cancel pending order confirmation dialog (matches iQuote design style).
   Future<void> _showCancelPendingDialog(BuildContext context, String mt5Account) async {
     final pos = widget.position;
     final palette = _Palette.of(context);

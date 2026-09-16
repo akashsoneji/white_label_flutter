@@ -1634,11 +1634,6 @@ Placing Order:
     // NOTE: WebSocket initialization is handled centrally by AccountController
     // DO NOT call ensureWebSocketInitialized() here - it causes redundant refreshes
 
-    // ── Vantage / Vantage-child brands (pipze, baazex, gtxprime, …)
-    //    use the TRADYN-style chart layout: slim ← SYMBOL ⌄ header,
-    //    purple BUY button, quantity + chart-icons + bell dock.
-    //    The full legacy Xelthio screen below is preserved for
-    //    non-Vantage flavors.
     if (FlavorConfig.usesVantageUi()) {
       // VantageChartLayout manages its own symbol-picker (favourites
       // dropdown first, falls back to SearchInstrumentsScreen when the

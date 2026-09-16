@@ -181,7 +181,7 @@ class _VantageTransactionHistoryScreenState
 
   /// Universal back handler used by BOTH the AppBar arrow and device/swipe
   /// back. If a normal push put us here, `Navigator.canPop()` is true and
-  /// `Get.back()` returns to the origin (More, Celestial/Meta settings).
+  /// `Get.back()` returns to the origin.
   /// If the screen was reached via `Get.offAllNamed(...)` (Cregis flow wipes
   /// the stack), `canPop()` is false and we send the user to the dashboard.
   void _handleBack() {

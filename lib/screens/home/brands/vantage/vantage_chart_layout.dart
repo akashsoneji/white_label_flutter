@@ -1,7 +1,4 @@
 // ============================================================
-// VantageChartLayout — Vantage TRADYN-style chart screen
-//
-// Used by all Vantage-child brands (pipze, baazex, gtxprime, …).
 // Mirrors the TRADYN/JSX reference design (pixel-perfect):
 //   • Slim header   : ←  SYMBOL ⌄  ●(tick)         [slider pill] top-right
 //   • Top-right     : brand-primary icon (light mode) / white icon (dark mode)
@@ -9,7 +6,7 @@
 //   • Bottom dock   : Quantity stepper + [pending-pill icon] + bell
 //                     ─────────────────────────────────────────
 //                     SELL  bid  •  spread  •  ask  BUY
-//   • BUY button    : FlavorConfig.primaryColor (purple for Pipze)
+//   • BUY button    : FlavorConfig.primaryColor
 //   • SELL button   : AppColors.error (red gradient)
 //   • Spread chip   : pip number in the middle
 //

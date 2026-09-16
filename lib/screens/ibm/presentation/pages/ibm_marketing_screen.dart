@@ -325,7 +325,6 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
           ],
           SizedBox(height: 8.h),
 
-          // Meta Row (Dimensions, Language, Downloads)
           Wrap(
             spacing: 10.w,
             children: [

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// Tinted SVG icon — works with stroke- and fill-based assets (Vantage theme).
 class AppSvgIcon extends StatelessWidget {
   final String assetPath;
   final double? width;

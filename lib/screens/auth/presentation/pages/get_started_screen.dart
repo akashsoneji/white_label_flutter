@@ -31,7 +31,7 @@ class GetStartedScreen extends StatelessWidget {
                     children: [
                       Center(
                         child: BrandLogo(
-                          source: FlavorConfig.effectiveLogo,
+                          source: FlavorConfig.instance.appIconPath,
                           // color: AppColors.primary,
                           height: 100.h,
                           width: 180.w,

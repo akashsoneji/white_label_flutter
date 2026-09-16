@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'clients/base_config.dart';
+import 'clients/afx/config.dart';
 import 'clients/baazex/config.dart';
 import 'clients/celestial/config.dart';
 import 'clients/gtxprime/config.dart';
@@ -18,6 +19,7 @@ import 'clients/tenax/config.dart';
 import 'clients/vantage/config.dart';
 
 enum Flavor {
+  afx,
   baazex,
   celestial,
   gtxprime,
@@ -138,6 +140,9 @@ class FlavorConfig {
 
   static FlavorConfig _configFor(Flavor flavor) {
     switch (flavor) {
+      case Flavor.afx:
+        const config = AfxConfig();
+        return config.toFlavorConfig(Flavor.afx, 'afx');
       case Flavor.baazex:
         const config = BaazexConfig();
         return config.toFlavorConfig(Flavor.baazex, 'baazex');
@@ -179,6 +184,9 @@ class FlavorConfig {
         return config.toFlavorConfig(Flavor.vantage, 'vantage');
     }
   }
+
+  static bool isAfx() => _instance?.flavor == Flavor.afx;
+  static FlavorConfig get afx => activate(Flavor.afx);
 
   static bool isBaazex() => _instance?.flavor == Flavor.baazex;
   static FlavorConfig get baazex => activate(Flavor.baazex);
@@ -288,11 +296,8 @@ class FlavorConfig {
   }
 
   /// True when the active flavor supports per-user multi-broker selection
-  /// (the Tenax-style flow stored in `SecureStorageService`).
+  /// (the multi-broker flow stored in `SecureStorageService`).
   ///
-  /// Returns `true` when the flavor id is `tenax` or when the active config
-  /// already carries a non-empty `selectedBrokerData` payload. For all
-  /// other flavors the feature is disabled.
   static bool get isMultiBrokerEnabled {
     final inst = _instance;
     if (inst == null) return false;
@@ -305,11 +310,10 @@ class FlavorConfig {
   /// that gates UI on this brand — always false in this build.
   static bool get isONSA => false;
 
-  /// Applies a Tenax multi-broker runtime payload onto the active
-  /// [FlavorConfig]. When [payload] is null or empty this is a no-op so
-  /// non-Tenax flavors stay untouched. The shape mirrors [applyBranding] —
-  /// callers build a single map merging tenant-supplied config + selected
-  /// broker name / logo overrides.
+  /// Applies a multi-broker runtime payload onto the active
+  /// [FlavorConfig]. When [payload] is null or empty this is a no-op.
+  /// The shape mirrors [applyBranding] — callers build a single map
+  /// merging tenant-supplied config + selected broker name / logo overrides.
   static void applyTenaxBrokerRuntimeConfig(Map<String, dynamic>? payload) {
     if (payload == null || payload.isEmpty) return;
     applyBranding(

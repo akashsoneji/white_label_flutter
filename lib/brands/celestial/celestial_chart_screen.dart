@@ -682,7 +682,6 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
 // ─────────────────────────────────────────────────────────────────────────────
 // _CelChartArea
 //
-// Vantage-pattern chart area: seeds the WebView symbol ONCE in initState
 // and subsequently pushes symbol changes via key.currentState?.updateSymbol().
 // ChartInAppWebView is NEVER torn down and rebuilt on symbol change — that
 // eliminates the "Obx triggers didUpdateWidget → XAUUSD reload" race.

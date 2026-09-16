@@ -14,7 +14,6 @@ class AppNotificationStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // iQuote and Vantage share the center-right slide-in presentation.
     if (FlavorConfig.usesIquoteUi()) {
       return Positioned.fill(
         child: Align(

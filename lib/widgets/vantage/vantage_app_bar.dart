@@ -5,9 +5,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
-/// Vantage-only unified AppBar shell.
 ///
-/// Use this ONLY inside `if (FlavorConfig.isVantage())` branches.
 class VantageAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget title;
   final bool showBack;

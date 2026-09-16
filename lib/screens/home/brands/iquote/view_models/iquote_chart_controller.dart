@@ -1,4 +1,3 @@
-// IQuoteChartController — header / bottom-bar state for the IQuote chart
 // screen.
 //
 // Note: the candle chart itself is rendered as a static placeholder for now
@@ -320,8 +319,6 @@ class IQuoteChartController extends GetxController {
 
   // ── order placement ───────────────────────────────────────────────────
   /// Send a market/limit order through TradingController.placeTradeOrder
-  /// (the same entry point enhanced_pending_order_content / meta_chart_screen
-  /// / celestial_chart_screen use).
   ///
   /// [side]     = "buy" | "sell"
   /// [orderKind] = "market" | "limit"

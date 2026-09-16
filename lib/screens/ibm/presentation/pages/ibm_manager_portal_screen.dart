@@ -807,8 +807,6 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
       label = first['label']?.toString() ?? '';
     }
 
-    // Build the full referral URL using the active brand/flavor base URL
-    // (e.g. https://my.pipze.com) — never hardcode a domain.
     final baseUrl = BrandSwitcher.currentChartBaseUrl.replaceAll(
       RegExp(r'/+$'),
       '',

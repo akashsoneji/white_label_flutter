@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Vantage-only dashboard layout wrapper.
 ///
 /// Keep this file presentation-only. All existing business logic/controllers
 /// remain in the entry `DashboardScreen`.

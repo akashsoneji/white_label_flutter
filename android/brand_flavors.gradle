@@ -3,6 +3,19 @@
 
 ext.brandFlavors = [
     [
+        name: "afx",
+        label: "AFX",
+        appId: "com.afx.app",
+        appName: "AFX",
+        primary: "#182430",
+        secondary: "#E8F0F5",
+        accent: "#182430",
+        splashColor: "#182430",
+        launcherBackground: "#182430",
+        type: "child",
+        inheritsFrom: "celestial",
+    ],
+    [
         name: "baazex",
         label: "Baazex",
         appId: "com.baazex.app",

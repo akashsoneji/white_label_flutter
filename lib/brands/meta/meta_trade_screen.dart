@@ -25,7 +25,6 @@ double _d(String? v) => double.tryParse(v ?? '') ?? 0;
 String _fmt(double v, int d) => v.toStringAsFixed(d);
 String _fmtPL(double v) => '${v < 0 ? '' : '+'}${v.toStringAsFixed(2)}';
 
-/// Meta — Trade screen.
 ///
 /// Body layout (matches the MT5 reference):
 ///   ┌────────────────────────────────────────┐

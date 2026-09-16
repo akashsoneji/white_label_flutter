@@ -1,6 +1,3 @@
-// lib/brands/meta/meta_history_screen.dart
-//
-// Meta-branded History screen — MT5-style UI.
 
 import 'package:flutter/material.dart';
 import 'package:crm_app/constants/text_styles.dart';

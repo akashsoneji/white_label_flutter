@@ -2,10 +2,8 @@
 // TenaxChartWebView
 //
 // Drop-in for ChartInAppWebView / AdvancedChartInAppWebView that renders
-// the Tenax custom chart bundle (from the `tenax_chart` package) backed
-// by the real broker datafeed (REST history + WebSocket ticks).
+// the custom chart bundle backed by the real broker datafeed (REST history + WebSocket ticks).
 //
-// Usage inside _ChartArea of VantageChartLayout:
 //
 //   TenaxChartWebView(key: tenaxKey, symbol: raw, isDark: isDark)
 //
@@ -257,7 +255,7 @@ class TenaxChartWebViewState extends State<TenaxChartWebView> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// _PipzeTenaxApi  —  TenaxChartApi implementation for Pipze / Tenax CRM backend
+// _PipzeTenaxApi  —  TenaxChartApi implementation for the CRM backend
 // ─────────────────────────────────────────────────────────────────────────────
 class _PipzeTenaxApi extends TenaxChartApi {
   _PipzeTenaxApi({required this.baseUrl, required this.token});

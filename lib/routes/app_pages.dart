@@ -207,10 +207,6 @@ class AppPages {
   static final routes = [
     GetPage(
       name: _Paths.SPLASH,
-      // ✅ Route through UiRegistry so brand-inherited auth UI renders
-      // for Vantage-family clients (Pipze/Celestial/etc.) and the legacy
-      // UI for Tenax/Meta. Previously the page was hardcoded to the
-      // legacy SplashScreen, so no brand-specific splash could ever show.
       page: () => UiRegistry.instance.splash(),
       binding: SplashBinding(),
     ),
@@ -232,8 +228,6 @@ class AppPages {
     GetPage(name: _Paths.BANK_LIST, page: () => BankListScreen()),
     GetPage(
       name: _Paths.LOGIN,
-      // ✅ UiRegistry picks VantageLoginScreen for Pipze/Celestial/
-      // Vantage and falls back to LoginScreen for Tenax/Meta.
       page: () => UiRegistry.instance.login(),
       binding: AuthBinding(),
     ),
@@ -284,9 +278,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.TRADING,
-      // ✅ Route through UiRegistry so the brand's parent UI renders:
-      //    Celestial → CelestialMainShell, Meta → MetaMainShell,
-      //    Vantage-family → TradingMainScreen (legacy shared shell).
+      // Route through UiRegistry so the correct parent UI renders.
       page: () => UiRegistry.instance.tradingMain(),
       binding: TradingBinding(),
     ),

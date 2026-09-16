@@ -7,9 +7,6 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/models/app_notification.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 
-/// iQuote-only notification item that slides in from the right edge and is
-/// anchored to the vertical center of the screen. Presented by
-/// [AppNotificationStack] when [FlavorConfig.usesIquoteUi] is true.
 class IquoteNotificationItem extends StatefulWidget {
   final AppNotification notification;
 

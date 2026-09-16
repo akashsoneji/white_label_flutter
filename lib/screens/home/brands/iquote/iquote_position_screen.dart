@@ -67,7 +67,6 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       _initializeTradeScreenWebSockets();
       _listenForAccountChanges();
 
-      // ✅ PERF: Ensure DashboardController WS is initialized (same as Vantage TradeScreen)
       try {
         if (Get.isRegistered<DashboardController>()) {
           final dashboardController = Get.find<DashboardController>();
@@ -2170,7 +2169,6 @@ padding: EdgeInsetsDirectional.fromSTEB(14.w, 10.h, 14.w, 20.h),
 }
 
 /// One account card inside the switch-account bottom sheet.
-/// Layout mirrors the iQuote dashboard account card.
 class _AccountRow extends StatelessWidget {
   final MT5Account account;
   final bool isActive;

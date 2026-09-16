@@ -10,7 +10,6 @@
 //   • Buy/Sell quick-trade panel (toggled by the "Trade" pill in the toolbar)
 //   • Symbol + timeframe picker in Flutter toolbar
 //   • Live price header (bid/ask/H/L) via InstrumentsController
-//   • Dark/light theme sync (Meta blue + Meta dark palette)
 // ============================================================
 
 import 'dart:async';
@@ -580,7 +579,6 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
 // ─────────────────────────────────────────────────────────────────────────────
 // _MetaChartArea
 //
-// Vantage-pattern: seeds WebView symbol ONCE and pushes updates via key.
 // Eliminates Obx-triggered didUpdateWidget → XAUUSD race.
 // Fixed for app-kill (fallback detection) and device-lock (forceReload on resume).
 // ─────────────────────────────────────────────────────────────────────────────

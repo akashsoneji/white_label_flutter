@@ -12,7 +12,6 @@ import 'package:crm_app/screens/trading/view_models/search_instruments_controlle
 import 'meta_theme.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
-/// Meta — WatchList screen (screenshot-faithful).
 ///
 ///  • Top bar: hamburger | "Quotes" | + | ✎
 ///  • ✎ → "Selected symbols" screen (edit / delete mode)

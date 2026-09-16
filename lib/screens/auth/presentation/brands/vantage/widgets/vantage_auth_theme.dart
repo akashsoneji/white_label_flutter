@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../../flavor_config.dart';
 
-/// Theme tokens for the Vantage auth flow (sourced from [FlavorConfig]).
 class VantageAuthTheme {
   VantageAuthTheme._();
 

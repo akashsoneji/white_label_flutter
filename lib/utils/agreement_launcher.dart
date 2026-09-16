@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import 'package:crm_app/screens/common/webview_screen.dart';
@@ -29,12 +30,25 @@ class AgreementLauncher {
         fallbackTitleKey: 'terms_conditions',
       );
 
+  static const Map<String, String> _pipproStaticUrls = {
+    termsKey: 'https://proactivetech.pro/proactivetech-client-agreement.html',
+    privacyKey: 'https://proactivetech.pro/proactivetech-privacy-policy.html',
+  };
+
   static Future<void> _open({
     required String agreementKey,
     required String fallbackTitleKey,
   }) async {
     final languageService = Get.find<LanguageService>();
     final title = languageService.tr(fallbackTitleKey);
+
+    if (FlavorConfig.instance.flavor.name == 'pippro') {
+      final staticUrl = _pipproStaticUrls[agreementKey];
+      if (staticUrl != null) {
+        await _openUrl(staticUrl, title);
+        return;
+      }
+    }
 
     if (Get.isRegistered<CrmSettingsService>()) {
       final crmService = Get.find<CrmSettingsService>();

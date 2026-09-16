@@ -18,8 +18,6 @@ import 'brands/vantage/pages/withdrawal_screen.dart' as vantage;
 
 /// Build-time selected client (no runtime switching).
 ///
-/// Use: `--dart-define=CLIENT=tenax|vantage|celestial|pipze|skyriss|telifox`
-/// All non-parent clients inherit Vantage's finance screen files.
 const String _activeClient = String.fromEnvironment(
  'CLIENT',
  defaultValue: 'tenax',

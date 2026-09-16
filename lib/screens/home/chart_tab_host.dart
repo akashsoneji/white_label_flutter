@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Tab host for the Chart tab in the Vantage 5-tab bottom nav.
 ///
 /// This widget is intentionally inert: the parent (`TradingMainScreen`)
 /// drives the chart push directly from `_onTabChanged` when the user

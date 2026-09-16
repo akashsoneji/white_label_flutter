@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:crm_app/screens/home/dashboard_screen.dart';
 import 'meta_theme.dart';
 
-/// Meta-only "Trading Account" screen.
-///
-/// Wraps the shared [DashboardScreen] (used by Vantage / Pipze bottom-nav)
-/// inside a Meta-themed scaffold. The Meta AppBar (title + wallet pill +
+/// Wraps the shared [DashboardScreen]
 /// plus button) is rendered by [DashboardScreen] itself, so this wrapper
 /// deliberately adds no AppBar to avoid a double-header.
 ///

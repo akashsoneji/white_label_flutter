@@ -111,7 +111,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   // 🎨 AUTO-DETECT FLAVOR FROM BUILD CONFIGURATION
   // The flavor is automatically detected from the build command
-  // Example: flutter build apk --flavor vantage -t lib/main.dart
 
   // Reset any previous flavor configuration
   FlavorConfig.reset();
@@ -934,8 +933,8 @@ void _initializeLogging() {
 Future<void> _initializeFlavor() async {
   // Build-time selection only (no runtime switching).
   //
-  // Preferred: `--dart-define=CLIENT=tenax|vantage`
-  // Back-compat: `--dart-define=FLAVOR=tenax|vantage`
+  // Preferred: `--dart-define=CLIENT=<brand>`
+  // Back-compat: `--dart-define=FLAVOR=<brand>`
   const clientFromDefine = String.fromEnvironment('CLIENT', defaultValue: '');
   const flavorFromDefine = String.fromEnvironment('FLAVOR', defaultValue: '');
 

@@ -308,8 +308,7 @@ class SecureStorageService {
     }
   }
 
-  // ── Tenax multi-broker support ────────────────────────────────────
-  // Keys for Tenax broker data, profiles, and current selection.
+  // Keys for multi-broker data, profiles, and current selection.
   static const String _tenaxBrokerSelectionKey = 'tenax_broker_selection';
   static const String _tenaxBrokerSelectionFlagKey =
       'tenax_broker_selection_enabled';
@@ -317,7 +316,7 @@ class SecureStorageService {
       'tenax_user_broker_profiles';
   static const String _tenaxCurrentProfileKeyKey = 'tenax_current_profile_key';
 
-  /// Returns the persisted broker selection payload (JSON) for Tenax.
+  /// Returns the persisted broker selection payload (JSON).
   static Future<Map<String, dynamic>?> getTenaxBrokerSelection() async {
     try {
       final prefs = await SharedPreferences.getInstance();

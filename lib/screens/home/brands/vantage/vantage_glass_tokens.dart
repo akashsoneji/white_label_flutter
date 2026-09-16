@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:crm_app/constants/color.dart';
 
-/// Vantage UI tokens (premium, dark-safe).
 ///
 /// Intentionally avoids heavy “glass blur”. Uses crisp surfaces with subtle
-/// brand accent and consistent borders/radii across Vantage-only screens.
+/// brand accent and consistent borders/radii.
 class VantageUiTokens {
   VantageUiTokens._();
 

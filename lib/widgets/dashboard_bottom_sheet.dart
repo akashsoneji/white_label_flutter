@@ -4,7 +4,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/home/dashboard_screen.dart';
 
 /// Shows the [DashboardScreen] inside a modal bottom sheet
-/// with maximum height capped at 78% of the screen height and innovative iQuote theme styling.
+/// with maximum height capped at 78% of the screen height.
 void showDashboardBottomSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,

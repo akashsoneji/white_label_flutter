@@ -28,7 +28,7 @@ import 'package:crm_app/widgets/theme_bottom_sheet.dart';
 import 'celestial_theme.dart';
 import 'celestial_trading_account_screen.dart';
 
-/// Celestial Settings screen — full parity with Vantage/Pipze MoreScreen.
+/// Celestial Settings screen.
 /// Wired to MoreController (dashboard API), EnabledModulesService (feature
 /// flags), OneClickTradingService, and BiometricService.
 class CelestialSettingsScreen extends StatefulWidget {
