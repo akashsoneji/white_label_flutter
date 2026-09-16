@@ -16,3 +16,5 @@ key.properties
 # Per-flavor signing secrets (android/keystore/<flavor>/<flavor>.properties)
 keystore/**/*.properties
 !keystore/keystore.properties.example
+# Per-flavor credential reference notes (contain passwords)
+keystore/**/*_credentials.txt

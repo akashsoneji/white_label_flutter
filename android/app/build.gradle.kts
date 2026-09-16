@@ -108,19 +108,17 @@ android {
                 resValue("color", "ic_launcher_background", brand["launcherBackground"] as String)
                 buildConfigField("String", "FLAVOR", "\"$name\"")
                 manifestPlaceholders["FLAVOR"] = name
-                // Use this flavor's own signing key if one was configured above
-                signingConfigs.findByName(name)?.let { signingConfig = it }
+                // Flavor-specific key wins; fallback to global release or debug key.
+                signingConfig = signingConfigs.findByName(name)
+                    ?: if (keystorePropertiesFile.exists()) signingConfigs.getByName("release")
+                    else signingConfigs.getByName("debug")
             }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            // signingConfig is set per-flavor in productFlavors above — not here.
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

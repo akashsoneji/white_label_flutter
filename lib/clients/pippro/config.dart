@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '../base_config.dart';
 
+/// Auto-generated config for "PipPro".
 /// Change values in assets/config/brands/brands.yaml and re-run the generator.
 class PipproConfig extends BaseClientConfig {
   const PipproConfig()
