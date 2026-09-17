@@ -345,7 +345,7 @@ class SecureStorageService {
     }
   }
 
-  /// Feature flag: whether the Tenax multi-broker UI is enabled.
+  /// Feature flag: whether the multi-broker UI is enabled.
   static Future<bool> getTenaxBrokerSelectionFlag() async {
     try {
       final prefs = await SharedPreferences.getInstance();

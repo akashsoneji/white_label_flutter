@@ -6,6 +6,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/brand_switcher.dart';
 import 'package:crm_app/widgets/app_svg_icon.dart';
 
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
@@ -25,6 +26,7 @@ class TradingBottomNavigation extends StatelessWidget {
     final languageService = Get.find<LanguageService>();
     final isIquote = FlavorConfig.usesIquoteUi();
     final isVantage = FlavorConfig.usesVantageUi();
+    final isBaazex = BrandSwitcher.isBaazex;
 
     if (isIquote) {
       final isDark = AppColors.isDarkMode;
@@ -93,6 +95,78 @@ class TradingBottomNavigation extends StatelessWidget {
           ),
         );
       });
+    }
+
+    if (isBaazex) {
+      // Floating pill bar. FittedBox on the whole Row scales everything down
+      // proportionally so there is never an overflow, and the selected capsule
+      // keeps its icon + label visible at any screen width.
+      return Container(
+        height: 60.h,
+        margin: EdgeInsets.fromLTRB(12.w, 0, 12.w, 18.h),
+        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(32.r),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.textPrimary.withValues(
+                alpha: AppColors.isDarkMode ? 0.18 : 0.15,
+              ),
+              blurRadius: 22,
+              spreadRadius: 2,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: constraints.maxWidth,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildBaazexNavItem(
+                      0,
+                      "assets/svg/bottom_navigation/trend-up.svg",
+                      "assets/svg/bottom_navigation/trend-up_bold.svg",
+                      languageService.tr('nav_prices'),
+                    ),
+                    _buildBaazexNavItem(
+                      1,
+                      "assets/svg/bottom_navigation/chart.svg",
+                      "assets/svg/bottom_navigation/chart_bold.svg",
+                      languageService.tr('meta_trade_chart'),
+                    ),
+                    _buildBaazexNavItem(
+                      2,
+                      "assets/svg/bottom_navigation/candle.svg",
+                      "assets/svg/bottom_navigation/candle_bold.svg",
+                      languageService.tr('nav_position'),
+                    ),
+                    _buildBaazexNavItem(
+                      3,
+                      "assets/svg/bottom_navigation/wallet.svg",
+                      "assets/svg/bottom_navigation/wallet_bold.svg",
+                      languageService.tr('nav_accounts'),
+                    ),
+                    _buildBaazexNavItem(
+                      4,
+                      "assets/svg/copy_trading/bottom_navigation/dashboard.svg",
+                      "assets/svg/copy_trading/bottom_navigation/dashboard_bold.svg",
+                      languageService.tr('copy_trading_nav_dashboard'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
     }
 
     if (isVantage) {
@@ -398,6 +472,59 @@ class TradingBottomNavigation extends StatelessWidget {
     );
   }
 
+  Color get _baazexSelectedCapsuleColor =>
+      AppColors.primary.withValues(alpha: 0.10);
+
+  Widget _buildBaazexNavItem(
+    int index,
+    String icon,
+    String iconBold,
+    String label,
+  ) {
+    final isSelected = currentIndex == index;
+
+    return GestureDetector(
+      onTap: () => onTap(index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        height: _tabCapsuleHeight.h,
+        padding: EdgeInsets.symmetric(
+          horizontal: isSelected ? 14.w : 10.w,
+          vertical: 4.h,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? _baazexSelectedCapsuleColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(100.r),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            AppSvgIcon(
+              assetPath: isSelected ? iconBold : icon,
+              height: _selectedIconSize.h,
+              width: _selectedIconSize.w,
+              color: isSelected ? AppColors.primary : AppColors.textGrey,
+            ),
+            if (isSelected) ...[
+              SizedBox(width: 6.w),
+              Text(
+                label,
+                maxLines: 1,
+                style: AppTextStyles.subheading.copyWith(
+                  fontSize: 12.sp,
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildVantageNavItem(
     int index,
     String icon,
@@ -415,8 +542,6 @@ class TradingBottomNavigation extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Selected tab shows a brand circle behind the icon — a normal
-          // in-bar animation that stays fully inside the bar (no bump).
           AnimatedContainer(
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeOut,

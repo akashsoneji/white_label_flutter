@@ -118,28 +118,27 @@ class AccountHeaderWidget extends StatelessWidget {
                 }
 
                 double? tradingProfit;
+                double? tradingEquity;
                 if (useTradingFloatingProfit &&
                     Get.isRegistered<TradingController>()) {
-                  tradingProfit =
-                      Get.find<TradingController>().accountInfoRx.value?.profit;
+                  final tcInfo =
+                      Get.find<TradingController>().accountInfoRx.value;
+                  tradingProfit = tcInfo?.profit;
+                  tradingEquity = tcInfo?.equity;
                 }
 
                 final double? resolvedFloatingProfit =
                     floatingProfit ?? tradingProfit ?? accountInfo?.profit;
-                final bool useFloatingProfit = resolvedFloatingProfit != null;
-                final double displayValue =
-                    useFloatingProfit ? resolvedFloatingProfit : displayEquity;
-                final bool isPositive = displayValue >= 0;
 
-                final valueText =
-                    useFloatingProfit
-                        ? '\$${PrecisionHelper.formatPnL(displayValue)}'
-                        : '\$${displayEquity.toStringAsFixed(2)}';
+                // Use trading controller equity as fallback when DashboardController
+                // accountInfoMap hasn't populated yet (e.g. on chart tab).
+                final double resolvedEquity =
+                    displayEquity != 0.0
+                        ? displayEquity
+                        : (tradingEquity ?? displayEquity);
 
-                final valueColor =
-                    useFloatingProfit
-                        ? (isPositive ? AppColors.success : AppColors.error)
-                        : AppTextStyles.heading.color;
+                final valueText = '\$${resolvedEquity.toStringAsFixed(2)}';
+                final valueColor = AppTextStyles.heading.color;
 
                 final accountTypeText = _getAccountTypeText(primaryAccount);
                 final accountNumberText = _getAccountNumber(primaryAccount);
@@ -258,11 +257,11 @@ class AccountHeaderWidget extends StatelessWidget {
                   },
                 );
 
-                final double? liveProfit = accountInfo?.profit;
+                final double? liveProfit = resolvedFloatingProfit;
 
                 final valueRow = Row(
                   children: [
-                    if (showLoading && !useFloatingProfit) ...[
+                    if (showLoading) ...[
                       LoadingAnimationWidget.fourRotatingDots(
                         color: AppColors.primary,
                         size: 18.w,
@@ -281,35 +280,17 @@ class AccountHeaderWidget extends StatelessWidget {
                         maxLines: 1,
                       ),
                     ),
-                    if (!useFloatingProfit &&
-                        liveProfit != null &&
-                        liveProfit != 0.0) ...[
-                      SizedBox(width: 8.w),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 6.w,
-                          vertical: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: (liveProfit >= 0
-                                  ? AppColors.success
-                                  : AppColors.error)
-                              .withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
-                        child: Text(
-                          '${liveProfit >= 0 ? '+' : ''}${PrecisionHelper.formatPnL(liveProfit)}',
-                          style: AppTextStyles.bodyText.copyWith(
-                            color:
-                                liveProfit >= 0
-                                    ? AppColors.success
-                                    : AppColors.error,
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
+                    // if (liveProfit != null && liveProfit != 0.0) ...[
+                    //   SizedBox(width: 8.w),
+                    //   Text(
+                    //     '${liveProfit >= 0 ? '+' : ''}${PrecisionHelper.formatPnL(liveProfit)}',
+                    //     style: AppTextStyles.bodyText.copyWith(
+                    //       color: AppColors.textGrey,
+                    //       fontSize: 12.sp,
+                    //       fontWeight: FontWeight.w500,
+                    //     ),
+                    //   ),
+                    // ],
                   ],
                 );
 

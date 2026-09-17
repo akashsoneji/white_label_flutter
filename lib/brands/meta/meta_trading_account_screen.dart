@@ -16,7 +16,7 @@ class MetaTradingAccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // DashboardScreen renders its own Meta-themed AppBar (wallet + plus
+    // DashboardScreen renders its own themed AppBar (wallet + plus
     // button) so we deliberately avoid adding a second AppBar here.
     return Scaffold(
       backgroundColor: MetaTheme.bg(context),

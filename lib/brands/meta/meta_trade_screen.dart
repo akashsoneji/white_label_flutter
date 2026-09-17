@@ -238,7 +238,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                             break;
                           case _PosAction.newOrder:
                             // Swipe-strip "New order" → push the
-                            // dedicated Meta New Order screen pre-filled
+                            // dedicated New Order screen pre-filled
                             // with this position's symbol. Same behavior
                             // as the long-press action sheet's
                             // "New order".
@@ -1137,7 +1137,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                 onTap: () {
                   final sym = p.symbol;
                   Navigator.pop(sheetCtx);
-                  // Push the dedicated Meta New Order screen pre-filled
+                  // Push the dedicated New Order screen pre-filled
                   // with this position's symbol (matches the Watchlist's
                   // "New Order" row action).
                   Navigator.of(c).push(

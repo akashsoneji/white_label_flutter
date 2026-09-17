@@ -111,7 +111,7 @@ const Map<String, String> _uiParentByClient = {
   'tenax': 'tenax',
   'pipze': 'iquote',
   'skyriss': 'iquote',
-  'baazex': 'iquote',
+  'baazex': 'vantage',
   'telifox': 'vantage',
   'kantara': 'vantage',
   'gtxprime': 'vantage',

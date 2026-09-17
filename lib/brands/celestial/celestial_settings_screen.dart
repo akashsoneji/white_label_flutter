@@ -28,7 +28,7 @@ import 'package:crm_app/widgets/theme_bottom_sheet.dart';
 import 'celestial_theme.dart';
 import 'celestial_trading_account_screen.dart';
 
-/// Celestial Settings screen.
+/// Settings screen.
 /// Wired to MoreController (dashboard API), EnabledModulesService (feature
 /// flags), OneClickTradingService, and BiometricService.
 class CelestialSettingsScreen extends StatefulWidget {
@@ -628,7 +628,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
     final showPromotional = modulesService?.isPromotionalMenuVisible ?? false;
 
     final items = <_CelMenuItem>[
-      // ── Trading Account (Celestial-only) ─────────────────────────────────
+      // ── Trading Account ─────────────────────────────────
       _CelMenuItem(
         icon: Icons.manage_accounts_rounded,
         label: languageService.tr('settings_trading_account'),

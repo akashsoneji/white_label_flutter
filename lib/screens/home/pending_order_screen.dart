@@ -546,7 +546,7 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
         title: ValueListenableBuilder<String>(
           valueListenable: _selectedOrderType,
           builder: (context, orderType, child) {
-            // Vantage: remove the left icon and keep a unified title style.
+            // Remove the left icon and keep a unified title style.
             if (isVantage) {
               return Column(
                 mainAxisSize: MainAxisSize.min,
@@ -573,7 +573,7 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
               );
             }
 
-            // Non-vantage: keep existing title layout with flag icon.
+            // Otherwise: keep existing title layout with flag icon.
             return Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -21,7 +21,7 @@ class CelThemeBus {
   }
 }
 
-/// Celestial — MT5-inspired design system.
+/// MT5-inspired design system.
 /// Provides light + dark theme colors, typography, and shared widgets
 /// used across the 5-tab shell (WatchList / Chart / Trade / History / Settings).
 class CelTheme {

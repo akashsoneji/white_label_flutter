@@ -101,7 +101,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     _isVantage = FlavorConfig.isVantage();
     final isIquote = FlavorConfig.usesIquoteUi();
 
-    // NOTE: No headless chart pre-warm here. The 5 Vantage tabs live in an
+    // NOTE: No headless chart pre-warm here. The 5 tabs live in an
     // eager IndexedStack (see build → _screens built in initState), so the
     // visible ChartInAppWebView already starts loading its remote URL at home
     // mount. A headless prewarmer loading the SAME url only doubles the cold
@@ -158,9 +158,9 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
         const KeepAliveWrapper(child: MoreScreen()), // 4. Assets
       ];
     } else if (_isVantage) {
-      // Vantage 5-tab layout (as of 2026-07-09):
+      // 5-tab layout:
       //   0: Prices    → InstrumentsScreen (watchlist)
-      //   1: Chart     → ChartTabHost (auto-pushes ChartScreen → VantageChartLayout)
+      //   1: Chart     → ChartTabHost (auto-pushes ChartScreen → chart layout)
       //   2: Markets   → TradeScreen
       //   3: Accounts  → DashboardScreen
       //   4: Settings  → MoreScreen

@@ -143,7 +143,7 @@ class BrandResolver extends GetxService {
 
     // Build-time selection only (no runtime switching).
     //
-    // Use: `--dart-define=CLIENT=tenax` / `--dart-define=CLIENT=vantage` / `--dart-define=CLIENT=celestial`
+    // Use: `--dart-define=CLIENT=<brand>`
     final selected = _client.trim().isNotEmpty
         ? _client
         : (_flavor.trim().isNotEmpty ? _flavor : _registry!.defaultBrand.value);

@@ -681,7 +681,7 @@ class _BottomBar extends StatelessWidget {
                 SizedBox(height: 8.h),
               ],
               // Buy/Sell side-by-side with overlapping center spread badge —
-              // same layout as the iQuote market row (Stack + Positioned).
+              // same layout as the market row (Stack + Positioned).
               // A compact one-click toggle sits to the right.
               Row(
                 children: [
@@ -1013,7 +1013,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
   // ── pending-order order-type dropdown ───────────────────────────────
   // Side × kind × variant. The user picks one of six — never auto-derived
   // from price vs bid/ask (that was the old two-button SELL STOP / BUY
-  // LIMIT auto-label behavior, replaced by Vantage-style explicit choice).
+  // LIMIT auto-label behavior, replaced by explicit choice).
   // kind: 'limit' → limit price triggers the order
   //       'stop'  → stop price triggers the order
   //       'stop_limit' → stop price arms the order, then limit price fires it

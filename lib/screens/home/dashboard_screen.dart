@@ -144,7 +144,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // ── Celestial wallet pill (lighter, MT5-inspired) ─────────────────────────
+  // ── Wallet pill (lighter, MT5-inspired) ─────────────────────────
   Widget _buildCelestialWalletHeaderButton(BuildContext context) {
     final walletCtrl =
         Get.isRegistered<WalletController>()
@@ -325,7 +325,7 @@ class DashboardScreen extends StatelessWidget {
   }
 
   // ════════════════════════════════════════════════════════════════════════
-  // CELESTIAL — REIMAGINED DASHBOARD CONTENT (MT5-inspired)
+  // REIMAGINED DASHBOARD CONTENT (MT5-inspired)
   // ════════════════════════════════════════════════════════════════════════
 
   Widget _buildCelestialDashboardContent(BuildContext context) {
@@ -1687,6 +1687,7 @@ class DashboardScreen extends StatelessWidget {
             ? VantageAppBar(
               backgroundColor: AppColors.tradeBackgroundCenterColor,
               showBack: false,
+              showBottomDivider: false,
               centerTitle: true,
               leadingWidth: 180.w,
               leading: Padding(
@@ -1898,7 +1899,7 @@ class DashboardScreen extends StatelessWidget {
           isVantage
               ? VantageUiTokens.cardDecoration()
               : BoxDecoration(
-                color: AppColors.card,
+                color: AppColors.whiteColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: AppColors.primary.withValues(
@@ -2462,7 +2463,7 @@ class DashboardScreen extends StatelessWidget {
 
     // Solid, deep primary tint so the card doesn't look washed-out.
     final Color tileBg = primary.withValues(alpha: isDark ? 0.28 : 0.16);
-    final Color headerBg = primary.withValues(alpha: isDark ? 0.24 : 0.14);
+    final Color headerBg = AppColors.whiteColor;
 
     Widget iconTile({
       required String asset,

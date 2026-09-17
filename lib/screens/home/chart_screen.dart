@@ -1775,7 +1775,8 @@ Placing Order:
       return AccountHeaderWidget(
         showSearchIcon: false,
         rightWidget: symbolSelector,
-        floatingProfit: floatingProfit, // ✅ ADD: Show floating P&L
+        floatingProfit: floatingProfit,
+        useTradingFloatingProfit: true,
       );
     });
   }

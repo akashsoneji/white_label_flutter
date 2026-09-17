@@ -29,7 +29,7 @@ import 'package:crm_app/widgets/theme_bottom_sheet.dart';
 import 'meta_theme.dart';
 import 'meta_trading_account_screen.dart';
 
-/// Meta Settings screen.
+/// Settings screen.
 /// Wired to MoreController (dashboard API), EnabledModulesService (feature
 /// flags), OneClickTradingService, and BiometricService.
 class MetaSettingsScreen extends StatefulWidget {
@@ -624,7 +624,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
     final showPromotional = modulesService?.isPromotionalMenuVisible ?? false;
 
     final items = <_CelMenuItem>[
-      // ── Trading Account (Meta-only) ─────────────────────────────────
+      // ── Trading Account ─────────────────────────────────
       _CelMenuItem(
         icon: Icons.manage_accounts_rounded,
         label: languageService.tr('settings_trading_account'),

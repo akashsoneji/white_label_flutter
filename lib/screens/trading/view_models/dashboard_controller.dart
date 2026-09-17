@@ -597,7 +597,7 @@ class DashboardController extends GetxController {
   void switchToTrade(String accountNumber) async {
     await changePrimaryAccount(accountNumber);
     // Navigate to Trade screen and update bottom navigation.
-    // Vantage 5-tab nav (as of 2026-07-09): Trade is at index 2
+    // 5-tab nav: Trade is at index 2
     // (Prices 0, Chart 1, Markets=Trade 2, Accounts 3, Settings 4).
     if (onNavigateToTab != null) {
       onNavigateToTab!(FlavorConfig.isVantage() ? 2 : 2);

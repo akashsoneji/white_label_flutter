@@ -15,7 +15,7 @@
 // icon opens the full search screen.
 //
 // The "pending order" icon between quantity `+` and bell opens the
-// Vantage PendingOrderScreen pre-loaded with the current symbol.
+// PendingOrderScreen pre-loaded with the current symbol.
 //
 // Reuses the existing ChartInAppWebView (from lib/widgets/) so the
 // datafeed bridge and TradingView JS shim loaded by the legacy
@@ -511,7 +511,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
               isDark: isDark,
               onBack: () => Navigator.of(context).maybePop(),
               onSymbolTap: _openFavouritesDropdown,
-              // Top-right button jumps to the Vantage "Trade" tab.
+              // Top-right button jumps to the "Trade" tab.
               // Vantage 5-tab nav (as of 2026-07-09):
               //   Prices(0), Chart(1), Markets(2)=Trade, Accounts(3), Settings(4).
               onSettingsTap: () {
@@ -646,6 +646,18 @@ class _Header extends StatelessWidget {
                 final typeText = isDemo ? 'DEMO' : 'LIVE';
                 final typeColor = isDemo ? AppColors.primary : AppColors.accent;
 
+                final tcInfo = Get.isRegistered<TradingController>()
+                    ? Get.find<TradingController>().accountInfoRx.value
+                    : null;
+                final double? equity = tcInfo?.equity;
+                final double? profit = tcInfo?.profit;
+                final equityText = equity != null
+                    ? '\$${equity.toStringAsFixed(2)}'
+                    : null;
+                final profitText = (profit != null && profit != 0.0)
+                    ? '${profit >= 0 ? '+' : ''}${profit.toStringAsFixed(2)}'
+                    : null;
+
                 return Container(
                   height: 28.h,
                   padding: EdgeInsets.symmetric(horizontal: 10.w),
@@ -680,18 +692,38 @@ class _Header extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 8.w),
-                      Flexible(
-                        child: Text(
-                          accNumber,
+                      Text(
+                        accNumber,
+                        style: AppTextStyles.label.copyWith(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      if (equityText != null) ...[
+                        SizedBox(width: 6.w),
+                        Text(
+                          equityText,
                           style: AppTextStyles.label.copyWith(
                             fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
                         ),
-                      ),
+                      ],
+                      // if (profitText != null) ...[
+                      //   SizedBox(width: 4.w),
+                      //   Text(
+                      //     profitText,
+                      //     style: AppTextStyles.bodyText.copyWith(
+                      //       fontSize: 11.sp,
+                      //       fontWeight: FontWeight.w500,
+                      //       color: AppColors.textGrey,
+                      //     ),
+                      //   ),
+                      // ],
                       SizedBox(width: 6.w),
                       Container(
                         padding: EdgeInsets.symmetric(

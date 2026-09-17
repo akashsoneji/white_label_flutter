@@ -1664,7 +1664,7 @@ padding: EdgeInsetsDirectional.only(start: 16.w, end: 16.w),
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Close-position confirmation dialog (matches iQuote design)
+  // Close-position confirmation dialog
   // ─────────────────────────────────────────────────────────────────────────
   Future<void> _showCloseConfirmDialog(
     TradingController tradingController,
@@ -1886,7 +1886,7 @@ padding: EdgeInsetsDirectional.fromSTEB(18.w, 18.h, 18.w, 16.h),
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Cancel-pending confirmation dialog (matches iQuote design)
+  // Cancel-pending confirmation dialog
   // ─────────────────────────────────────────────────────────────────────────
   Future<void> _showCancelPendingDialog(
     TradingController tradingController,

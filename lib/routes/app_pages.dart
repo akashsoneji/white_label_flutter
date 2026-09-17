@@ -303,7 +303,7 @@ class AppPages {
     GetPage(
       name: _Paths.TRANSACTION_HISTORY,
       page: () {
-        // Vantage UI brands (vantage + its 7 children) use the branded
+        // Brands using the shared UI tree use the branded
         // transaction history screen; everything else uses the plain one.
         if (FlavorConfig.usesVantageUi()) {
           return const vantage.VantageTransactionHistoryScreen();

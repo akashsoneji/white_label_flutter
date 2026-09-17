@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:crm_app/screens/home/dashboard_screen.dart';
 import 'celestial_theme.dart';
 
-/// Celestial-only "Trading Account" screen.
+/// Brand-specific "Trading Account" screen.
 ///
 /// Wraps the shared [DashboardScreen]
-/// inside a Celestial-themed scaffold. The Celestial AppBar (title +
+/// inside a themed scaffold. The AppBar (title +
 /// wallet pill + plus button) is rendered by [DashboardScreen] itself, so
 /// this wrapper deliberately adds no AppBar to avoid a double-header.
 ///
