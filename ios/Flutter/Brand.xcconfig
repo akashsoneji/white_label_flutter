@@ -1,7 +1,7 @@
 // GENERATED — Do not edit manually. Regenerate with:
-//   dart run scripts/prepare_flavor.dart pippro
-// Active flavor: pippro
-PRODUCT_BUNDLE_IDENTIFIER=com.pippro.app
-BRAND_DISPLAY_NAME=PipPro
+//   dart run scripts/prepare_flavor.dart pipze
+// Active flavor: pipze
+PRODUCT_BUNDLE_IDENTIFIER=com.pipze.app
+BRAND_DISPLAY_NAME=Pipze
 FLUTTER_TARGET=lib/main.dart
-DART_DEFINES=Q0xJRU5UPXBpcHBybw==,RkxBVk9SPXBpcHBybw==
+DART_DEFINES=Q0xJRU5UPXBpcHpl,RkxBVk9SPXBpcHpl

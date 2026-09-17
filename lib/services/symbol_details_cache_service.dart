@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:crm_app/core/network/api_client.dart';
 import 'package:crm_app/utils/date_helper.dart';
 
-import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/brand_switcher.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 
@@ -136,7 +136,7 @@ class SymbolDetailsCacheService {
 
     // 5. If broker/flavor is known to use .c suffix (any .c in global lookup)
     final hasDotCSuffix = _globalDatafeedLookup.values.any((v) => v.toLowerCase().endsWith('.c'));
-    if (hasDotCSuffix || FlavorConfig.isPipze()) {
+    if (hasDotCSuffix || BrandSwitcher.isPipze) {
       return '$symbol.c';
     }
 
