@@ -64,7 +64,7 @@ class NotificationService {
 
     // Initialize the plugin
     await _notifications.initialize(
-      initSettings,
+      settings: initSettings,
       onDidReceiveNotificationResponse: _onNotificationTapped,
     );
 
@@ -280,10 +280,10 @@ class NotificationService {
     );
 
     await _notifications.show(
-      message.notification?.hashCode ?? DateTime.now().millisecond,
-      message.notification?.title,
-      message.notification?.body,
-      notificationDetails,
+      id: message.notification?.hashCode ?? DateTime.now().millisecond,
+      title: message.notification?.title,
+      body: message.notification?.body,
+      notificationDetails: notificationDetails,
       payload: json.encode(message.data),
     );
   }
@@ -592,16 +592,16 @@ class NotificationService {
       debugPrint('📱 Showing notification...');
       // Show notification immediately
       await _notifications.show(
-        alertId,
-        _buildNotificationTitle(symbol, condition),
-        _buildNotificationContent(
+        id: alertId,
+        title: _buildNotificationTitle(symbol, condition),
+        body: _buildNotificationContent(
           symbol,
           targetPrice,
           condition,
           currentPrice,
           message,
         ),
-        notificationDetails,
+        notificationDetails: notificationDetails,
         payload: json.encode(payload),
       );
       debugPrint('✅ Notification displayed successfully');
@@ -681,7 +681,7 @@ class NotificationService {
   Future<void> cancelPriceAlert(int alertId) async {
     try {
       // Cancel the scheduled notification
-      await _notifications.cancel(alertId);
+      await _notifications.cancel(id: alertId);
 
       // Update local storage
       final prefs = await SharedPreferences.getInstance();
@@ -748,10 +748,10 @@ class NotificationService {
     );
 
     await _notifications.show(
-      999,
-      'Test Price Alert',
-      'This is a test notification for price alerts',
-      notificationDetails,
+      id: 999,
+      title: 'Test Price Alert',
+      body: 'This is a test notification for price alerts',
+      notificationDetails: notificationDetails,
     );
 
     // Play sound

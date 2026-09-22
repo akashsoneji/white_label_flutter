@@ -122,7 +122,7 @@ class ScratchCardApiModel {
   /// Human-readable expires_at label, e.g. "20 Mar 08:00"
   String get expiresLabel {
     try {
-      final dt = DateTime.parse(expiresAt).toLocal();
+      final dt = DateTime.parse(scratchedAt!).toLocal();
       final months = [
         TranslationUtils.tr('month_short_jan'),
         TranslationUtils.tr('month_short_feb'),

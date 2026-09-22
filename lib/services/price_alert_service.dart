@@ -230,7 +230,7 @@ class PriceAlertService {
           );
 
       await _notifications.initialize(
-        initializationSettings,
+        settings: initializationSettings,
         onDidReceiveNotificationResponse: _onNotificationTapped,
       );
 
@@ -381,7 +381,7 @@ class PriceAlertService {
   Future<void> deleteAlert(int alertId) async {
     _activeAlerts.removeWhere((alert) => alert.id == alertId);
     await _saveAlerts();
-    await _notifications.cancel(alertId);
+    await _notifications.cancel(id: alertId);
   }
 
   Future<void> checkPriceAlerts(double currentPrice, String symbol) async {
@@ -442,10 +442,10 @@ class PriceAlertService {
       );
 
       await _notifications.show(
-        alert.id,
-        'Price Alert: ${alert.symbol}',
-        '${alert.symbol} has reached ${currentPrice.toStringAsFixed(5)}',
-        platformChannelSpecifics,
+        id: alert.id,
+        title: 'Price Alert: ${alert.symbol}',
+        body: '${alert.symbol} has reached ${currentPrice.toStringAsFixed(5)}',
+        notificationDetails: platformChannelSpecifics,
         payload: jsonEncode({
           'symbol': alert.symbol,
           'targetPrice': alert.targetPrice,
@@ -510,10 +510,10 @@ class PriceAlertService {
       );
 
       await _notifications.show(
-        999,
-        'Test Notification',
-        'This is a test notification for price alerts',
-        platformChannelSpecifics,
+        id: 999,
+        title: 'Test Notification',
+        body: 'This is a test notification for price alerts',
+        notificationDetails: platformChannelSpecifics,
       );
 
       await _playAlertSound();

@@ -39,13 +39,12 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
   }
 
   Future<void> _pickFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'],
-      allowMultiple: false,
     );
-    if (result != null && result.files.single.path != null) {
-      final file = File(result.files.single.path!);
+    if (result != null && result.path != null) {
+      final file = File(result.path!);
       const maxBytes = 5 * 1024 * 1024; // 5 MB
       if (await file.length() > maxBytes) {
         CustomToastService.showError(

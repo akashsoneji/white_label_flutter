@@ -19,6 +19,17 @@ class _AppLockLifecycleState extends State<AppLockLifecycle>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    // Cold start: the `resumed` lifecycle event does NOT fire on a fresh app
+    // launch (only after a paused → resumed cycle), so lock here once the first
+    // frame is up. Without this, biometric login never prompts on first open.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!Get.isRegistered<AppLockService>()) return;
+      Get.find<AppLockService>().lockIfNeeded(
+        reason: TranslationUtils.tr('biometric_unlock_reason'),
+      );
+    });
   }
 
   @override

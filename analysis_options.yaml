@@ -45,6 +45,10 @@ analyzer:
     non_constant_identifier_names: ignore
     prefer_null_aware_operators: ignore
     prefer_function_declarations_over_variables: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
 
 linter:
   # The lint rules applied to this project can be customized in the

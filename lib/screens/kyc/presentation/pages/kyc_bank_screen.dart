@@ -1369,14 +1369,12 @@ class _KycBankScreenState extends State<KycBankScreen> {
   // Pick image from gallery
   Future<void> _pickImageFromGallery() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFile(
         type: FileType.image,
-        allowMultiple: false,
-        allowCompression: true,
       );
 
-      if (result != null && result.files.single.path != null) {
-        File imageFile = File(result.files.single.path!);
+      if (result != null && result.path != null) {
+        File imageFile = File(result.path!);
         // Compress image if needed (max 1.5 MB)
         imageFile = await FileCompressionHelper.compressIfNeeded(imageFile);
         controller.setProofFile(imageFile);
@@ -1435,11 +1433,11 @@ class _KycBankScreenState extends State<KycBankScreen> {
                   style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                 ),
                 onTap: () async {
-                  final result = await FilePicker.platform.pickFiles(
+                  final result = await FilePicker.pickFile(
                     type: FileType.any,
                   );
-                  if (result != null && result.files.single.path != null) {
-                    File imageFile = File(result.files.single.path!);
+                  if (result != null && result.path != null) {
+                    File imageFile = File(result.path!);
                     // Compress image if needed (max 1.5 MB)
                     imageFile = await FileCompressionHelper.compressIfNeeded(
                       imageFile,

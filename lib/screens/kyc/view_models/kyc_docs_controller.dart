@@ -374,14 +374,12 @@ class KycDocsController extends GetxController {
         return;
       }
 
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFile(
         type: FileType.image,
-        allowMultiple: false,
-        allowCompression: true,
       );
 
-      if (result != null && result.files.single.path != null) {
-        final File imageFile = File(result.files.single.path!);
+      if (result != null && result.path != null) {
+        final File imageFile = File(result.path!);
 
         // Check file size and compress if needed
         final fileSize = await imageFile.length();

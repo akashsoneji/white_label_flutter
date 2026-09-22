@@ -251,14 +251,12 @@ class DepositInstructionController extends GetxController {
   // Pick image from gallery using file_picker
   Future<void> pickImageFromGallery() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFile(
         type: FileType.image,
-        allowMultiple: false,
-        allowCompression: true,
       );
 
-      if (result != null && result.files.single.path != null) {
-        selectedImage.value = File(result.files.single.path!);
+      if (result != null && result.path != null) {
+        selectedImage.value = File(result.path!);
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showSuccess(
             message: TranslationUtils.tr(

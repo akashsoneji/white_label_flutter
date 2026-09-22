@@ -543,13 +543,13 @@ class ComplianceController extends GetxController {
   // Picking Files
   Future<void> pickDocument(String documentType) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
       );
 
-      if (result != null && result.files.single.path != null) {
-        final File file = File(result.files.single.path!);
+      if (result != null && result.path != null) {
+        final File file = File(result.path!);
         final size = await file.length();
         if (size > 15 * 1024 * 1024) {
           CustomToastService.showError(
