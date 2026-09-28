@@ -3,19 +3,6 @@
 
 ext.brandFlavors = [
     [
-        name: "afx",
-        label: "AFX",
-        appId: "com.afx.app",
-        appName: "AFX",
-        primary: "#182430",
-        secondary: "#E8F0F5",
-        accent: "#182430",
-        splashColor: "#182430",
-        launcherBackground: "#182430",
-        type: "child",
-        inheritsFrom: "celestial",
-    ],
-    [
         name: "baazex",
         label: "Baazex",
         appId: "com.baazex.app",
@@ -142,6 +129,19 @@ ext.brandFlavors = [
         launcherBackground: "#000000",
         type: "child",
         inheritsFrom: "iquote",
+    ],
+    [
+        name: "starfx",
+        label: "StarFX",
+        appId: "com.starfx.app",
+        appName: "StarFX",
+        primary: "#151515",
+        secondary: "#FF9441",
+        accent: "#FF9441",
+        splashColor: "#151515",
+        launcherBackground: "#151515",
+        type: "child",
+        inheritsFrom: "celestial",
     ],
     [
         name: "telifox",

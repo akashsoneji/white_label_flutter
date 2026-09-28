@@ -2,36 +2,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "AFX (parent: Celestial) (debug)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "afx", "--dart-define=CLIENT=afx", "--dart-define=FLAVOR=afx", "--dart-define=PARENT=celestial", "--no-enable-impeller"],
-            "flutterMode": "debug",
-            "console": "terminal",
-            "preLaunchTask": "prepare-afx"
-        },
-        {
-            "name": "AFX (parent: Celestial) (profile)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "afx", "--dart-define=CLIENT=afx", "--dart-define=FLAVOR=afx", "--dart-define=PARENT=celestial"],
-            "flutterMode": "profile",
-            "console": "terminal",
-            "preLaunchTask": "prepare-afx"
-        },
-        {
-            "name": "AFX (parent: Celestial) (release)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "afx", "--dart-define=CLIENT=afx", "--dart-define=FLAVOR=afx", "--dart-define=PARENT=celestial"],
-            "flutterMode": "release",
-            "console": "terminal",
-            "preLaunchTask": "prepare-afx"
-        },
-        {
             "name": "Baazex (parent: Vantage) (debug)",
             "request": "launch",
             "type": "dart",
@@ -390,6 +360,36 @@
             "flutterMode": "release",
             "console": "terminal",
             "preLaunchTask": "prepare-skyriss"
+        },
+        {
+            "name": "StarFX (parent: Celestial) (debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "starfx", "--dart-define=CLIENT=starfx", "--dart-define=FLAVOR=starfx", "--dart-define=PARENT=celestial", "--no-enable-impeller"],
+            "flutterMode": "debug",
+            "console": "terminal",
+            "preLaunchTask": "prepare-starfx"
+        },
+        {
+            "name": "StarFX (parent: Celestial) (profile)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "starfx", "--dart-define=CLIENT=starfx", "--dart-define=FLAVOR=starfx", "--dart-define=PARENT=celestial"],
+            "flutterMode": "profile",
+            "console": "terminal",
+            "preLaunchTask": "prepare-starfx"
+        },
+        {
+            "name": "StarFX (parent: Celestial) (release)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "starfx", "--dart-define=CLIENT=starfx", "--dart-define=FLAVOR=starfx", "--dart-define=PARENT=celestial"],
+            "flutterMode": "release",
+            "console": "terminal",
+            "preLaunchTask": "prepare-starfx"
         },
         {
             "name": "Telifox (parent: Vantage) (debug)",

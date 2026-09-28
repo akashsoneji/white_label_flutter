@@ -1,21 +1,21 @@
 {
-  "default": "pipze",
+  "default": "starfx",
   "brands": [
-    "pipze",
-    "vantage"
+    "starfx",
+    "celestial"
   ],
   "brandDetails": [
     {
-      "name": "pipze",
+      "name": "starfx",
       "type": "child",
-      "inheritsFrom": "vantage",
-      "label": "Pipze",
+      "inheritsFrom": "celestial",
+      "label": "StarFX",
       "themeMode": "both"
     },
     {
-      "name": "vantage",
+      "name": "celestial",
       "type": "parent",
-      "label": "Vantage",
+      "label": "Celestial",
       "themeMode": "both"
     }
   ]

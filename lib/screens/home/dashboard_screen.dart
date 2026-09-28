@@ -1903,7 +1903,7 @@ class DashboardScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: AppColors.primary.withValues(
-                    alpha: AppColors.isDarkMode ? 0.30 : 0.8,
+                    alpha: AppColors.isDarkMode ? 0.01 : 0.01 ,
                   ),
                   width: 2.9,
                 ),

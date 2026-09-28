@@ -1,0 +1,33 @@
+name: starfx
+type: child
+inheritsFrom: celestial
+label: StarFX
+themeMode: both
+
+android:
+  applicationId: com.starfx.app
+  appName: StarFX
+
+ios:
+  bundleId: com.starfx.app
+  appName: StarFX
+
+colors:
+  primary: "#151515"
+  secondary: "#FF9441"
+  accent: "#FF9441"
+  splashColor: "#151515"
+  launcherBackground: "#151515"
+
+urls:
+  api: https://trader.starfxtrading.com/api/
+  websocket: wss://trader.starfxtrading.com/trade-engine
+  chart: https://trader.starfxtrading.com
+
+assets:
+  appIcon: icon.png
+  logo: logo.svg
+  splashLogo: splash_logo.svg
+
+features:
+  useNewChart: false

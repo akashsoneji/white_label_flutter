@@ -141,7 +141,7 @@ class _CelestialMainShellState extends State<CelestialMainShell> {
           children: List.generate(_tabs.length, (i) {
             final selected = i == _index;
             final tab = _tabs[i];
-            final accent = CelTheme.buyBlue;
+            final accent = CelTheme.buy(context);
             final inactive =
                 isDark ? const Color(0xFF6B7280) : const Color(0xFF9AA5B5);
             return Expanded(

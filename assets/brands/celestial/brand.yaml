@@ -12,7 +12,7 @@ ios:
   appName: Celestial
 
 colors:
-  primary: "#24324D69"
+  primary: "#324D69"
   secondary: "#22D3EE"
   accent: "#24324D"
   splashColor: "#24324D"

@@ -15,6 +15,12 @@ import 'package:crm_app/services/app_status/force_update_dialog.dart'
 class AppStatusController extends GetxController {
   final AppStatusService _service = Get.find<AppStatusService>();
 
+  // Brands for which the force/update dialog must never be shown.
+  static const String _client = String.fromEnvironment('CLIENT');
+  static const Set<String> _updateDialogDisabledClients = {'pippro'};
+  bool get _isUpdateDialogDisabled =>
+      _updateDialogDisabledClients.contains(_client.toLowerCase());
+
   // Observable states
   final RxBool isUpdateRequired = false.obs;
   final RxBool isMaintenanceMode = false.obs;
@@ -139,6 +145,14 @@ class AppStatusController extends GetxController {
 
   /// Show force update dialog
   void showForceUpdateDialog(bool isForceUpdate) {
+    // Some brands intentionally suppress the in-app update dialog entirely.
+    if (_isUpdateDialogDisabled) {
+      AppLogger.debug(
+        'AppStatusController: Update dialog disabled for client "$_client"',
+      );
+      return;
+    }
+
     // If already shown and dialog is still open, don't show again
     if (_forceUpdateDialogShown && (Get.isDialogOpen ?? false)) {
       return;

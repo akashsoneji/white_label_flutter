@@ -1790,17 +1790,22 @@ class AuthController extends GetxController {
       final profile = await getProfile();
       if (profile != null) {
         final user = profile.data.user;
-        final details = user.userDetails;
-        
-        final forceRegulatedForm = user.forceRegulatedForm;
         final regulationSubmitted = user.regulationSubmitted;
-        final documentsSubmitted = details.documentsSubmitted;
 
-        if (forceRegulatedForm == 1) {
-          if (regulationSubmitted == 0) {
-            Get.offAllNamed(AppPages.COMPLIANCE_WIZARD);
-            return;
-          }
+        // The wizard must only appear when the broker actually has the
+        // regulated profile form switched on. force_regulated_form alone can
+        // stay 1 on the user row after the broker disables the module, and the
+        // regulation endpoint then answers 403 "form is disabled".
+        final isRegulationFormEnabled =
+            user.regulatedBrokerEnabled == 1 && user.regulationRequired == 1;
+        final mustSubmitRegulation =
+            isRegulationFormEnabled &&
+            user.forceRegulatedForm == 1 &&
+            regulationSubmitted == 0;
+
+        if (mustSubmitRegulation) {
+          Get.offAllNamed(AppPages.COMPLIANCE_WIZARD);
+          return;
         }
       }
     } catch (e) {

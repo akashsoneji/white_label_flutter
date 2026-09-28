@@ -314,7 +314,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
               decoration: BoxDecoration(
-                color: CelTheme.buyBlue,
+                color: CelTheme.buy(context),
                 borderRadius: BorderRadius.circular(6.r),
               ),
               child: Text(
