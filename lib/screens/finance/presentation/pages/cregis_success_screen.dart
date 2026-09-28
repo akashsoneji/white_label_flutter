@@ -45,13 +45,6 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
   bool _resolved = false; // set once success/timeout/cancel fires
   String _statusText = '';
   bool _isPolling = true;
-  int _pollAttempts = 0;
-
-  // Visible debug strip showing the most recent Transaction-History poll.
-  // Helps diagnose why success was/wasn't detected at the wait screen.
-  String _debugLastCall = '(no poll yet)';
-  String _debugLastResponse = '(no response yet)';
-  DateTime? _debugLastAt;
 
   @override
   void initState() {
@@ -80,7 +73,6 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
 
   void _startStatusPolling() {
     _pollingStartedAt = DateTime.now();
-    _pollAttempts = 0;
     _pollingTimer = Timer.periodic(
       const Duration(seconds: _pollIntervalSeconds),
       (timer) async {
@@ -96,11 +88,10 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
           return;
         }
 
-        _pollAttempts++;
         setState(() {
           final remaining = _maxWaitSeconds - elapsed;
           _statusText =
-              'Verifying payment details... (${remaining}s, attempt $_pollAttempts)';
+              '${TranslationUtils.tr('cregis_success_screen_checking_payment_details')} (${remaining}s)';
         });
 
         // Poll Transaction History and look for a row whose
@@ -109,24 +100,14 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
         final ref = widget.referenceNumber;
         if (ref.trim().isEmpty) return; // can't match without a ref
 
-        _debugLastCall = 'GET /transactions @ ${DateTime.now().toIso8601String()} '
-            '(attempt $_pollAttempts, ref=${ref.length > 10 ? '${ref.substring(0, 10)}…' : ref})';
         final res = await Get.find<TransactionHistoryController>()
             .fetchLatestTransactionForRef(ref, statusFilter: true);
 
         if (!mounted || _resolved) return;
         if (res.row != null) {
-          _debugLastResponse =
-              'MATCH status=${res.row!.status ?? '?'} amount=${res.row!.amount ?? '?'} '
-              'created_at=${res.row!.createdAt ?? '?'}';
-          _debugLastAt = DateTime.now();
           _onSuccess();
           return;
         }
-        _debugLastResponse =
-            'NO MATCH (status=${res.rawStatus}, totalRows=${res.totalRows})';
-        _debugLastAt = DateTime.now();
-        setState(() {});
       },
     );
   }
@@ -235,6 +216,14 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Brand primary can be near-black or near-white depending on flavor/theme,
+    // so pick the label colour by luminance. Must not use textPrimary here —
+    // in dark mode that is white, and primary is white too.
+    final Color onPrimary =
+        ThemeData.estimateBrightnessForColor(AppColors.primary) ==
+                Brightness.dark
+            ? AppColors.pureWhite
+            : AppColors.pureBlack;
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
@@ -350,7 +339,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                     onPressed: _openExternalBrowser,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.whiteColor,
+                      foregroundColor: onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -360,15 +349,16 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.open_in_browser, size: 20),
+                        Icon(Icons.open_in_browser, size: 20, color: onPrimary),
                         SizedBox(width: 8.w),
                         Text(
-                  TranslationUtils.tr(
-                    'cregis_success_screen_open_payment_link',
-                  ),
+                          TranslationUtils.tr(
+                            'cregis_success_screen_open_payment_link',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
+                            color: onPrimary,
                           ),
                         ),
                       ],
@@ -391,60 +381,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                     ),
                   ),
                 ),
-                // ── Debug strip: shows last Transaction-History poll
-                //    request/response so QA can see whether the Cregis
-                //    reference_number matched. Remove once flow is stable. ──
-                SizedBox(height: 16.h),
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Colors.black.withValues(alpha: 0.1),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                TranslationUtils.tr('cregis_address_screen_debug_last_poll'),
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        _debugLastCall,
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 10.sp,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      SizedBox(height: 2.h),
-                      Text(
-                        _debugLastResponse,
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 10.sp,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      if (_debugLastAt != null) ...[
-                        SizedBox(height: 2.h),
-                        Text(
-                          'at ${_debugLastAt!.toIso8601String()}',
-                          style: AppTextStyles.bodyText.copyWith(
-                            fontSize: 9.sp,
-                            color: Colors.black45,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+              
               ],
             ),
           ),
