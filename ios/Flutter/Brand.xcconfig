@@ -1,7 +1,7 @@
 // GENERATED — Do not edit manually. Regenerate with:
-//   dart run scripts/prepare_flavor.dart starfx
-// Active flavor: starfx
-PRODUCT_BUNDLE_IDENTIFIER=com.starfx.app
-BRAND_DISPLAY_NAME=StarFX
+//   dart run scripts/prepare_flavor.dart baazex
+// Active flavor: baazex
+PRODUCT_BUNDLE_IDENTIFIER=com.baazex.app
+BRAND_DISPLAY_NAME=Baazex
 FLUTTER_TARGET=lib/main.dart
-DART_DEFINES=Q0xJRU5UPXN0YXJmeA==,RkxBVk9SPXN0YXJmeA==
+DART_DEFINES=Q0xJRU5UPWJhYXpleA==,RkxBVk9SPWJhYXpleA==

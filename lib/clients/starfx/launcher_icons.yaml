@@ -5,4 +5,4 @@ flutter_launcher_icons:
   image_path: "assets/brands/starfx/icon.png"
   min_sdk_android: 21
   adaptive_icon_background: "#151515"
-  adaptive_icon_foreground: "assets/clients/starfx/ic_adaptive_foreground.png"
+  adaptive_icon_foreground: "assets/brands/starfx/icon.png"

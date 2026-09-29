@@ -1,21 +1,21 @@
 {
-  "default": "starfx",
+  "default": "baazex",
   "brands": [
-    "starfx",
-    "celestial"
+    "baazex",
+    "vantage"
   ],
   "brandDetails": [
     {
-      "name": "starfx",
+      "name": "baazex",
       "type": "child",
-      "inheritsFrom": "celestial",
-      "label": "StarFX",
+      "inheritsFrom": "vantage",
+      "label": "Baazex",
       "themeMode": "both"
     },
     {
-      "name": "celestial",
+      "name": "vantage",
       "type": "parent",
-      "label": "Celestial",
+      "label": "Vantage",
       "themeMode": "both"
     }
   ]
