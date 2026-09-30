@@ -169,6 +169,47 @@ class MT5Account {
   // Helper method to check if this is a scratchcard account
   bool get isScratchCardAccount => masterGroupId.toLowerCase() == 'scratchcard';
 
+  /// Returns the formatted display name of the account's trading platform
+  /// (e.g., 'MT5', 'MT4', 'Vertex', 'ActTrader', etc.).
+  String get platformDisplayName {
+    final raw = tradingPlatform?.trim();
+    if (raw != null && raw.isNotEmpty) {
+      final upper = raw.toUpperCase();
+      if (upper == 'MT5' || upper == 'MT4') return upper;
+      if (upper == 'WEB_TRADER' || upper == 'WEBTRADER') return 'WebTrader';
+      if (upper == 'ACT_TRADER' || upper == 'ACTTRADER') return 'ActTrader';
+      if (upper == 'VERTEX') return 'Vertex';
+      if (upper == 'CTRADER') return 'cTrader';
+      return raw;
+    }
+
+    final lowerServer = tradingServer.toLowerCase();
+    final lowerGroup = mt5GroupName.toLowerCase();
+    final lowerMaster = masterGroupId.toLowerCase();
+    final lowerNick = mt5NickName.toLowerCase();
+
+    if (lowerServer.contains('mt4') ||
+        lowerGroup.contains('mt4') ||
+        lowerMaster.contains('mt4') ||
+        lowerNick.contains('mt4')) {
+      return 'MT4';
+    }
+    if (lowerServer.contains('vertex') || lowerGroup.contains('vertex')) {
+      return 'Vertex';
+    }
+    if (lowerServer.contains('acttrader') || lowerGroup.contains('acttrader')) {
+      return 'ActTrader';
+    }
+    if (lowerServer.contains('ctrader') || lowerGroup.contains('ctrader')) {
+      return 'cTrader';
+    }
+
+    // Default to MT5 as this is an MT5Account model from mt5accounts/get
+    return 'MT5';
+  }
+
+  bool get isMT5 => platformDisplayName.toUpperCase() == 'MT5';
+
   MT5Account copyWith({
     int? userId,
     String? metaAccountNumber,

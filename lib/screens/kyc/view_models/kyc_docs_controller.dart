@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/kyc/presentation/pages/kyc_camera_screen.dart';
 import 'package:crm_app/screens/kyc/data/repositories/kyc_repository.dart';
+import 'package:crm_app/utils/camera_permission_helper.dart';
 
 class KycDocsController extends GetxController {
   final KycRepository _repo = Get.find<KycRepository>();
@@ -67,11 +67,8 @@ class KycDocsController extends GetxController {
   }
 
   // Request camera permission
-  Future<void> _requestCameraPermission() async {
-    var status = await Permission.camera.status;
-    if (!status.isGranted) {
-      await Permission.camera.request();
-    }
+  Future<bool> _requestCameraPermission() async {
+    return await CameraPermissionHelper.checkAndRequestCameraPermission();
   }
 
   // Observable variables
@@ -111,7 +108,8 @@ class KycDocsController extends GetxController {
         return;
       }
 
-      await _requestCameraPermission();
+      final hasPermission = await _requestCameraPermission();
+      if (!hasPermission) return;
 
       if (_cameras == null || _cameras!.isEmpty) {
         await _initializeCamera();
@@ -225,6 +223,7 @@ class KycDocsController extends GetxController {
         selectedCamera,
         ResolutionPreset
             .medium, // Use medium instead of high for better memory management
+        enableAudio: false,
       );
 
       try {
@@ -235,9 +234,16 @@ class KycDocsController extends GetxController {
         Get.to(() => KycCameraScreen());
       } catch (e) {
         print('Error starting camera: $e');
-        CustomToastService.showError(
-          message: 'Failed to start camera: ${e.toString()}',
-        );
+        if (e is CameraException &&
+            (e.code == 'cameraPermission' ||
+                e.code == 'CameraAccessDenied' ||
+                (e.description?.toLowerCase().contains('permission') ?? false))) {
+          await CameraPermissionHelper.showPermissionSettingsDialog();
+        } else {
+          CustomToastService.showError(
+            message: 'Failed to start camera: ${e.toString()}',
+          );
+        }
         await cameraController?.dispose();
         cameraController = null;
         // Try to navigate back if camera failed
@@ -247,7 +253,14 @@ class KycDocsController extends GetxController {
       }
     } catch (e) {
       print('❌ Error starting camera: $e');
-      CustomToastService.showError(message: 'Error starting camera: $e');
+      if (e is CameraException &&
+          (e.code == 'cameraPermission' ||
+              e.code == 'CameraAccessDenied' ||
+              (e.description?.toLowerCase().contains('permission') ?? false))) {
+        await CameraPermissionHelper.showPermissionSettingsDialog();
+      } else {
+        CustomToastService.showError(message: 'Error starting camera: $e');
+      }
       await cameraController?.dispose();
       cameraController = null;
     }

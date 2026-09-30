@@ -2,7 +2,6 @@ import 'package:crm_app/screens/finance/presentation/finance_ui_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/services/language_service.dart';
@@ -17,6 +16,7 @@ import 'package:crm_app/services/api_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/finance/presentation/pages/deposit_camera_screen.dart';
 import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
+import 'package:crm_app/utils/camera_permission_helper.dart';
 
 class DepositInstructionController extends GetxController {
   final FinanceRepository _repo = Get.find<FinanceRepository>();
@@ -102,11 +102,8 @@ class DepositInstructionController extends GetxController {
   }
 
   // Request camera permission
-  Future<void> requestCameraPermission() async {
-    var status = await Permission.camera.status;
-    if (!status.isGranted) {
-      await Permission.camera.request();
-    }
+  Future<bool> requestCameraPermission() async {
+    return await CameraPermissionHelper.checkAndRequestCameraPermission();
   }
 
   // Fetch crypto address from API
@@ -136,18 +133,22 @@ class DepositInstructionController extends GetxController {
 
   // Start camera for taking payment proof photo
   Future<void> startCamera() async {
-    await requestCameraPermission();
+    final hasPermission = await requestCameraPermission();
+    if (!hasPermission) return;
 
     if (cameras == null || cameras!.isEmpty) {
-      if (Get.isRegistered<AppNotificationController>()) {
-        Get.find<AppNotificationController>().showError(
-          message: TranslationUtils.tr(
-            'deposit_instruction_controller_no_camera_available_on_this_device',
-          ),
-          title: TranslationUtils.tr('general_error'),
-        );
+      await initializeCamera();
+      if (cameras == null || cameras!.isEmpty) {
+        if (Get.isRegistered<AppNotificationController>()) {
+          Get.find<AppNotificationController>().showError(
+            message: TranslationUtils.tr(
+              'deposit_instruction_controller_no_camera_available_on_this_device',
+            ),
+            title: TranslationUtils.tr('general_error'),
+          );
+        }
+        return;
       }
-      return;
     }
 
     // Dispose existing controller if any
@@ -160,6 +161,7 @@ class DepositInstructionController extends GetxController {
       cameras![0],
       ResolutionPreset
           .medium, // Use medium instead of high for better memory management
+      enableAudio: false,
     );
 
     try {
@@ -169,7 +171,12 @@ class DepositInstructionController extends GetxController {
       Get.to(() => DepositCameraScreen());
     } catch (e) {
       print('Error starting camera: $e');
-      if (Get.isRegistered<AppNotificationController>()) {
+      if (e is CameraException &&
+          (e.code == 'cameraPermission' ||
+              e.code == 'CameraAccessDenied' ||
+              (e.description?.toLowerCase().contains('permission') ?? false))) {
+        await CameraPermissionHelper.showPermissionSettingsDialog();
+      } else if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
           message: 'Failed to start camera: ${e.toString()}',
           title: 'Error',

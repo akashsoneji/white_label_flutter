@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:crm_app/screens/home/more/camera_screen.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/utils/camera_permission_helper.dart';
 
 class IdScannerController extends GetxController {
   var frontImagePath = ''.obs;
@@ -28,32 +28,52 @@ class IdScannerController extends GetxController {
     }
   }
 
-  Future<void> requestCameraPermission() async {
-    var status = await Permission.camera.status;
-    if (!status.isGranted) {
-      await Permission.camera.request();
-    }
+  Future<bool> requestCameraPermission() async {
+    return await CameraPermissionHelper.checkAndRequestCameraPermission();
   }
 
   Future<void> startCamera() async {
-    await requestCameraPermission();
+    final hasPermission = await requestCameraPermission();
+    if (!hasPermission) return;
+
+    if (cameras == null || cameras!.isEmpty) {
+      await initializeCamera();
+    }
 
     if (cameras != null && cameras!.isNotEmpty) {
-      cameraController = CameraController(cameras![0], ResolutionPreset.high);
+      cameraController = CameraController(
+        cameras![0],
+        ResolutionPreset.high,
+        enableAudio: false,
+      );
 
       try {
         await cameraController!.initialize();
         Get.to(() => CameraScreen());
       } catch (e) {
         print('Error starting camera: $e');
-        if (Get.isRegistered<AppNotificationController>()) {
+        if (e is CameraException &&
+            (e.code == 'cameraPermission' ||
+                e.code == 'CameraAccessDenied' ||
+                (e.description?.toLowerCase().contains('permission') ?? false))) {
+          await CameraPermissionHelper.showPermissionSettingsDialog();
+        } else if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-        message: TranslationUtils.tr(
-          'id_scanner_controller_failed_to_start_camera_please_check',
-        ),
+            message: TranslationUtils.tr(
+              'id_scanner_controller_failed_to_start_camera_please_check',
+            ),
             title: TranslationUtils.tr('close_position_error'),
           );
         }
+      }
+    } else {
+      if (Get.isRegistered<AppNotificationController>()) {
+        Get.find<AppNotificationController>().showError(
+          message: TranslationUtils.tr(
+            'deposit_instruction_controller_no_camera_available_on_this_device',
+          ),
+          title: TranslationUtils.tr('general_error'),
+        );
       }
     }
   }

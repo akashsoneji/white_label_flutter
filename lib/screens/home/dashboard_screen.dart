@@ -1041,6 +1041,30 @@ class DashboardScreen extends StatelessWidget {
                             vertical: 1.5.h,
                           ),
                           decoration: BoxDecoration(
+                            color: CelTheme.buyTint(context),
+                            borderRadius: BorderRadius.circular(999.r),
+                            border: Border.all(
+                              color: CelTheme.buyBlue.withOpacity(0.35),
+                              width: 0.6,
+                            ),
+                          ),
+                          child: Text(
+                            account.platformDisplayName,
+                            style: AppTextStyles.bodyText.copyWith(
+                              color: CelTheme.buyBlue,
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 4.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6.w,
+                            vertical: 1.5.h,
+                          ),
+                          decoration: BoxDecoration(
                             color: accentTint,
                             borderRadius: BorderRadius.circular(999.r),
                           ),
@@ -1241,12 +1265,23 @@ class DashboardScreen extends StatelessWidget {
                     size: 11.sp,
                   ),
                   SizedBox(width: 4.w),
-                  Text(
-                    '${account.tradingServer.capitalizeFirst} • ${account.masterGroupId}',
-                    style: AppTextStyles.bodyText.copyWith(
-                      color: CelTheme.subText(context),
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w500,
+                  Expanded(
+                    child: Text(
+                      [
+                        account.platformDisplayName,
+                        if (account.tradingServer.isNotEmpty)
+                          account.tradingServer.capitalizeFirst ??
+                              account.tradingServer,
+                        if (account.masterGroupId.isNotEmpty)
+                          account.masterGroupId,
+                      ].join(' • '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: CelTheme.subText(context),
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ],
@@ -1940,6 +1975,28 @@ class DashboardScreen extends StatelessWidget {
                     SizedBox(width: 8),
                     Container(
                       height: 22,
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: AppColors.primary.withOpacity(0.35),
+                          width: 0.6,
+                        ),
+                      ),
+                      child: Text(
+                        account.platformDisplayName,
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 6),
+                    Container(
+                      height: 22,
                       width: 42,
                       padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                       alignment: Alignment.center,
@@ -2058,7 +2115,7 @@ class DashboardScreen extends StatelessWidget {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: ' ${account.accountType.capitalizeFirst}\t\t',
+                      text: ' ${account.platformDisplayName} • ${account.accountType.capitalizeFirst}\t\t',
                       style: AppTextStyles.bodyText.copyWith(
                         backgroundColor:
                             AppColors.isDarkMode
@@ -2978,6 +3035,29 @@ class AccountInfoBottomSheet extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: 6,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.primary.withOpacity(0.35),
+                              width: 0.6,
+                            ),
+                          ),
+                          child: Text(
+                            account.platformDisplayName,
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 6),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6,
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
@@ -3093,6 +3173,10 @@ class AccountInfoBottomSheet extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               children: [
+                _buildDetailRow(
+                  languageService.tr('trading_platform'),
+                  account.platformDisplayName,
+                ),
                 _buildDetailRow(
                   languageService.tr('dashboard_balance'),
                   () {

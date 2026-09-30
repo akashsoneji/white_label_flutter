@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:camera/camera.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/models/bank_withdralList_model.dart';
@@ -17,6 +16,7 @@ import 'package:crm_app/screens/common/view_models/app_notification_controller.d
 import 'package:crm_app/screens/kyc/data/repositories/kyc_repository.dart';
 import 'package:crm_app/core/network/api_response.dart';
 import 'package:crm_app/utils/file_compression_helper.dart';
+import 'package:crm_app/utils/camera_permission_helper.dart';
 
 class KycBankController extends GetxController {
   final KycRepository _repo = Get.find<KycRepository>();
@@ -917,16 +917,14 @@ class KycBankController extends GetxController {
   }
 
   // Request camera permission
-  Future<void> requestCameraPermission() async {
-    var status = await Permission.camera.status;
-    if (!status.isGranted) {
-      await Permission.camera.request();
-    }
+  Future<bool> requestCameraPermission() async {
+    return await CameraPermissionHelper.checkAndRequestCameraPermission();
   }
 
   // Start camera for taking proof photo
   Future<void> startCamera() async {
-    await requestCameraPermission();
+    final hasPermission = await requestCameraPermission();
+    if (!hasPermission) return;
 
     if (cameras == null || cameras!.isEmpty) {
       await initializeCamera();
@@ -951,6 +949,7 @@ class KycBankController extends GetxController {
         cameras![0],
         ResolutionPreset
             .medium, // Use medium instead of high for better memory management
+        enableAudio: false,
       );
 
       await cameraController!.initialize();
@@ -966,7 +965,12 @@ class KycBankController extends GetxController {
       }
     } catch (e) {
       print('Error starting camera: $e');
-      if (Get.isRegistered<AppNotificationController>()) {
+      if (e is CameraException &&
+          (e.code == 'cameraPermission' ||
+              e.code == 'CameraAccessDenied' ||
+              (e.description?.toLowerCase().contains('permission') ?? false))) {
+        await CameraPermissionHelper.showPermissionSettingsDialog();
+      } else if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
           message: TranslationUtils.tr(
             'kyc_bank_controller_failed_to_start_camera_please_try',
