@@ -131,12 +131,10 @@ build_flavor() {
     fi
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
     
-    # Step 0: Increment version code for release builds (so users can update without uninstalling)
-    # Skip if building multiple clients (version already incremented)
-    if [ "$MODE" == "release" ] && [ "$SKIP_VERSION_INCREMENT" != "true" ]; then
-        echo -e "${YELLOW}📈 Step 0: Incrementing full version...${NC}"
-        increment_version_code
-        echo ""
+    # Show active version for release builds
+    if [ "$MODE" == "release" ]; then
+        local CURRENT_VER=$(grep "^version:" pubspec.yaml | sed 's/version: //' | tr -d ' ')
+        echo -e "${YELLOW}📈 Building release version: $CURRENT_VER${NC}\n"
     fi
     
     # Step 1: Run brand config generator for this build client only (prevents other client constants in decompiled output)
@@ -263,6 +261,12 @@ build_flavor() {
     else
         echo -e "${BLUE}ℹ️  Built for all Android devices (all architectures supported)${NC}"
     fi
+
+    # Auto-increment version code after successful release build (ready for next build)
+    if [ "$MODE" == "release" ] && [ "$SKIP_VERSION_INCREMENT" != "true" ]; then
+        echo -e "\n${YELLOW}📈 Auto-incrementing version for next release...${NC}"
+        increment_version_code
+    fi
     
     return 0
 }
@@ -344,11 +348,10 @@ if [ "$FLAVOR" == "all" ]; then
     echo -e "${BLUE}📱 Target: All Android devices (all architectures)${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
     
-    # Increment version code once for all builds (only for release mode)
+    # Show active version for all builds
     if [ "$MODE" == "release" ]; then
-        echo -e "${YELLOW}📈 Incrementing full version for all builds...${NC}"
-        increment_version_code
-        echo ""
+        local CURRENT_VER=$(grep "^version:" pubspec.yaml | sed 's/version: //' | tr -d ' ')
+        echo -e "${YELLOW}📈 Building all clients with release version: $CURRENT_VER${NC}\n"
     fi
 
     PUBSPEC_VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: //' | tr -d ' ')
@@ -375,6 +378,12 @@ if [ "$FLAVOR" == "all" ]; then
             echo -e "${RED}❌ $CLIENT failed after ${CLIENT_DURATION}s${NC}"
         fi
     done
+    
+    # Auto-increment version code for next release after all builds complete
+    if [ "$MODE" == "release" ] && [ ${#SUCCESSFUL[@]} -gt 0 ]; then
+        echo -e "\n${YELLOW}📈 Auto-incrementing version for next release...${NC}"
+        increment_version_code
+    fi
     
     # Summary
     END_TIME=$(date +%s)
