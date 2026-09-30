@@ -20,7 +20,7 @@ class KantaraConfig extends BaseClientConfig {
           appIconPath: 'icon.png',
  apiBaseUrl: 'https://client.kantaracapital.io/api/',
  websocketUrl: 'wss://client.kantaracapital.io/trade-engine',
- chartBaseUrl: 'https://client.kantaracapital.io/',
+ chartBaseUrl: 'https://client.kantaracapital.io',
  useNewChart: false,
  );
 }

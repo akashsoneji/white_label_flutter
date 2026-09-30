@@ -1,7 +1,7 @@
 // GENERATED — Do not edit manually. Regenerate with:
-//   dart run scripts/prepare_flavor.dart baazex
-// Active flavor: baazex
-PRODUCT_BUNDLE_IDENTIFIER=com.baazex.app
-BRAND_DISPLAY_NAME=Baazex
+//   dart run scripts/prepare_flavor.dart kantara
+// Active flavor: kantara
+PRODUCT_BUNDLE_IDENTIFIER=com.kantara.app
+BRAND_DISPLAY_NAME=Kantara
 FLUTTER_TARGET=lib/main.dart
-DART_DEFINES=Q0xJRU5UPWJhYXpleA==,RkxBVk9SPWJhYXpleA==
+DART_DEFINES=Q0xJRU5UPWthbnRhcmE=,RkxBVk9SPWthbnRhcmE=

@@ -1,21 +1,21 @@
 {
-  "default": "baazex",
+  "default": "kantara",
   "brands": [
-    "baazex",
-    "vantage"
+    "kantara",
+    "celestial"
   ],
   "brandDetails": [
     {
-      "name": "baazex",
+      "name": "kantara",
       "type": "child",
-      "inheritsFrom": "vantage",
-      "label": "Baazex",
+      "inheritsFrom": "celestial",
+      "label": "Kantara",
       "themeMode": "both"
     },
     {
-      "name": "vantage",
+      "name": "celestial",
       "type": "parent",
-      "label": "Vantage",
+      "label": "Celestial",
       "themeMode": "both"
     }
   ]

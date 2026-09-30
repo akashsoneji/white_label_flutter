@@ -15,8 +15,7 @@ class BrandSwitcher {
 
   static bool get isVantage => _active == 'vantage';
 
-  
-  static bool get isCelestial => _active == 'celestial';
+  static bool get isCelestial => _active == 'celestial' || usesCelestialUi;
 
   static bool get isPipze => _active == 'pipze';
 
@@ -41,6 +40,8 @@ class BrandSwitcher {
   static bool get isMeta => _active == 'meta';
 
   static bool get usesVantageUi => FlavorConfig.usesVantageUi();
+
+  static bool get usesCelestialUi => FlavorConfig.usesCelestialUi();
 
   /// The Flavor enum value of the active brand.
   static Flavor get currentFlavor => FlavorConfig.instance.flavor;

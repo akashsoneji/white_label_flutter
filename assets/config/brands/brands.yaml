@@ -118,7 +118,7 @@ brands:
 
   - name: kantara
     type: child
-    inheritsFrom: vantage
+    inheritsFrom: celestial
     label: Kantara
     themeMode: both
  android:
@@ -136,7 +136,7 @@ brands:
  urls:
  api: "https://client.kantaracapital.io/api/"
  websocket: "wss://client.kantaracapital.io/trade-engine"
- chart: "https://client.kantaracapital.io/"
+ chart: "https://client.kantaracapital.io"
  assets:
  appIcon: "assets/brands/kantara/icon.png"
  logo: "assets/brands/kantara/logo.svg"

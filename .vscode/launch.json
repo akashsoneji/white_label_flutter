@@ -122,31 +122,31 @@
             "preLaunchTask": "prepare-iquote"
         },
         {
-            "name": "Kantara (parent: Vantage) (debug)",
+            "name": "Kantara (parent: Celestial) (debug)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
-            "args": ["--flavor", "kantara", "--dart-define=CLIENT=kantara", "--dart-define=FLAVOR=kantara", "--dart-define=PARENT=vantage", "--no-enable-impeller"],
+            "args": ["--flavor", "kantara", "--dart-define=CLIENT=kantara", "--dart-define=FLAVOR=kantara", "--dart-define=PARENT=celestial", "--no-enable-impeller"],
             "flutterMode": "debug",
             "console": "terminal",
             "preLaunchTask": "prepare-kantara"
         },
         {
-            "name": "Kantara (parent: Vantage) (profile)",
+            "name": "Kantara (parent: Celestial) (profile)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
-            "args": ["--flavor", "kantara", "--dart-define=CLIENT=kantara", "--dart-define=FLAVOR=kantara", "--dart-define=PARENT=vantage"],
+            "args": ["--flavor", "kantara", "--dart-define=CLIENT=kantara", "--dart-define=FLAVOR=kantara", "--dart-define=PARENT=celestial"],
             "flutterMode": "profile",
             "console": "terminal",
             "preLaunchTask": "prepare-kantara"
         },
         {
-            "name": "Kantara (parent: Vantage) (release)",
+            "name": "Kantara (parent: Celestial) (release)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
-            "args": ["--flavor", "kantara", "--dart-define=CLIENT=kantara", "--dart-define=FLAVOR=kantara", "--dart-define=PARENT=vantage"],
+            "args": ["--flavor", "kantara", "--dart-define=CLIENT=kantara", "--dart-define=FLAVOR=kantara", "--dart-define=PARENT=celestial"],
             "flutterMode": "release",
             "console": "terminal",
             "preLaunchTask": "prepare-kantara"

@@ -570,6 +570,7 @@ Future<void> generateFlavorConfig(
       .join('\n');
   final vantageUiSet = <String>{'vantage'};
   final iquoteUiSet = <String>{'iquote'};
+  final celestialUiSet = <String>{'celestial'};
   for (final b in brands) {
     final bName = (b['name'] as String).toLowerCase();
     final parent = (b['inheritsFrom'] as String?)?.toLowerCase();
@@ -577,10 +578,13 @@ Future<void> generateFlavorConfig(
       vantageUiSet.add(bName);
     } else if (parent == 'iquote' || bName == 'iquote') {
       iquoteUiSet.add(bName);
+    } else if (parent == 'celestial' || bName == 'celestial') {
+      celestialUiSet.add(bName);
     }
   }
   final vantageUiBrands = vantageUiSet.map((n) => "'$n'").join(', ');
   final iquoteUiBrands = iquoteUiSet.map((n) => "'$n'").join(', ');
+  final celestialUiBrands = celestialUiSet.map((n) => "'$n'").join(', ');
   final cases = buildBrands
       .map((brand) {
         final name = brand['name'] as String;
@@ -595,7 +599,7 @@ Future<void> generateFlavorConfig(
         final name = brand['name'] as String;
         final configGetter =
             '  static FlavorConfig get $name => activate(Flavor.$name);';
-        if (name == 'vantage') return configGetter;
+        if (name == 'vantage' || name == 'celestial') return configGetter;
         return '''  static bool is${_brandClassName(name)}() => _instance?.flavor == Flavor.$name;
 $configGetter''';
       })
@@ -733,6 +737,17 @@ $getters
 
     final name = (_instance?.flavor.name ?? Flavor.$fallbackBrand.name).toLowerCase();
     return const <String>{$vantageUiBrands}.contains(name);
+  }
+
+  static bool isCelestial() => usesCelestialUi();
+
+  static bool usesCelestialUi() {
+    final explicitParent = const String.fromEnvironment('PARENT', defaultValue: '').trim().toLowerCase();
+    if (explicitParent == 'celestial') return true;
+    if (explicitParent.isNotEmpty && explicitParent != 'celestial') return false;
+
+    final name = (_instance?.flavor.name ?? Flavor.$fallbackBrand.name).toLowerCase();
+    return const <String>{$celestialUiBrands}.contains(name);
   }
 
   static bool usesIquoteUi() {
@@ -1095,27 +1110,6 @@ String _androidManifestTemplate() =>
 </manifest>
 ''';
 
-/// Returns a map of child-name → parent-label for every brand whose
-/// `inheritsFrom` points at another known brand. Used by
-/// `updateLaunchJson` to make the parent visible in the VS Code
-/// run-configuration dropdown.
-Map<String, String> _buildParentLabelMap(List<Map<String, dynamic>> brands) {
-  final byName = <String, String>{};
-  for (final brand in brands) {
-    final label = brand['label'] as String;
-    final name = brand['name'] as String;
-    byName[name] = label.isEmpty ? name : label;
-  }
-  final parents = <String, String>{};
-  for (final brand in brands) {
-    final name = brand['name'] as String;
-    final inheritsFrom = brand['inheritsFrom'] as String?;
-    if (inheritsFrom != null && inheritsFrom.isNotEmpty) {
-      parents[name] = byName[inheritsFrom] ?? inheritsFrom;
-    }
-  }
-  return parents;
-}
 
 /// Returns every parent this child can run as, in preference order.
 ///
@@ -1137,7 +1131,6 @@ Future<void> updateLaunchJson(List<Map<String, dynamic>> brands) async {
   print('\n6. Updating .vscode/launch.json...');
 
   final configs = <Map<String, dynamic>>[];
-  final parentLabelFor = _buildParentLabelMap(brands);
   final byName = <String, Map<String, dynamic>>{};
   for (final brand in brands) {
     byName[brand['name'].toString().toLowerCase()] = brand;
@@ -1278,8 +1271,3 @@ String _generateLaunchJson(List<Map<String, dynamic>> configs) {
 
 String _escapeJson(String s) =>
     s.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
-
-String _getIconEmoji(String name, int index) {
-  final emojis = ['🔵', '🟡', '🟢', '🔴', '🟣', '🟠', '🔶', '🩵', '🩷', '🟤'];
-  return emojis[index % emojis.length];
-}
