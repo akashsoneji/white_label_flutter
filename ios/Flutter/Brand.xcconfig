@@ -1,7 +1,7 @@
 // GENERATED — Do not edit manually. Regenerate with:
-//   dart run scripts/prepare_flavor.dart kantara
-// Active flavor: kantara
-PRODUCT_BUNDLE_IDENTIFIER=com.kantara.app
-BRAND_DISPLAY_NAME=Kantara
+//   dart run scripts/prepare_flavor.dart pippro
+// Active flavor: pippro
+PRODUCT_BUNDLE_IDENTIFIER=com.pippro.app
+BRAND_DISPLAY_NAME=PipPro
 FLUTTER_TARGET=lib/main.dart
-DART_DEFINES=Q0xJRU5UPWthbnRhcmE=,RkxBVk9SPWthbnRhcmE=
+DART_DEFINES=Q0xJRU5UPXBpcHBybw==,RkxBVk9SPXBpcHBybw==

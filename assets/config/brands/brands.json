@@ -1,21 +1,21 @@
 {
-  "default": "kantara",
+  "default": "pippro",
   "brands": [
-    "kantara",
-    "celestial"
+    "pippro",
+    "vantage"
   ],
   "brandDetails": [
     {
-      "name": "kantara",
+      "name": "pippro",
       "type": "child",
-      "inheritsFrom": "celestial",
-      "label": "Kantara",
+      "inheritsFrom": "vantage",
+      "label": "PipPro",
       "themeMode": "both"
     },
     {
-      "name": "celestial",
+      "name": "vantage",
       "type": "parent",
-      "label": "Celestial",
+      "label": "Vantage",
       "themeMode": "both"
     }
   ]

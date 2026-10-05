@@ -191,6 +191,9 @@ class RTLHelper {
     int? maxLines,
     FocusNode? focusNode, // ✅ Optional FocusNode
     List<TextInputFormatter>? inputFormatters,
+    Iterable<String>? autofillHints,
+    TextInputAction? textInputAction,
+    void Function(String)? onFieldSubmitted,
   }) {
     return TextFormField(
       controller: controller,
@@ -199,6 +202,9 @@ class RTLHelper {
       keyboardType: keyboardType,
       obscureText: obscureText,
       validator: validator,
+      autofillHints: autofillHints,
+      textInputAction: textInputAction,
+      onFieldSubmitted: onFieldSubmitted,
       style:
           style ??
           AppTextStyles.bodyText.copyWith(

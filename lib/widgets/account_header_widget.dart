@@ -137,8 +137,25 @@ class AccountHeaderWidget extends StatelessWidget {
                         ? displayEquity
                         : (tradingEquity ?? displayEquity);
 
-                final valueText = '\$${resolvedEquity.toStringAsFixed(2)}';
-                final valueColor = AppTextStyles.heading.color;
+                // Vantage trading header:
+                //   • Live P&L available AND non-zero (>= $0.01) → show P&L in green/red.
+                //   • P&L is 0.00 or null → fall back to Equity.
+                final bool showPnLInHeader =
+                    layoutStyle ==
+                            AccountHeaderLayoutStyle.vantageInstruments &&
+                        resolvedFloatingProfit != null &&
+                        resolvedFloatingProfit.abs() >= 0.005;
+
+                final String valueText =
+                    showPnLInHeader
+                        ? '${resolvedFloatingProfit! >= 0 ? '+' : '-'}\$${resolvedFloatingProfit.abs().toStringAsFixed(2)}'
+                        : '\$${resolvedEquity.toStringAsFixed(2)}';
+                final Color? valueColor =
+                    showPnLInHeader
+                        ? (resolvedFloatingProfit! >= 0
+                            ? AppColors.success
+                            : AppColors.error)
+                        : AppTextStyles.heading.color;
 
                 final accountTypeText = _getAccountTypeText(primaryAccount);
                 final accountNumberText = _getAccountNumber(primaryAccount);

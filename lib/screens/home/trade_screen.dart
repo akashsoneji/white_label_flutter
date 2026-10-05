@@ -616,6 +616,7 @@ class _TradeScreenState extends State<TradeScreen> {
           showSearchIcon: false,
           rightWidget: closeAllButton,
           floatingProfit: floatingProfit,
+          useTradingFloatingProfit: true,
         );
       },
     );

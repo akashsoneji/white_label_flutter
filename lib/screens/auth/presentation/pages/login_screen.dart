@@ -105,6 +105,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
+      // Commit the autofill context BEFORE calling login — authController.login
+      // navigates away on success (Get.offAllNamed), which disposes this
+      // screen and kills the chance for Google / iCloud to show the save
+      // prompt. Doing it here, while the AutofillGroup is still alive and the
+      // fields hold the user-entered credentials, is what makes the OS offer
+      // "Save password?". If login then fails and user retries with a correct
+      // password, the OS offers "Update password?" — standard behaviour.
+      TextInput.finishAutofillContext();
+
       await authController.login(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
@@ -151,7 +160,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: IntrinsicHeight(
                             child: Form(
                               key: _formKey,
-                              child: Column(
+                              child: AutofillGroup(
+                                child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
@@ -192,6 +202,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                     hintText: languageService.tr(
                                       "register_email",
                                     ),
+                                    keyboardType: TextInputType.emailAddress,
+                                    textInputAction: TextInputAction.next,
+                                    autofillHints: const [
+                                      AutofillHints.username,
+                                      AutofillHints.email,
+                                    ],
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return languageService.tr(
@@ -221,6 +237,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                     labelText: languageService.tr(
                                       "register_password",
                                     ),
+                                    keyboardType: TextInputType.visiblePassword,
+                                    textInputAction: TextInputAction.done,
+                                    autofillHints: const [
+                                      AutofillHints.password,
+                                    ],
+                                    onFieldSubmitted: (_) => _handleLogin(),
                                     suffixIcon: IconButton(
                                       icon: SvgPicture.asset(
                                         obscureText
@@ -363,7 +385,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     );
                                   }),
                                   SizedBox(height: 16.h),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
