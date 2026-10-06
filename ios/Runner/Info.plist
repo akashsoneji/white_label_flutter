@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>$(BRAND_DISPLAY_NAME)</string>
+	<string>PipPro</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>$(BRAND_DISPLAY_NAME)</string>
+	<string>PipPro</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -24,7 +24,11 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
@@ -39,12 +43,12 @@
 	<string>Allow to upload document for validation</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>We use Face ID / Touch ID to secure your account.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need photo library access for Identity verification.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>We need photo library access to save verification documents and statements.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>We need microphone access for Identity verification videos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We need photo library access to save verification documents and statements.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need photo library access for Identity verification.</string>
 	<key>NSUserNotificationUsageDescription</key>
 	<string>This app needs notification permissions to send you price alerts for your trading instruments.</string>
 	<key>UIApplicationSceneManifest</key>
@@ -70,6 +74,13 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -77,17 +88,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-	</array>
-	<key>UIFileSharingEnabled</key>
-	<true/>
-	<key>LSSupportsOpeningDocumentsInPlace</key>
-	<true/>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>remote-notification</string>
 	</array>
 </dict>
 </plist>

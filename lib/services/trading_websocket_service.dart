@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
@@ -246,6 +247,10 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
   /// Initialize all WebSocket connections simultaneously for fast data loading
   /// Connect main channel and marketwatch - main channel handles both positions and orders
   void _initializeAllConnections() {
+    // Pippro / pipze: a single multiplexed `/ws/stream` socket
+    // (StreamWebSocketService) delivers prices + positions + orders. Skip the
+    // legacy per-channel sockets for these flavors.
+    if (FlavorConfig.usesSingleStreamSocket) return;
     // Connect main channel (handles both positions and orders) and marketwatch
     _connectToMarketWatch();
     _connectToOpenPositions();
@@ -280,6 +285,9 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
   // Initialize WebSocket connection - always use unified /ws/op endpoint
   // Main channel handles both positions and orders (batched)
   void _initializeWebSocket() {
+    // Pippro / pipze: positions + orders are multiplexed on `/ws/stream`
+    // (StreamWebSocketService). Skip opening `/ws/op` for these flavors.
+    if (FlavorConfig.usesSingleStreamSocket) return;
     // ✅ Always use unified endpoint - account type detection happens on Trade Engine side
     final endpoint = WebSocketEndpointHelper.getOpenPositionsEndpoint(null);
 
@@ -1456,6 +1464,30 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
         decoded = jsonDecode(messageStr);
       }
 
+      handleStreamFrame(
+        decoded,
+        isPendingOrderChannel: isPendingOrderChannel,
+        isOpenPositionChannel: isOpenPositionChannel,
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Trading WS: Error handling message',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  /// Public entry for already-decoded msgpack/JSON frames arriving via
+  /// `/ws/stream` (pippro / pipze). Mirrors `_handleSocketMessage` but skips
+  /// the decode step — the stream service has already decoded the frame.
+  void handleStreamFrame(
+    dynamic decoded, {
+    bool isPendingOrderChannel = false,
+    bool isOpenPositionChannel = false,
+  }) {
+    if (_isDisposed) return;
+    try {
       // ✅ FIX: Update timestamp first to prevent false reconnections
       // Always update timestamp even if we block the message (connection is alive)
       _lastDataReceived = DateHelper.nowUtc();

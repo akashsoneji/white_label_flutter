@@ -6,6 +6,9 @@ import 'package:crm_app/utils/app_logger.dart';
 import 'package:crm_app/widgets/app_select_field.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/utils/currency_format.dart';
+import 'package:crm_app/models/mt5_account.dart';
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -135,10 +138,22 @@ class _CopyTradingCreatePlanScreenState
                           enabled: accounts.isNotEmpty,
                           options: List.generate(accounts.length, (i) {
                             final a = accounts[i];
+                            MT5Account? resolved;
+                            if (Get.isRegistered<AccountController>()) {
+                              final list = Get.find<AccountController>().mt5Accounts;
+                              for (final acc in list) {
+                                if (acc.metaAccountNumber == a.metaAccountNumber) {
+                                  resolved = acc;
+                                  break;
+                                }
+                              }
+                            }
+                            final balanceNum =
+                                double.tryParse(a.balance.toString()) ?? 0;
                             return AppSelectOption<int>(
                               value: i,
                               title:
-                                  '${a.metaAccountNumber} (\$${a.balance}) - ${a.lpProviderName}',
+                                  '${a.metaAccountNumber} (${CurrencyFormat.amount(balanceNum, resolved)}) - ${a.lpProviderName}',
                               subtitle: '${a.tradingServer} · ${a.accountType}',
                             );
                           }),

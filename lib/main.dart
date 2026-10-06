@@ -19,6 +19,7 @@ import 'package:crm_app/services/notification_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
 import 'package:crm_app/services/trading_websocket_service.dart';
+import 'package:crm_app/services/stream_websocket_service.dart';
 import 'package:crm_app/services/symbol_details_cache_service.dart';
 
 import 'constants/color.dart';
@@ -350,6 +351,16 @@ Future<void> initServices() async {
   Get.put<BannerController>(BannerController(), permanent: true);
   Get.put<TradingWebSocketService>(TradingWebSocketService(), permanent: true);
   Get.put<AccountWebSocketService>(AccountWebSocketService(), permanent: true);
+  // Pippro / pipze: single multiplexed `/ws/stream` socket. The service
+  // self-binds to the active MT5 account and (re)connects on account switch,
+  // so no explicit connect() call is needed here. All other flavors still rely
+  // on the legacy per-channel sockets above.
+  if (FlavorConfig.usesSingleStreamSocket) {
+    Get.put<StreamWebSocketService>(
+      StreamWebSocketService(),
+      permanent: true,
+    );
+  }
   await PriceAlertService().initialize();
 
 

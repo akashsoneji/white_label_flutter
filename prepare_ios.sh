@@ -1,22 +1,22 @@
 #!/bin/bash
 
 # Script to prepare and configure iOS build for a specific flavor/client
-# Usage: ./prepare_ios.sh [tenax|vantage|celestial|pipze]
+# Usage: ./prepare_ios.sh [tenax|vantage|celestial|pipze|pippro]
 
 if [ $# -lt 1 ]; then
     echo "❌ Error: Please specify a flavor"
-    echo "Usage: ./prepare_ios.sh [tenax|vantage|celestial|pipze]"
+    echo "Usage: ./prepare_ios.sh [tenax|vantage|celestial|pipze|pippro]"
     exit 1
 fi
 
 FLAVOR=$(echo "$1" | tr '[:upper:]' '[:lower:]')
 
 case "$FLAVOR" in
-    tenax|vantage|celestial|pipze)
+    tenax|vantage|celestial|pipze|pippro)
         ;;
     *)
         echo "❌ Error: Unsupported flavor: $FLAVOR"
-        echo "Supported: tenax, vantage, celestial, pipze"
+        echo "Supported: tenax, vantage, celestial, pipze, pippro"
         exit 1
         ;;
 esac

@@ -56,6 +56,7 @@ class Data {
   String? mt5AccountId;
   String? referenceNumber;
   String? amount;
+  String? currencyAccount;
   String? transactionId;
   String? status;
   String? paymentMethod;
@@ -72,6 +73,7 @@ class Data {
     this.mt5AccountId,
     this.referenceNumber,
     this.amount,
+    this.currencyAccount,
     this.transactionId,
     this.status,
     this.paymentMethod,
@@ -91,7 +93,8 @@ class Data {
             : int.tryParse(json['user_id']?.toString() ?? '');
     mt5AccountId = json['mt5_account_id']?.toString();
     referenceNumber = json['reference_number']?.toString();
-    amount = json['amount']?.toString();
+    currencyAccount = json['currency_account']?.toString();
+    amount = _normalizeAmount(json['amount']?.toString(), currencyAccount);
     transactionId = json['transaction_id']?.toString();
     status = json['status']?.toString();
     paymentMethod = json['paymentMethod']?.toString();
@@ -103,6 +106,24 @@ class Data {
     type = json['type']?.toString();
   }
 
+  // USC (US Cent) accounts report `amount` in cents (as a display string like
+  // "$10,000.00"). Divide by 100 so the UI shows the real USD value.
+  static String? _normalizeAmount(String? raw, String? currencyAccount) {
+    if (raw == null || raw.isEmpty) return raw;
+    if (currencyAccount?.toUpperCase() != 'USC') return raw;
+    final match = RegExp(r'-?[\d,]*\.?\d+').firstMatch(raw);
+    if (match == null) return raw;
+    final numeric = double.tryParse(match.group(0)!.replaceAll(',', ''));
+    if (numeric == null) return raw;
+    final converted = numeric / 100;
+    final whole = converted.truncate();
+    final formattedWhole = whole
+        .toString()
+        .replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
+    final formatted = '$formattedWhole.${(converted - whole).abs().toStringAsFixed(2).substring(2)}';
+    return raw.replaceRange(match.start, match.end, formatted);
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
@@ -110,6 +131,7 @@ class Data {
     data['mt5_account_id'] = this.mt5AccountId;
     data['reference_number'] = this.referenceNumber;
     data['amount'] = this.amount;
+    data['currency_account'] = this.currencyAccount;
     data['transaction_id'] = this.transactionId;
     data['status'] = this.status;
     data['paymentMethod'] = this.paymentMethod;

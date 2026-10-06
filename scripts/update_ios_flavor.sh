@@ -48,9 +48,14 @@ case "$FLAVOR" in
         APP_ICON="AppIcon"
         XCODE_CONFIG_PREFIX="Debug-Pipze"
         ;;
+    pippro)
+        APP_NAME="PipPro"
+        APP_ICON="AppIcon"
+        XCODE_CONFIG_PREFIX="Debug-Pippro"
+        ;;
     *)
         echo "❌ Unsupported flavor: $FLAVOR"
-        echo "   Supported: tenax, vantage, celestial, pipze"
+        echo "   Supported: tenax, vantage, celestial, pipze, pippro"
         exit 1
         ;;
 esac

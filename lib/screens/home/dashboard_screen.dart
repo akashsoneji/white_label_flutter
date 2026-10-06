@@ -12,6 +12,7 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/brand_switcher.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/utils/precision_helper.dart';
+import 'package:crm_app/utils/currency_format.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
@@ -2076,8 +2077,14 @@ class DashboardScreen extends StatelessWidget {
                           ),
                           Text(
                             accountInfo != null
-                                ? '\$${accountInfo.equity.toStringAsFixed(2)}'
-                                : '\$${account.equity}',
+                                ? CurrencyFormat.amount(
+                                    accountInfo.equity,
+                                    account,
+                                  )
+                                : CurrencyFormat.amount(
+                                    double.tryParse(account.equity) ?? 0,
+                                    account,
+                                  ),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -2494,8 +2501,11 @@ class DashboardScreen extends StatelessWidget {
     final Color primary = AppColors.primary;
     final String equityText =
         accountInfo != null
-            ? '\$${accountInfo.equity.toStringAsFixed(2)}'
-            : '\$${account.equity}';
+            ? CurrencyFormat.amount(accountInfo.equity, account)
+            : CurrencyFormat.amount(
+              double.tryParse(account.equity) ?? 0,
+              account,
+            );
 
     void switchToTrade() {
       final accountController = Get.find<AccountController>();

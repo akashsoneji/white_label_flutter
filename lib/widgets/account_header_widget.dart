@@ -13,6 +13,7 @@ import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/models/websocket_trading_response.dart';
 import 'package:crm_app/utils/precision_helper.dart';
+import 'package:crm_app/utils/currency_format.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
 
@@ -148,11 +149,17 @@ class AccountHeaderWidget extends StatelessWidget {
 
                 final String valueText =
                     showPnLInHeader
-                        ? '${resolvedFloatingProfit! >= 0 ? '+' : '-'}\$${resolvedFloatingProfit.abs().toStringAsFixed(2)}'
-                        : '\$${resolvedEquity.toStringAsFixed(2)}';
+                        ? CurrencyFormat.signedAmount(
+                            resolvedFloatingProfit,
+                            primaryAccount,
+                          )
+                        : CurrencyFormat.amount(
+                            resolvedEquity,
+                            primaryAccount,
+                          );
                 final Color? valueColor =
                     showPnLInHeader
-                        ? (resolvedFloatingProfit! >= 0
+                        ? (resolvedFloatingProfit >= 0
                             ? AppColors.success
                             : AppColors.error)
                         : AppTextStyles.heading.color;

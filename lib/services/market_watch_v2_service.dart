@@ -5,9 +5,11 @@ import 'dart:typed_data';
 import 'package:get/get.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
+import 'package:crm_app/services/stream_websocket_service.dart';
 import 'package:crm_app/services/websocket_endpoint_helper.dart';
 import 'package:crm_app/utils/message_pack_decoder.dart';
 
@@ -23,7 +25,15 @@ import 'package:crm_app/utils/message_pack_decoder.dart';
 /// Decoded payloads are broadcast on [decodedFrames] for [InstrumentsController] (and debug [decodedLog]).
 class MarketWatchV2Service extends GetxService {
   @override
+  void onInit() {
+    super.onInit();
+    _bindStreamSocketBridge();
+  }
+
+  @override
   void onClose() {
+    _streamPricesSub?.cancel();
+    _streamPricesSub = null;
     disconnect();
     if (!_decodedBroadcast.isClosed) {
       _decodedBroadcast.close();
@@ -35,8 +45,32 @@ class MarketWatchV2Service extends GetxService {
   StreamSubscription<dynamic>? _sub;
   String? _tradingAccountBound;
 
+  // Pippro / pipze: forward decoded price frames from the single `/ws/stream`
+  // socket onto [_decodedBroadcast] so InstrumentsController can consume them
+  // without caring which socket produced them.
+  StreamSubscription<dynamic>? _streamPricesSub;
+
   final StreamController<dynamic> _decodedBroadcast =
       StreamController<dynamic>.broadcast();
+
+  void _bindStreamSocketBridge() {
+    if (!FlavorConfig.usesSingleStreamSocket) return;
+    void attach() {
+      if (!Get.isRegistered<StreamWebSocketService>()) {
+        Future.delayed(const Duration(seconds: 1), attach);
+        return;
+      }
+      final svc = Get.find<StreamWebSocketService>();
+      _streamPricesSub?.cancel();
+      _streamPricesSub = svc.prices.listen((payload) {
+        if (_decodedBroadcast.isClosed) return;
+        // InstrumentsController's existing decoder understands the raw
+        // decoded shape (list / map). Pass the payload straight through.
+        _decodedBroadcast.add(payload);
+      });
+    }
+    attach();
+  }
 
   /// Decoded server payloads (MessagePack or JSON), for instruments price updates.
   Stream<dynamic> get decodedFrames => _decodedBroadcast.stream;
@@ -163,6 +197,10 @@ class MarketWatchV2Service extends GetxService {
   }
 
   Future<void> _ensureSocketForCurrentAccount() async {
+    // Pippro / pipze: all symbol ticks arrive on the single multiplexed
+    // `/ws/stream` socket (StreamWebSocketService.prices). Skip the
+    // dedicated `/ws/marketwatchv2` socket for these flavors.
+    if (FlavorConfig.usesSingleStreamSocket) return;
     final token = await SecureStorageService.getAuthToken();
     if (token == null || token.isEmpty) {
       _appendLog('→ REQUEST skipped (no auth token)');
@@ -228,6 +266,14 @@ class MarketWatchV2Service extends GetxService {
         symbols.map(normalizeSymbol).where((s) => s.isNotEmpty).toList();
     if (clean.isEmpty) return;
 
+    // Pippro / pipze: route subscription to the single `/ws/stream` socket.
+    if (FlavorConfig.usesSingleStreamSocket) {
+      if (Get.isRegistered<StreamWebSocketService>()) {
+        await Get.find<StreamWebSocketService>().addSymbols(clean);
+      }
+      return;
+    }
+
     await _ensureSocketForCurrentAccount();
     if (_channel == null) return;
 
@@ -240,6 +286,15 @@ class MarketWatchV2Service extends GetxService {
     final clean =
         symbols.map(normalizeSymbol).where((s) => s.isNotEmpty).toList();
     if (clean.isEmpty) return;
+
+    // Pippro / pipze: route unsubscription to the single `/ws/stream` socket.
+    if (FlavorConfig.usesSingleStreamSocket) {
+      if (Get.isRegistered<StreamWebSocketService>()) {
+        await Get.find<StreamWebSocketService>().removeSymbols(clean);
+      }
+      return;
+    }
+
     if (_channel == null) return;
 
     final payload = <String, dynamic>{

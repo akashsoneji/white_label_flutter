@@ -14,6 +14,23 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/utils/currency_format.dart';
+import 'package:crm_app/models/mt5_account.dart' as mt5m;
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
+
+mt5m.MT5Account? _resolveMt5Account(String? metaAccountNumber) {
+  if (metaAccountNumber == null || metaAccountNumber.isEmpty) return null;
+  if (!Get.isRegistered<AccountController>()) return null;
+  for (final acc in Get.find<AccountController>().mt5Accounts) {
+    if (acc.metaAccountNumber == metaAccountNumber) return acc;
+  }
+  return null;
+}
+
+String _fmtMt5(dynamic balanceLike, String? metaAccountNumber) {
+  final n = double.tryParse(balanceLike?.toString() ?? '') ?? 0;
+  return CurrencyFormat.amount(n, _resolveMt5Account(metaAccountNumber));
+}
 
 class InternalTransferScreen extends StatefulWidget {
   const InternalTransferScreen({Key? key}) : super(key: key);
@@ -89,7 +106,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
         _selectedTransferFromType = 'mt5';
         _selectedTransferFromAccount = firstAccount;
         _transferFromController.text =
-            '${firstAccount.metaAccountNumber} - \$ ${firstAccount.balance}';
+            '${firstAccount.metaAccountNumber} - ${_fmtMt5(firstAccount.balance, firstAccount.metaAccountNumber)}';
         controller.selectedFromAccount.value = firstAccount;
         controller.selectedFromAccountType.value = 'mt5';
       });
@@ -689,7 +706,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                       final account = item['account'] as UserMT5Account;
                       _selectedTransferFrom = account.metaAccountNumber;
                       _transferFromController.text =
-                          '${account.metaAccountNumber} - \$ ${account.balance}';
+                          '${account.metaAccountNumber} - ${_fmtMt5(account.balance, account.metaAccountNumber)}';
                       _selectedTransferFromAccount = account;
                       _selectedTransferFromType = 'mt5';
                       controller.selectedFromAccount.value = account;
@@ -707,7 +724,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                       final account = item['account'] as UserMT5Account;
                       _selectedTransferFrom = account.metaAccountNumber;
                       _transferFromController.text =
-                          '${account.metaAccountNumber} - \$ ${account.balance}';
+                          '${account.metaAccountNumber} - ${_fmtMt5(account.balance, account.metaAccountNumber)}';
                       _selectedTransferFromAccount = account;
                       _selectedTransferFromType = 'ib';
                       controller.selectedFromAccount.value = account;
@@ -798,7 +815,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                             ? '\$ ${(item['wallet'] as Wallet).walletBalance}'
                             : accountType == 'ibmwallet'
                             ? '\$ ${(item['ibmwallet'] as IbmWallet).balance}'
-                            : '\$ ${(item['account'] as UserMT5Account).balance}',
+                            : _fmtMt5((item['account'] as UserMT5Account).balance, (item['account'] as UserMT5Account).metaAccountNumber),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
@@ -934,7 +951,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                       final account = item['account'] as UserMT5Account;
                       _selectedTransferTo = account.metaAccountNumber;
                       _transferToController.text =
-                          '${account.metaAccountNumber} - \$ ${account.balance}';
+                          '${account.metaAccountNumber} - ${_fmtMt5(account.balance, account.metaAccountNumber)}';
                       _selectedTransferToAccount = account;
                       _selectedTransferToType = 'mt5';
                       controller.selectedToAccount.value = account;
@@ -952,7 +969,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                       final account = item['account'] as UserMT5Account;
                       _selectedTransferTo = account.metaAccountNumber;
                       _transferToController.text =
-                          '${account.metaAccountNumber} - \$ ${account.balance}';
+                          '${account.metaAccountNumber} - ${_fmtMt5(account.balance, account.metaAccountNumber)}';
                       _selectedTransferToAccount = account;
                       _selectedTransferToType = 'ib';
                       controller.selectedToAccount.value = account;
@@ -1033,7 +1050,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                             ? '\$ ${(item['wallet'] as Wallet).walletBalance}'
                             : accountType == 'ibmwallet'
                             ? '\$ ${(item['ibmwallet'] as IbmWallet).balance}'
-                            : '\$ ${(item['account'] as UserMT5Account).balance}',
+                            : _fmtMt5((item['account'] as UserMT5Account).balance, (item['account'] as UserMT5Account).metaAccountNumber),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,

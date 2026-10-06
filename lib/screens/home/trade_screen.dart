@@ -542,7 +542,7 @@ class _TradeScreenState extends State<TradeScreen> {
                 decoration:
                     FlavorConfig.isVantage()
                         ? BoxDecoration(
-                          color: AppColors.whiteColor,
+                          color: Colors.transparent,
                           borderRadius: BorderRadius.circular(12.r),
                           boxShadow: [
                             BoxShadow(

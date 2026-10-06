@@ -1,3 +1,23 @@
+bool _parseCentFlag(Map<String, dynamic> json) {
+  final raw = json['is_cent_account'];
+  if (raw is bool) return raw;
+  if (raw is num) return raw != 0;
+  if (raw is String) {
+    final v = raw.toLowerCase().trim();
+    if (v == 'true' || v == '1' || v == 'yes') return true;
+    if (v == 'false' || v == '0' || v == 'no' || v == '') {
+      // fall through to currency/group heuristics
+    }
+  }
+  final currency = (json['currency'] ?? '').toString().toUpperCase();
+  if (currency == 'USC' || currency == 'CENT') return true;
+  final group = (json['mt5_group_name'] ?? json['masterGroupId'] ?? '')
+      .toString()
+      .toLowerCase();
+  if (group.contains('cent') || group.contains('usc')) return true;
+  return false;
+}
+
 class MT5Account {
   final int userId;
   final String metaAccountNumber;
@@ -87,7 +107,7 @@ class MT5Account {
       tradingServer: json['trading_server']?.toString() ?? '',
       currency: json['currency']?.toString() ?? 'USD',
       isActive: json['is_active'] ?? false,
-      isCentAccount: json['is_cent_account'] ?? false,
+      isCentAccount: _parseCentFlag(json),
       tradingPlatform: json['trading_platform']?.toString(),
       minimumTradeSize: _parseDouble(json['minimum_trade_size']) ?? 0.01,
       maxLotSize: _parseDouble(json['max_lot_size']) ?? 100.0,

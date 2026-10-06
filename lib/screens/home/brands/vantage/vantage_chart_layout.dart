@@ -51,6 +51,7 @@ import 'package:crm_app/widgets/tenax_chart_webview.dart';
 import 'package:crm_app/services/symbol_details_cache_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/price_alert_dialog.dart';
+import 'package:crm_app/utils/currency_format.dart';
 
 class VantageChartLayout extends StatefulWidget {
   /// Called when the user taps a symbol in the favourites dropdown.
@@ -651,12 +652,17 @@ class _Header extends StatelessWidget {
                     : null;
                 final double? equity = tcInfo?.equity;
                 final double? profit = tcInfo?.profit;
-                final equityText = equity != null
-                    ? '\$${equity.toStringAsFixed(2)}'
-                    : null;
-                final profitText = (profit != null && profit != 0.0)
-                    ? '${profit >= 0 ? '+' : ''}${profit.toStringAsFixed(2)}'
-                    : null;
+                // Show live P&L when non-zero (|P&L| >= 0.005 to avoid showing
+                // a flickering +0.00), otherwise fall back to equity.
+                final bool showProfit = profit != null && profit.abs() >= 0.005;
+                final String? equityText = showProfit
+                    ? CurrencyFormat.signedAmount(profit, active)
+                    : (equity != null
+                        ? CurrencyFormat.amount(equity, active)
+                        : null);
+                // P&L is folded into equityText above; coloring handled via style.
+                final bool isProfitNegative =
+                    showProfit && profit < 0;
 
                 return Container(
                   height: 28.h,
@@ -709,7 +715,11 @@ class _Header extends StatelessWidget {
                           style: AppTextStyles.label.copyWith(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: showProfit
+                                ? (isProfitNegative
+                                    ? AppColors.error
+                                    : AppColors.success)
+                                : AppColors.textPrimary,
                           ),
                         ),
                       ],

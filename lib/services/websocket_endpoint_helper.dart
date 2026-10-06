@@ -170,6 +170,16 @@ class WebSocketEndpointHelper {
     return getFullUrl(marketWatchV2);
   }
 
+  // ==================== SINGLE MULTIPLEXED SOCKET (pippro / pipze) ====================
+  /// Single multiplexed Trade Engine socket that fans out `prices`, `positions`,
+  /// `orders` and `accounts` channels on one connection. Used by
+  /// [StreamWebSocketService] for flavors that opt into the stream socket (see
+  /// `FlavorConfig.usesSingleStreamSocket`).
+  static const String stream = '/ws/stream';
+
+  /// Full URL for the single multiplexed `/ws/stream` socket.
+  static String getStreamUrl() => getFullUrl(stream);
+
   /// Get full WebSocket URL for account
   static String getAccountUrl(MT5Account? account) {
     return getFullUrl(getAccountEndpoint(account));

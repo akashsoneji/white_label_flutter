@@ -826,6 +826,17 @@ $getters
   /// that gates UI on this brand — always false in this build.
   static bool get isONSA => false;
 
+  /// Flavors that use the single multiplexed Trade Engine socket
+  /// (`/ws/stream`) instead of the legacy 5-socket layout
+  /// (`/ws/op`, `/ws/po`, `/ws/symbol`, `/ws/marketwatch`, `/ws/account`).
+  ///
+  /// Only pippro / pipze are migrated for now; every other flavor keeps the
+  /// legacy multi-socket behavior.
+  static bool get usesSingleStreamSocket {
+    final name = (_instance?.flavor.name ?? '').toLowerCase();
+    return const <String>{'pippro', 'pipze'}.contains(name);
+  }
+
   /// Applies a Tenax multi-broker runtime payload onto the active
   /// [FlavorConfig]. When [payload] is null or empty this is a no-op so
   /// non-Tenax flavors stay untouched. The shape mirrors [applyBranding] —

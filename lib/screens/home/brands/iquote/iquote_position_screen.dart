@@ -25,6 +25,7 @@ import 'package:crm_app/screens/common/view_models/app_notification_controller.d
 import 'package:crm_app/screens/home/brands/iquote/history_filter_sheet.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/utils/currency_format.dart';
 
 class IQuotePositionScreen extends StatefulWidget {
   final Function(String)? onNavigateToChart;
@@ -378,6 +379,11 @@ padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 12.h),
   Widget _buildAccountMetrics(TradingController controller) {
     final currentTab = controller.selectedTab;
     final isHistory = currentTab == 2;
+    final MT5Account? activeAccount =
+        Get.isRegistered<AccountController>()
+            ? Get.find<AccountController>().activeMT5Account
+            : null;
+    String fmtMoney(num value) => CurrencyFormat.amount(value, activeAccount);
 
     final accountInfo = controller.accountInfo;
     final totals = controller.tradeHistoryTotals;
@@ -422,12 +428,12 @@ padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 12.h),
       final balance = totals?.balance ?? 0.0;
 
       children = [
-        buildItem('trade_metric_profit', profit.toStringAsFixed(2)),
-        buildItem('trade_metric_deposit', deposit.toStringAsFixed(2)),
-        buildItem('trade_metric_withdrawal', withdrawal.toStringAsFixed(2)),
-        buildItem('general_swap', swap.toStringAsFixed(2)),
-        buildItem('iquote_position_commissions', commission.toStringAsFixed(2)),
-        buildItem('trade_metric_balance', balance.toStringAsFixed(2)),
+        buildItem('trade_metric_profit', fmtMoney(profit)),
+        buildItem('trade_metric_deposit', fmtMoney(deposit)),
+        buildItem('trade_metric_withdrawal', fmtMoney(withdrawal)),
+        buildItem('general_swap', fmtMoney(swap)),
+        buildItem('iquote_position_commissions', fmtMoney(commission)),
+        buildItem('trade_metric_balance', fmtMoney(balance)),
       ];
     } else {
       final balance = accountInfo?.balance ?? 0.0;
@@ -438,11 +444,11 @@ padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 12.h),
       final marginLevel = accountInfo?.marginLevel ?? 0.0;
 
       children = [
-        buildItem('trade_metric_balance', balance.toStringAsFixed(2)),
-        buildItem('trade_metric_credit', credit.toStringAsFixed(2)),
-        buildItem('trade_metric_equity', equity.toStringAsFixed(2)),
-        buildItem('trade_metric_margin', margin.toStringAsFixed(2)),
-        buildItem('trade_metric_free_margin', freeMargin.toStringAsFixed(2)),
+        buildItem('trade_metric_balance', fmtMoney(balance)),
+        buildItem('trade_metric_credit', fmtMoney(credit)),
+        buildItem('trade_metric_equity', fmtMoney(equity)),
+        buildItem('trade_metric_margin', fmtMoney(margin)),
+        buildItem('trade_metric_free_margin', fmtMoney(freeMargin)),
         buildItem(
           'trade_metric_margin_level',
           marginLevel > 0 ? '${marginLevel.toStringAsFixed(2)}%' : '0.00%',

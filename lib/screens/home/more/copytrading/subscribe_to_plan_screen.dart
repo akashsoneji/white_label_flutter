@@ -13,6 +13,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
+import 'package:crm_app/utils/currency_format.dart';
+import 'package:crm_app/models/mt5_account.dart';
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 
 class SubscribeToPlanScreen extends StatefulWidget {
@@ -1669,12 +1672,12 @@ class _PlanInfoCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 8.h),
-          Row(
+          Wrap(
+            spacing: 12.w,
+            runSpacing: 4.h,
             children: [
               Text(TranslationUtils.trArgs('copy_trading_min_value', {'value': '\$${plan.minimumCapital}'}), style: AppTextStyles.caption),
-              SizedBox(width: 12.w),
               Text(TranslationUtils.trArgs('copy_trading_fee_value', {'value': plan.commissionLabel.isNotEmpty ? plan.commissionLabel : plan.commissionType}), style: AppTextStyles.caption),
-              SizedBox(width: 12.w),
               Text(TranslationUtils.trArgs('copy_trading_amount_per_days', {'amount': plan.subscriptionFee > 0 ? '\$${plan.subscriptionFee}' : '\$0', 'days': '${plan.subscriptionPeriodDays}'}), style: AppTextStyles.caption),
             ],
           ),
@@ -1809,20 +1812,32 @@ class _AccountListPicker extends StatelessWidget {
                               ),
                             ),
                             SizedBox(height: 3.h),
-                            Text(
-                              TranslationUtils.trArgs('copy_trading_account_row_summary', {
-                                'balance': '\$${a.balance.toStringAsFixed(2)}',
-                                'type': a.accountType.isNotEmpty
-                                    ? a.accountType.toUpperCase()
-                                    : TranslationUtils.tr('transaction_history_account_label'),
-                                'equity': '\$${a.equity.toStringAsFixed(2)}',
-                              }),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTextStyles.caption.copyWith(
-                                color: belowMin ? AppColors.textGrey : AppTextStyles.caption.color,
-                              ),
-                            ),
+                            Builder(builder: (_) {
+                              MT5Account? resolved;
+                              if (Get.isRegistered<AccountController>()) {
+                                final list = Get.find<AccountController>().mt5Accounts;
+                                for (final acc in list) {
+                                  if (acc.metaAccountNumber == a.metaAccountNumber) {
+                                    resolved = acc;
+                                    break;
+                                  }
+                                }
+                              }
+                              return Text(
+                                TranslationUtils.trArgs('copy_trading_account_row_summary', {
+                                  'balance': CurrencyFormat.amount(a.balance, resolved),
+                                  'type': a.accountType.isNotEmpty
+                                      ? a.accountType.toUpperCase()
+                                      : TranslationUtils.tr('transaction_history_account_label'),
+                                  'equity': CurrencyFormat.amount(a.equity, resolved),
+                                }),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyles.caption.copyWith(
+                                  color: belowMin ? AppColors.textGrey : AppTextStyles.caption.color,
+                                ),
+                              );
+                            }),
                           ],
                         ),
                       ),

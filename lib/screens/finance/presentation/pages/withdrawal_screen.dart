@@ -13,6 +13,18 @@ import '../../../../widgets/common_loading_widget.dart';
 import '../../../../widgets/custom_toast.dart';
 import '../../../../routes/app_pages.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/utils/currency_format.dart';
+import 'package:crm_app/models/mt5_account.dart' as mt5m;
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
+
+mt5m.MT5Account? _resolveMt5Account(String? metaAccountNumber) {
+  if (metaAccountNumber == null || metaAccountNumber.isEmpty) return null;
+  if (!Get.isRegistered<AccountController>()) return null;
+  for (final acc in Get.find<AccountController>().mt5Accounts) {
+    if (acc.metaAccountNumber == metaAccountNumber) return acc;
+  }
+  return null;
+}
 
 class WithdrawalScreen extends StatefulWidget {
   final String? accountNumber;
@@ -426,7 +438,10 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
       final selectedAccount = accounts.firstWhere(
         (account) => account.metaAccountNumber == selectedAccountId,
       );
-      return '${selectedAccount.metaAccountNumber} - \$ ${selectedAccount.freeMargin}';
+      final resolved = _resolveMt5Account(selectedAccount.metaAccountNumber);
+      final freeMargin =
+          double.tryParse(selectedAccount.freeMargin.toString()) ?? 0;
+      return '${selectedAccount.metaAccountNumber} - ${CurrencyFormat.amount(freeMargin, resolved)}';
     } catch (e) {
       // Account not found, return just the ID
       return selectedAccountId;
@@ -1661,7 +1676,10 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
 
                         // Balance
                         Text(
-                          "\$ ${account.freeMargin}",
+                          CurrencyFormat.amount(
+                            double.tryParse(account.freeMargin.toString()) ?? 0,
+                            _resolveMt5Account(account.metaAccountNumber),
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,

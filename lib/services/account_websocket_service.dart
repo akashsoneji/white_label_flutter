@@ -5,6 +5,7 @@ import 'dart:typed_data'; // ✅ ADD: For binary message handling
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
@@ -306,6 +307,10 @@ class AccountWebSocketService extends GetxService with WidgetsBindingObserver {
 
   // Initialize WebSocket connection
   void _initializeWebSocket() {
+    // Pippro / pipze: account data arrives on the single multiplexed
+    // `/ws/stream` socket (StreamWebSocketService.accounts). Skip opening
+    // the dedicated `/ws/account` socket for these flavors.
+    if (FlavorConfig.usesSingleStreamSocket) return;
     if (isConnected.value || _isConnecting) return;
 
     _isConnecting = true;
@@ -545,6 +550,20 @@ class AccountWebSocketService extends GetxService with WidgetsBindingObserver {
         decodedData = jsonDecode(messageStr);
       }
 
+      handleStreamFrame(decodedData);
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        dev.log('Account WS: Error handling message: $e\n$stackTrace');
+      }
+    }
+  }
+
+  /// Public entry for already-decoded frames (used by `/ws/stream` bridge for
+  /// pippro / pipze). The decode step is skipped — payload has already been
+  /// decoded by `StreamWebSocketService`.
+  void handleStreamFrame(dynamic decodedData) {
+    if (_isDisposed) return;
+    try {
       // Handle array responses (account data)
       // Format: [["ac","1000003",7164.04,7163.87,1.3,7162.57,551066.92,-0.17,0]]
       if (decodedData is List && decodedData.isNotEmpty) {

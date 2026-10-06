@@ -38,6 +38,8 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:crm_app/services/chart_webview_prewarmer.dart';
 import 'package:crm_app/services/google_otp_service.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
+import 'package:crm_app/services/stream_websocket_service.dart';
+import 'package:crm_app/flavor_config.dart';
 
 
 class AuthController extends GetxController {
@@ -330,6 +332,7 @@ class AuthController extends GetxController {
           Get.put<AccountController>(AccountController(), permanent: true);
           print('AuthController: AccountController re-registered after logout');
         }
+        _rebindStreamSocketIfNeeded();
 
         // 3. Re-initialize InstrumentsController (has WebSocket)
         try {
@@ -598,6 +601,21 @@ class AuthController extends GetxController {
     await _navigatePostAuth();
   }
 
+  // Re-attach the single-stream websocket (pippro/pipze) to the CURRENT
+  // AccountController after it has been (re-)registered. No-op for flavors
+  // that use the legacy multi-socket stack.
+  void _rebindStreamSocketIfNeeded() {
+    if (!FlavorConfig.usesSingleStreamSocket) return;
+    try {
+      if (Get.isRegistered<StreamWebSocketService>()) {
+        Get.find<StreamWebSocketService>().rebindAccount();
+        print('AuthController: StreamWebSocketService rebound to new AccountController');
+      }
+    } catch (e) {
+      print('AuthController: Error rebinding StreamWebSocketService: $e');
+    }
+  }
+
   void _reinitializeTradingControllers() {
     try {
       if (Get.isRegistered<DashboardController>()) {
@@ -612,6 +630,7 @@ class AuthController extends GetxController {
       }
       Get.put<AccountController>(AccountController(), permanent: true);
     } catch (_) {}
+    _rebindStreamSocketIfNeeded();
 
     try {
       if (Get.isRegistered<InstrumentsController>()) {
@@ -822,6 +841,7 @@ class AuthController extends GetxController {
               'AuthController: Error re-initializing AccountController: $e',
             );
           }
+          _rebindStreamSocketIfNeeded();
 
           // 3. InstrumentsController
           try {
@@ -1172,6 +1192,19 @@ class AuthController extends GetxController {
       }
     } catch (e) {
       print('AuthController: Error clearing AccountController: $e');
+    }
+
+    // Tear down the single stream socket on logout so the next login rebinds
+    // to the brand new AccountController rather than the disposed one.
+    if (FlavorConfig.usesSingleStreamSocket) {
+      try {
+        if (Get.isRegistered<StreamWebSocketService>()) {
+          await Get.find<StreamWebSocketService>().resetForLogout();
+          print('AuthController: StreamWebSocketService reset for logout');
+        }
+      } catch (e) {
+        print('AuthController: Error resetting StreamWebSocketService: $e');
+      }
     }
 
     // Clear TradingController

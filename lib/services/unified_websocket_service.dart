@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:get/get.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/websocket_endpoint_helper.dart';
@@ -69,6 +70,10 @@ class UnifiedWebSocketService extends GetxService {
     WebSocketChannelType type,
     MT5Account? account,
   ) async {
+    // Pippro / pipze use the single multiplexed `/ws/stream` socket via
+    // `StreamWebSocketService`. Skip the legacy per-channel sockets so we
+    // don't open duplicate connections for the same data.
+    if (FlavorConfig.usesSingleStreamSocket) return;
     _currentAccount = account ?? _currentAccount;
     switch (type) {
       case WebSocketChannelType.marketWatch:
@@ -103,6 +108,12 @@ class UnifiedWebSocketService extends GetxService {
   }
 
   Future<void> switchAccount(MT5Account newAccount) async {
+    // Pippro / pipze: single-socket path handles switches via
+    // `StreamWebSocketService.switchAccount`.
+    if (FlavorConfig.usesSingleStreamSocket) {
+      _currentAccount = newAccount;
+      return;
+    }
     print(
       '═══════════════════════════════════════════════════════════',
     );

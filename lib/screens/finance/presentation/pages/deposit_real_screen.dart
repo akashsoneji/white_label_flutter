@@ -15,6 +15,23 @@ import 'package:crm_app/utils/navigation_helper.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/language_service.dart';
 import '../../../../widgets/custom_toast.dart';
+import 'package:crm_app/utils/currency_format.dart';
+import 'package:crm_app/models/mt5_account.dart' as mt5m;
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
+
+mt5m.MT5Account? _resolveMt5Account(String? metaAccountNumber) {
+  if (metaAccountNumber == null || metaAccountNumber.isEmpty) return null;
+  if (!Get.isRegistered<AccountController>()) return null;
+  for (final acc in Get.find<AccountController>().mt5Accounts) {
+    if (acc.metaAccountNumber == metaAccountNumber) return acc;
+  }
+  return null;
+}
+
+String _fmtMt5(dynamic balanceLike, String? metaAccountNumber) {
+  final n = double.tryParse(balanceLike?.toString() ?? '') ?? 0;
+  return CurrencyFormat.amount(n, _resolveMt5Account(metaAccountNumber));
+}
 
 class DepositRealScreen extends StatefulWidget {
   final Map<String, dynamic> object;
@@ -159,7 +176,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
           'DepositRealScreen: selectedTransferAccount changed to: $accountNumber',
         );
         transferToController.text =
-            "${account['meta_account_number']} - \$ ${account['balance'] ?? '0.00'}";
+            "${account['meta_account_number']} - ${_fmtMt5(account['balance'], account['meta_account_number']?.toString())}";
         selectedAccount = account['meta_account_number'].toString();
         print(
           'DepositRealScreen: Updated transferToController.text to: ${transferToController.text}',
@@ -640,7 +657,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
                 onTap: () {
                   controller.selectedTransferAccount.value = account;
                   transferToController.text =
-                      "${account['meta_account_number']} - \$ ${account['balance'] ?? '0.00'}";
+                      "${account['meta_account_number']} - ${_fmtMt5(account['balance'], account['meta_account_number']?.toString())}";
                   Navigator.pop(context);
                 },
                 child: Container(
@@ -686,7 +703,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
                       // Balance
                       Text(
-                        "\$ ${account['balance'] ?? '0.00'}",
+                        _fmtMt5(account['balance'], account['meta_account_number']?.toString()),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
