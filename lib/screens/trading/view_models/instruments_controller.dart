@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/utils/android_style_extensions.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -309,8 +311,15 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
           // Update last account
           _lastAccount = account;
 
-          // Re-hydrate catalogue for new account
-          hydrateFavoritesFromRest();
+          // Re-hydrate catalogue for new account. On /ws/stream the switch
+          // auth frame carries no favorites (old account's symbols must not
+          // leak), so subscribe the new account's favorites once the REST
+          // catalogue confirms which ones it actually offers.
+          if (FlavorConfig.usesSingleStreamSocket) {
+            unawaited(_hydrateAndSubscribeForAccount(account));
+          } else {
+            hydrateFavoritesFromRest();
+          }
 
           // DO NOT call startWebSocket() here
           // WebSocket reconnection is handled centrally by AccountController.setActiveMT5Account()
@@ -372,6 +381,14 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     _reconnectTimer = null;
     _reconnectAttempts = 0;
     isReconnecting.value = false;
+
+    // Prices arrive on the shared /ws/stream socket via MarketWatchV2Service;
+    // this controller never owns a socket in that mode.
+    if (FlavorConfig.usesSingleStreamSocket) {
+      _bindMarketWatchV2DecodedListener();
+      await startMarketWatchV2Only();
+      return;
+    }
 
     // 2. Tear down the (likely dead) channel from before the suspend so
     //    the new connection starts cleanly. `channel` is `late`
@@ -522,6 +539,32 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   }
 
   /// Load favorite rows from same REST API as search; bid/ask filled by v2 ticks.
+  /// Account switch on /ws/stream: subscribe only the favorites the new
+  /// account actually offers (favorites ∩ its REST catalogue).
+  Future<void> _hydrateAndSubscribeForAccount(MT5Account account) async {
+    _currentAccountNumber = account.metaAccountNumber;
+    await hydrateFavoritesFromRest();
+
+    // A newer switch superseded this one while REST was in flight.
+    final active =
+        Get.find<AccountController>().activeMT5Account?.metaAccountNumber;
+    if (active != account.metaAccountNumber) return;
+    if (!Get.isRegistered<MarketWatchV2Service>()) return;
+
+    final offered =
+        allInstruments
+            .map((e) => MarketWatchV2Service.normalizeSymbol(e.symbol))
+            .toSet();
+    final syms =
+        favoriteInstruments
+            .map(MarketWatchV2Service.normalizeSymbol)
+            .where((s) => s.isNotEmpty && offered.contains(s))
+            .toSet()
+            .toList();
+    if (syms.isEmpty) return;
+    await Get.find<MarketWatchV2Service>().subscribeSymbols(syms);
+  }
+
   Future<void> hydrateFavoritesFromRest() async {
     try {
       final token = await SecureStorageService.getAuthToken();
@@ -746,6 +789,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   }
 
   void _initializeWebSocket() async {
+    if (FlavorConfig.usesSingleStreamSocket) return;
     if (_isConnecting) {
       print('Instruments: Connection already in progress, skipping');
       return;
@@ -1363,9 +1407,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
   bool _isCurrencyPair(String symbol) {
     final majorPairs = ['EUR', 'GBP', 'AUD', 'NZD', 'USD', 'CAD', 'CHF', 'JPY'];
-    final symbolWithoutSuffix = symbol
-        .replaceAll('.c', '')
-        .replaceAll('.r', '');
+    final symbolWithoutSuffix = symbol.removeSuffix();
 
     int matchCount = 0;
     for (final pair in majorPairs) {
@@ -1583,6 +1625,10 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
   void _reconnectWebSocket() {
     if (isConnected.value) return;
+    if (FlavorConfig.usesSingleStreamSocket) {
+      unawaited(resumePriceStreamOnly());
+      return;
+    }
 
     print('🔄 Attempting to reconnect WebSocket...');
     isReconnecting.value = true;
@@ -1600,6 +1646,12 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   }
 
   void disconnectWebSocket() {
+    // Guard the `late` field — on pippro/pipze (single stream socket) the
+    // legacy channel is never initialised, so touching it throws
+    // LateInitializationError on every lifecycle pause.
+    if (!isConnected.value && _currentWsUrl == null) {
+      return;
+    }
     try {
       channel.sink.close();
       isConnected.value = false;

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/models/websocket_trading_response.dart';
+import 'package:crm_app/utils/android_style_extensions.dart';
 import 'package:crm_app/models/trade_history_model.dart';
 import 'package:crm_app/models/order_types.dart';
 import 'package:crm_app/constants/api_const.dart';
@@ -1087,10 +1088,10 @@ class TradingController extends GetxController {
                 return true;
               }
               // Check if base symbol (without .c suffix) matches
-              final baseSymbol = p.symbol.replaceFirst('.c', '');
+              final baseSymbol = p.symbol.removeSuffix();
               return _selectedInstruments.contains(baseSymbol) ||
                   _selectedInstruments.any(
-                    (selected) => selected.replaceFirst('.c', '') == baseSymbol,
+                    (selected) => selected.removeSuffix() == baseSymbol,
                   );
             }).toList();
       }
@@ -1357,6 +1358,35 @@ class TradingController extends GetxController {
     }
   }
 
+  /// Mirrors a successful pending-order edit into [_pendingPositions] so the
+  /// card and bottom sheet show the new TP/SL right away; the next /ws/stream
+  /// 'po' update overwrites it with the server's values.
+  void _applyPendingOrderEdit({
+    required int orderId,
+    double? price,
+    double? stopLoss,
+    double? takeProfit,
+    int? digits,
+  }) {
+    final index = _pendingPositions.indexWhere(
+      (p) => p.orderId == orderId.toString(),
+    );
+    if (index == -1) return;
+    final current = _pendingPositions[index];
+    final decimals = digits ?? current.digits;
+    String format(double? value) => (value == null || value == 0)
+        ? ''
+        : PrecisionHelper.formatPrice(value, decimals: decimals);
+
+    _pendingPositions[index] = current.copyWith(
+      entryPrice: (price != null && price > 0)
+          ? PrecisionHelper.formatPrice(price, decimals: decimals)
+          : null,
+      stopLoss: format(stopLoss),
+      takeProfit: format(takeProfit),
+    );
+  }
+
   /// Update Take Profit, Stop Loss, and Price for a Pending Order
   Future<bool> updatePendingOrderTPSL({
     required String mt5Account,
@@ -1409,6 +1439,13 @@ class TradingController extends GetxController {
       final response = await _tradingRepo.updatePendingOrderTPSL(data: payload);
 
       if (response.success) {
+        _applyPendingOrderEdit(
+          orderId: orderId,
+          price: price,
+          stopLoss: stopLoss,
+          takeProfit: takeProfit,
+          digits: digits,
+        );
         return true;
       } else {
         _setError(

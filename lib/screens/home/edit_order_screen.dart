@@ -16,7 +16,10 @@ import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/app_switch_tile.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/utils/precision_helper.dart';
+import 'package:crm_app/utils/android_style_extensions.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/services/stream_websocket_service.dart';
+import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/widgets/tenax_chart_webview.dart';
@@ -24,7 +27,15 @@ import 'package:crm_app/widgets/tenax_chart_webview.dart';
 class EditOrderScreen extends StatefulWidget {
   final TradePosition position;
 
-  const EditOrderScreen({super.key, required this.position});
+  /// True when opened from the Pending tab: the ticket is an order id, so
+  /// saves go to `update-pending-order-tp-sl`, not the position TP/SL API.
+  final bool isPendingOrder;
+
+  const EditOrderScreen({
+    super.key,
+    required this.position,
+    this.isPendingOrder = false,
+  });
 
   @override
   State<EditOrderScreen> createState() => _EditOrderScreenState();
@@ -78,6 +89,16 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   double? currentAskPrice;
   String? currentSymbol;
 
+  // /ws/stream feed filtered to this order's symbol (stream mode only).
+  StreamSubscription<dynamic>? _streamPriceSub;
+  final RxnDouble _streamBid = RxnDouble();
+  final RxnDouble _streamAsk = RxnDouble();
+  bool get _useStream => FlavorConfig.usesSingleStreamSocket;
+  double? get _bid =>
+      _useStream ? _streamBid.value : chartSocketController.getBidPrice();
+  double? get _ask =>
+      _useStream ? _streamAsk.value : chartSocketController.getAskPrice();
+
   // Real-time price data from socket
   Map<String, dynamic>? realTimePriceData;
 
@@ -88,7 +109,10 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 
   // Helper method to get symbol without .c suffix
   String _getDisplaySymbol(String symbol) {
-    return symbol.replaceFirst('.c', '');
+    // Only an exact trailing '.c' is stripped so '.cent' symbols stay intact.
+    return symbol.endsWith('.c')
+        ? symbol.substring(0, symbol.length - 2)
+        : symbol;
   }
 
   // Chart toggle
@@ -107,8 +131,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   }
 
   double _getCurrentPrice() {
-    final bid = chartSocketController.getBidPrice() ?? 0.0;
-    final ask = chartSocketController.getAskPrice() ?? 0.0;
+    final bid = _bid ?? 0.0;
+    final ask = _ask ?? 0.0;
 
     if (widget.position.action.toLowerCase() == 'buy') {
       return bid;
@@ -263,6 +287,10 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   }
 
   void _initializePrices() {
+    if (_useStream) {
+      _seedFromInstruments();
+      return;
+    }
     // Get current prices from chart socket controller
     final priceData = chartSocketController.getCurrentPrice();
     if (priceData != null) {
@@ -271,7 +299,65 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     }
   }
 
+  /// Show the last known market-watch price instantly while the first
+  /// /ws/stream tick for this symbol is on its way.
+  void _seedFromInstruments() {
+    final symbol = currentSymbol;
+    if (symbol == null || !Get.isRegistered<InstrumentsController>()) return;
+    final inst = Get.find<InstrumentsController>();
+    final live = inst.getLivePrice(symbol);
+    final match = inst.findInstrument(symbol);
+    final bid = (live != null && live.bid > 0) ? live.bid : match?.bid;
+    final ask = (live != null && live.ask > 0) ? live.ask : match?.ask;
+    if (bid == null || bid <= 0) return;
+    _applyStreamTick(bid, (ask != null && ask > 0) ? ask : bid);
+  }
+
+  void _subscribeStreamSymbol() {
+    final symbol = currentSymbol;
+    if (symbol == null || symbol.isEmpty) return;
+    if (!Get.isRegistered<StreamWebSocketService>()) return;
+    final stream = Get.find<StreamWebSocketService>();
+    final wanted = StreamWebSocketService.normalizeSymbol(symbol);
+    unawaited(stream.addSymbols(<String>[symbol]));
+    _streamPriceSub?.cancel();
+    _streamPriceSub = stream.prices.listen((payload) {
+      if (!mounted || payload is! List || payload.isEmpty) return;
+      // 'p' payload: one row [sym, bid, ask, ...] or a list of such rows.
+      final rows = payload.first is List ? payload : <dynamic>[payload];
+      for (final row in rows) {
+        if (row is! List || row.length < 3) continue;
+        if (StreamWebSocketService.normalizeSymbol(row[0].toString()) !=
+            wanted) {
+          continue;
+        }
+        final bid = double.tryParse(row[1].toString());
+        final ask = double.tryParse(row[2].toString());
+        if (bid == null || bid <= 0) continue;
+        _applyStreamTick(bid, (ask != null && ask > 0) ? ask : bid);
+      }
+    });
+  }
+
+  void _applyStreamTick(double bid, double ask) {
+    _streamBid.value = bid;
+    _streamAsk.value = ask;
+    currentBidPrice = bid;
+    currentAskPrice = ask;
+    if (!mounted) return;
+    if (!_isManuallyEditingSL && !_isManuallyEditingTP) {
+      setState(() {
+        _validateStopLoss();
+        _validateTakeProfit();
+      });
+    } else {
+      _validateStopLoss();
+      _validateTakeProfit();
+    }
+  }
+
   void _setupPriceListener() {
+    if (_useStream) return;
     // Listen to real-time price updates
     chartSocketController.priceStream.listen((priceData) {
       if (mounted) {
@@ -304,6 +390,10 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   }
 
   void _initializeSocketForSymbol() {
+    if (_useStream) {
+      _subscribeStreamSymbol();
+      return;
+    }
     // Initialize socket for the current symbol to get real-time price updates
     if (currentSymbol != null) {
       // //print(
@@ -347,6 +437,19 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   //   // Limit price validation removed for modify order functionality
   // }
 
+  /// Price SL/TP are measured from. A pending order fills at its trigger
+  /// price, so that is the reference — not the live market, which for a
+  /// Buy Limit sits above the entry and rejected every valid TP below it.
+  double _slTpReferencePrice() {
+    if (widget.isPendingOrder) {
+      final orderPrice = double.tryParse(
+        widget.position.entryPrice.replaceAll(',', ''),
+      );
+      if (orderPrice != null && orderPrice > 0) return orderPrice;
+    }
+    return _getCurrentRealTimePriceAsDouble();
+  }
+
   /// Validate Stop Loss price based on position type and current market price
   /// MT5 Standard: SL must be at least 20 points away from current market price
   /// Buy: SL must be at least 20 points below current Ask
@@ -363,8 +466,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       return false;
     }
 
-    final isBuy = widget.position.action.toLowerCase() == 'buy';
-    final currentPrice = _getCurrentRealTimePriceAsDouble();
+    final isBuy = widget.position.action.toLowerCase().startsWith('buy');
+    final currentPrice = _slTpReferencePrice();
 
     if (currentPrice <= 0) {
       return true; // Can't validate without current price
@@ -398,8 +501,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       return false;
     }
 
-    final isBuy = widget.position.action.toLowerCase() == 'buy';
-    final currentPrice = _getCurrentRealTimePriceAsDouble();
+    final isBuy = widget.position.action.toLowerCase().startsWith('buy');
+    final currentPrice = _slTpReferencePrice();
 
     if (currentPrice <= 0) {
       return true; // Can't validate without current price
@@ -456,14 +559,27 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       // Get trading controller
       final tradingController = Get.find<TradingController>();
 
-      // Call the updateTPSL method from trading controller
-      final success = await tradingController.updateTPSL(
-        mt5Account: activeAccount.metaAccountNumber,
-        positionId: positionId,
-        stopLoss: stopLoss,
-        takeProfit: takeProfit,
-        digits: _positionDigits,
-      );
+      final bool success;
+      if (widget.isPendingOrder) {
+        // Pending order: backend needs the order's trigger price alongside
+        // SL/TP; a disabled side is sent as null.
+        success = await tradingController.updatePendingOrderTPSL(
+          mt5Account: activeAccount.metaAccountNumber,
+          orderId: positionId,
+          price: double.tryParse(widget.position.entryPrice),
+          stopLoss: stopLossEnabled ? stopLoss : null,
+          takeProfit: takeProfitEnabled ? takeProfit : null,
+          digits: _positionDigits,
+        );
+      } else {
+        success = await tradingController.updateTPSL(
+          mt5Account: activeAccount.metaAccountNumber,
+          positionId: positionId,
+          stopLoss: stopLoss,
+          takeProfit: takeProfit,
+          digits: _positionDigits,
+        );
+      }
 
       // Navigate back on success (no toast)
       if (success) {
@@ -599,6 +715,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 
   @override
   void dispose() {
+    _streamPriceSub?.cancel();
     _pnlUpdateTimer?.cancel();
     _tpPnLUpdateNotifier.dispose();
     _slPnLUpdateNotifier.dispose();
@@ -834,9 +951,9 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
               ),
               SizedBox(height: 2.h),
               Obx(() {
-                final bid = chartSocketController.getBidPrice() ?? 0.0;
+                final bid = _bid ?? 0.0;
                 return Text(
-                  bid.toString(),
+                  _formatPrice(bid),
                   style: AppTextStyles.heading.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
@@ -860,9 +977,9 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
               ),
               SizedBox(height: 2.h),
               Obx(() {
-                final ask = chartSocketController.getAskPrice() ?? 0.0;
+                final ask = _ask ?? 0.0;
                 return Text(
-                  ask.toString(),
+                  _formatPrice(ask),
                   style: AppTextStyles.heading.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
@@ -1865,7 +1982,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       bool symbolsMatch =
           socketSymbol == originalSymbol ||
           socketSymbol == '$originalSymbol.c' ||
-          socketSymbol.replaceAll('.c', '') == originalSymbol;
+          socketSymbol.removeSuffix() == originalSymbol;
 
       if (symbolsMatch) {
         final bid = realTimePriceData!['bid']?.toString() ?? '0';
@@ -1894,7 +2011,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       // Check if symbols match (with or without .c suffix)
       return socketSymbol == originalSymbol ||
           socketSymbol == '$originalSymbol.c' ||
-          socketSymbol.replaceAll('.c', '') == originalSymbol;
+          socketSymbol.removeSuffix() == originalSymbol;
     }
     return false;
   }
@@ -1908,7 +2025,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       bool symbolsMatch =
           socketSymbol == originalSymbol ||
           socketSymbol == '$originalSymbol.c' ||
-          socketSymbol.replaceAll('.c', '') == originalSymbol;
+          socketSymbol.removeSuffix() == originalSymbol;
 
       if (symbolsMatch) {
         final bid =

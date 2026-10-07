@@ -17,6 +17,8 @@ import 'package:crm_app/services/unified_websocket_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/services/market_watch_v2_service.dart';
+import 'package:crm_app/services/stream_websocket_service.dart';
+import 'package:crm_app/flavor_config.dart';
 
 class ChartSocketController extends GetxController with WidgetsBindingObserver {
   // Connection state
@@ -32,6 +34,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
   late WebSocketChannel channel;
   StreamSubscription? _unifiedSymbolSub;
   StreamSubscription<dynamic>? _marketWatchV2Sub;
+  StreamSubscription<dynamic>? _streamPricesSub;
 
   // Unsubscribe/resubscribe state
   Completer<void>? _unsubscribeCompleter;
@@ -169,6 +172,8 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
     // If user has no MT5 accounts, we still allow symbol WebSocket to run.
     // Trade engine accepts `trading_account: "0"` for read-only symbol pricing.
 
+    if (_bindStreamSymbol()) return;
+
     if (_bindUnifiedSymbol()) {
       return;
     }
@@ -176,6 +181,27 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
     if (!isConnected.value) {
       initializeWebSocket();
     }
+  }
+
+  /// Selected symbol rides on the shared /ws/stream socket: pin it there
+  /// (subscribe + kept across account switches) and read ticks from the
+  /// MarketWatchV2 bridge. No separate /ws/symbol connection is opened.
+  bool _bindStreamSymbol() {
+    if (!FlavorConfig.usesSingleStreamSocket) return false;
+    // Read ticks straight off /ws/stream; the MarketWatchV2 bridge only
+    // forwards once InstrumentsController has started, which left the
+    // chart dock / edit order screen without a price ("—" / 0.0).
+    if (_streamPricesSub == null && Get.isRegistered<StreamWebSocketService>()) {
+      _streamPricesSub = Get.find<StreamWebSocketService>().prices.listen(
+        _handleMarketWatchV2Decoded,
+      );
+    }
+    final symbol = currentSymbol.value;
+    if (symbol.isNotEmpty && Get.isRegistered<StreamWebSocketService>()) {
+      Get.find<StreamWebSocketService>().pinSymbol(symbol);
+    }
+    isConnected.value = true;
+    return true;
   }
 
   bool _bindUnifiedSymbol() {
@@ -215,6 +241,8 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
     _reconnectTimer?.cancel();
     _unifiedSymbolSub?.cancel();
     _marketWatchV2Sub?.cancel();
+    _streamPricesSub?.cancel();
+    _streamPricesSub = null;
     try {
       if (!_priceStreamController.isClosed) {
         _priceStreamController.close();
@@ -371,6 +399,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
   /// Called by chart screen after restart/resume (kept for compatibility).
   void handleAppRestart() {
     if (currentSymbol.value.isEmpty) return;
+    if (_bindStreamSymbol()) return;
 
     // ✅ FIX: Ensure resubscription to current symbol on app restart
     if (!isConnected.value) {
@@ -464,6 +493,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
       // dev.log('Chart: initializeWebSocket() called with empty symbol');
       return;
     }
+    if (_bindStreamSymbol()) return;
     if (isConnected.value) return;
 
     // ✅ FIX: Check authentication before initializing WebSocket
@@ -577,6 +607,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
       dev.log('Chart: getSocketData() called with empty symbol');
       return;
     }
+    if (_bindStreamSymbol()) return;
 
     // ✅ FIX: Check authentication before requesting socket data
     final isLoggedIn = await SecureStorageService.isUserLoggedIn();
@@ -974,41 +1005,58 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
                 map['SpreadDiff'] ??
                 map['spread_diff'] as num?)
             ?.toDouble();
+        final digits = int.tryParse(
+          (map['digits'] ?? map['Digits'] ?? map['d'])?.toString() ?? '',
+        );
         if (bid != null && bid > 0) {
           updatePriceFromExternal(
             symbol: cur,
             bid: bid,
             ask: ask ?? bid,
             spreadDiff: spread,
+            digits: digits,
           );
         }
+      }
+    }
+
+    void applyRow(List row) {
+      if (row.length < 3) return;
+      final s = row[0]?.toString();
+      if (s == null ||
+          !(_matchesCurrentSymbol(s) ||
+              MarketWatchV2Service.normalizeSymbol(s) == cleanCur)) {
+        return;
+      }
+      final bid = double.tryParse(row[1].toString());
+      final ask = double.tryParse(row[2].toString());
+      final spread = row.length > 3 ? double.tryParse(row[3].toString()) : null;
+      // Stream price row: [symbol, bid, ask, spread, digits, ...].
+      final digits = row.length > 4 ? int.tryParse(row[4].toString()) : null;
+      if (bid != null && bid > 0) {
+        updatePriceFromExternal(
+          symbol: cur,
+          bid: bid,
+          ask: ask ?? bid,
+          spreadDiff: spread,
+          digits: digits,
+        );
       }
     }
 
     if (decodedData is Map) {
       checkAndApply(decodedData);
     } else if (decodedData is List) {
+      // /ws/stream sends a lone tick as one row: [symbol, bid, ask, ...].
+      if (decodedData.isNotEmpty && decodedData.first is String) {
+        applyRow(decodedData);
+        return;
+      }
       for (final item in decodedData) {
         if (item is Map) {
           checkAndApply(item);
-        } else if (item is List && item.length >= 3) {
-          final s = item[0]?.toString();
-          if (s != null &&
-              (_matchesCurrentSymbol(s) ||
-                  MarketWatchV2Service.normalizeSymbol(s) == cleanCur)) {
-            final bid = double.tryParse(item[1].toString());
-            final ask = double.tryParse(item[2].toString());
-            final spread =
-                item.length > 3 ? double.tryParse(item[3].toString()) : null;
-            if (bid != null && bid > 0) {
-              updatePriceFromExternal(
-                symbol: cur,
-                bid: bid,
-                ask: ask ?? bid,
-                spreadDiff: spread,
-              );
-            }
-          }
+        } else if (item is List) {
+          applyRow(item);
         }
       }
     }
@@ -1022,17 +1070,19 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
     required double bid,
     required double ask,
     double? spreadDiff,
+    int? digits,
   }) {
     if (_isDisposed) return;
     if (!_matchesCurrentSymbol(symbol)) return;
 
+    final hasSocketDigits = digits != null && digits >= 0 && digits <= 10;
     final transformed = <String, dynamic>{
       'type': 'singleSymbolPrice',
       'symbol': symbol,
       'bid': bid,
       'ask': ask,
       'spreadDiff': spreadDiff ?? realTimePrice['spreadDiff'] ?? 0.0,
-      'digits': realTimePrice['digits'] ?? 5,
+      'digits': hasSocketDigits ? digits : (realTimePrice['digits'] ?? 5),
     };
 
     realTimePrice.value = transformed;
@@ -1106,9 +1156,10 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
   void _disconnectWebSocket() {
     _reconnectTimer?.cancel();
     _reconnectAttempts = 0;
-    isConnected.value = false;
     isReconnecting.value = false;
+    isConnected.value = false;
     realTimePrice.clear();
+    if (FlavorConfig.usesSingleStreamSocket) return;
     try {
       channel.sink.close();
     } catch (_) {}
@@ -1179,6 +1230,11 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
     _reconnectTimer?.cancel();
     _reconnectAttempts = 0;
     isReconnecting.value = false;
+    if (FlavorConfig.usesSingleStreamSocket) {
+      // Never touch the `late channel` in stream mode (it is never opened);
+      // keep the last price so the dock does not flash "—".
+      return;
+    }
     if (isConnected.value) {
       try {
         channel.sink.close();
@@ -1189,6 +1245,9 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
   }
 
   void forceReconnect() {
+    // /ws/stream is shared: there is no chart socket to recycle. Re-pin the
+    // symbol so ticks resume immediately instead of a 1s blank gap.
+    if (_bindStreamSymbol()) return;
     resetController();
     Future.delayed(const Duration(milliseconds: 1000), () {
       if (!_isDisposed) initializeWebSocket();

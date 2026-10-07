@@ -29,6 +29,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/utils/android_style_extensions.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:crm_app/constants/color.dart';
@@ -229,11 +230,11 @@ class _Header extends StatelessWidget {
             onTap: () => _showFavoritesBottomSheet(context, ctrl),
             child: Row(
               children: [
-                _FlagIcon(symbol: ctrl.symbol.replaceAll('.c', '')),
+                _FlagIcon(symbol: ctrl.symbol.removeSuffix()),
                 SizedBox(width: 6.w),
                 Obx(
                   () => Text(
-                    ctrl.symbol.replaceAll('.c', '').toUpperCase(),
+                    ctrl.symbol.removeSuffix().toUpperCase(),
                     style: TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 16.sp,
@@ -655,7 +656,7 @@ class _BottomBar extends StatelessWidget {
                             context,
                             tradingController!,
                             symbolPositions,
-                            ctrl.symbol.replaceAll('.c', '').toUpperCase(),
+                            ctrl.symbol.removeSuffix().toUpperCase(),
                           ),
                       child: Container(
                         width: 44.h,
@@ -2729,7 +2730,7 @@ class IQuoteFullscreenChartScreen extends StatelessWidget {
         elevation: 0,
         leading: AppBackButton(onPressed: () => Get.back()),
         title: Text(
-          '${symbol.replaceAll('.c', '').toUpperCase()} Chart',
+          '${symbol.removeSuffix().toUpperCase()} Chart',
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 16.sp,

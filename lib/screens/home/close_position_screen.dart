@@ -246,7 +246,13 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
   }
 
   // Helper method to get symbol without .c suffix
-  String get _displaySymbol => widget.position.symbol.replaceFirst('.c', '');
+  // Only an exact trailing '.c' is stripped so '.cent' symbols stay intact.
+  String get _displaySymbol {
+    final symbol = widget.position.symbol;
+    return symbol.endsWith('.c')
+        ? symbol.substring(0, symbol.length - 2)
+        : symbol;
+  }
 
   // Wrapper method for button press with debug logging
   void _onButtonPressed() {

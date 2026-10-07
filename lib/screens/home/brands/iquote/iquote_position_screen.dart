@@ -1000,7 +1000,9 @@ padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 90.h),
           // Close / Modify Position (with live P&L + chart).
           final isPending = tradingController.selectedTab == 1;
           if (isPending) {
-            Get.to<void>(() => EditOrderScreen(position: position));
+            Get.to<void>(
+              () => EditOrderScreen(position: position, isPendingOrder: true),
+            );
           } else {
             Get.to<void>(() => ClosePositionScreen(position: position));
           }

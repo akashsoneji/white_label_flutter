@@ -58,6 +58,16 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
   int _reconnectAttempt = 0;
   bool _manualClose = false;
 
+  /// Set by `pause()` so the WidgetsBindingObserver safety-net does not race
+  /// the central `AccountController` coordinator into reconnecting while the
+  /// app is still backgrounded.
+  bool _pausedByLifecycle = false;
+
+  /// Set by `resume()`; consumed inside `_handleControl` once the server
+  /// returns `authenticated:true`. Forces one `chunk_request` burst for
+  /// positions / orders / accounts so the UI resyncs after a background gap.
+  bool _pendingResumeResync = false;
+
   /// Monotonic account-switch sequence (spec §6). Every async step inside
   /// switchAccount captures this value and aborts if a newer switch has
   /// started (fast A→B→C tap must only land C).
@@ -108,18 +118,15 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    // Spec §8: on resume from background, if no frame has arrived in a
-    // while, force a reconnect — iOS/Android often drop the socket silently.
-    if (state == AppLifecycleState.resumed) {
-      if (_currentAccount == null) return;
-      final sinceLast = DateTime.now().difference(_lastFrameAt);
-      if (_channel == null || sinceLast > const Duration(seconds: 10)) {
-        if (kDebugMode) {
-          debugPrint('StreamWS: resumed after ${sinceLast.inSeconds}s — reconnect');
-        }
-        _teardown();
-        _scheduleReconnect();
-      }
+    // Pause is a safety net for the window before AccountController exists.
+    // Resume is owned exclusively by AccountController's central
+    // coordinator (it also honours app-lock); a second trigger here would
+    // race it and tear down the socket that was just opened.
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_channel == null) return;
+      if (kDebugMode) debugPrint('StreamWS: observer paused — closing socket');
+      pause();
     }
   }
 
@@ -194,12 +201,167 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
     _symbols.clear();
     _pinnedSymbol = null;
     isAuthenticated.value = false;
+    _pausedByLifecycle = false;
+    _pendingResumeResync = false;
     await disconnect();
+  }
+
+  // ─── Lifecycle entry points (driven by AccountController) ──────────────
+
+  /// Close the socket but keep `_currentAccount` / `_symbols` / `_pinnedSymbol`
+  /// so `resume()` can reopen without the caller passing them again. Called
+  /// on `AppLifecycleState.paused`/`inactive` and on app-lock.
+  void pause() {
+    if (_pausedByLifecycle && _channel == null) return;
+    _pausedByLifecycle = true;
+    _stopHeartbeat();
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    _manualClose = true; // prevent onDone / stale timer auto-reconnect
+    try {
+      _sub?.cancel();
+    } catch (_) {}
+    _sub = null;
+    try {
+      _channel?.sink.close();
+    } catch (_) {}
+    _channel = null;
+    isConnected.value = false;
+    isAuthenticated.value = false;
+    print('StreamWS: paused');
+  }
+
+  /// Reopen the socket for the cached account and queue a snapshot resync
+  /// (positions / orders / accounts) to run once the engine confirms
+  /// authentication. No-op if there is no account bound yet.
+  ///
+  /// After a long background the OS silently kills the underlying TCP
+  /// socket; `isAuthenticated` can still read `true` from stale state and
+  /// `_channel` may still hold a dead reference. We therefore ALWAYS tear
+  /// the socket down first and reopen — the extra work is negligible and
+  /// avoids the "frozen P&L after 2 min background" symptom.
+  Future<void> resume() async {
+    final account = _currentAccount;
+    if (account == null) {
+      _pausedByLifecycle = false;
+      return;
+    }
+    _pausedByLifecycle = false;
+
+    // Debounce guard. `resume()` is fired from TWO places on every
+    // foreground: the service's own WidgetsBindingObserver AND
+    // AccountController's central lifecycle coordinator. The two calls
+    // arrive 100-400 ms apart — too far for an in-flight completer check
+    // (first connect may already have completed; auth may still be in
+    // flight so `isAuthenticated` is still false; the socket is open but
+    // not yet usable). The 2nd call then does a hard teardown of the
+    // socket we JUST opened, server's `authenticated` reply + positions
+    // deltas land on a dead channel, and P&L freezes.
+    //
+    // Coalesce resume() calls that arrive within 1s of the first (e.g.
+    // app-unlock + lifecycle resumed firing back to back).
+    final now = DateTime.now();
+    final last = _lastResumeAt;
+    if (last != null && now.difference(last) < const Duration(seconds: 1)) {
+      print('StreamWS: resume skipped (debounced, dup within 1s)');
+      final inFlight = _connectInFlight;
+      if (inFlight != null && !inFlight.isCompleted) {
+        try {
+          await inFlight.future;
+        } catch (_) {}
+      }
+      return;
+    }
+    _lastResumeAt = now;
+
+    // Hard teardown — do not trust any flag survived the background gap.
+    _stopHeartbeat();
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    _manualClose = true;
+    try {
+      _sub?.cancel();
+    } catch (_) {}
+    _sub = null;
+    try {
+      _channel?.sink.close();
+    } catch (_) {}
+    _channel = null;
+    isConnected.value = false;
+    isAuthenticated.value = false;
+
+    // Fresh connect with the cached symbol set and a snapshot resync queued.
+    _manualClose = false;
+    _reconnectAttempt = 0;
+    _pendingResumeResync = true;
+    final carryOver = _symbols.toList();
+    _symbols.clear();
+    print('StreamWS: resume → fresh connect (symbols=${carryOver.length})');
+    final resumeAt = DateTime.now();
+    await connect(
+      account: account,
+      symbols: carryOver,
+      channels: _channels,
+    );
+    _resumeWatchdog?.cancel();
+    _resumeWatchdog = Timer(const Duration(seconds: 4), () {
+      if (_currentAccount == null) return;
+      if (_lastFrameAt.isAfter(resumeAt)) return;
+      print('StreamWS: resume watchdog — no frames, forcing reconnect');
+      _pendingResumeResync = true;
+      _teardown();
+      _scheduleReconnect();
+    });
+  }
+
+  Timer? _resumeWatchdog;
+
+  /// Entry point called from `AuthController` after a successful login.
+  /// Re-arms the account watcher and, when an active account is already
+  /// known, opens the socket immediately. Safe to call on any flavor —
+  /// callers gate on `FlavorConfig.usesSingleStreamSocket`.
+  Future<void> subscribeForLogin({MT5Account? account}) async {
+    _manualClose = false;
+    _pausedByLifecycle = false;
+    _bindAccountStream();
+    if (account != null) {
+      _pendingResumeResync = true;
+      await connect(account: account, channels: _channels);
+    }
+  }
+
+  /// Explicit unsubscribe + teardown on logout. Sends an `unsubscribe` control
+  /// frame (best-effort) so the engine drops the subscription immediately
+  /// instead of waiting for the TCP close.
+  Future<void> unsubscribeForLogout() async {
+    final account = _currentAccount;
+    if (_channel != null && account != null) {
+      try {
+        _channel!.sink.add(jsonEncode(<String, dynamic>{
+          'type': 'unsubscribe',
+          'trading_account': account.metaAccountNumber,
+        }));
+      } catch (_) {}
+    }
+    await resetForLogout();
+  }
+
+  /// Issue the three snapshot chunk_requests used on resume. Private helper
+  /// shared by `resume()` (if already authenticated) and `_handleControl`
+  /// (once the fresh socket authenticates).
+  void _requestResumeSnapshot() {
+    if (_channel == null) return;
+    for (final type in const <String>['positions', 'orders', 'accounts']) {
+      requestChunk(dataType: type);
+    }
   }
 
   /// Opens the single socket for [account] and sends the initial authenticate
   /// frame with [symbols]. Safe to call multiple times — reconnects only when
   /// the bound account changes.
+  Completer<void>? _connectInFlight;
+  DateTime? _lastResumeAt;
+
   Future<void> connect({
     required MT5Account account,
     List<String> symbols = const <String>[],
@@ -210,10 +372,42 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
       'accounts',
     ],
   }) async {
+    // Serialize overlapping connect() calls. Both the service's own
+    // WidgetsBindingObserver AND AccountController's central coordinator
+    // fire resume → connect; without this guard the second call races
+    // ahead with `disconnect()`, kills the first socket mid-handshake,
+    // and the server's `authenticated` reply never lands → P&L freezes.
+    final inFlight = _connectInFlight;
+    if (inFlight != null && !inFlight.isCompleted) {
+      final sameAccount =
+          _currentAccount?.metaAccountNumber == account.metaAccountNumber;
+      if (sameAccount) {
+        print('StreamWS: connect skipped (in-flight)');
+        return inFlight.future;
+      }
+    }
+    final completer = Completer<void>();
+    _connectInFlight = completer;
+    try {
+      await _connectImpl(account, symbols, channels);
+      completer.complete();
+    } catch (e, st) {
+      completer.completeError(e, st);
+      rethrow;
+    } finally {
+      if (identical(_connectInFlight, completer)) _connectInFlight = null;
+    }
+  }
+
+  Future<void> _connectImpl(
+    MT5Account account,
+    List<String> symbols,
+    List<String> channels,
+  ) async {
     final sameAccount =
         _currentAccount?.metaAccountNumber == account.metaAccountNumber;
-    if (_channel != null && sameAccount) {
-      // Already connected to this account — just reconcile symbols.
+    if (_channel != null && sameAccount && isAuthenticated.value) {
+      // Already connected AND authenticated — just reconcile symbols.
       await setSymbols(symbols);
       return;
     }
@@ -304,9 +498,10 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
 
   /// Remove symbols from the active subscription set.
   Future<void> removeSymbols(List<String> symbols) async {
+    // The chart's pinned symbol stays subscribed even if it leaves favorites.
     final remove = symbols
         .map(_normalize)
-        .where(_symbols.contains)
+        .where((s) => _symbols.contains(s) && s != _pinnedSymbol)
         .toSet();
     if (remove.isEmpty) return;
     _symbols.removeAll(remove);
@@ -325,6 +520,8 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
         .map(_normalize)
         .where((s) => s.isNotEmpty)
         .toSet();
+    final pinned = _pinnedSymbol;
+    if (pinned != null && pinned.isNotEmpty) next.add(pinned);
     final toAdd = next.difference(_symbols);
     final toRemove = _symbols.difference(next);
 
@@ -368,16 +565,15 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
       } catch (_) {}
     }
 
-    // Prefer the caller-supplied filtered list (favorites ∩ new account's
-    // symbols + chart-pinned). Fall back to carrying over the previous
-    // active set so prices do not go blank during the switch (spec §6).
-    final carryOver = (filteredSymbols != null && filteredSymbols.isNotEmpty)
-        ? filteredSymbols
-        : _symbols.toList();
-    if (_pinnedSymbol != null && _pinnedSymbol!.isNotEmpty) {
-      if (!carryOver.contains(_pinnedSymbol)) {
-        carryOver.add(_pinnedSymbol!);
-      }
+    // Spec §6.7: symbols from the old account must NOT carry over. The new
+    // account's favorites are subscribed by InstrumentsController once its
+    // REST hydrate for the new account finishes (addSymbols queues them until
+    // auth). Only an explicit filtered list and the chart-pinned symbol ride
+    // in the authenticate frame.
+    final carryOver = <String>[...?filteredSymbols?.map(_normalize)];
+    final pinned = _pinnedSymbol;
+    if (pinned != null && pinned.isNotEmpty && !carryOver.contains(pinned)) {
+      carryOver.add(pinned);
     }
     _symbols.clear();
 
@@ -395,10 +591,20 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
   /// account switches even if the user removes it from favorites — spec §6.
   void pinSymbol(String? symbol) {
     _pinnedSymbol = symbol == null ? null : _normalize(symbol);
-    if (_pinnedSymbol != null && _pinnedSymbol!.isNotEmpty) {
-      // Fire-and-forget — safe before auth; queues if not ready.
-      unawaited(addSymbols(<String>[_pinnedSymbol!]));
+    final pinned = _pinnedSymbol;
+    if (pinned == null || pinned.isEmpty) return;
+    _symbols.add(pinned);
+    if (_channel == null || !isAuthenticated.value) {
+      // Not ready yet — goes out in the next authenticate frame.
+      return;
     }
+    // Always re-send: addSymbols() skips symbols already in the local set,
+    // so a server-side drop (e.g. a screen unsubscribing on exit) would
+    // leave the chart with no ticks when the user comes back.
+    _channel!.sink.add(jsonEncode(<String, dynamic>{
+      'action': 'subscribe',
+      'symbols': <String>[pinned],
+    }));
   }
 
   /// Spec §5: tear down channel subscriptions without closing the socket.
@@ -503,30 +709,70 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
     });
   }
 
+  // Per-channel frame counters so we can see from logcat whether frames
+  // are actually arriving after resume. Logged once every 20 frames.
+  int _framePrices = 0;
+  int _framePositions = 0;
+  int _frameOrders = 0;
+  int _frameAccounts = 0;
+  int _frameOther = 0;
+
   void _onMessage(dynamic message) {
     _lastFrameAt = DateTime.now();
-    // Any frame = alive → reset backoff.
     _reconnectAttempt = 0;
     try {
+      String? channel;
       if (MessagePackDecoder.isBinaryMessage(message)) {
         final bytes = message is Uint8List
             ? message
             : Uint8List.fromList(message as List<int>);
         final decoded = MessagePackDecoder.decodeBinary(bytes);
         if (decoded is List && decoded.isNotEmpty && decoded.first is String) {
-          _route(decoded.first as String, decoded.sublist(1));
+          channel = decoded.first as String;
+          _route(channel, decoded.sublist(1));
         }
-        return;
+      } else {
+        final text = message.toString();
+        final decoded = jsonDecode(text);
+        if (decoded is Map<String, dynamic>) {
+          channel = decoded['type']?.toString() ?? 'ctrl';
+          _handleControl(decoded);
+        } else if (decoded is List &&
+            decoded.isNotEmpty &&
+            decoded.first is String) {
+          channel = decoded.first as String;
+          _route(channel, decoded.sublist(1));
+        }
       }
-
-      final text = message.toString();
-      final decoded = jsonDecode(text);
-      if (decoded is Map<String, dynamic>) {
-        _handleControl(decoded);
-      } else if (decoded is List &&
-          decoded.isNotEmpty &&
-          decoded.first is String) {
-        _route(decoded.first as String, decoded.sublist(1));
+      switch (channel) {
+        case 'p':
+        case 'prices':
+          _framePrices++;
+          break;
+        case 'pos':
+        case 'positions':
+          _framePositions++;
+          break;
+        case 'po':
+        case 'orders':
+          _frameOrders++;
+          break;
+        case 'ac':
+        case 'accounts':
+          _frameAccounts++;
+          break;
+        default:
+          _frameOther++;
+      }
+      final total = _framePrices +
+          _framePositions +
+          _frameOrders +
+          _frameAccounts +
+          _frameOther;
+      if (total % 20 == 1) {
+        print(
+          'StreamWS: frames prices=$_framePrices pos=$_framePositions ord=$_frameOrders acc=$_frameAccounts other=$_frameOther',
+        );
       }
     } catch (e) {
       if (kDebugMode) debugPrint('StreamWS: onMessage error $e');
@@ -539,11 +785,19 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
       case 'authenticated':
         final ok = decoded['status'] == 'success';
         isAuthenticated.value = ok;
+        print(
+          'StreamWS: authenticated=$ok symbols=${_symbols.length} resync=$_pendingResumeResync',
+        );
         if (ok && _channel != null && _symbols.isNotEmpty) {
           _channel!.sink.add(jsonEncode(<String, dynamic>{
             'action': 'subscribe',
             'symbols': _symbols.toList(),
           }));
+        }
+        if (ok && _pendingResumeResync) {
+          _pendingResumeResync = false;
+          _requestResumeSnapshot();
+          print('StreamWS: resume snapshot requested');
         }
         break;
       case 'pong':
@@ -634,6 +888,9 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
     }
   }
 
+  /// Same normalisation the socket uses for subscribe/route matching.
+  static String normalizeSymbol(String raw) => _normalize(raw);
+
   static String _normalize(String raw) {
     var s = raw.trim();
     if (s.contains('.')) {
@@ -671,18 +928,16 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
   void _forwardToAccount(List<dynamic> payload) {
     if (!Get.isRegistered<AccountWebSocketService>()) return;
     try {
-      // Legacy /ws/account parser expects either a single `[tag, acct, ...]`
-      // row OR a batch `[[tag,...], [tag,...]]`. Our stream strips the tag,
-      // so re-prepend 'ac' for compatibility.
+      // Legacy /ws/account parser expects `['ac', acct, ...]` rows. The live
+      // server already tags each row (`["ac",[["ac","904419",...]]]`), so
+      // only prepend 'ac' when a row arrives untagged — a double tag shifts
+      // the account number to index 2 and every update gets rejected.
       final inner = _unwrap(payload);
       dynamic reshaped;
       if (inner is List && inner.isNotEmpty && inner.first is List) {
-        // Batch of account rows → prepend 'ac' to each.
-        reshaped = inner
-            .map((row) => row is List ? <dynamic>['ac', ...row] : row)
-            .toList();
+        reshaped = inner.map((row) => row is List ? tagAccountRow(row) : row).toList();
       } else if (inner is List) {
-        reshaped = <dynamic>['ac', ...inner];
+        reshaped = tagAccountRow(inner);
       } else {
         reshaped = inner;
       }
@@ -690,5 +945,12 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
     } catch (e) {
       if (kDebugMode) debugPrint('StreamWS: forwardToAccount error $e');
     }
+  }
+
+  /// Ensures an account row starts with the 'ac' tag exactly once.
+  static List<dynamic> tagAccountRow(List<dynamic> row) {
+    final alreadyTagged =
+        row.isNotEmpty && row.first?.toString().toLowerCase() == 'ac';
+    return alreadyTagged ? row : <dynamic>['ac', ...row];
   }
 }

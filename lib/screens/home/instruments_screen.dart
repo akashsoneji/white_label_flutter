@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/utils/android_style_extensions.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:crm_app/constants/color.dart';
@@ -1508,7 +1509,7 @@ class _FavoriteButton extends StatelessWidget {
         final isFavorite =
             favs.contains(symbol) ||
             favs.contains('$symbol.c') ||
-            favs.contains(symbol.replaceAll('.c', ''));
+            favs.contains(symbol.removeSuffix());
         final Color borderColor =
             isFavorite ? AppColors.primary : AppColors.primary.withOpacity(0.6);
 

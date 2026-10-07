@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:get/get.dart';
 import 'package:crm_app/models/login_response_model.dart';
 import 'package:crm_app/models/user_model.dart';
@@ -608,11 +609,14 @@ class AuthController extends GetxController {
     if (!FlavorConfig.usesSingleStreamSocket) return;
     try {
       if (Get.isRegistered<StreamWebSocketService>()) {
-        Get.find<StreamWebSocketService>().rebindAccount();
-        print('AuthController: StreamWebSocketService rebound to new AccountController');
+        // subscribeForLogin re-arms the account watcher AND (when an active
+        // account is already known) opens the socket + queues a snapshot
+        // resync. Fire-and-forget — errors are logged inside the service.
+        unawaited(Get.find<StreamWebSocketService>().subscribeForLogin());
+        print('AuthController: StreamWebSocketService subscribed for login');
       }
     } catch (e) {
-      print('AuthController: Error rebinding StreamWebSocketService: $e');
+      print('AuthController: Error subscribing StreamWebSocketService: $e');
     }
   }
 
@@ -1199,11 +1203,14 @@ class AuthController extends GetxController {
     if (FlavorConfig.usesSingleStreamSocket) {
       try {
         if (Get.isRegistered<StreamWebSocketService>()) {
-          await Get.find<StreamWebSocketService>().resetForLogout();
-          print('AuthController: StreamWebSocketService reset for logout');
+          // Sends an explicit `unsubscribe` control frame before closing,
+          // so the engine drops the subscription immediately instead of
+          // waiting for the TCP close to be observed.
+          await Get.find<StreamWebSocketService>().unsubscribeForLogout();
+          print('AuthController: StreamWebSocketService unsubscribed for logout');
         }
       } catch (e) {
-        print('AuthController: Error resetting StreamWebSocketService: $e');
+        print('AuthController: Error unsubscribing StreamWebSocketService: $e');
       }
     }
 

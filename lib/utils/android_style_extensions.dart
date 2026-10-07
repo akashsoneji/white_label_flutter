@@ -40,9 +40,14 @@ extension AndroidStyleExtensions on String {
     return price.toStringAsFixed(decimalPlaces);
   }
 
-  /// Remove suffix like .c (similar to Android removeSuffix)
+  /// Remove a trailing broker suffix `.c` / `.r` (similar to Android
+  /// removeSuffix). Only an exact trailing suffix is removed:
+  /// `replaceAll('.c', '')` turned `XAUUSD.cent` into `XAUUSDent`.
   String removeSuffix() {
-    return replaceAll('.c', '');
+    for (final suffix in const ['.c', '.r']) {
+      if (endsWith(suffix)) return substring(0, length - suffix.length);
+    }
+    return this;
   }
 }
 

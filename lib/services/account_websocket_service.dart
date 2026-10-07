@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as dev;
 import 'dart:typed_data'; // ✅ ADD: For binary message handling
+import 'package:crm_app/services/stream_websocket_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -67,6 +68,31 @@ class AccountWebSocketService extends GetxService with WidgetsBindingObserver {
     // ✅ FIX: Check authentication before setting up listeners
     // Don't initialize WebSocket until user is logged in
     _checkAuthAndSetup();
+
+    // Pippro / pipze: forward decoded account-stream frames from the single
+    // `/ws/stream` socket into `handleStreamFrame`. Without this bridge the
+    // engine delivers account snapshots on resume but nothing updates the UI
+    // — balance / equity / cent value freeze.
+    _bindStreamSocketBridgeIfNeeded();
+  }
+
+  StreamSubscription<dynamic>? _streamAccountsSub;
+
+  void _bindStreamSocketBridgeIfNeeded() {
+    if (!FlavorConfig.usesSingleStreamSocket) return;
+    void attach() {
+      if (!Get.isRegistered<StreamWebSocketService>()) {
+        Future.delayed(const Duration(seconds: 1), attach);
+        return;
+      }
+      final svc = Get.find<StreamWebSocketService>();
+      _streamAccountsSub?.cancel();
+      _streamAccountsSub = svc.accounts.listen((payload) {
+        if (_isDisposed) return;
+        handleStreamFrame(payload);
+      });
+    }
+    attach();
   }
 
   /// Check authentication status before setting up WebSocket

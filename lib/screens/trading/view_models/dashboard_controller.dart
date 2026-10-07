@@ -10,6 +10,7 @@ import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/models/websocket_trading_response.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/services/stream_websocket_service.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
@@ -147,7 +148,37 @@ class DashboardController extends GetxController {
     }
   }
 
+  /// Account rows on /ws/stream are normalised to `['ac', acct, ...]` so
+  /// [_parseAccountArray] can read them unchanged.
+  void _bindStreamAccountChannel() {
+    if (!Get.isRegistered<StreamWebSocketService>()) return;
+    _unifiedAccountSub?.cancel();
+    _unifiedAccountSub =
+        Get.find<StreamWebSocketService>().accounts.listen(_onStreamAccounts);
+    _isWebSocketConnected.value = true;
+  }
+
+  void _onStreamAccounts(dynamic raw) {
+    if (_isDisposed || raw is! List || raw.isEmpty) return;
+    // Demuxer may hand `[<payload>]` for `['ac', <payload>]` frames.
+    final payload = raw.length == 1 && raw.first is List ? raw.first : raw;
+    if (payload is! List || payload.isEmpty) return;
+    if (payload.first is List) {
+      for (final row in payload) {
+        if (row is List && row.isNotEmpty) {
+          _parseAccountArray(StreamWebSocketService.tagAccountRow(row));
+        }
+      }
+      return;
+    }
+    _parseAccountArray(StreamWebSocketService.tagAccountRow(payload));
+  }
+
   void _bindUnifiedAccountStream() {
+    if (FlavorConfig.usesSingleStreamSocket) {
+      _bindStreamAccountChannel();
+      return;
+    }
     try {
       final unified = Get.find<UnifiedWebSocketService>();
       unified.ensureConnected(WebSocketChannelType.account, primaryMT5Account);
@@ -819,6 +850,7 @@ class DashboardController extends GetxController {
     // Use unified WebSocket service instead of direct channel
     _bindUnifiedAccountStream();
     if (_isWebSocketConnected.value) return;
+    if (FlavorConfig.usesSingleStreamSocket) return;
 
     // ✅ FIX: Check authentication before initializing WebSocket
     final isLoggedIn = await SecureStorageService.isUserLoggedIn();

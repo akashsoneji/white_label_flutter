@@ -2700,7 +2700,10 @@ class _TradeScreenState extends State<TradeScreen> {
 
   // Helper method to get symbol without .c suffix
   String _getDisplaySymbol(String symbol) {
-    return symbol.replaceFirst('.c', '');
+    // Only an exact trailing '.c' is stripped so '.cent' symbols stay intact.
+    return symbol.endsWith('.c')
+        ? symbol.substring(0, symbol.length - 2)
+        : symbol;
   }
 
   Widget _buildPositionDetailsContent(
@@ -2986,7 +2989,12 @@ class _TradeScreenState extends State<TradeScreen> {
                         ),
                         onTap: () {
                           Get.back(closeOverlays: true);
-                          Get.to(() => EditOrderScreen(position: position));
+                          Get.to(
+                            () => EditOrderScreen(
+                              position: position,
+                              isPendingOrder: true,
+                            ),
+                          );
                         },
                         color: AppColors.primary,
                       ),

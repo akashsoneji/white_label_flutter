@@ -251,10 +251,22 @@ class MarketWatchV2Service extends GetxService {
   Future<void> resumeSubscribeSymbols(List<String> symbols) async {
     final clean =
         symbols.map(normalizeSymbol).where((s) => s.isNotEmpty).toList();
+    if (clean.isEmpty) return;
+
+    // Pippro / pipze: route resume subscription to the single `/ws/stream`
+    // socket. Without this branch the legacy `_channel` is always null for
+    // this flavor and the favorites subscribe gets silently dropped on every
+    // app resume — StreamWS reconnects fine but the client never re-asserts
+    // the symbol list, so prices for favorites can stop flowing.
+    if (FlavorConfig.usesSingleStreamSocket) {
+      if (Get.isRegistered<StreamWebSocketService>()) {
+        await Get.find<StreamWebSocketService>().addSymbols(clean);
+      }
+      return;
+    }
 
     await _ensureSocketForCurrentAccount();
     if (_channel == null) return;
-    if (clean.isEmpty) return;
 
     final payload = <String, dynamic>{'action': 'subscribe', 'symbols': clean};
     _logRequest('resume subscribe', payload);

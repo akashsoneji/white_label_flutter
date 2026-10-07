@@ -19,7 +19,9 @@ import 'package:crm_app/services/trading_websocket_service.dart';
 import 'package:crm_app/services/account_websocket_service.dart';
 import 'package:crm_app/services/market_watch_v2_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
+import 'package:crm_app/services/stream_websocket_service.dart';
 import 'package:crm_app/services/unified_websocket_service.dart';
+import 'package:crm_app/flavor_config.dart';
 
 class AccountController extends GetxController with WidgetsBindingObserver {
   final AccountService _accountService = Get.find<AccountService>();
@@ -117,7 +119,12 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       // ✅ Delay check slightly to let AppLockLifecycle evaluate lock status first.
       // Normal foreground return should restore socket subscriptions only. A full
       // account refresh/reconnect clears screen data and causes visible reloads.
-      Future.delayed(const Duration(milliseconds: 100), () {
+      // Stream flavors reconnect on the next microtask; legacy flavors keep
+      // the 100ms grace so AppLockLifecycle can evaluate lock status first.
+      final resumeDelay = FlavorConfig.usesSingleStreamSocket
+          ? Duration.zero
+          : const Duration(milliseconds: 100);
+      Future.delayed(resumeDelay, () {
         final isLocked = Get.find<AppLockService>().isLocked.value;
         if (!isLocked) {
           print('=== WS CENTRAL: App resumed and not locked, restoring sockets only ===');
@@ -203,6 +210,20 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       }
     } catch (e) {
       print('Error disconnecting Unified WS: $e');
+    }
+
+    // Single multiplexed stream socket (pippro / pipze).
+    // Legacy services above short-circuit on these flavors, so the stream
+    // socket is the only live connection — it MUST be paused here or the
+    // OS kills it silently in the background.
+    if (FlavorConfig.usesSingleStreamSocket) {
+      try {
+        if (Get.isRegistered<StreamWebSocketService>()) {
+          Get.find<StreamWebSocketService>().pause();
+        }
+      } catch (e) {
+        print('Error pausing Stream WS: $e');
+      }
     }
   }
 
@@ -859,6 +880,16 @@ class AccountController extends GetxController with WidgetsBindingObserver {
         (acc) => acc.metaAccountNumber == accountNumber,
       );
       if (account == null) return;
+
+      // Single /ws/stream socket carries prices, positions, orders and
+      // accounts, so it is the only thing to reopen. Legacy sockets are never
+      // opened in this mode; touching them here only delays the resume.
+      if (FlavorConfig.usesSingleStreamSocket) {
+        if (Get.isRegistered<StreamWebSocketService>()) {
+          await Get.find<StreamWebSocketService>().resume();
+        }
+        return;
+      }
 
       // Trading WS
       try {
