@@ -2095,10 +2095,10 @@ class _FavoritesWatchlistSheetState extends State<_FavoritesWatchlistSheet> {
   static String _stripSuffix(String s) =>
       s.contains('.') ? s.substring(0, s.lastIndexOf('.')) : s;
 
-  void _removeFromFavorites(String sym, InstrumentsController ic) {
+  Future<void> _removeFromFavorites(String sym, InstrumentsController ic) async {
+    final removed = await ic.removeFromFavorites(sym);
+    if (!removed || !mounted) return;
     setState(() => _lastRemoved = sym);
-    ic.toggleFavorite(sym);
-    if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     messenger.clearSnackBars();
     messenger.showSnackBar(

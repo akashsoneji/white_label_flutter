@@ -6,14 +6,6 @@ class FavoritesStorageService {
   static const String _favoritesNamesKey = 'favorite_instruments_names';
   static FavoritesStorageService? _instance;
 
-  // Default favorite instruments - only include instruments that exist in API
-  static const List<String> _defaultFavorites = [
-    'XAUUSD.c',
-    'XAGUSD.c',
-    'GBPUSD.c',
-    'EURUSD.c',
-  ];
-
   // Singleton pattern
   static FavoritesStorageService get instance {
     _instance ??= FavoritesStorageService._();
@@ -28,19 +20,12 @@ class FavoritesStorageService {
       final prefs = await SharedPreferences.getInstance();
       final json = prefs.getString(_favoritesKey);
 
-      if (json != null && json.isNotEmpty) {
-        final List<dynamic> decoded = jsonDecode(json);
-        return decoded.cast<String>();
-      } else {
-        // If no favorites exist, initialize with default favorites
-        print('No favorites found, initializing with default favorites');
-        await _initializeDefaultFavorites();
-        return List.from(_defaultFavorites);
-      }
+      if (json == null || json.isEmpty) return <String>[];
+      final List<dynamic> decoded = jsonDecode(json);
+      return decoded.cast<String>();
     } catch (e) {
       print('Error getting favorites: $e');
-      // If error occurs, return default favorites
-      return List.from(_defaultFavorites);
+      return <String>[];
     }
   }
 
@@ -66,16 +51,6 @@ class FavoritesStorageService {
       await prefs.setString(_favoritesNamesKey, jsonEncode(names));
     } catch (e) {
       print('Error saving favorite names: $e');
-    }
-  }
-
-  // Initialize default favorites in storage
-  Future<void> _initializeDefaultFavorites() async {
-    try {
-      await saveFavoriteInstruments(_defaultFavorites);
-      print('Default favorites initialized: $_defaultFavorites');
-    } catch (e) {
-      print('Error initializing default favorites: $e');
     }
   }
 
@@ -169,26 +144,6 @@ class FavoritesStorageService {
     }
   }
 
-  // Reset to default favorites
-  Future<void> resetToDefaultFavorites() async {
-    try {
-      await saveFavoriteInstruments(_defaultFavorites);
-      print('Reset to default favorites: $_defaultFavorites');
-    } catch (e) {
-      print('Error resetting to default favorites: $e');
-    }
-  }
-
-  // Force reinitialize with new defaults (useful when default list changes)
-  Future<void> forceReinitializeDefaults() async {
-    try {
-      await clearAllFavorites();
-      await saveFavoriteInstruments(_defaultFavorites);
-      print('Force reinitialized with new defaults: $_defaultFavorites');
-    } catch (e) {
-      print('Error force reinitializing defaults: $e');
-    }
-  }
 
   // Get favorites count
   Future<int> getFavoritesCount() async {

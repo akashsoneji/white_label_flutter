@@ -413,12 +413,15 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                   size: 22.r,
                 ),
               ),
-              onDismissed: (direction) {
-                _ic.removeFromFavorites(item.symbol);
-                CustomToastService.showSuccess(
-                  message:
-                      '${item.symbol.replaceAll('.c', '').replaceAll('.r', '')} removed from favorites',
-                );
+              confirmDismiss: (direction) async {
+                final removed = await _ic.removeFromFavorites(item.symbol);
+                if (removed) {
+                  CustomToastService.showSuccess(
+                    message:
+                        '${item.symbol.replaceAll('.c', '').replaceAll('.r', '')} removed from favorites',
+                  );
+                }
+                return removed;
               },
               child: _IquoteInstrumentRow(
                 key: ValueKey(item.symbol),
@@ -476,12 +479,15 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                   size: 22.r,
                 ),
               ),
-              onDismissed: (direction) {
-                _ic.removeFromFavorites(item.symbol);
-                CustomToastService.showSuccess(
-                  message:
-                      '${item.symbol.replaceAll('.c', '').replaceAll('.r', '')} removed from favorites',
-                );
+              confirmDismiss: (direction) async {
+                final removed = await _ic.removeFromFavorites(item.symbol);
+                if (removed) {
+                  CustomToastService.showSuccess(
+                    message:
+                        '${item.symbol.replaceAll('.c', '').replaceAll('.r', '')} removed from favorites',
+                  );
+                }
+                return removed;
               },
               child: row,
             );

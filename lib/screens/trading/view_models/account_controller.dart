@@ -731,6 +731,7 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       // Set the new primary account for endpoint helper to avoid stale URLs
       WebSocketEndpointHelper.setPrimaryAccount(account);
 
+
       // ✅ NOTE: Trading data already cleared above when setting switching flag
       // No need to clear again here to avoid double clearing
       try {

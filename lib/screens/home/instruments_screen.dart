@@ -737,16 +737,11 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
           color: Colors.red,
           child: Icon(Icons.delete, color: Colors.white, size: 24.sp),
         ),
-        onDismissed: (direction) async {
-          final ic = _controller;
-          if (ic.isFavorite(instrument.symbol)) {
-            await ic.toggleFavorite(instrument.symbol);
-            await ic.syncMarketWatchV2AfterFavoriteChange(
-              instrument.symbol,
-              isFavoriteNow: ic.isFavorite(instrument.symbol),
-            );
-          }
-        },
+        // Server-first: the row only goes away once the POST succeeds; on
+        // failure it snaps back and the controller shows the error toast.
+        confirmDismiss:
+            (direction) =>
+                _controller.removeFromFavorites(instrument.symbol),
         child: itemWidget,
       );
     }

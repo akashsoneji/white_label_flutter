@@ -54,6 +54,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 
   // Loading states
   bool isProcessingEdit = false;
+  bool isCancellingOrder = false;
 
   // Key to force FutureBuilder rebuild when TP/SL values change
   int _pnlCalculationKey = 0;
@@ -130,6 +131,21 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     return PrecisionHelper.formatPrice(value, decimals: _positionDigits);
   }
 
+  /// Trigger price typed in the pending-order Price field; null if unparsable.
+  double? get _editedOrderPrice =>
+      double.tryParse(limitPriceController.text.replaceAll(',', ''));
+
+  /// Price SL/TP P&L is measured from: the edited trigger price for a pending
+  /// order, otherwise the position's open price.
+  double get _orderEntryPrice {
+    if (widget.isPendingOrder) {
+      final edited = _editedOrderPrice;
+      if (edited != null && edited > 0) return edited;
+    }
+    return double.tryParse(widget.position.entryPrice.replaceAll(',', '')) ??
+        0.0;
+  }
+
   double _getCurrentPrice() {
     final bid = _bid ?? 0.0;
     final ask = _ask ?? 0.0;
@@ -171,6 +187,15 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
         widget.position.digits > 0
             ? widget.position.digits
             : _getDecimalDigitsForSymbol(widget.position.symbol);
+
+    if (widget.isPendingOrder) {
+      final orderPrice = double.tryParse(
+        widget.position.entryPrice.replaceAll(',', ''),
+      );
+      if (orderPrice != null && orderPrice > 0) {
+        limitPriceController.text = _formatPrice(orderPrice);
+      }
+    }
 
     // Initialize controllers
     _initializeControllers();
@@ -442,10 +467,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   /// Buy Limit sits above the entry and rejected every valid TP below it.
   double _slTpReferencePrice() {
     if (widget.isPendingOrder) {
-      final orderPrice = double.tryParse(
-        widget.position.entryPrice.replaceAll(',', ''),
-      );
-      if (orderPrice != null && orderPrice > 0) return orderPrice;
+      final orderPrice = _orderEntryPrice;
+      if (orderPrice > 0) return orderPrice;
     }
     return _getCurrentRealTimePriceAsDouble();
   }
@@ -522,8 +545,10 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 
   // Modify order method - using update-tp-sl API
   Future<void> _modifyOrder() async {
-    // Check if both take profit and stop loss are empty
-    if (takeProfitController.text.isEmpty && stopLossController.text.isEmpty) {
+    // Positions need TP or SL; a pending order can also save a price-only edit.
+    if (!widget.isPendingOrder &&
+        takeProfitController.text.isEmpty &&
+        stopLossController.text.isEmpty) {
       return;
     }
 
@@ -566,7 +591,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
         success = await tradingController.updatePendingOrderTPSL(
           mt5Account: activeAccount.metaAccountNumber,
           orderId: positionId,
-          price: double.tryParse(widget.position.entryPrice),
+          price: _editedOrderPrice,
           stopLoss: stopLossEnabled ? stopLoss : null,
           takeProfit: takeProfitEnabled ? takeProfit : null,
           digits: _positionDigits,
@@ -595,6 +620,34 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       setState(() {
         isProcessingEdit = false;
       });
+    }
+  }
+
+  Future<void> _cancelPendingOrder() async {
+    final activeAccount = accountController.activeMT5Account;
+    final orderId = int.tryParse(widget.position.orderId) ?? 0;
+    if (activeAccount == null || orderId <= 0) {
+      CustomToastService.showError(
+        title: TranslationUtils.tr('general_error'),
+        message: TranslationUtils.tr('trade_no_active_account'),
+      );
+      return;
+    }
+
+    setState(() => isCancellingOrder = true);
+    try {
+      final success = await Get.find<TradingController>()
+          .cancelOrderWithImmediateUpdate(
+            mt5Account: activeAccount.metaAccountNumber,
+            orderId: orderId,
+          );
+      if (success) {
+        Get.back(closeOverlays: true);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isCancellingOrder = false);
+      }
     }
   }
 
@@ -825,6 +878,11 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 
                         SizedBox(height: 12.h),
 
+                        if (widget.isPendingOrder) ...[
+                          _buildOrderPriceSection(),
+                          SizedBox(height: 12.h),
+                        ],
+
                         // Stop Loss and Take Profit with Switches
                         _buildEditContent(),
 
@@ -1039,6 +1097,36 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildOrderPriceSection() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            TranslationUtils.tr('pending_order_price'),
+            style: AppTextStyles.label.copyWith(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          _buildPriceInputCompact(
+            'Price',
+            limitPriceController,
+            _orderEntryPrice,
+          ),
+        ],
+      ),
     );
   }
 
@@ -1742,7 +1830,13 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
         stopLossEnabled &&
         stopLossController.text.isNotEmpty &&
         PrecisionHelper.parseDouble(stopLossController.text, decimals: _positionDigits) > 0;
-    final canConfirm = hasTPValue || hasSLValue;
+    final editedPrice = _editedOrderPrice;
+    final hasPriceValue =
+        widget.isPendingOrder && editedPrice != null && editedPrice > 0;
+    final canConfirm = hasPriceValue || hasTPValue || hasSLValue;
+    final hasInvalidPrice =
+        widget.isPendingOrder && (editedPrice == null || editedPrice <= 0);
+    final isBusy = isProcessingEdit || isCancellingOrder;
 
     final bool hasInvalidSLTP =
         (stopLossEnabled && !_validateStopLoss()) ||
@@ -1752,12 +1846,15 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       child: Row(
         children: [
-          // Discard Button
+          // Discard (position) / Cancel Order (pending order) Button
           Expanded(
             child: SizedBox(
               height: 40.h,
               child: OutlinedButton(
-                onPressed: () => Get.back(closeOverlays: true),
+                onPressed:
+                    widget.isPendingOrder
+                        ? (isBusy ? null : _cancelPendingOrder)
+                        : () => Get.back(closeOverlays: true),
                 style: OutlinedButton.styleFrom(
                   backgroundColor: Color(0xffEFEAF6),
                   side: BorderSide(color: AppColors.whiteColor),
@@ -1766,14 +1863,24 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                   ),
                   padding: EdgeInsets.zero,
                 ),
-                child: Text(
-                  TranslationUtils.tr('edit_order_screen_discard'),
-                  style: AppTextStyles.label.copyWith(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
-                  ),
-                ),
+                child:
+                    isCancellingOrder
+                        ? ButtonLoadingWidget(
+                          size: 20.0,
+                          color: AppColors.primary,
+                        )
+                        : Text(
+                          TranslationUtils.tr(
+                            widget.isPendingOrder
+                                ? 'trade_cancel_order'
+                                : 'edit_order_screen_discard',
+                          ),
+                          style: AppTextStyles.label.copyWith(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
+                        ),
               ),
             ),
           ),
@@ -1786,7 +1893,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                 onPressed:
                     (canConfirm &&
                             _isOrderValid() &&
-                            !isProcessingEdit &&
+                            !isBusy &&
+                            !hasInvalidPrice &&
                             !hasInvalidSLTP)
                         ? _modifyOrder
                         : null,
@@ -1864,7 +1972,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     if (tpPrice <= 0) return null;
 
     // Use entry price (static from order), not current price (from datafeed)
-    final entryPrice = double.tryParse(widget.position.entryPrice) ?? 0.0;
+    final entryPrice = _orderEntryPrice;
     if (entryPrice <= 0) return null;
 
     // Get symbol details from cache (contract size and digits)
@@ -1920,7 +2028,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     }
 
     // Use entry price (static from order), not current price (from datafeed)
-    final entryPrice = double.tryParse(widget.position.entryPrice) ?? 0.0;
+    final entryPrice = _orderEntryPrice;
     if (entryPrice <= 0) {
       print(
         'EditOrderScreen: SL P&L - Invalid entry price: ${widget.position.entryPrice}',

@@ -6,6 +6,7 @@ import 'package:crm_app/models/settings_profile_model.dart' as profile_model;
 import 'package:get/get.dart' as g;
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/account_cache_service.dart';
+import 'package:crm_app/services/favorites_storage_service.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/kyc/view_models/compliance_controller.dart';
@@ -1241,6 +1242,10 @@ class AuthController extends GetxController {
     } catch (e) {
       print('AuthController: Error clearing WalletController: $e');
     }
+
+    // Marketwatch is per client: drop the cached list so the next login
+    // shows only its own server list.
+    await FavoritesStorageService.instance.clearAllFavorites();
 
     // 5. Reset AuthController state
     _loginResponse.value = null;

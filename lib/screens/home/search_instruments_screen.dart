@@ -355,17 +355,13 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
               final ic = Get.find<InstrumentsController>();
               final isFavorite = ic.isFavorite(symbol.displaySymbol);
               return GestureDetector(
-                onTap: () async {
-                  await ic.toggleFavorite(
-                    symbol.displaySymbol,
-                    searchSymbol: symbol,
-                    hydrateAfterChange: false,
-                  );
-                  await ic.syncMarketWatchV2AfterFavoriteChange(
-                    symbol.displaySymbol,
-                    isFavoriteNow: ic.isFavorite(symbol.displaySymbol),
-                  );
-                },
+                // toggleFavorite POSTs the full list (old + this symbol) and
+                // subscribes / unsubscribes on the stream only after success.
+                onTap: () => ic.toggleFavorite(
+                  symbol.displaySymbol,
+                  searchSymbol: symbol,
+                  hydrateAfterChange: false,
+                ),
                 child: Padding(
                   padding: EdgeInsetsDirectional.only(start: 8.w),
                   child: Icon(

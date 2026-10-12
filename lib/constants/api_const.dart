@@ -28,6 +28,7 @@ class ApiConstants {
   static const String googleOtpVerifyLogin = '${ajax}auth/google/verify-login-otp';
   static const String register = '${ajax}register';
   static const String registerFcmToken = '${ajax}register-fcm-token';
+  static const String marketWatch = '${ajax}trade/marketwatch';
   static const String dashboard = '${ajax}dashboard';
   static const String getNotifications = '${ajax}notifications';
   static const String priceAlerts = '${ajax}price-alerts';

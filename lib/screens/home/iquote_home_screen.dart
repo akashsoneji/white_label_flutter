@@ -423,11 +423,14 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                     size: 20.r,
                   ),
                 ),
-                onDismissed: (direction) {
-                  _ic.removeFromFavorites(item.symbol);
-                  CustomToastService.showSuccess(
-                    message: '${item.symbol.replaceAll('.c', '').replaceAll('.r', '')} removed from favorites',
-                  );
+                confirmDismiss: (direction) async {
+                  final removed = await _ic.removeFromFavorites(item.symbol);
+                  if (removed) {
+                    CustomToastService.showSuccess(
+                      message: '${item.symbol.replaceAll('.c', '').replaceAll('.r', '')} removed from favorites',
+                    );
+                  }
+                  return removed;
                 },
                 child: _LiveTickerCard(
                   instrument: item,
