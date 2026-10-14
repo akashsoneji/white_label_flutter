@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:crm_app/utils/android_style_extensions.dart';
+
 import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:crm_app/constants/color.dart';
@@ -729,7 +729,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
 
     if (isFavoriteFilter) {
       return Dismissible(
-        key: Key('dismiss_${instrument.symbol}'),
+        key: ValueKey('dismiss_${instrument.symbol}'),
         direction: DismissDirection.endToStart,
         background: Container(
           alignment: AlignmentDirectional.centerEnd,
@@ -737,11 +737,13 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
           color: Colors.red,
           child: Icon(Icons.delete, color: Colors.white, size: 24.sp),
         ),
-        // Server-first: the row only goes away once the POST succeeds; on
-        // failure it snaps back and the controller shows the error toast.
-        confirmDismiss:
-            (direction) =>
-                _controller.removeFromFavorites(instrument.symbol),
+        // removeFromFavorites drops the row from the list before its first
+        // await, so the dismissed widget leaves the tree in this frame. The
+        // remaining full list is POSTed in the background; on failure the
+        // row comes back from the server-confirmed cache.
+        onDismissed: (_) {
+          _controller.removeFromFavorites(instrument.symbol);
+        },
         child: itemWidget,
       );
     }
@@ -1500,11 +1502,9 @@ class _FavoriteButton extends StatelessWidget {
         controller.toggleFavorite(symbol, name: name);
       },
       child: Obx(() {
-        final favs = controller.favoriteInstruments;
-        final isFavorite =
-            favs.contains(symbol) ||
-            favs.contains('$symbol.c') ||
-            favs.contains(symbol.removeSuffix());
+        // Reading the RxList length keeps this Obx subscribed to changes.
+        controller.favoriteInstruments.length;
+        final isFavorite = controller.isFavorite(symbol);
         final Color borderColor =
             isFavorite ? AppColors.primary : AppColors.primary.withOpacity(0.6);
 

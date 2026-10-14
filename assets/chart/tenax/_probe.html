@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="tenax-chart.css" />
+    <style>html,body,#app{margin:0;width:400px;height:600px}</style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <pre id="out">pending</pre>
+    <script>
+      // Capture what the chart sends back to the app (same channel as Flutter).
+      var fromChart = [];
+      window.flutter_inappwebview = {
+        callHandler: function (name, msg) {
+          fromChart.push(typeof msg === 'string' ? msg : JSON.stringify(msg));
+          return Promise.resolve();
+        },
+      };
+      var errors = [];
+      window.addEventListener('error', function (e) { errors.push(String(e.message)); });
+      var origErr = console.error;
+      console.error = function () { errors.push([].slice.call(arguments).join(' ')); origErr.apply(console, arguments); };
+      var origWarn = console.warn;
+      console.warn = function () { errors.push('WARN ' + [].slice.call(arguments).join(' ')); origWarn.apply(console, arguments); };
+    </script>
+    <script src="tenax-chart.umd.cjs"></script>
+    <script>
+      function bars(n, stepSec, mode) {
+        var now = Math.floor(Date.now() / 1000);
+        var start = now - n * stepSec;
+        var out = [];
+        for (var i = 0; i < n; i++) {
+          var t = start + i * stepSec;
+          var o = 2000 + Math.sin(i / 10) * 20;
+          out.push({ time: mode === 'ms' ? t * 1000 : t, open: o, high: o + 5, low: o - 5, close: o + 2, volume: 10 });
+        }
+        return out;
+      }
+      function canvasInk() {
+        // Count non-blank pixels across all canvases → did anything draw?
+        var total = 0;
+        document.querySelectorAll('canvas').forEach(function (c) {
+          try {
+            var ctx = c.getContext('2d');
+            if (!ctx || !c.width || !c.height) return;
+            var d = ctx.getImageData(0, 0, c.width, c.height).data;
+            for (var i = 3; i < d.length; i += 16) if (d[i] > 0) total++;
+          } catch (e) {}
+        });
+        return total;
+      }
+      var r = {};
+      var mode = (location.hash || '#sec').slice(1);
+      try {
+        TenaxChart.mountBridge(document.getElementById('app'), {
+          symbol: 'XAUUSD', interval: '15m', themeMode: 'light',
+          datafeed: { mode: 'push', displayOffsetMinutes: 0 },
+          orders: { contractSize: 1, allowDrag: true, allowClose: true },
+        });
+      } catch (e) { r.mountError = String(e); }
+
+      setTimeout(function () {
+        r.inkBefore = canvasInk();
+        // Same order the Flutter controller uses.
+        TenaxChart.receive({ type: 'theme', mode: 'light' });
+        var b = bars(1000, 900, mode === 'ms' ? 'ms' : 'sec');
+        if (mode === 'nosymbol') {
+          // candles only, no preceding symbol reset
+          TenaxChart.receive({ type: 'candles', bars: b });
+        } else if (mode === 'tagged') {
+          TenaxChart.receive({ type: 'symbol', symbol: 'XAUUSD', interval: '15m' });
+          TenaxChart.receive({ type: 'candles', symbol: 'XAUUSD', interval: '15m', bars: b });
+        } else if (mode === 'delayed') {
+          TenaxChart.receive({ type: 'symbol', symbol: 'XAUUSD', interval: '15m' });
+          setTimeout(function () { TenaxChart.receive({ type: 'candles', bars: b }); }, 700);
+        } else if (mode === 'json') {
+          TenaxChart.receive({ type: 'symbol', symbol: 'XAUUSD', interval: '15m' });
+          TenaxChart.receive(JSON.stringify({ type: 'candles', bars: b }));
+        } else {
+          TenaxChart.receive({ type: 'symbol', symbol: 'XAUUSD', interval: '15m' });
+          TenaxChart.receive({ type: 'candles', bars: b });
+        }
+      }, 500);
+
+      setTimeout(function () {
+        r.mode = mode;
+        r.inkAfterCandles = canvasInk();
+        r.canvases = document.querySelectorAll('canvas').length;
+        var app = document.getElementById('app');
+        r.legend = (app.innerText || '').replace(/\s+/g, ' ').slice(0, 220);
+        r.fromChart = fromChart.slice(0, 8);
+        r.errors = errors.slice(0, 8);
+        document.getElementById('out').textContent = 'RESULT:' + JSON.stringify(r);
+      }, 2500);
+    </script>
+  </body>
+</html>

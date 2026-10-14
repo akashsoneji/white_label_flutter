@@ -504,13 +504,9 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
     );
   }
 
-  // Helper method to get symbol without .c suffix
-  // Only an exact trailing '.c' is stripped; replaceFirst('.c') turned
-  // 'XAUUSD.cent' into 'XAUUSDent'.
+  /// Display symbol from the instruments API (`datafeed_symbol` → `display_symbol`).
   String get _displaySymbol =>
-      selectedSymbol.endsWith('.c')
-          ? selectedSymbol.substring(0, selectedSymbol.length - 2)
-          : selectedSymbol;
+      SymbolDetailsCacheService.displaySymbolOf(selectedSymbol);
 
   // Display-only label for an order type. The raw value is still used for logic.
   String _orderTypeLabel(String orderType) {

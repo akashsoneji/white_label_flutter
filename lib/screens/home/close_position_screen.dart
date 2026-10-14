@@ -245,14 +245,9 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
     return PrecisionHelper.formatPrice(value, decimals: _positionDigits);
   }
 
-  // Helper method to get symbol without .c suffix
-  // Only an exact trailing '.c' is stripped so '.cent' symbols stay intact.
-  String get _displaySymbol {
-    final symbol = widget.position.symbol;
-    return symbol.endsWith('.c')
-        ? symbol.substring(0, symbol.length - 2)
-        : symbol;
-  }
+  /// Display symbol from the instruments API (`datafeed_symbol` → `display_symbol`).
+  String get _displaySymbol =>
+      SymbolDetailsCacheService.displaySymbolOf(widget.position.symbol);
 
   // Wrapper method for button press with debug logging
   void _onButtonPressed() {

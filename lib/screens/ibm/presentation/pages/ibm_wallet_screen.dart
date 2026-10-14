@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,10 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/ibm/presentation/pages/create_edit_plan_screen.dart';
+import 'package:crm_app/screens/ibm/presentation/pages/ibm_commission_distribution_screen.dart';
+import 'package:crm_app/screens/ibm/presentation/pages/ibm_exports_screen.dart';
+import 'package:crm_app/screens/ibm/presentation/pages/ibm_reports_screen.dart';
+
 import 'package:crm_app/screens/ibm/presentation/widgets/assign_plan_bottom_sheet.dart';
 import 'package:crm_app/screens/ibm/data/ibm_api_provider.dart';
 import 'package:crm_app/screens/ibm/utils/ibm_currency.dart';
@@ -73,6 +79,11 @@ class _IbmWalletScreenState extends State<IbmWalletScreen>
           ),
         ),
         actions: [
+          IconButton(
+            tooltip: TranslationUtils.tr('ibm_reports'),
+            icon: Icon(Icons.assessment_outlined, color: AppColors.textPrimary),
+            onPressed: () => Get.to(() => const IbmReportsScreen()),
+          ),
           Obx(() {
             final balanceStr = '\$${controller.walletBalance}';
             return Padding(
@@ -222,11 +233,17 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
       IbmCurrency.format(_asNum(v), currencyCode: _currency());
 
   String _selectedSubTab = 'Earnings';
-  final List<String> _subTabs = ['Earnings', 'Payouts', 'My Commission Plan'];
+  final List<String> _subTabs = [
+    'Earnings',
+    'Payouts',
+    'Distribute to Client',
+    'My Commission Plan',
+  ];
 
   static const Map<String, String> _subTabKeys = {
     'Earnings': 'ibm_earnings',
     'Payouts': 'ibm_payouts',
+    'Distribute to Client': 'ibm_distribute_to_client',
     'My Commission Plan': 'ibm_my_commission_plan',
   };
 
@@ -257,10 +274,52 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
     'Clawbacks': 'clawback',
   };
 
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounce;
+  String _searchQuery = '';
+  bool _isExporting = false;
+
+  static const Color _exportColor = AppColors.successText;
+
   @override
   void initState() {
     super.initState();
     _fetchTransactions();
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  /// Debounced so typing "NZDUSD" fires one request, not six. Clearing the
+  /// box reloads the unfiltered list.
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 400), () {
+      final query = value.trim();
+      if (query == _searchQuery) return;
+      _searchQuery = query;
+      _fetchTransactions();
+    });
+  }
+
+  Future<void> _exportCommissionHistory() async {
+    if (_isExporting) return;
+    setState(() => _isExporting = true);
+    try {
+      await runIbmExport(
+        kind: 'commission_history',
+        filters: {
+          'type': _selectedFilterValue.isEmpty ? null : _selectedFilterValue,
+          'symbol': _searchQuery.isEmpty ? null : _searchQuery,
+        },
+      );
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
   }
 
   Future<void> _fetchTransactions() async {
@@ -272,6 +331,7 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
       final response = await _apiProvider.getPortalWalletTransactions(
         currency: _currency(),
         type: _selectedFilterValue.isEmpty ? null : _selectedFilterValue,
+        search: _searchQuery,
       );
       if (response.success) {
         final rawJson = response.data;
@@ -625,7 +685,6 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
             Divider(color: AppColors.divider),
             SizedBox(height: 10.h),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 PopupMenuButton<String>(
                   onSelected: _onFilterSelected,
@@ -662,13 +721,12 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
                     }).toList();
                   },
                   child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 6.h,
-                    ),
+                    height: 36.h,
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.symmetric(horizontal: 12.w),
                     decoration: BoxDecoration(
                       border: Border.all(color: AppColors.divider),
-                      borderRadius: BorderRadius.circular(4.r),
+                      borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Text(
                       _filterLabel(_selectedFilter),
@@ -679,11 +737,117 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
                     ),
                   ),
                 ),
-                Text(
-                  TranslationUtils.tr('ibm_every_line_is_one_movement'),
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 10.sp,
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: SizedBox(
+                    height: 36.h,
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        setState(() {});
+                        _onSearchChanged(value);
+                      },
+                      textInputAction: TextInputAction.search,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: AppColors.textPrimary,
+                      ),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: TranslationUtils.tr(
+                          'ibm_search_symbol_or_account',
+                        ),
+                        hintStyle: TextStyle(
+                          fontSize: 12.sp,
+                          color: AppColors.textGrey,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          size: 16.w,
+                          color: AppColors.textGrey,
+                        ),
+                        prefixIconConstraints: BoxConstraints(minWidth: 32.w),
+                        suffixIcon: _searchController.text.isEmpty
+                            ? null
+                            : GestureDetector(
+                                onTap: () {
+                                  _searchController.clear();
+                                  setState(() {});
+                                  _onSearchChanged('');
+                                },
+                                child: Icon(
+                                  Icons.close,
+                                  size: 16.w,
+                                  color: AppColors.textGrey,
+                                ),
+                              ),
+                        suffixIconConstraints: BoxConstraints(minWidth: 32.w),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 8.h,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6.r),
+                          borderSide: BorderSide(color: AppColors.divider),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6.r),
+                          borderSide: BorderSide(color: AppColors.primary),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10.h),
+            Row(
+              children: [
+                OutlinedButton.icon(
+                  onPressed: _isExporting ? null : _exportCommissionHistory,
+                  icon: _isExporting
+                      ? SizedBox(
+                          width: 14.w,
+                          height: 14.w,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: _exportColor,
+                          ),
+                        )
+                      : Icon(
+                          Icons.description_rounded,
+                          size: 16.w,
+                          color: _exportColor,
+                        ),
+                  label: Text(
+                    TranslationUtils.tr('ibm_commission_history'),
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: _exportColor,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: Size(0, 36.h),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w),
+                    backgroundColor: _exportColor.withValues(alpha: 0.1),
+                    side: BorderSide(
+                      color: _exportColor.withValues(alpha: 0.35),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Text(
+                    TranslationUtils.tr('ibm_every_line_is_one_movement'),
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 10.sp,
+                    ),
                   ),
                 ),
               ],
@@ -770,6 +934,10 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
               }).toList(),
             ] else if (_selectedSubTab == 'Payouts')
               _buildPayoutsBody()
+            else if (_selectedSubTab == 'Distribute to Client')
+              IbmDistributeToClientSection(
+                onChanged: _ibmController.fetchWallet,
+              )
             else
               _buildMyPlanBody(),
           ],
@@ -1403,6 +1571,39 @@ class _CommissionPlansTabState extends State<CommissionPlansTab> {
     }
   }
 
+  Future<void> _renamePlan(
+    int planId,
+    String currentName,
+    String currentDescription,
+  ) async {
+    final result = await showDialog<_RenamePlanResult>(
+      context: context,
+      builder: (_) => _RenamePlanDialog(
+        initialName: currentName,
+        initialDescription: currentDescription,
+      ),
+    );
+    if (result == null) return;
+
+    setState(() => _isLoading = true);
+    final res = await IbmApiProvider().renamePartnerPlan(
+      planId,
+      planName: result.name,
+      description: result.description,
+    );
+    if (res.success) {
+      CustomToastService.showSuccess(
+        message: res.message ?? TranslationUtils.tr('ibm_plan_renamed'),
+      );
+      _fetchPlans();
+    } else {
+      if (mounted) setState(() => _isLoading = false);
+      CustomToastService.showError(
+        message: res.message ?? TranslationUtils.tr('ibm_failed_to_rename_plan'),
+      );
+    }
+  }
+
   void _showAssignBottomSheet(int planId, String planName) {
     showModalBottomSheet(
       context: context,
@@ -1642,6 +1843,25 @@ class _CommissionPlansTabState extends State<CommissionPlansTab> {
                           ),
                           Expanded(
                             child: GestureDetector(
+                              onTap: () => _renamePlan(
+                                plan['plan_id'] ?? 0,
+                                name,
+                                description,
+                              ),
+                              child: _buildActionIcon(
+                                Icons.drive_file_rename_outline,
+                                TranslationUtils.tr('ibm_rename'),
+                                AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 1,
+                            height: 18.h,
+                            color: AppColors.divider,
+                          ),
+                          Expanded(
+                            child: GestureDetector(
                               onTap: () => _showAssignBottomSheet(
                                 plan['plan_id'] ?? 0,
                                 name,
@@ -1694,6 +1914,96 @@ class _CommissionPlansTabState extends State<CommissionPlansTab> {
             color: color,
             fontWeight: FontWeight.w500,
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RenamePlanResult {
+  final String name;
+  final String description;
+  const _RenamePlanResult(this.name, this.description);
+}
+
+class _RenamePlanDialog extends StatefulWidget {
+  final String initialName;
+  final String initialDescription;
+
+  const _RenamePlanDialog({
+    required this.initialName,
+    required this.initialDescription,
+  });
+
+  @override
+  State<_RenamePlanDialog> createState() => _RenamePlanDialogState();
+}
+
+class _RenamePlanDialogState extends State<_RenamePlanDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameController =
+      TextEditingController(text: widget.initialName);
+  late final TextEditingController _descriptionController =
+      TextEditingController(text: widget.initialDescription);
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    Navigator.pop(
+      context,
+      _RenamePlanResult(
+        _nameController.text.trim(),
+        _descriptionController.text.trim(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(TranslationUtils.tr('ibm_rename_plan')),
+      content: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _nameController,
+                maxLength: 150,
+                decoration: InputDecoration(
+                  labelText: TranslationUtils.tr('ibm_plan_name'),
+                ),
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? TranslationUtils.tr('ibm_plan_name_required')
+                    : null,
+              ),
+              TextFormField(
+                controller: _descriptionController,
+                maxLength: 1000,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText: TranslationUtils.tr('ibm_description'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(TranslationUtils.tr('account_management_cancel')),
+        ),
+        TextButton(
+          onPressed: _submit,
+          child: Text(TranslationUtils.tr('ibm_save')),
         ),
       ],
     );

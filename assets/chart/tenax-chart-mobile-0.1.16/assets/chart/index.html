@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!--
+      Tenax Chart 0.1.16 — WebView host page.
+
+      user-scalable=no: the chart pinch-zooms its own time scale, and the
+      browser zooming the page on top of that fights it.
+      viewport-fit=cover + safe-area padding keeps the chrome clear of the
+      notch and the home indicator.
+    -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Tenax Chart</title>
+    <link rel="stylesheet" href="tenax-chart.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overscroll-behavior: none;
+        background: #131722;
+      }
+      /* Pinned to the viewport rather than sized in vh: a WebView has no
+         browser chrome to account for, and `fixed` cannot be thrown off by
+         the keyboard opening or by dvh support differing across Android
+         WebView versions. */
+      #app {
+        position: fixed;
+        inset: 0;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right)
+          env(safe-area-inset-bottom) env(safe-area-inset-left);
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="tenax-chart.umd.cjs"></script>
+    <script>
+      // Boot values may come from the app before the socket does — either as a
+      // query string on the asset URL or as window.TENAX_CHART_BOOT injected
+      // with an initial user script. Anything not set here can still be sent
+      // later: symbol, interval, theme and colours are all messages.
+      var q = new URLSearchParams(location.search);
+      var boot = window.TENAX_CHART_BOOT || {};
+      var offset = q.get('offset');
+
+      // The UMD bundle defines TenaxChart; mounting replaces it with the
+      // bridge handle the app talks to (receive / send / ui).
+      var mounted = TenaxChart.mountBridge(document.getElementById('app'), {
+        symbol: q.get('symbol') || boot.symbol || 'BTCUSD',
+        interval: q.get('interval') || boot.interval || '15m',
+        // 'auto' follows the device's light/dark setting; the app can also
+        // send { type: 'theme', mode } at any point.
+        themeMode: q.get('theme') || boot.themeMode || 'dark',
+        // Push mode: the app owns the socket and feeds this chart. No
+        // historyUrl or wsUrl on purpose — a second connection would be a
+        // second login for the same stream.
+        datafeed: {
+          mode: 'push',
+          displayOffsetMinutes: Number(offset !== null ? offset : boot.displayOffsetMinutes || 0),
+        },
+        orders: Object.assign({ contractSize: 1, allowDrag: true, allowClose: true }, boot.orders),
+        persistence: Object.assign({ key: 'tenax.chart.mobile' }, boot.persistence),
+      });
+
+      // The safe-area strip around the chart is page background, so it has to
+      // change with the chart or a notch shows a dark band on a light screen.
+      var chartRoot = mounted.element || document.querySelector('.tc-root');
+      var paintBody = function () {
+        document.body.style.background =
+          getComputedStyle(chartRoot).getPropertyValue('--tc-bg-primary').trim() || '#131722';
+      };
+      paintBody();
+      new MutationObserver(paintBody).observe(chartRoot, {
+        attributes: true,
+        attributeFilter: ['data-tc-theme', 'style'],
+      });
+    </script>
+  </body>
+</html>

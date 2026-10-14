@@ -14,6 +14,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
@@ -25,6 +26,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
+import 'package:crm_app/services/symbol_details_cache_service.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
@@ -62,10 +64,11 @@ class TenaxChartWebViewState extends State<TenaxChartWebView> {
   @override
   void initState() {
     super.initState();
-    _initialSymbol = widget.symbol;
+    _initialSymbol = _chartSymbol(widget.symbol);
     _resolveToken();
     _setupOrderSync();
   }
+
 
   void _setupOrderSync() {
     try {
@@ -86,7 +89,7 @@ class TenaxChartWebViewState extends State<TenaxChartWebView> {
       final positions = tradeCtrl.marketPositions.map((p) {
         return Position(
           id: p.orderId.isNotEmpty ? p.orderId : (p.orderNo.isNotEmpty ? p.orderNo : '${p.symbol}_${p.openTime}'),
-          symbol: p.symbol,
+          symbol: _chartSymbol(p.symbol),
           side: p.action.toLowerCase() == 'buy' ? OrderSide.buy : OrderSide.sell,
           volume: p.volume,
           entry: double.tryParse(p.entryPrice) ?? 0.0,
@@ -106,7 +109,7 @@ class TenaxChartWebViewState extends State<TenaxChartWebView> {
 
         return PendingOrder(
           id: p.orderId.isNotEmpty ? p.orderId : (p.orderNo.isNotEmpty ? p.orderNo : '${p.symbol}_${p.openTime}'),
-          symbol: p.symbol,
+          symbol: _chartSymbol(p.symbol),
           kind: kind,
           volume: p.volume,
           price: double.tryParse(p.entryPrice) ?? 0.0,
@@ -122,12 +125,26 @@ class TenaxChartWebViewState extends State<TenaxChartWebView> {
   @override
   void didUpdateWidget(covariant TenaxChartWebView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.symbol != widget.symbol) {
-      debugPrint('TenaxChartWebView didUpdateWidget: symbol changed from ${oldWidget.symbol} to ${widget.symbol}');
+    final previous = _chartSymbol(oldWidget.symbol);
+    final next = _chartSymbol(widget.symbol);
+    // `XAUUSD` → `XAUUSD.c` is the same instrument; only a real change
+    // switches the chart (and reloads history).
+    if (previous != next) {
+      debugPrint(
+        'TenaxChartWebView didUpdateWidget: symbol changed from $previous to $next '
+        '(controller ready: ${_controller != null})',
+      );
       // In-place switch — controller sends a JS message; WebView stays alive.
-      _controller?.setSymbol(widget.symbol);
+      _controller?.setSymbol(next);
       _syncOrders();
     }
+  }
+
+  /// Chart/history symbol: upper-case, no account suffix (`.c`, `.m` …).
+  static String _chartSymbol(String raw) {
+    final upper = raw.trim().toUpperCase();
+    final dot = upper.indexOf('.');
+    return dot > 0 ? upper.substring(0, dot) : upper;
   }
 
   @override
@@ -169,7 +186,7 @@ class TenaxChartWebViewState extends State<TenaxChartWebView> {
   }
 
   void updateSymbol(String symbol) {
-    _controller?.setSymbol(symbol);
+    _controller?.setSymbol(_chartSymbol(symbol));
     _syncOrders();
   }
 
@@ -245,6 +262,15 @@ class TenaxChartWebViewState extends State<TenaxChartWebView> {
           theme: widget.isDark ? ChartTheme.dark : ChartTheme.light,
           onControllerReady: (c) {
             _controller = c;
+            // The header may have switched symbol while the chart was still
+            // loading; that change had no controller to go to, so apply it now.
+            final current = _chartSymbol(widget.symbol);
+            debugPrint(
+              'TenaxChartWebView controller ready (initial $_initialSymbol, current $current)',
+            );
+            if (current != _initialSymbol) {
+              c.setSymbol(current);
+            }
             _syncOrders();
           },
           onError: (e) => debugPrint('TenaxChartWebView: $e'),
@@ -268,8 +294,34 @@ class _PipzeTenaxApi extends TenaxChartApi {
   final Map<String, void Function(Tick)> _tickListeners = {};
   final Map<String, void Function()> _cancelCallbacks = {};
 
-  String get _accountNumber =>
-      token.contains('|') ? token.split('|').first : '';
+  static String _cleanSymbol(String raw) {
+    final upper = raw.trim().toUpperCase();
+    final dot = upper.indexOf('.');
+    return dot > 0 ? upper.substring(0, dot) : upper;
+  }
+
+  /// Seconds per bar for the cleaned resolution ('15', '60', '1D', ...).
+  static int _barSeconds(String cleanedRes) {
+    switch (cleanedRes) {
+      case '1D':
+        return 86400;
+      case '1W':
+        return 7 * 86400;
+      case '1M':
+        return 30 * 86400;
+      default:
+        return (int.tryParse(cleanedRes) ?? 1) * 60;
+    }
+  }
+
+  /// Active MT5 trading account for `user/instruments/{account}`. The token
+  /// prefix (`16362|...`) is the Sanctum token id, not an account, and the
+  /// API answers it with 404 "Trading account not found".
+  String get _accountNumber {
+    if (!Get.isRegistered<AccountController>()) return '';
+    final raw = Get.find<AccountController>().activeMT5Account?.metaAccountNumber;
+    return raw?.trim() ?? '';
+  }
 
   Map<String, String> get _headers => {
         'Authorization': 'Bearer $token',
@@ -310,27 +362,73 @@ class _PipzeTenaxApi extends TenaxChartApi {
   }
 
   // ── fetchCandles ──────────────────────────────────────────────────────────
+  /// In-flight history requests shared by every chart instance (chart tab,
+  /// order screens, rebuilt widgets). A second caller for the same
+  /// symbol+resolution awaits the running response instead of opening a
+  /// new connection — that pile-up is what flooded /market/history.
+  static final Map<String, Future<List<Candle>>> _inFlightHistory = {};
+  static int _historySeq = 0;
+
   @override
   Future<List<Candle>> fetchCandles({
     required String symbol,
     required String resolution,
     int? from,
     int? to,
-  }) async {
-    final count = 1000;
-    final cleanedRes = _cleanResolution(resolution);
+  }) {
+    final key = '$symbol|${_cleanResolution(resolution)}|${from ?? ''}|${to ?? ''}';
+    final running = _inFlightHistory[key];
+    if (running != null) {
+      print('fetchCandles: reuse in-flight $key');
+      return running;
+    }
+    // Block body on purpose: `remove` returns this same Future, and a Future
+    // returned from whenComplete is awaited — the request would wait on
+    // itself forever and the bars would never reach the chart.
+    final request = _fetchCandlesNetwork(
+      symbol: symbol,
+      resolution: resolution,
+      from: from,
+      to: to,
+    ).whenComplete(() {
+      _inFlightHistory.remove(key);
+    });
+    _inFlightHistory[key] = request;
+    return request;
+  }
 
+  Future<List<Candle>> _fetchCandlesNetwork({
+    required String symbol,
+    required String resolution,
+    int? from,
+    int? to,
+  }) async {
+    final seq = ++_historySeq;
+    const count = 500;
+    final cleanedRes = _cleanResolution(resolution);
+    // Backend contract: symbol=XAUUSD.c&from=..&to=..&count=500&resolution=15
+    // with a from/to window of 1000 bars ending now.
+    final nowSec = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    final toSec = to ?? nowSec;
+    final fromSec = from ?? (toSec - 1000 * _barSeconds(cleanedRes));
+
+    // `datafeed_symbol` from user/instruments/{account}; loads that API
+    // first if it is not cached yet.
+    final feedSymbol = await SymbolDetailsCacheService.resolveDatafeedSymbol(
+      symbol,
+      _accountNumber,
+    );
     final uri = Uri.parse('$baseUrl/api/market/history').replace(queryParameters: {
-      'symbol': symbol,
-      'resolution': cleanedRes,
-      if (from != null) 'from': '$from',
-      if (to != null) 'to': '$to',
+      'symbol': feedSymbol,
+      'from': '$fromSec',
+      'to': '$toSec',
       'count': '$count',
+      'resolution': cleanedRes,
     });
 
-    print('fetchCandles: GET $uri');
+    print('fetchCandles: #$seq GET $uri');
     final res = await _client.get(uri, headers: _headers);
-    print('fetchCandles: status ${res.statusCode}');
+    print('fetchCandles: #$seq status ${res.statusCode}');
     
     if (res.statusCode != 200) {
       throw Exception('HTTP ${res.statusCode}: ${res.body}');
@@ -439,21 +537,39 @@ class _PipzeTenaxApi extends TenaxChartApi {
   ) {
     _tickListeners[symbol] = onTick;
     _ensureSocket();
-    try {
-      _socket?.sink.add(jsonEncode({
-        'type': 'subscribe_chart',
-        'symbol': symbol,
-      }));
-    } catch (_) {}
 
-    return () {
-      _tickListeners.remove(symbol);
+    // Same async lookup as history: the sync one returns plain `XAUUSD` when
+    // user/instruments is not cached yet, and /ws/pricing only streams the
+    // datafeed symbol (`XAUUSD.cent`), so the chart got no live ticks.
+    var cancelled = false;
+    String? feedSymbol;
+    SymbolDetailsCacheService.resolveDatafeedSymbol(
+      symbol,
+      _accountNumber.isEmpty ? null : _accountNumber,
+    ).then((resolved) {
+      if (cancelled) return;
+      feedSymbol = resolved;
+      print('TenaxTrace subscribe_chart $resolved (chart $symbol)');
       try {
         _socket?.sink.add(jsonEncode({
-          'type': 'unsubscribe_chart',
-          'symbol': symbol,
+          'type': 'subscribe_chart',
+          'symbol': resolved,
         }));
       } catch (_) {}
+    });
+
+    return () {
+      cancelled = true;
+      _tickListeners.remove(symbol);
+      final subscribed = feedSymbol;
+      if (subscribed != null) {
+        try {
+          _socket?.sink.add(jsonEncode({
+            'type': 'unsubscribe_chart',
+            'symbol': subscribed,
+          }));
+        } catch (_) {}
+      }
       if (_tickListeners.isEmpty) {
         _socket?.sink.close();
         _socket = null;
@@ -537,6 +653,8 @@ class _PipzeTenaxApi extends TenaxChartApi {
   }
 
   // ── WebSocket management ──────────────────────────────────────────────────
+  final Set<String> _tracedTickSymbols = {};
+
   void _ensureSocket() {
     if (_socket != null) return;
 
@@ -557,15 +675,30 @@ class _PipzeTenaxApi extends TenaxChartApi {
               : jsonDecode(utf8.decode(raw as List<int>));
           if (msg is! Map) return;
 
-          final sym = msg['symbol']?.toString() ?? '';
-          final onTick = _tickListeners[sym];
+          // /ws/pricing sends compact frames:
+          // {"i":"XAGUSD.CENT","t":<ms>,"b":60.627,"a":60.645,"bt":<ms>}
+          final sym = (msg['i'] ?? msg['symbol'])?.toString() ?? '';
+          if (sym.isEmpty) return;
+          // Feed answers with the datafeed symbol (upper-cased, e.g.
+          // `XAGUSD.CENT`) while the chart listens on `XAGUSD`.
+          final chartSym = _tickListeners.containsKey(sym) ? sym : _cleanSymbol(sym);
+          final onTick = _tickListeners[chartSym];
           if (onTick == null) return;
 
-          final bid = (msg['bid'] as num?)?.toDouble();
-          final ask = (msg['ask'] as num?)?.toDouble();
+          final bid = _asDouble(msg['b'] ?? msg['bid']);
+          final ask = _asDouble(msg['a'] ?? msg['ask']);
           if (bid == null || ask == null) return;
 
-          onTick(Tick(symbol: sym, bid: bid, ask: ask));
+          final tickMs = _asDouble(msg['t']);
+          if (kDebugMode && _tracedTickSymbols.add(chartSym)) {
+            debugPrint('TenaxTrace first tick $sym → $chartSym b=$bid a=$ask');
+          }
+          onTick(Tick(
+            symbol: chartSym,
+            bid: bid,
+            ask: ask,
+            time: tickMs == null ? null : tickMs ~/ 1000,
+          ));
 
           if (Get.isRegistered<ChartSocketController>()) {
             final chartSocket = Get.find<ChartSocketController>();

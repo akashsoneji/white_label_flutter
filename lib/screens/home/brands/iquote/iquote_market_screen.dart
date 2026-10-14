@@ -14,6 +14,7 @@ import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/home/search_instruments_screen.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/services/symbol_details_cache_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
@@ -413,15 +414,16 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                   size: 22.r,
                 ),
               ),
-              confirmDismiss: (direction) async {
+              // removeFromFavorites drops the row before its first await,
+              // so the dismissed widget leaves the tree in this frame.
+              onDismissed: (_) async {
                 final removed = await _ic.removeFromFavorites(item.symbol);
                 if (removed) {
                   CustomToastService.showSuccess(
                     message:
-                        '${item.symbol.replaceAll('.c', '').replaceAll('.r', '')} removed from favorites',
+                        '${SymbolDetailsCacheService.displaySymbolOf(item.symbol)} removed from favorites',
                   );
                 }
-                return removed;
               },
               child: _IquoteInstrumentRow(
                 key: ValueKey(item.symbol),
@@ -484,10 +486,12 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                 if (removed) {
                   CustomToastService.showSuccess(
                     message:
-                        '${item.symbol.replaceAll('.c', '').replaceAll('.r', '')} removed from favorites',
+                        '${SymbolDetailsCacheService.displaySymbolOf(item.symbol)} removed from favorites',
                   );
                 }
-                return removed;
+                // A dismissed row still in the list throws, so only
+                // dismiss once the server list no longer has it.
+                return removed && !_ic.isFavorite(item.symbol);
               },
               child: row,
             );
@@ -566,7 +570,7 @@ class _IquoteInstrumentRow extends StatelessWidget {
   });
 
   String _formatSymbolName(String sym) {
-    final clean = sym.replaceAll('.c', '').toUpperCase();
+    final clean = SymbolDetailsCacheService.displaySymbolOf(sym).toUpperCase();
     if (clean.length == 6) {
       return '${clean.substring(0, 3)}/${clean.substring(3)}';
     }

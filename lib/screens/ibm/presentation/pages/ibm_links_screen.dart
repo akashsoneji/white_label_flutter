@@ -9,6 +9,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/ibm/presentation/widgets/ibm_top_header.dart';
+import 'package:crm_app/screens/ibm/presentation/widgets/ibm_link_stats_sheet.dart';
 import 'package:crm_app/services/language_service.dart';
 
 class IbmLinksScreen extends StatefulWidget {
@@ -483,6 +484,23 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                 ),
               ),
               SizedBox(width: 8.w),
+              InkWell(
+                onTap: () => IbmLinkStatsSheet.show(
+                  context,
+                  linkId: linkId,
+                  label: label,
+                ),
+                borderRadius: BorderRadius.circular(6.r),
+                child: Padding(
+                  padding: EdgeInsets.all(4.w),
+                  child: Icon(
+                    Icons.bar_chart_rounded,
+                    size: 16.w,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              SizedBox(width: 4.w),
               // Edit button
               InkWell(
                 onTap: () => _openCreateEditDialog(context, existingLink: link),

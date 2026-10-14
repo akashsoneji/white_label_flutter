@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
-import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
-import 'package:crm_app/brand_switcher.dart';
 
 import 'package:crm_app/screens/ibm/presentation/widgets/ibm_top_header.dart';
 import 'package:crm_app/routes/app_pages.dart';
@@ -32,7 +30,9 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   String get _currencyPrefix =>
       selectedCurrencyCode == 'USD' ? r'$' : '$selectedCurrencyCode ';
 
-  String _fmt(double v) => '$_currencyPrefix${v.toStringAsFixed(2)}';
+  static final NumberFormat _amountFormat = NumberFormat('#,##0.00', 'en_US');
+
+  String _fmt(double v) => '$_currencyPrefix${_amountFormat.format(v)}';
 
   @override
   void initState() {
@@ -179,14 +179,13 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
 
         final data = controller.dashboardData;
         final actData = controller.dashboardActivityData;
-        final requests = controller.requestsData;
 
-        // Fallback structures if API is empty
-        final clients = data['clients'] ?? {};
-        final partners = data['partners'] ?? {};
-        final funnel = data['funnel'] ?? {};
-        final currencies = data['currencies'] ?? [];
-        final List currencyList = currencies is List ? currencies : const [];
+        final Map clients = data['clients'] is Map ? data['clients'] : const {};
+        final Map partners =
+            data['partners'] is Map ? data['partners'] : const {};
+        final Map funnel = data['funnel'] is Map ? data['funnel'] : const {};
+        final List currencyList =
+            data['currencies'] is List ? data['currencies'] : const [];
         final List<String> availableCodes = currencyList
             .whereType<Map>()
             .map((c) => (c['currency'] ?? '').toString())
@@ -197,38 +196,31 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             !availableCodes.contains(selectedCurrencyCode)) {
           selectedCurrencyCode = availableCodes.first;
         }
-        final Map<String, dynamic> firstCurrency = currencyList
-            .whereType<Map>()
-            .cast<Map<String, dynamic>>()
-            .firstWhere(
-              (c) => c['currency'] == selectedCurrencyCode,
-              orElse: () => currencyList.isNotEmpty
-                  ? Map<String, dynamic>.from(currencyList.first as Map)
-                  : <String, dynamic>{},
-            );
+        final Map currency = _currencyBlock(currencyList);
 
-        final funding = firstCurrency['funding'] ?? {};
-        final deposits = _parseDouble(funding['deposits'] ?? funding['net']);
+        final Map funding = currency['funding'] is Map ? currency['funding'] : const {};
+        final deposits = _parseDouble(funding['deposits']);
         final withdrawals = _parseDouble(funding['withdrawals']);
+        final netFunding = funding['net'] != null
+            ? _parseDouble(funding['net'])
+            : deposits - withdrawals;
 
-        final equityData = firstCurrency['equity'] ?? {};
+        final Map equityData = currency['equity'] is Map ? currency['equity'] : const {};
         final equity = _parseDouble(
           equityData['equity'] ?? equityData['balance'],
         );
 
-        final commData = firstCurrency['commission'] ?? {};
+        final Map commData =
+            currency['commission'] is Map ? currency['commission'] : const {};
         final commission = _parseDouble(commData['period'] ?? commData['mtd']);
         final lots = _parseDouble(commData['lots']);
         final trades = _parseDouble(commData['trades']).toInt();
-        final perLot = _parseDouble(commData['per_lot']);
 
-        // Use dashboard wallet data directly
-        final effectiveWallet = data['wallet'] ?? firstCurrency['wallet'] ?? {};
-        // Current available (unpaid) rebate balance for the rebate card.
-        final rebate = _parseDouble(effectiveWallet['unpaid_balance']);
-        // Referral link may or may not be present in the response.
-        final referralLink = data['referral_link'];
-        final network = controller.networkData;
+        // Wallet lives inside the per-currency block; older payloads put it at root.
+        final Map wallet = currency['wallet'] is Map
+            ? currency['wallet']
+            : (data['wallet'] is Map ? data['wallet'] : const {});
+        final subIbRows = controller.networkData['rows'];
 
         return RefreshIndicator(
           color: AppColors.primary,
@@ -242,33 +234,30 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           child: ListView(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
             children: [
-              if (_hasReferralLink(referralLink, controller.linksList)) ...[
-                _buildReferralLinkCard(referralLink, controller.linksList),
-                SizedBox(height: 16.h),
-              ],
               _buildHeaderRow(),
-              SizedBox(height: 20.h),
-              _buildTopGrid(
-                clients,
-                partners,
-                deposits,
-                withdrawals,
-                equity,
-                commission,
-                lots,
-                trades,
-                perLot,
-                rebate,
-                referralLink,
+              SizedBox(height: 16.h),
+              _buildStatsGrid(
+                clients: clients,
+                partners: partners,
+                deposits: deposits,
+                withdrawals: withdrawals,
+                netFunding: netFunding,
+                equity: equity,
+                lots: lots,
+                trades: trades,
+                commission: commission,
               ),
-              SizedBox(height: 24.h),
-              _buildCommissionSummary(effectiveWallet),
-              SizedBox(height: 24.h),
+              SizedBox(height: 16.h),
+              _buildCommissionSummary(
+                wallet,
+                data['by_source'] is Map ? data['by_source'] : const {},
+              ),
+              SizedBox(height: 16.h),
               _buildClientFunnel(funnel),
-              SizedBox(height: 24.h),
-              _buildSubIbPerformance(network['rows']),
-              SizedBox(height: 24.h),
-              _buildActivityRow(actData, requests),
+              SizedBox(height: 16.h),
+              _buildSubIbPerformance(subIbRows),
+              SizedBox(height: 16.h),
+              _buildActivitySection(actData),
               SizedBox(height: 40.h),
             ],
           ),
@@ -450,175 +439,202 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   }
 
 
-  Widget _buildTopGrid(
-    Map clients,
-    Map partners,
-    double deposits,
-    double withdrawals,
-    double equity,
-    double commission,
-    double lots,
-    int trades,
-    double perLot,
-    double rebate,
-    dynamic referralLink,
-  ) {
+  static const Color _positiveColor = Color(0xFF00C48C);
+  static const Color _negativeColor = Color(0xFFFF647C);
+  static const Color _pendingColor = Color(0xFFFFB547);
+
+  /// Lays [children] out in equal-height rows; column count adapts to width.
+  Widget _buildResponsiveGrid({
+    required List<Widget> children,
+    int compactColumns = 2,
+    int wideColumns = 4,
+    double? gap,
+  }) {
+    final spacing = gap ?? 10.w;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns =
+            constraints.maxWidth >= 600 ? wideColumns : compactColumns;
+        final rows = <Widget>[];
+        for (int start = 0; start < children.length; start += columns) {
+          if (start > 0) rows.add(SizedBox(height: spacing));
+          if (columns == 1) {
+            rows.add(children[start]);
+            continue;
+          }
+          final rowChildren = <Widget>[];
+          for (int col = 0; col < columns; col++) {
+            if (col > 0) rowChildren.add(SizedBox(width: spacing));
+            final index = start + col;
+            rowChildren.add(
+              Expanded(
+                child: index < children.length
+                    ? children[index]
+                    : const SizedBox.shrink(),
+              ),
+            );
+          }
+          rows.add(
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: rowChildren,
+              ),
+            ),
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: rows,
+        );
+      },
+    );
+  }
+
+  Widget _buildStatsGrid({
+    required Map clients,
+    required Map partners,
+    required double deposits,
+    required double withdrawals,
+    required double netFunding,
+    required double equity,
+    required double lots,
+    required int trades,
+    required double commission,
+  }) {
     final totalClients = clients['total'] ?? 0;
     final newInPeriod = clients['new_in_period'] ?? 0;
     final activeTraders = clients['active'] ?? 0;
-    final directPartners = partners['direct'] ?? 0;
-    final networkPartners = partners['network'] ?? 0;
-    final totalSubIbs = directPartners + networkPartners;
-    final netFlow = deposits - withdrawals;
-    // Web "Average Lots per Trader" = total lots / active traders (not / trades).
-    final activeTradersNum =
-        activeTraders is num ? activeTraders : num.tryParse('$activeTraders') ?? 0;
-    final avgLotSize =
-        activeTradersNum > 0 ? lots / activeTradersNum : 0.0;
+    final directPartners = _parseDouble(partners['direct']).toInt();
+    final networkPartners = _parseDouble(partners['network']).toInt();
+    final totalSubIbs = partners['total'] != null
+        ? _parseDouble(partners['total']).toInt()
+        : directPartners + networkPartners;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return _buildResponsiveGrid(
       children: [
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: _buildHeroEarnedCard(commission)),
-              SizedBox(width: 12.w),
-              Expanded(child: _buildRebateCard(rebate)),
-            ],
-          ),
+        _buildStatCard(
+          icon: Icons.groups_rounded,
+          color: AppColors.primary,
+          label: TranslationUtils.tr('ib_dashboard_new_screen_total_clients'),
+          value: '$totalClients',
+          hint: TranslationUtils.trArgs('ibm_new_this_period', {
+            'count': '$newInPeriod',
+          }),
         ),
-        SizedBox(height: 14.h),
-        Row(
-          children: [
-            Expanded(
-              child: _buildPillStat(
-                icon: Icons.people_alt_rounded,
-                iconBg: AppColors.iconBgPrimary,
-                iconColor: AppColors.primary,
-                label: TranslationUtils.tr(
-                  'ib_dashboard_new_screen_total_clients',
-                ),
-                value: '$totalClients',
-                hint: TranslationUtils.trArgs('ibm_new_this_period', {
-                  'count': '$newInPeriod',
-                }),
-              ),
-            ),
-            SizedBox(width: 10.w),
-            Expanded(
-              child: _buildPillStat(
-                icon: Icons.trending_up_rounded,
-                iconBg: const Color(0xFF00C48C).withValues(alpha: 0.12),
-                iconColor: const Color(0xFF00C48C),
-                label: TranslationUtils.tr('ibm_active_traders'),
-                value: '$activeTraders',
-                hint: TranslationUtils.tr('ibm_traded_this_period'),
-              ),
-            ),
-            SizedBox(width: 10.w),
-            Expanded(
-              child: _buildPillStat(
-                icon: Icons.account_tree_rounded,
-                iconBg: AppColors.iconBgPrimary,
-                iconColor: AppColors.primary,
-                label: TranslationUtils.tr('ibm_sub_ibs'),
-                value: '$totalSubIbs',
-                hint: TranslationUtils.trArgs('ibm_n_direct', {
-                  'count': '$directPartners',
-                }),
-              ),
-            ),
-          ],
+        _buildStatCard(
+          icon: Icons.how_to_reg_rounded,
+          color: AppColors.primary,
+          label: TranslationUtils.tr('ibm_active_traders'),
+          value: '$activeTraders',
+          hint: TranslationUtils.tr('ibm_traded_this_period'),
         ),
-        
-        SizedBox(height: 14.h),
-        _buildMoneyFlowRow(deposits, withdrawals, equity, netFlow),
-        SizedBox(height: 14.h),
-        _buildPerformanceGrid(lots, trades, perLot, avgLotSize),
+        _buildStatCard(
+          icon: Icons.account_tree_rounded,
+          color: AppColors.primary,
+          label: TranslationUtils.tr('ibm_sub_ibs'),
+          value: '$totalSubIbs',
+          hint: TranslationUtils.trArgs('ibm_n_direct', {
+            'count': '$directPartners',
+          }),
+        ),
+        _buildStatCard(
+          icon: Icons.south_west_rounded,
+          color: _positiveColor,
+          label: TranslationUtils.tr('ibm_total_deposits'),
+          value: _fmt(deposits),
+          hint: '${_fmt(netFunding)} ${TranslationUtils.tr('ibm_net_flow')}',
+        ),
+        _buildStatCard(
+          icon: Icons.north_east_rounded,
+          color: _negativeColor,
+          label: TranslationUtils.tr('ibm_total_withdrawals'),
+          value: _fmt(withdrawals),
+        ),
+        _buildStatCard(
+          icon: Icons.account_balance_wallet_rounded,
+          color: AppColors.primary,
+          label: TranslationUtils.tr('ibm_client_equity'),
+          value: _fmt(equity),
+        ),
+        _buildStatCard(
+          icon: Icons.show_chart_rounded,
+          color: AppColors.primary,
+          label: TranslationUtils.tr('tw_total_lots'),
+          value: lots.toStringAsFixed(2),
+          hint: '$trades ${TranslationUtils.tr('tw_trades')}',
+        ),
+        _buildStatCard(
+          icon: Icons.payments_rounded,
+          color: AppColors.primary,
+          label: TranslationUtils.tr('ibm_earned_this_period'),
+          value: _fmt(commission),
+          hint: _periodLabel(),
+        ),
       ],
     );
   }
 
-  Widget _buildHeroEarnedCard(double commission) {
+  Widget _buildStatCard({
+    required IconData icon,
+    required Color color,
+    required String label,
+    required String value,
+    String hint = '',
+  }) {
     return Container(
-      padding: EdgeInsetsDirectional.fromSTEB(20.w, 18.h, 20.w, 18.h),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primary,
-            AppColors.primary.withValues(alpha: 0.78),
-          ],
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-        ),
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.22),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.divider.withValues(alpha: 0.6)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: AppColors.whiteColor.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Icon(Icons.payments_rounded, color: AppColors.whiteColor, size: 20.w),
-              ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: Text(
-                  TranslationUtils.tr('ibm_earned_this_period'),
-                  maxLines: 2,
+          Container(
+            width: 36.w,
+            height: 36.w,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(9.r),
+            ),
+            child: Icon(icon, color: AppColors.whiteColor, size: 18.w),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: AppColors.whiteColor.withValues(alpha: 0.9),
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.3,
+                  style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+                ),
+                SizedBox(height: 2.h),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 12.h),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: AlignmentDirectional.centerStart,
-            child: Text(
-              _fmt(commission),
-              maxLines: 1,
-              style: TextStyle(
-                color: AppColors.whiteColor,
-                fontSize: 32.sp,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Row(
-            children: [
-              Icon(Icons.bolt_rounded, size: 14.w, color: AppColors.whiteColor.withValues(alpha: 0.85)),
-              SizedBox(width: 4.w),
-              Text(
-                _periodLabel(),
-                style: TextStyle(
-                  color: AppColors.whiteColor.withValues(alpha: 0.85),
-                  fontSize: 11.sp,
+                SizedBox(height: 2.h),
+                Text(
+                  hint,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -649,283 +665,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
       }
     }
     if (n <= 0) n = _parseDouble(controller.walletData['minimum_payout']);
-    return n > 0 ? n : 50;
-  }
-
-  Widget _buildRebateCard(double rebate) {
-    const accent = Color(0xFF00C48C);
-    return Container(
-      padding: EdgeInsetsDirectional.fromSTEB(20.w, 18.h, 20.w, 18.h),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [accent, accent.withValues(alpha: 0.78)],
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-        ),
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: accent.withValues(alpha: 0.22),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: AppColors.whiteColor.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Icon(Icons.account_balance_wallet_rounded,
-                    color: AppColors.whiteColor, size: 20.w),
-              ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: Text(
-                  TranslationUtils.tr('ib_dashboard_new_screen_available_rebate'),
-                  style: TextStyle(
-                    color: AppColors.whiteColor.withValues(alpha: 0.9),
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 12.h),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: AlignmentDirectional.centerStart,
-            child: Text(
-              _fmt(rebate),
-              maxLines: 1,
-              style: TextStyle(
-                color: AppColors.whiteColor,
-                fontSize: 32.sp,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Row(
-            children: [
-              Icon(Icons.savings_rounded,
-                  size: 14.w,
-                  color: AppColors.whiteColor.withValues(alpha: 0.85)),
-              SizedBox(width: 4.w),
-              Text(
-                  TranslationUtils.tr('ibm_unpaid_balance'),
-                style: TextStyle(
-                  color: AppColors.whiteColor.withValues(alpha: 0.85),
-                  fontSize: 11.sp,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 14.h),
-          Obx(() {
-            final w = controller.walletData;
-            final block = _wallet0(w);
-            final isFrozen = (block['is_frozen'] ?? w['is_frozen']) == true;
-            final canWithdrawFlag =
-                (block['can_withdraw'] ?? w['can_withdraw']) != false;
-            final openPayoutStatus =
-                block['open_payout_status'] ?? w['open_payout_status'];
-            final hasOpenPayout = openPayoutStatus != null &&
-                openPayoutStatus.toString().isNotEmpty;
-            final canRequest = canWithdrawFlag &&
-                !isFrozen &&
-                !hasOpenPayout &&
-                rebate >= _minPayout();
-            return SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed:
-                    canRequest ? () => Get.toNamed(AppPages.WITHDRAWAL) : null,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size.zero,
-                  backgroundColor: AppColors.whiteColor,
-                  foregroundColor: accent,
-                  disabledBackgroundColor:
-                      AppColors.whiteColor.withValues(alpha: 0.45),
-                  disabledForegroundColor:
-                      AppColors.whiteColor.withValues(alpha: 0.85),
-                  elevation: 0,
-                  padding: EdgeInsets.symmetric(vertical: 10.h),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                ),
-                child: Text(
-                    TranslationUtils.tr(
-                      'commission_history_screen_request_payout',
-                    ),
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  bool _hasReferralLink(dynamic referralLink, List links) {
-    if (referralLink is Map) {
-      final code = referralLink['code']?.toString() ?? '';
-      if (code.isNotEmpty) return true;
-    }
-    return links.isNotEmpty;
-  }
-
-  Widget _buildReferralLinkCard(dynamic referralLink, List links) {
-    String code = '';
-    String label = '';
-    bool isActive = true;
-
-    if (referralLink is Map) {
-      code = referralLink['code']?.toString() ?? '';
-      label = referralLink['label']?.toString() ?? '';
-      isActive = referralLink['is_active'] != false;
-    }
-
-    // Fall back to the links list if the dashboard didn't inline the link.
-    if (code.isEmpty && links.isNotEmpty && links.first is Map) {
-      final first = links.first as Map;
-      code = first['code']?.toString() ?? '';
-      label = first['label']?.toString() ?? '';
-    }
-
-    final baseUrl = BrandSwitcher.currentChartBaseUrl.replaceAll(
-      RegExp(r'/+$'),
-      '',
-    );
-    final referralUrl =
-        code.isEmpty ? '' : '$baseUrl/register?ref=$code';
-
-    return Container(
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-            TranslationUtils.tr('ibm_default_referral_link'),
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              SizedBox(width: 8.w),
-              if (isActive)
-                Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8F5E9),
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                  child: const Text(
-                    'ACTIVE',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2E7D32),
-                    ),
-                  ),
-                ),
-              SizedBox(width: 8.w),
-              InkWell(
-                onTap: () => controller.changeTab(4),
-                borderRadius: BorderRadius.circular(6.r),
-                child: Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6.r),
-                    border: Border.all(color: AppColors.primary),
-                  ),
-                  child: Text(
-              TranslationUtils.tr('ibm_custom_links'),
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (label.isNotEmpty) ...[
-            SizedBox(height: 4.h),
-            Text(
-              label,
-              style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
-            ),
-          ],
-          SizedBox(height: 10.h),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 1.h),
-            decoration: BoxDecoration(
-              color: AppColors.whiteColor,
-              borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(color: AppColors.divider),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.link, size: 16.w, color: AppColors.primary),
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: Text(
-                    referralUrl,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.copy, size: 16.w, color: AppColors.primary),
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: referralUrl));
-                    CustomToastService.showSuccess(
-                        message: TranslationUtils.tr(
-                          'ibm_referral_link_copied_short',
-                        ));
-                  },
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return n;
   }
 
   String _periodLabel() {
@@ -948,173 +688,103 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     }
   }
 
-  Widget _buildPillStat({
+  /// Picks the block for the selected currency from a `currencies[]` list.
+  Map _currencyBlock(dynamic currencies) {
+    if (currencies is! List) return const {};
+    final blocks = currencies.whereType<Map>().toList();
+    if (blocks.isEmpty) return const {};
+    return blocks.firstWhere(
+      (c) => c['currency'] == selectedCurrencyCode,
+      orElse: () => blocks.first,
+    );
+  }
+
+  Widget _buildCommissionSummary(Map wallet, Map bySource) {
+    final sum = wallet.containsKey('summary') ? wallet['summary'] : wallet;
+    final earned = _parseDouble(sum['lifetime_earned'] ?? sum['total_earned']);
+    final paid = _parseDouble(sum['lifetime_paid'] ?? sum['total_paid']);
+    final pending = _parseDouble(sum['pending_payout'] ?? sum['total_pending']);
+    final available = _parseDouble(
+      sum['unpaid_balance'] ?? sum['total_available'],
+    );
+    final isFrozen = sum['is_frozen'] == true;
+    final Map source = bySource[selectedCurrencyCode] is Map
+        ? bySource[selectedCurrencyCode]
+        : const {};
+    final directCommission = _parseDouble(source['direct']);
+    final networkCommission = _parseDouble(source['network']);
+    final splitTotal = directCommission + networkCommission;
+
+    return _buildSectionCard(
+      TranslationUtils.tr('ib_dashboard_new_screen_commission_summary'),
+      '$selectedCurrencyCode · ${TranslationUtils.tr('ibm_range_all_time')}',
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildResponsiveGrid(
+            children: [
+              _buildSummaryTile(
+                icon: Icons.account_balance_wallet_rounded,
+                color: AppColors.primary,
+                label: TranslationUtils.tr('ibm_total_earned'),
+                value: _fmt(earned),
+              ),
+              _buildSummaryTile(
+                icon: Icons.send_rounded,
+                color: _positiveColor,
+                label: TranslationUtils.tr('ibm_paid_out'),
+                value: _fmt(paid),
+              ),
+              _buildSummaryTile(
+                icon: Icons.hourglass_bottom_rounded,
+                color: _pendingColor,
+                label: TranslationUtils.tr('kyc_verification_pending'),
+                value: _fmt(pending),
+                valueColor: _pendingColor,
+              ),
+              _buildSummaryTile(
+                icon: Icons.savings_rounded,
+                color: _positiveColor,
+                label: TranslationUtils.tr('ibm_available'),
+                value: _fmt(available),
+                valueColor: _positiveColor,
+                footer: _buildRequestPayoutButton(available, isFrozen),
+              ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          _buildSplitRow(
+            TranslationUtils.tr('ibm_direct_clients'),
+            directCommission,
+            splitTotal,
+          ),
+          SizedBox(height: 10.h),
+          _buildSplitRow(
+            TranslationUtils.tr('ibm_sub_ib_network'),
+            networkCommission,
+            splitTotal,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryTile({
     required IconData icon,
-    required Color iconBg,
-    required Color iconColor,
+    required Color color,
     required String label,
     required String value,
-    required String hint,
+    Color? valueColor,
+    Widget? footer,
   }) {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.divider.withValues(alpha: 0.6)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.all(6.w),
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            child: Icon(icon, color: iconColor, size: 16.w),
-          ),
-          SizedBox(height: 10.h),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 2.h),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11.sp,
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          SizedBox(height: 2.h),
-          Text(
-            hint,
-            style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-
-Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, double netFlow) {
-    final netPositive = netFlow >= 0;
-    final netColor = netPositive ? const Color(0xFF00C48C) : const Color(0xFFFF647C);
-    final depositsColor = const Color(0xFF00C48C);
-    final withdrawalsColor = const Color(0xFFFF647C);
-
-    return Container(
-      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.divider.withValues(alpha: 0.6)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                TranslationUtils.tr('ibm_money_flow_upper'),
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textSecondary,
-                  letterSpacing: 0.6,
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                decoration: BoxDecoration(
-                  color: AppColors.iconBgSurface,
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                child: Text(
-                  TranslationUtils.tr('ibm_this_period'),
-                  style: TextStyle(
-                    fontSize: 9.sp,
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 12.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildColoredMiniStat(
-                  label: TranslationUtils.tr('transaction_history_deposits'),
-                  value: _fmt(deposits),
-                  icon: Icons.south_west_rounded,
-                  color: depositsColor,
-                ),
-              ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: _buildColoredMiniStat(
-                  label: TranslationUtils.tr('transaction_history_withdrawals'),
-                  value: _fmt(withdrawals),
-                  icon: Icons.north_east_rounded,
-                  color: withdrawalsColor,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 10.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildColoredMiniStat(
-                  label: TranslationUtils.tr('ibm_client_equity'),
-                  value: _fmt(equity),
-                  icon: Icons.account_balance_rounded,
-                  color: AppColors.primary,
-                  trailingText: TranslationUtils.tr('ibm_client_equity'),
-                ),
-              ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: _buildColoredMiniStat(
-                  label: TranslationUtils.tr('ibm_net_flow'),
-                  value: '${netPositive ? '+' : ''}${_fmt(netFlow)}',
-                  icon: netPositive
-                      ? Icons.trending_up_rounded
-                      : Icons.trending_down_rounded,
-                  color: netColor,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildColoredMiniStat({
-    required String label,
-    required String value,
-    required IconData icon,
-    required Color color,
-    String? trailingText,
-  }) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-      decoration: BoxDecoration(
         color: AppColors.iconBgSurface,
         borderRadius: BorderRadius.circular(10.r),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: EdgeInsets.all(6.w),
@@ -1124,273 +794,115 @@ Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, do
             ),
             child: Icon(icon, size: 14.w, color: color),
           ),
-          SizedBox(width: 10.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  trailingText ?? label,
-                  style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPerformanceGrid(double lots, int trades, double perLot, double avgLotSize) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.divider.withValues(alpha: 0.6)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+          SizedBox(height: 10.h),
           Text(
-            'PERFORMANCE',
+            label.toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 10.sp,
-              fontWeight: FontWeight.bold,
+              fontSize: 9.sp,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.4,
               color: AppColors.textSecondary,
-              letterSpacing: 0.6,
             ),
           ),
-          SizedBox(height: 12.h),
-          Row(
-            children: [
-              Expanded(child: _buildMiniStat(label: TranslationUtils.tr('tw_total_lots'), value: lots.toStringAsFixed(2), icon: Icons.bar_chart_rounded)),
-              SizedBox(width: 10.w),
-              Expanded(child: _buildMiniStat(label: TranslationUtils.tr('tw_trades'), value: '$trades', icon: Icons.swap_horiz_rounded)),
-            ],
+          SizedBox(height: 4.h),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+                color: valueColor ?? AppColors.textPrimary,
+              ),
+            ),
           ),
-          SizedBox(height: 10.h),
-          Row(
-            children: [
-              Expanded(child: _buildMiniStat(label: TranslationUtils.tr('ibm_per_lot'), value: _fmt(perLot), icon: Icons.percent_rounded)),
-              SizedBox(width: 10.w),
-              Expanded(child: _buildMiniStat(label: TranslationUtils.tr('ibm_avg_lots_per_trader'), value: avgLotSize.toStringAsFixed(2), icon: Icons.straighten_rounded)),
-            ],
-          ),
+          if (footer != null) ...[SizedBox(height: 10.h), footer],
         ],
       ),
     );
   }
 
-  Widget _buildMiniStat({required String label, required String value, required IconData icon}) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-      decoration: BoxDecoration(
-        color: AppColors.iconBgSurface,
-        borderRadius: BorderRadius.circular(10.r),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(6.w),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(7.r),
-            ),
-            child: Icon(icon, size: 14.w, color: AppColors.primary),
-          ),
-          SizedBox(width: 10.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(label, style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-Widget _buildCommissionSummary(Map wallet) {
-    final sum = wallet.containsKey('summary') ? wallet['summary'] : wallet;
-    final earned = _parseDouble(sum['lifetime_earned'] ?? sum['total_earned']);
-    final paid = _parseDouble(sum['lifetime_paid'] ?? sum['total_paid']);
-    final pending = _parseDouble(sum['pending_payout'] ?? sum['total_pending']);
-    final available = _parseDouble(
-      sum['unpaid_balance'] ?? sum['total_available'],
-    );
-    final total = earned > 0 ? earned : 1.0;
-    final paidRatio = (paid / total).clamp(0.0, 1.0);
-    final pendingRatio = (pending / total).clamp(0.0, 1.0);
-    final availableRatio = (available / total).clamp(0.0, 1.0);
-
-    return Container(
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.divider.withValues(alpha: 0.6)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                TranslationUtils.tr('ib_dashboard_new_screen_commission_summary'),
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              Text(
-                TranslationUtils.tr('ibm_usd_lifetime'),
-                style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
-              ),
-            ],
-          ),
-          SizedBox(height: 12.h),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6.r),
-            child: SizedBox(
-              height: 10.h,
-              child: Row(
-                children: [
-                  if (paidRatio > 0)
-                    Expanded(
-                      flex: (paidRatio * 1000).round(),
-                      child: Container(color: AppColors.primary),
-                    ),
-                  if (pendingRatio > 0)
-                    Expanded(
-                      flex: (pendingRatio * 1000).round(),
-                      child: Container(color: const Color(0xFFFFB547)),
-                    ),
-                  if (availableRatio > 0)
-                    Expanded(
-                      flex: (availableRatio * 1000).round(),
-                      child: Container(color: const Color(0xFF00C48C)),
-                    ),
-                  if (paidRatio + pendingRatio + availableRatio <= 0)
-                    Expanded(child: Container(color: AppColors.divider)),
-                ],
-              ),
+  Widget _buildRequestPayoutButton(double available, bool dashboardFrozen) {
+    return Obx(() {
+      final w = controller.walletData;
+      final block = _wallet0(w);
+      final isFrozen =
+          dashboardFrozen || (block['is_frozen'] ?? w['is_frozen']) == true;
+      final canWithdrawFlag =
+          (block['can_withdraw'] ?? w['can_withdraw']) != false;
+      final openPayoutStatus =
+          block['open_payout_status'] ?? w['open_payout_status'];
+      final hasOpenPayout =
+          openPayoutStatus != null && openPayoutStatus.toString().isNotEmpty;
+      final canRequest = canWithdrawFlag &&
+          !isFrozen &&
+          !hasOpenPayout &&
+          available >= _minPayout();
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: canRequest ? () => Get.toNamed(AppPages.WITHDRAWAL) : null,
+          style: ElevatedButton.styleFrom(
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.whiteColor,
+            disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.35),
+            disabledForegroundColor: AppColors.whiteColor,
+            elevation: 0,
+            padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 6.w),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.r),
             ),
           ),
-          SizedBox(height: 10.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildLegendItem(
-                  label: TranslationUtils.tr('ibm_paid'),
-                  value: paid,
-                  color: AppColors.primary,
-                ),
-              ),
-              Expanded(
-                child: _buildLegendItem(
-                  label: TranslationUtils.tr('kyc_verification_pending'),
-                  value: pending,
-                  color: const Color(0xFFFFB547),
-                ),
-              ),
-              Expanded(
-                child: _buildLegendItem(
-                  label: TranslationUtils.tr('ibm_available'),
-                  value: available,
-                  color: const Color(0xFF00C48C),
-                  highlight: true,
-                ),
-              ),
-            ],
+          child: Text(
+            TranslationUtils.tr('commission_history_screen_request_payout'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 10.h),
-          Container(
-            height: 1,
-            color: AppColors.divider.withValues(alpha: 0.5),
-          ),
-          SizedBox(height: 10.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                TranslationUtils.tr('ibm_total_earned'),
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(
-                _fmt(earned),
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLegendItem({
-    required String label,
-    required double value,
-    required Color color,
-    bool highlight = false,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 8.w,
-              height: 8.w,
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(2.r),
-              ),
-            ),
-            SizedBox(width: 5.w),
-            Text(
-              label,
-              style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
-            ),
-          ],
         ),
-        SizedBox(height: 4.h),
+      );
+    });
+  }
+
+  Widget _buildSplitRow(String label, double value, double total) {
+    final double ratio =
+        total > 0 ? (value / total).clamp(0.0, 1.0).toDouble() : 0.0;
+    return Row(
+      children: [
+        SizedBox(
+          width: 84.w,
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+          ),
+        ),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(4.r),
+            child: LinearProgressIndicator(
+              value: ratio,
+              minHeight: 6.h,
+              color: AppColors.primary,
+              backgroundColor: AppColors.divider.withValues(alpha: 0.5),
+            ),
+          ),
+        ),
+        SizedBox(width: 8.w),
         Text(
-          _fmt(value),
+          '${_fmt(value)} · ${(ratio * 100).toStringAsFixed(0)}%',
           style: TextStyle(
-            fontSize: 13.sp,
+            fontSize: 10.sp,
             fontWeight: FontWeight.bold,
-            color: highlight ? const Color(0xFF00C48C) : AppColors.textPrimary,
+            color: AppColors.textPrimary,
           ),
         ),
       ],
@@ -1398,95 +910,49 @@ Widget _buildCommissionSummary(Map wallet) {
   }
 
   Widget _buildClientFunnel(Map funnel) {
-    final visits = funnel['visits'] ?? 0;
-    final uniqueVisits = funnel['unique_visits'] ?? 0;
-    final signUps = funnel['signups'] ?? 0;
-    final accounts = funnel['accounts'] ?? 0;
-    final funded = funnel['funded'] ?? 0;
-
-    // Calculate percentages
-    final uniquePercent =
-        visits > 0 ? (uniqueVisits / visits * 100).toStringAsFixed(0) : '0';
-    final signupsPercent =
-        uniqueVisits > 0
-            ? (signUps / uniqueVisits * 100).toStringAsFixed(0)
-            : '0';
+    final steps = [
+      (Icons.ads_click_rounded, 'ibm_link_clicks', funnel['visits']),
+      (Icons.people_alt_rounded, 'ibm_different_people', funnel['unique_visits']),
+      (Icons.person_add_alt_1_rounded, 'ibm_signed_up', funnel['signups']),
+      (Icons.credit_card_rounded, 'ibm_opened_account', funnel['accounts']),
+      (Icons.account_balance_wallet_rounded, 'ibm_funded_it', funnel['funded']),
+    ];
 
     return _buildSectionCard(
       TranslationUtils.tr('ibm_client_funnel'),
       TranslationUtils.tr('ibm_from_your_referral_links'),
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 120.w,
-              child: _buildSimpleStat(
-                TranslationUtils.tr('ibm_link_clicks'),
-                '$visits',
-              ),
+      _buildResponsiveGrid(
+        wideColumns: 5,
+        children: [
+          for (final (icon, labelKey, value) in steps)
+            _buildSummaryTile(
+              icon: icon,
+              color: AppColors.primary,
+              label: TranslationUtils.tr(labelKey),
+              value: '${_parseDouble(value).toInt()}',
             ),
-            SizedBox(
-              width: 120.w,
-              child: _buildSimpleStat(
-                TranslationUtils.tr('ibm_different_people'),
-                '$uniqueVisits\n$uniquePercent%',
-              ),
-            ),
-            SizedBox(
-              width: 120.w,
-              child: _buildSimpleStat(
-                TranslationUtils.tr('ibm_signed_up'),
-                '$signUps\n$signupsPercent%',
-              ),
-            ),
-            SizedBox(
-              width: 120.w,
-              child: _buildSimpleStat(
-                TranslationUtils.tr('ibm_opened_account'),
-                '$accounts',
-              ),
-            ),
-            SizedBox(
-              width: 120.w,
-              child: _buildSimpleStat(
-                TranslationUtils.tr('ibm_funded_it'),
-                '$funded',
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildSubIbPerformance(dynamic rowsList) {
-    List rows = rowsList is List ? rowsList : [];
-    if (rows.isEmpty) {
-      return _buildSectionCard(
-        TranslationUtils.tr('ibm_sub_ib_performance'),
-        TranslationUtils.tr('pmam_fund_manager_view_view_all'),
-        Text(
-          TranslationUtils.tr('ibm_nobody_is_below_you_yet'),
-          style: TextStyle(color: AppColors.textGrey),
-        ),
-      );
-    }
-
+    final List rows = rowsList is List ? rowsList : const [];
     return _buildSectionCard(
       TranslationUtils.tr('ibm_sub_ib_performance'),
       TranslationUtils.tr('pmam_fund_manager_view_view_all'),
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (int i = 0; i < rows.length; i++) ...[
-            if (i > 0) SizedBox(height: 12.h),
-            _buildSubIbRow(rows[i] is Map ? rows[i] as Map : {}),
-          ],
-        ],
-      ),
-      onAction: () => controller.currentTabIndex.value = 2,
+      rows.isEmpty
+          ? _buildEmptyBox(TranslationUtils.tr('ibm_nobody_is_below_you_yet'))
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (int i = 0; i < rows.length; i++) ...[
+                  if (i > 0) SizedBox(height: 12.h),
+                  _buildSubIbRow(rows[i] is Map ? rows[i] as Map : const {}),
+                ],
+              ],
+            ),
+      onAction: rows.isEmpty ? null : () => controller.currentTabIndex.value = 2,
     );
   }
 
@@ -1494,24 +960,19 @@ Widget _buildCommissionSummary(Map wallet) {
     final name = (row['name'] ?? 'Unknown').toString();
     final clients = row['clients'] ?? 0;
     final active = row['active_clients'] ?? row['active'] ?? 0;
-
-    final List currencies =
-        row['currencies'] is List ? row['currencies'] : [];
-    final firstCurrency = currencies.isNotEmpty ? currencies.first : {};
-
+    final currency = _currencyBlock(row['currencies']);
     final netDeposit = _parseDouble(
-      firstCurrency['net_funding'] ?? firstCurrency['deposits'],
+      currency['net_funding'] ?? currency['deposits'],
     );
-    final earned = _parseDouble(firstCurrency['commission']);
-    final lots = _parseDouble(firstCurrency['lots']);
+    final earned = _parseDouble(currency['commission']);
+    final lots = _parseDouble(currency['lots']);
     final isActive = _parseDouble(active) >= 1;
-    final badgeColor = isActive ? Colors.orange : Colors.red;
 
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(8.r),
+        borderRadius: BorderRadius.circular(10.r),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1522,17 +983,16 @@ Widget _buildCommissionSummary(Map wallet) {
                 backgroundColor: AppColors.primary,
                 radius: 12.r,
                 child: Text(
-                  name.isNotEmpty ? name[0] : '?',
-                  style: TextStyle(
-                    color: AppColors.whiteColor,
-                    fontSize: 10.sp,
-                  ),
+                  name.isNotEmpty ? name[0].toUpperCase() : '?',
+                  style: TextStyle(color: AppColors.whiteColor, fontSize: 10.sp),
                 ),
               ),
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
                   name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13.sp,
@@ -1540,68 +1000,34 @@ Widget _buildCommissionSummary(Map wallet) {
                   ),
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                decoration: BoxDecoration(
-                  color: badgeColor.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Text(
-                  isActive
-                      ? TranslationUtils.tr('ticket_priority_low')
-                      : TranslationUtils.tr('wallet_inactive'),
-                  style: TextStyle(color: badgeColor, fontSize: 10.sp),
-                ),
+              SizedBox(width: 8.w),
+              _buildStatusChip(
+                isActive
+                    ? TranslationUtils.tr('wallet_active')
+                    : TranslationUtils.tr('wallet_inactive'),
+                isActive ? _positiveColor : _negativeColor,
               ),
             ],
           ),
           SizedBox(height: 12.h),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    TranslationUtils.tr('ibm_net_deposit'),
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 10.sp,
-                    ),
-                  ),
-                  Text(
-                    _fmt(netDeposit),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.sp,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
+              Expanded(
+                child: _buildValueBox(
+                  TranslationUtils.tr('ibm_net_deposit'),
+                  _fmt(netDeposit),
+                ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    TranslationUtils.tr('ibm_you_earned'),
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 10.sp,
-                    ),
-                  ),
-                  Text(
-                    _fmt(earned),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.sp,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _buildValueBox(
+                  TranslationUtils.tr('ibm_commission_earned'),
+                  _fmt(earned),
+                ),
               ),
             ],
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 10.h),
           Text(
             TranslationUtils.trArgs('ibm_clients_active_lots_line', {
               'clients': '$clients',
@@ -1615,103 +1041,146 @@ Widget _buildCommissionSummary(Map wallet) {
     );
   }
 
-  Widget _buildActivityRow(Map actData, Map requestsMap) {
-    final deposits = actData['deposits'] is List ? actData['deposits'] : [];
-    final withdrawals =
-        actData['withdrawals'] is List ? actData['withdrawals'] : [];
-    final payouts = actData['payouts'] is List ? actData['payouts'] : [];
-    final accounts = actData['accounts'] is List ? actData['accounts'] : [];
-
-    final List requestsList = requestsMap['rows'] ?? requestsMap['data'] ?? [];
-    final pendingRequests =
-        requestsList.where((r) => r['status'] == 'pending').toList();
-
-    final int maxRows = [
-      deposits.length,
-      withdrawals.length,
-      payouts.length,
-      accounts.length,
-      pendingRequests.length,
-    ].reduce((a, b) => a > b ? a : b);
-    // Header (title + subtitle) ~ 52, each row ~ 42, min one empty-state slot.
-    final double cardHeight = 52.h + (maxRows > 0 ? maxRows : 1) * 42.h;
-
-    return SizedBox(
-      height: cardHeight,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
+  Widget _buildValueBox(String label, String value) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: AppColors.iconBgSurface,
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildActivityCard(
-            Icons.arrow_downward,
-            TranslationUtils.tr('transaction_history_deposits'),
-            TranslationUtils.tr('ibm_pending_and_approved'),
-            _buildActivityListContent(
-              deposits,
-              TranslationUtils.tr('ibm_no_new_deposits'),
-              true,
-            ),
-            Colors.green,
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey),
           ),
-          _buildActivityCard(
-            Icons.arrow_upward,
-            TranslationUtils.tr('transaction_history_withdrawals'),
-            TranslationUtils.tr('ibm_pending_and_approved'),
-            _buildActivityListContent(
-              withdrawals,
-              TranslationUtils.tr('ibm_nobody_has_withdrawn'),
-              false,
+          SizedBox(height: 2.h),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
-            Colors.red,
-          ),
-          _buildActivityCard(
-            Icons.account_balance,
-            TranslationUtils.tr('ibm_payouts'),
-            TranslationUtils.tr('ibm_you_and_your_downline'),
-            _buildActivityListContent(
-              payouts,
-              TranslationUtils.tr('ibm_no_payout_taken_yet'),
-              false,
-            ),
-            AppColors.primary,
-          ),
-          _buildActivityCard(
-            Icons.person_add,
-            TranslationUtils.tr('ibm_new_accounts'),
-            TranslationUtils.tr('ibm_whole_downline'),
-            _buildActivityListContent(
-              accounts,
-              TranslationUtils.tr('ibm_no_new_accounts'),
-              true,
-            ),
-            Colors.blue,
-          ),
-          _buildActivityCard(
-            Icons.group,
-            TranslationUtils.tr('ibm_sub_ib_requests'),
-            TranslationUtils.tr('ibm_waiting_on_you'),
-            _buildActivityListContent(
-              pendingRequests,
-              TranslationUtils.tr('ibm_nobody_is_waiting_for_answer'),
-              true,
-            ),
-            Colors.grey,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildActivityCard(
-    IconData icon,
-    String title,
-    String subtitle,
-    Widget content,
-    Color color,
-  ) {
+  Widget _buildStatusChip(String label, Color color) {
+    if (label.isEmpty) return const SizedBox.shrink();
     return Container(
-      width: 220.w,
-      margin: EdgeInsetsDirectional.only(end: 12.w),
-      padding: EdgeInsets.all(12.w),
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Text(
+        label[0].toUpperCase() + label.substring(1),
+        style: TextStyle(
+          fontSize: 8.sp,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyBox(String message) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 12.w),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: AppColors.divider.withValues(alpha: 0.6)),
+      ),
+      child: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp),
+      ),
+    );
+  }
+
+  Widget _buildActivitySection(Map actData) {
+    List listOf(String key) =>
+        actData[key] is List ? actData[key] as List : const [];
+    final List pendingRequests = listOf('requests')
+        .whereType<Map>()
+        .where((r) => r['status'] == 'pending')
+        .toList();
+
+    return _buildResponsiveGrid(
+      compactColumns: 1,
+      wideColumns: 2,
+      gap: 14.h,
+      children: [
+        _buildActivityCard(
+          icon: Icons.south_west_rounded,
+          color: _positiveColor,
+          title: TranslationUtils.tr('transaction_history_deposits'),
+          subtitle: TranslationUtils.tr('ibm_pending_and_approved'),
+          items: listOf('deposits'),
+          emptyMessage: TranslationUtils.tr('ibm_no_new_deposits'),
+          amountSign: 1,
+        ),
+        _buildActivityCard(
+          icon: Icons.north_east_rounded,
+          color: _negativeColor,
+          title: TranslationUtils.tr('transaction_history_withdrawals'),
+          subtitle: TranslationUtils.tr('ibm_pending_and_approved'),
+          items: listOf('withdrawals'),
+          emptyMessage: TranslationUtils.tr('ibm_nobody_has_withdrawn'),
+          amountSign: -1,
+        ),
+        _buildActivityCard(
+          icon: Icons.payments_rounded,
+          color: AppColors.primary,
+          title: TranslationUtils.tr('ibm_payouts'),
+          subtitle: TranslationUtils.tr('ibm_you_and_your_downline'),
+          items: listOf('payouts'),
+          emptyMessage: TranslationUtils.tr('ibm_no_payout_taken_yet'),
+        ),
+        _buildActivityCard(
+          icon: Icons.person_add_alt_1_rounded,
+          color: AppColors.primary,
+          title: TranslationUtils.tr('ibm_new_accounts'),
+          subtitle: TranslationUtils.tr('ibm_whole_downline'),
+          items: listOf('accounts'),
+          emptyMessage: TranslationUtils.tr('ibm_no_new_accounts'),
+        ),
+        _buildActivityCard(
+          icon: Icons.group_rounded,
+          color: AppColors.textSecondary,
+          title: TranslationUtils.tr('ibm_sub_ib_requests'),
+          subtitle: TranslationUtils.tr('ibm_waiting_on_you'),
+          items: pendingRequests,
+          emptyMessage: TranslationUtils.tr('ibm_nobody_is_waiting_for_answer'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActivityCard({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String subtitle,
+    required List items,
+    required String emptyMessage,
+    int amountSign = 0,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12.r),
@@ -1722,159 +1191,170 @@ Widget _buildCommissionSummary(Map wallet) {
         children: [
           Row(
             children: [
-              Icon(icon, color: color, size: 16.w),
-              SizedBox(width: 6.w),
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12.sp,
-                  color: AppColors.textPrimary,
+              Container(
+                padding: EdgeInsets.all(5.w),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
+                child: Icon(icon, size: 12.w, color: AppColors.whiteColor),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.sp,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Flexible(
+                child: Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                  style: TextStyle(color: AppColors.textGrey, fontSize: 9.sp),
                 ),
               ),
             ],
           ),
-          Text(
-            subtitle,
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 10.sp),
-          ),
-          SizedBox(height: 8.h),
-          Expanded(
-            child: SingleChildScrollView(child: content),
-          ),
+          SizedBox(height: 10.h),
+          if (items.isEmpty)
+            _buildEmptyBox(emptyMessage)
+          else
+            for (int i = 0; i < items.length; i++) ...[
+              if (i > 0)
+                Divider(
+                  height: 16.h,
+                  thickness: 1,
+                  color: AppColors.divider.withValues(alpha: 0.5),
+                ),
+              _buildActivityItem(
+                items[i] is Map ? items[i] as Map : const {},
+                amountSign,
+              ),
+            ],
         ],
       ),
     );
   }
 
-  Widget _buildActivityListContent(
-    List items,
-    String emptyMessage,
-    bool isPositive,
-  ) {
-    if (items.isEmpty) {
-      return Center(
-        child: Text(
-          emptyMessage,
-          style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp),
-          textAlign: TextAlign.center,
-        ),
-      );
+  /// Formats with the item's own currency (a USC deposit must not show as $).
+  String _fmtAmount(double value, dynamic currency) {
+    final code = (currency ?? selectedCurrencyCode).toString().toUpperCase();
+    final prefix = code == 'USD' ? r'$' : '$code ';
+    return '$prefix${_amountFormat.format(value)}';
+  }
+
+  /// "19d ago" style label from an API timestamp like "2026-09-25 07:09:27".
+  String _relativeTime(String at) {
+    final parsed = DateTime.tryParse(at.replaceFirst(' ', 'T'));
+    if (parsed == null) return at.split(' ').first;
+    final diff = DateTime.now().difference(parsed);
+    final String short;
+    if (diff.inDays >= 1) {
+      short = '${diff.inDays}d';
+    } else if (diff.inHours >= 1) {
+      short = '${diff.inHours}h';
+    } else {
+      short = '${diff.inMinutes.clamp(1, 59)}m';
     }
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return TranslationUtils.trArgs('time_ago', {'time': short});
+  }
+
+  Widget _buildActivityItem(Map item, int amountSign) {
+    final name = (item['name'] ?? 'Unknown').toString();
+    final status = (item['status'] ?? '').toString();
+    final account = (item['account'] ?? '').toString();
+    final amount = _parseDouble(item['amount']);
+    final atStr = (item['at'] ?? '').toString();
+    final dateDisplay = atStr.isNotEmpty ? _relativeTime(atStr) : '';
+    final isSettled = status == 'approved' || status == 'opened';
+
+    String amountText = '';
+    Color amountColor = AppColors.textPrimary;
+    if (amount > 0) {
+      final formatted = _fmtAmount(amount, item['currency']);
+      if (amountSign > 0) {
+        amountText = '+ $formatted';
+        amountColor = _positiveColor;
+      } else if (amountSign < 0) {
+        amountText = '− $formatted';
+        amountColor = _negativeColor;
+      } else {
+        amountText = formatted;
+      }
+    }
+
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children:
-          items.map((item) {
-            final name = item['name'] ?? 'Unknown';
-            final status = item['status'] ?? '';
-            final amount = _parseDouble(item['amount']);
-            final account = item['account'] ?? '';
-            final atStr = (item['at'] ?? '').toString();
-            final dateDisplay = atStr.isNotEmpty ? atStr.split(' ').first : '';
-
-            final amountStr =
-                amount > 0
-                    ? (isPositive
-                        ? '+${_fmt(amount)}'
-                        : _fmt(amount))
-                    : '';
-
-            return Padding(
-              padding: EdgeInsets.only(bottom: 8.h),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                name,
-                                style: TextStyle(
-                                  fontSize: 10.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            SizedBox(width: 4.w),
-                            if (status.isNotEmpty)
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 4.w,
-                                  vertical: 2.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color:
-                                      status == 'approved' || status == 'opened'
-                                          ? Colors.green.withOpacity(0.2)
-                                          : Colors.orange.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(4.r),
-                                ),
-                                child: Text(
-                                  status.isNotEmpty
-                                      ? status[0].toUpperCase() +
-                                          status.substring(1)
-                                      : status,
-                                  style: TextStyle(
-                                    fontSize: 8.sp,
-                                    color:
-                                        status == 'approved' ||
-                                                status == 'opened'
-                                            ? Colors.green
-                                            : Colors.orange,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        if (account.isNotEmpty)
-                          Text(
-                            'TA#$account',
-                            style: TextStyle(
-                              fontSize: 9.sp,
-                              color: AppColors.textGrey,
-                            ),
-                          ),
-                      ],
+                  Flexible(
+                    child: Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
-                  SizedBox(width: 8.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      if (amountStr.isNotEmpty)
-                        Text(
-                          amountStr,
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.bold,
-                            color:
-                                isPositive
-                                    ? Colors.green
-                                    : AppColors.textPrimary,
-                          ),
-                        ),
-                      if (dateDisplay.isNotEmpty)
-                        Text(
-                          dateDisplay,
-                          style: TextStyle(
-                            fontSize: 8.sp,
-                            color: AppColors.textGrey,
-                          ),
-                        ),
-                    ],
-                  ),
+                  if (status.isNotEmpty) ...[
+                    SizedBox(width: 6.w),
+                    _buildStatusChip(
+                      status,
+                      isSettled ? _positiveColor : _pendingColor,
+                    ),
+                  ],
                 ],
               ),
-            );
-          }).toList(),
+              if (account.isNotEmpty) ...[
+                SizedBox(height: 2.h),
+                Text(
+                  'TA#$account',
+                  style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey),
+                ),
+              ],
+            ],
+          ),
+        ),
+        SizedBox(width: 8.w),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (amountText.isNotEmpty)
+              Text(
+                amountText,
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.bold,
+                  color: amountColor,
+                ),
+              ),
+            if (dateDisplay.isNotEmpty) ...[
+              SizedBox(height: 2.h),
+              Text(
+                dateDisplay,
+                style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey),
+              ),
+            ],
+          ],
+        ),
+      ],
     );
   }
 
@@ -1885,22 +1365,26 @@ Widget _buildCommissionSummary(Map wallet) {
     VoidCallback? onAction,
   }) {
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: AppTextStyles.heading.copyWith(fontSize: 14.sp),
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.heading.copyWith(fontSize: 14.sp),
+                ),
               ),
+              SizedBox(width: 8.w),
               GestureDetector(
                 onTap: onAction,
                 child: Text(
@@ -1908,8 +1392,8 @@ Widget _buildCommissionSummary(Map wallet) {
                   style: TextStyle(
                     color: onAction != null
                         ? AppColors.primary
-                        : AppColors.textSecondary,
-                    fontSize: 11.sp,
+                        : AppColors.textGrey,
+                    fontSize: 10.sp,
                     fontWeight:
                         onAction != null ? FontWeight.w600 : FontWeight.normal,
                   ),
@@ -1917,40 +1401,8 @@ Widget _buildCommissionSummary(Map wallet) {
               ),
             ],
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 14.h),
           child,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSimpleStat(String label, String value, {Color? valueColor}) {
-    return Container(
-      padding: EdgeInsets.all(8.w),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 10.sp,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.bold,
-              color: valueColor ?? AppColors.textPrimary,
-            ),
-          ),
         ],
       ),
     );

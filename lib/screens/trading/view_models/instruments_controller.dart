@@ -1901,14 +1901,21 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  /// Serializes watchlist POSTs. The backend replaces the whole list, so two
-  /// overlapping requests built from the same base would drop one change.
+  /// Serializes watchlist POSTs so each full-list POST is built from the
+  /// list the previous request returned.
   Future<void> _watchlistWriteChain = Future<void>.value();
 
-  /// Server-first watchlist change. Builds the next list from the current
-  /// one, POSTs the FULL list (the backend replaces the list), and only on
-  /// success applies the list the server returned. On failure nothing
-  /// changes locally. Returns true when the server accepted the change.
+  /// Symbols swiped away whose POST is still queued. Kept out of the
+  /// in-memory favorites so an earlier server reply can't bring them back.
+  final Set<String> _pendingFavoriteRemovals = <String>{};
+
+  /// Symbols tapped "+" whose POST is still queued; shown as favorites until
+  /// the server answers.
+  final Set<String> _pendingFavoriteAdds = <String>{};
+
+  /// Server-first watchlist change. Builds the next list from the last
+  /// server-confirmed one, POSTs the FULL list, and only on success applies
+  /// the list the server returned. Returns true when the server accepted it.
   /// Never throws and always completes, so a swipe can't hang.
   Future<bool> _updateWatchlistOnServer(
     List<String> Function(List<String> current) buildNext,
@@ -1941,7 +1948,14 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       }
     }
 
-    final current = _normalizedFavorites().toList();
+    // Baseline is the last server-confirmed list (the cache), not the
+    // in-memory favorites, which may already hold an optimistic removal.
+    final current =
+        (await FavoritesStorageService.instance.getFavoriteInstruments())
+            .map(MarketWatchV2Service.normalizeSymbol)
+            .where((s) => s.isNotEmpty)
+            .toSet()
+            .toList();
     final next =
         buildNext(current)
             .map(MarketWatchV2Service.normalizeSymbol)
@@ -1949,13 +1963,21 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
             .toSet()
             .toList();
 
+    final unchanged =
+        next.length == current.length &&
+        Iterable<int>.generate(next.length).every((i) => next[i] == current[i]);
+    if (unchanged) return true;
+
+    // The server replaces the whole list with `symbols`, so the complete
+    // final list is always sent — never just the changed symbols. An empty
+    // list is valid (user removed every row); DELETE would instead restore
+    // the server default list.
     String? errorMessage;
     // Second try covers 429 "too many requests" (spec: retry after a short
     // delay); ApiResponse does not expose the HTTP status code.
     for (var attempt = 0; attempt < 2; attempt++) {
       if (attempt > 0) await Future.delayed(const Duration(seconds: 1));
       try {
-        // Body is only `symbols`; the server replaces the whole list.
         final response = await ApiService.post(
           endpoint: ApiConstants.marketWatch,
           data: {'symbols': next},
@@ -2008,12 +2030,13 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     return true;
   }
 
-  /// Server symbols → local cache format (`.c` suffix, no blanks/duplicates).
+  /// Server symbols → local cache (same names the marketwatch API returns,
+  /// no blanks/duplicates). Broker suffixes come from `datafeed_symbol`
+  /// when a feed symbol is needed, never from this list.
   List<String> _toLocalFavorites(List<dynamic> serverSymbols) =>
       serverSymbols
           .map((e) => MarketWatchV2Service.normalizeSymbol(e.toString()))
           .where((s) => s.isNotEmpty)
-          .map((s) => '$s.c')
           .toSet()
           .toList();
 
@@ -2036,7 +2059,19 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       isLoadingFavorites.value = true;
       final favorites =
           await FavoritesStorageService.instance.getFavoriteInstruments();
-      favoriteInstruments.assignAll(favorites);
+      final kept =
+          favorites
+              .where(
+                (s) => !_pendingFavoriteRemovals.contains(
+                  MarketWatchV2Service.normalizeSymbol(s),
+                ),
+              )
+              .toList();
+      final keptKeys = kept.map(MarketWatchV2Service.normalizeSymbol).toSet();
+      favoriteInstruments.assignAll([
+        ...kept,
+        ..._pendingFavoriteAdds.where((s) => !keptKeys.contains(s)),
+      ]);
       
       final names = await FavoritesStorageService.instance.getFavoriteNames();
       favoriteNames.assignAll(names);
@@ -2059,13 +2094,34 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     if (symbol.isEmpty) return false;
     final adding = !isFavorite(instrumentSymbol);
 
-    final success = await _updateWatchlistOnServer(
-      (current) =>
-          adding
-              ? (current.contains(symbol) ? current : [...current, symbol])
-              : current.where((s) => s != symbol).toList(),
-    );
-    if (!success) return false;
+    // Optimistic: each tap shows its state at once, so several symbols can be
+    // picked in a row while their full-list POSTs run one after another.
+    final pending = adding ? _pendingFavoriteAdds : _pendingFavoriteRemovals;
+    (adding ? _pendingFavoriteRemovals : _pendingFavoriteAdds).remove(symbol);
+    pending.add(symbol);
+    if (adding) {
+      favoriteInstruments.add(symbol);
+    } else {
+      favoriteInstruments.removeWhere(
+        (s) => MarketWatchV2Service.normalizeSymbol(s) == symbol,
+      );
+    }
+
+    final bool success;
+    try {
+      success = await _updateWatchlistOnServer(
+        (current) =>
+            adding
+                ? (current.contains(symbol) ? current : [...current, symbol])
+                : current.where((s) => s != symbol).toList(),
+      );
+    } finally {
+      pending.remove(symbol);
+    }
+    if (!success) {
+      if (!isClosed) await _loadFavorites();
+      return false;
+    }
 
     final resolvedName =
         name ??
@@ -2075,7 +2131,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
             ?.name;
     if (adding && resolvedName != null) {
       final names = Map<String, String>.from(favoriteNames)
-        ..['$symbol.c'] = resolvedName;
+        ..[instrumentSymbol] = resolvedName
+        ..[SymbolDetailsCacheService.resolveDatafeedSymbolSync(symbol, null)] =
+            resolvedName;
       await FavoritesStorageService.instance.saveFavoriteNames(names);
       favoriteNames.assignAll(names);
     }
@@ -2135,16 +2193,11 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
   // Check if an instrument is favorite
   bool isFavorite(String instrumentSymbol) {
-    // Check both with and without .c suffix
-    final isFav =
-        favoriteInstruments.contains(instrumentSymbol) ||
-        favoriteInstruments.contains(instrumentSymbol + '.c') ||
-        favoriteInstruments.contains(instrumentSymbol.replaceAll('.c', ''));
-
-    // print('🔍 isFavorite check for "$instrumentSymbol": $isFav');
-    // print('🔍 Current favorites: $favoriteInstruments');
-
-    return isFav;
+    final target = MarketWatchV2Service.normalizeSymbol(instrumentSymbol);
+    if (target.isEmpty) return false;
+    return favoriteInstruments.any(
+      (s) => MarketWatchV2Service.normalizeSymbol(s) == target,
+    );
   }
 
   /// Adds [instrumentSymbol] on the server, then applies the server's list.
@@ -2167,16 +2220,35 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     return true;
   }
 
-  /// Removes [instrumentSymbol] on the server (POST of the remaining list),
-  /// then applies the server's list. Returns false if the server rejected it.
+  /// Removes [instrumentSymbol] locally right away, then POSTs the remaining
+  /// full list. The local drop happens before the first await so a swiped
+  /// `Dismissible` leaves the tree in the same frame (otherwise Flutter throws
+  /// "A dismissed Dismissible widget is still part of the tree"). On failure
+  /// the last server-confirmed list is restored from the cache.
   Future<bool> removeFromFavorites(String instrumentSymbol) async {
     final symbol = MarketWatchV2Service.normalizeSymbol(instrumentSymbol);
     if (symbol.isEmpty) return false;
 
-    final success = await _updateWatchlistOnServer(
-      (current) => current.where((s) => s != symbol).toList(),
+    _pendingFavoriteRemovals.add(symbol);
+    favoriteInstruments.removeWhere(
+      (s) => MarketWatchV2Service.normalizeSymbol(s) == symbol,
     );
-    if (!success) return false;
+    _updateFilteredInstruments();
+
+    final bool success;
+    try {
+      success = await _updateWatchlistOnServer(
+        (current) => current.where((s) => s != symbol).toList(),
+      );
+    } finally {
+      _pendingFavoriteRemovals.remove(symbol);
+    }
+    if (!success) {
+      if (isClosed) return false;
+      await _loadFavorites();
+      _updateFilteredInstruments();
+      return false;
+    }
 
     _updateFilteredInstruments();
     await hydrateFavoritesFromRest();
@@ -2189,13 +2261,11 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
   // Helper to find the index of a symbol in favoriteInstruments
   int _getFavoriteIndex(String symbol) {
-    int idx = favoriteInstruments.indexOf(symbol);
-    if (idx != -1) return idx;
-    idx = favoriteInstruments.indexOf('$symbol.c');
-    if (idx != -1) return idx;
-    idx = favoriteInstruments.indexOf(symbol.replaceAll('.c', '').replaceAll('.r', ''));
-    if (idx != -1) return idx;
-    return 9999;
+    final target = MarketWatchV2Service.normalizeSymbol(symbol);
+    final idx = favoriteInstruments.indexWhere(
+      (s) => MarketWatchV2Service.normalizeSymbol(s) == target,
+    );
+    return idx == -1 ? 9999 : idx;
   }
 
   /// Debounces reorder POSTs while the user is dragging (spec: "debounce if
@@ -2245,12 +2315,10 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     // rows on screen, then append the hidden favorites so none are lost.
     final visibleOrder =
         instruments
-            .map((e) => '${MarketWatchV2Service.normalizeSymbol(e.symbol)}.c')
+            .map((e) => MarketWatchV2Service.normalizeSymbol(e.symbol))
             .toList();
     final hidden = favoriteInstruments.where(
-      (s) => !visibleOrder.contains(
-        '${MarketWatchV2Service.normalizeSymbol(s)}.c',
-      ),
+      (s) => !visibleOrder.contains(MarketWatchV2Service.normalizeSymbol(s)),
     );
     _applyLocalReorder([...visibleOrder, ...hidden]);
   }

@@ -191,9 +191,12 @@ class ChartDatafeedBridge {
     final sub = controller.priceStream.listen((priceData) {
       final tickSymbol = priceData['symbol']?.toString() ?? _currentSymbol;
       if (tickSymbol == null) return;
-      final tickClean = tickSymbol.toUpperCase().replaceAll('.C', '').replaceAll('.R', '');
-      final curClean = (_currentSymbol ?? '').toUpperCase().replaceAll('.C', '').replaceAll('.R', '');
-      if (tickSymbol != _currentSymbol && tickClean != curClean) return;
+      final tickDisplay =
+          SymbolDetailsCacheService.displaySymbolOf(tickSymbol).toUpperCase();
+      final curDisplay = SymbolDetailsCacheService.displaySymbolOf(
+        _currentSymbol ?? '',
+      ).toUpperCase();
+      if (tickSymbol != _currentSymbol && tickDisplay != curDisplay) return;
       final bid = _toDouble(priceData['bid']);
       final ask = _toDouble(priceData['ask']);
       if (bid == null || ask == null) return;

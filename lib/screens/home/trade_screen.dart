@@ -12,6 +12,7 @@ import 'package:crm_app/screens/common/view_models/app_notification_controller.d
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/services/trading_websocket_service.dart';
+import 'package:crm_app/services/symbol_details_cache_service.dart';
 import 'package:crm_app/services/account_websocket_service.dart';
 import 'package:crm_app/widgets/account_header_widget.dart';
 import 'package:crm_app/widgets/dashBorder.dart';
@@ -2698,13 +2699,9 @@ class _TradeScreenState extends State<TradeScreen> {
     );
   }
 
-  // Helper method to get symbol without .c suffix
-  String _getDisplaySymbol(String symbol) {
-    // Only an exact trailing '.c' is stripped so '.cent' symbols stay intact.
-    return symbol.endsWith('.c')
-        ? symbol.substring(0, symbol.length - 2)
-        : symbol;
-  }
+  /// Display symbol from the instruments API (`datafeed_symbol` → `display_symbol`).
+  String _getDisplaySymbol(String symbol) =>
+      SymbolDetailsCacheService.displaySymbolOf(symbol);
 
   Widget _buildPositionDetailsContent(
     TradingController tradingController,

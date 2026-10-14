@@ -21,6 +21,7 @@ import 'package:crm_app/screens/trading/view_models/banner_controller.dart';
 import 'package:crm_app/screens/home/search_instruments_screen.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/services/symbol_details_cache_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
 
@@ -423,14 +424,15 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                     size: 20.r,
                   ),
                 ),
-                confirmDismiss: (direction) async {
+                // removeFromFavorites drops the row before its first await,
+                // so the dismissed widget leaves the tree in this frame.
+                onDismissed: (_) async {
                   final removed = await _ic.removeFromFavorites(item.symbol);
                   if (removed) {
                     CustomToastService.showSuccess(
-                      message: '${item.symbol.replaceAll('.c', '').replaceAll('.r', '')} removed from favorites',
+                      message: '${SymbolDetailsCacheService.displaySymbolOf(item.symbol)} removed from favorites',
                     );
                   }
-                  return removed;
                 },
                 child: _LiveTickerCard(
                   instrument: item,

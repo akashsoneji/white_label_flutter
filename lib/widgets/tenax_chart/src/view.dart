@@ -111,13 +111,20 @@ class _TenaxChartViewState extends State<TenaxChartView> {
           );
         }
         await _controller.setTheme(widget.theme);
-        await _controller.setSymbol(
-          widget.initialSymbol,
-          resolution: widget.initialResolution,
-        );
+        // Hand over BEFORE the initial load: setSymbol awaits the history
+        // fetch, and a header symbol switch during that window would
+        // otherwise find no controller and be dropped.
         if (!_handedOver) {
           _handedOver = true;
           widget.onControllerReady?.call(_controller);
+        }
+        // The parent may have switched symbol inside onControllerReady; the
+        // initial symbol is then stale and must not overwrite it.
+        if (_controller.symbol == null) {
+          await _controller.setSymbol(
+            widget.initialSymbol,
+            resolution: widget.initialResolution,
+          );
         }
       },
       onConsoleMessage: (_, msg) {

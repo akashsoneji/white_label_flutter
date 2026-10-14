@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
+import 'package:crm_app/services/symbol_details_cache_service.dart';
 
 /// Extension methods to replicate Android functionality
 extension AndroidStyleExtensions on String {
@@ -40,15 +41,10 @@ extension AndroidStyleExtensions on String {
     return price.toStringAsFixed(decimalPlaces);
   }
 
-  /// Remove a trailing broker suffix `.c` / `.r` (similar to Android
-  /// removeSuffix). Only an exact trailing suffix is removed:
-  /// `replaceAll('.c', '')` turned `XAUUSD.cent` into `XAUUSDent`.
-  String removeSuffix() {
-    for (final suffix in const ['.c', '.r']) {
-      if (endsWith(suffix)) return substring(0, length - suffix.length);
-    }
-    return this;
-  }
+  /// Broker datafeed symbol -> display symbol (`AUDCAD.c` -> `AUDCAD`),
+  /// using the `display_symbol` / `datafeed_symbol` pair from the
+  /// instruments API. The suffix is never hardcoded.
+  String removeSuffix() => SymbolDetailsCacheService.displaySymbolOf(this);
 }
 
 /// Extension methods for UI state management (similar to Android makeVisible/makeGone)

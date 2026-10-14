@@ -1,0 +1,436 @@
+{
+  "info": {
+    "name": "IB Manager Portal — New endpoints (not in old collection)",
+    "description": "New IB Manager portal endpoints (not in the old collection or IB_MANAGER_PORTAL_API_UI.md).\n\nSetup: set base_url, ib_email, ib_password, then run '0. Login' — the token is saved automatically and every other request uses it.\n\nAll responses: {success, message, data}. Calls marked [W] are refused when the IB is managed by the broker. An id that is not in the IB's own network returns 404.\n\nReports take from/to (Y-m-d), not period. period values elsewhere: today | 7d | 30d | mtd | all | custom (custom needs from + to).\n\nWithdrawal flow: Request withdrawal OTP -> Create withdrawal (with otp) -> Withdrawal status.\nExport flow: Start export -> Export status until ready -> Download.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "base_url", "value": "https://broker.example.com", "type": "string" },
+    { "key": "ib_email", "value": "ib@example.com", "type": "string" },
+    { "key": "ib_password", "value": "CHANGE_ME", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "plan_id", "value": "7", "type": "string" },
+    { "key": "link_id", "value": "3", "type": "string" },
+    { "key": "client_user_id", "value": "10", "type": "string" },
+    { "key": "distribution_id", "value": "1", "type": "string" },
+    { "key": "export_id", "value": "1", "type": "string" },
+    { "key": "account_number", "value": "100001", "type": "string" },
+    { "key": "mt5_account_id", "value": "1", "type": "string" },
+    { "key": "method_id", "value": "1", "type": "string" },
+    { "key": "group_id", "value": "1", "type": "string" },
+    { "key": "request_order_id", "value": "ORD-0001", "type": "string" },
+    { "key": "from_account", "value": "", "type": "string" },
+    { "key": "from", "value": "2026-10-01", "type": "string" },
+    { "key": "to", "value": "2026-10-12", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "0. Login (run first)",
+      "item": [
+        {
+          "name": "Login as IB partner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const d = body.data || {};",
+                  "const token = d.token || d.access_token || (d.user && d.user.token) || body.token;",
+                  "if (token) { pm.collectionVariables.set('token', token); console.log('token saved'); }",
+                  "else { console.warn('No token in response - check the login response and copy it into the token variable'); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{ib_email}}\",\n  \"password\": \"{{ib_password}}\"\n}" },
+            "url": "{{base_url}}/api/login",
+            "description": "Same login the client app uses (core/routes/api.php:198). The user must be an active IB Manager partner, otherwise every /api/ibm/portal call is refused. The test script saves the token into {{token}}."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Partner Plans",
+      "item": [
+        {
+          "name": "Rename partner plan [W]",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"plan_name\": \"Gold 2026\",\n  \"description\": \"Renamed plan\"\n}" },
+            "url": "{{base_url}}/api/ibm/portal/partner-plans/{{plan_id}}/rename",
+            "description": "plan_name required (max 150), description optional (max 1000). api.php:526."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Referral Links",
+      "item": [
+        {
+          "name": "Link stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/links/{{link_id}}/stats?period=30d",
+            "description": "In the old collection but not in the MD. period = today|7d|30d|mtd|all|custom (custom needs from/to). api.php:549."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Commission Distribution",
+      "item": [
+        {
+          "name": "Create form data",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/commission-distributions/create"
+          }
+        },
+        {
+          "name": "Search my clients",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/commission-distributions/clients?search="
+          }
+        },
+        {
+          "name": "Distribute commission to a client [W]",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"client_user_id\": {{client_user_id}},\n  \"amount\": 10,\n  \"comment\": \"Monthly share\"\n}" },
+            "url": "{{base_url}}/api/ibm/portal/commission-distributions",
+            "description": "client_user_id required, amount required > 0, comment optional (max 500)."
+          }
+        },
+        {
+          "name": "Distribution history",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/commission-distributions?page=1&per_page=25"
+          }
+        },
+        {
+          "name": "Cancel distribution [W]",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/commission-distributions/{{distribution_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Client funding",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/client-funding?from={{from}}&to={{to}}&type=deposit&page=1",
+            "description": "from/to optional dates, type = deposit|withdrawal."
+          }
+        },
+        {
+          "name": "Commission report",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/commission-report?from={{from}}&to={{to}}&view=trade&symbol=&type=&page=1",
+            "description": "from/to REQUIRED (Y-m-d). view = trade|account, type = buy|sell."
+          }
+        },
+        {
+          "name": "Payout report",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/payout-report?from={{from}}&to={{to}}&status=&page=1",
+            "description": "from/to REQUIRED (Y-m-d). status = pending|approved|paid|rejected|cancelled."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exports",
+      "item": [
+        {
+          "name": "List my exports",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/exports"
+          }
+        },
+        {
+          "name": "Start export",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"kind\": \"commission_history\",\n  \"from\": \"{{from}}\",\n  \"to\": \"{{to}}\",\n  \"view\": \"trade\"\n}" },
+            "url": "{{base_url}}/api/ibm/portal/exports",
+            "description": "kind required = commission_history|client_funding|ib_payouts. Optional: from, to, type (deposit|withdrawal), status (pending|approved|paid|rejected|cancelled), view (trade|account), symbol, side (buy|sell)."
+          }
+        },
+        {
+          "name": "Export status",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/exports/{{export_id}}"
+          }
+        },
+        {
+          "name": "Download export (binary)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/ibm/portal/exports/{{export_id}}/download",
+            "description": "Streams the file on success; JSON envelope only on error."
+          }
+        }
+      ]
+    },
+    {
+      "name": "IB Client API — clients & KYC",
+      "item": [
+        {
+          "name": "Create client",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "first_name", "value": "Test", "type": "text" },
+                { "key": "last_name", "value": "Client", "type": "text" },
+                { "key": "email", "value": "test.client@example.com", "type": "text" },
+                { "key": "mobile", "value": "+10000000000", "type": "text" },
+                { "key": "password", "value": "Secret123", "type": "text" },
+                { "key": "id_proof", "type": "file", "src": [], "disabled": true },
+                { "key": "address_proof", "type": "file", "src": [], "disabled": true }
+              ]
+            },
+            "url": "{{base_url}}/api/ibm/portal/clients",
+            "description": "email + mobile unique, password min 6. Proofs optional (jpeg/jpg/png/pdf, max 10 MB)."
+          }
+        },
+        {
+          "name": "List my clients",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/clients/list?search=&page=1&per_page=25&direct_only=0"
+          }
+        },
+        {
+          "name": "Client KYC status",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/kyc"
+          }
+        },
+        {
+          "name": "Upload client KYC",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "files[]", "type": "file", "src": [] },
+                { "key": "subdocument_type", "value": "others", "type": "text" }
+              ]
+            },
+            "url": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/kyc",
+            "description": "document_type is forced to kyc; the rest goes to the core KYC upload (same fields as the admin Add KYC screen)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "IB Client API — money",
+      "item": [
+        {
+          "name": "Client deposits",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/deposits"
+          }
+        },
+        {
+          "name": "Deposit methods",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/deposit-methods"
+          }
+        },
+        {
+          "name": "Create deposit for client",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 100,\n  \"method_id\": {{method_id}},\n  \"request_order_id\": \"{{request_order_id}}\",\n  \"call_back_url\": \"https://partner.example.com/callback\"\n}" },
+            "url": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/deposits"
+          }
+        },
+        {
+          "name": "Deposit status",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/deposits/status?request_order_id={{request_order_id}}"
+          }
+        },
+        {
+          "name": "Client withdrawals",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/withdrawals"
+          }
+        },
+        {
+          "name": "Withdrawal methods",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/withdrawal-methods"
+          }
+        },
+        {
+          "name": "Request withdrawal OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"user_id\": {{client_user_id}},\n  \"action\": \"withdraw\",\n  \"amount\": 50\n}" },
+            "url": "{{base_url}}/api/ibm/portal/otp/request",
+            "description": "Run before 'Create withdrawal for client'. action must be withdraw."
+          }
+        },
+        {
+          "name": "Create withdrawal for client",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 50,\n  \"otp\": \"123456\",\n  \"mt5_account_id\": {{mt5_account_id}},\n  \"request_order_id\": \"{{request_order_id}}\",\n  \"call_back_url\": \"https://partner.example.com/callback\"\n}" },
+            "url": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/withdrawals",
+            "description": "otp required (from /otp/request). mt5_account_id is required — except on wallet-first brokers, where it is prohibited (remove it). Crypto: add crypto_address + crypto_network."
+          }
+        },
+        {
+          "name": "Withdrawal status",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/withdrawals/status?request_order_id={{request_order_id}}"
+          }
+        },
+        {
+          "name": "Client wallet",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/wallet"
+          }
+        },
+        {
+          "name": "Client wallet history",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/wallet/history?page=1"
+          }
+        },
+        {
+          "name": "Internal transfer for client",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"from_account\": \"{{from_account}}\",\n  \"to_account\": \"{{account_number}}\",\n  \"amount\": 10\n}" },
+            "url": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/transfers",
+            "description": "from_account and to_account must differ (max 64 chars each); amount min 0.01. Handed to the same internal-transfer logic as the client app, so use the same account values the client app sends (wallet ID or MT5 account number) — take them from 'Client wallet' and 'MT5 account detail'."
+          }
+        }
+      ]
+    },
+    {
+      "name": "IB Client API — MT5",
+      "item": [
+        {
+          "name": "MT5 groups",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/mt5-groups"
+          }
+        },
+        {
+          "name": "Open MT5 account for client",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"group_id\": {{group_id}},\n  \"leverage\": 100,\n  \"main_password\": \"Main@1234\",\n  \"investor_password\": \"Inv@12345\"\n}" },
+            "url": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/mt5",
+            "description": "Passwords 8-16 chars and must differ."
+          }
+        },
+        {
+          "name": "MT5 account detail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/mt5/{{account_number}}"
+          }
+        },
+        {
+          "name": "MT5 account trades",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/mt5/{{account_number}}/trades?period=30d"
+          }
+        },
+        {
+          "name": "Change MT5 main password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"new_password\": \"Main@5678\"\n}" },
+            "url": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/mt5/{{account_number}}/password/main",
+            "description": "Needs upper + lower + digit + special character."
+          }
+        },
+        {
+          "name": "Change MT5 investor password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"new_password\": \"Inv@56789\"\n}" },
+            "url": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/mt5/{{account_number}}/password/investor",
+            "description": "Needs upper + lower + digit + special character."
+          }
+        }
+      ]
+    }
+  ]
+}

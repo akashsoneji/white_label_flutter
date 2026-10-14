@@ -331,6 +331,57 @@ class ApiService {
     }
   }
 
+  /// PATCH: JSON body
+  static Future<ApiResponse> patch({
+    required String endpoint,
+    Map<String, dynamic>? data,
+    String? token,
+    bool isRetry = false,
+  }) async {
+    try {
+      final authToken = token ?? await SecureStorageService.getAuthToken();
+      final httpClient = HttpClientService.instance;
+      final headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        ...httpClient.keepAliveHeaders,
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      };
+
+      _logRequest('PATCH', endpoint, data: data, extraHeaders: headers);
+
+      final uri = Uri.parse('${ApiConstants.baseUrl}$endpoint');
+      final response = await httpClient.client
+          .patch(
+            uri,
+            headers: headers,
+            body: data != null ? jsonEncode(data) : null,
+          )
+          .timeout(_timeout);
+
+      _logResponse(response);
+
+      if (response.statusCode == 401) {
+        final errorResponse = _handleError(response, allowRetry: !isRetry);
+        if (_shouldRetry(errorResponse)) {
+          return patch(
+            endpoint: endpoint,
+            data: data,
+            token: token,
+            isRetry: true,
+          );
+        }
+        return errorResponse;
+      }
+
+      return _parseApiResponse(response.body);
+    } catch (e, t) {
+      _logError('PATCH', endpoint, e, t);
+      return _handleError(e);
+    }
+  }
+
   /// DELETE: Delete resource
   static Future<ApiResponse> delete({
     required String endpoint,

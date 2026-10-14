@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:crm_app/core/network/api_client.dart';
 import 'package:crm_app/utils/date_helper.dart';
 
-import 'package:crm_app/brand_switcher.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 
@@ -25,15 +24,66 @@ class SymbolDetailsCacheService {
   /// Fast global lookup for clean/upper symbol -> broker datafeed_symbol (e.g. "UKOIL" -> "UKOil.c")
   static final Map<String, String> _globalDatafeedLookup = {};
 
+  /// Reverse lookup: upper datafeed/display symbol -> API `display_symbol`
+  /// (e.g. "UKOIL.C" -> "UKOil").
+  static final Map<String, String> _globalDisplayLookup = {};
+
+  /// Symbol without whatever broker suffix follows the last dot. The suffix
+  /// itself (`.c`, `.cent`, `.r`, ...) is never hardcoded — it comes from
+  /// the instruments API `datafeed_symbol`.
+  static String _cleanKey(String upper) {
+    final dot = upper.lastIndexOf('.');
+    return dot > 0 ? upper.substring(0, dot) : upper;
+  }
+
   /// Registers a display -> datafeed mapping in the global lookup table
   static void registerDatafeedSymbol(String displaySymbol, String datafeedSymbol) {
     if (displaySymbol.isEmpty || datafeedSymbol.isEmpty) return;
-    final upperDisp = displaySymbol.toUpperCase().trim();
-    final upperDf = datafeedSymbol.toUpperCase().trim();
-    final cleanDisp = upperDisp.replaceAll('.C', '').replaceAll('.R', '');
-    _globalDatafeedLookup[upperDisp] = datafeedSymbol.trim();
-    _globalDatafeedLookup[cleanDisp] = datafeedSymbol.trim();
-    _globalDatafeedLookup[upperDf] = datafeedSymbol.trim();
+    final display = displaySymbol.trim();
+    final datafeed = datafeedSymbol.trim();
+    final upperDisp = display.toUpperCase();
+    final upperDf = datafeed.toUpperCase();
+    _globalDatafeedLookup[upperDisp] = datafeed;
+    _globalDatafeedLookup[_cleanKey(upperDf)] = datafeed;
+    _globalDatafeedLookup[upperDf] = datafeed;
+    _globalDisplayLookup[upperDisp] = display;
+    _globalDisplayLookup[upperDf] = display;
+  }
+
+  /// Datafeed symbol -> display symbol from the instruments API
+  /// (`AUDCAD.c` -> `AUDCAD`). A symbol not in any instruments response
+  /// drops the part after its last dot.
+  static String displaySymbolOf(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return trimmed;
+    final fromApi = _globalDisplayLookup[trimmed.toUpperCase()];
+    if (fromApi != null && fromApi.isNotEmpty) return fromApi;
+    final dot = trimmed.lastIndexOf('.');
+    return dot > 0 ? trimmed.substring(0, dot) : trimmed;
+  }
+
+  /// `datafeed_symbol` of the entry in [symbols] matching [symbolUpper].
+  static String? _findDatafeed(
+    List<Map<String, dynamic>>? symbols,
+    String symbolUpper,
+  ) {
+    if (symbols == null) return null;
+    final cleanSymbol = _cleanKey(symbolUpper);
+    for (final s in symbols) {
+      final display = (s['display_symbol'] ?? '').toString().trim();
+      final datafeed = (s['datafeed_symbol'] ?? '').toString().trim();
+      if (datafeed.isEmpty) continue;
+      final displayUpper = display.toUpperCase();
+      final datafeedUpper = datafeed.toUpperCase();
+      final matches =
+          displayUpper == symbolUpper ||
+          datafeedUpper == symbolUpper ||
+          _cleanKey(datafeedUpper) == cleanSymbol;
+      if (!matches) continue;
+      registerDatafeedSymbol(display, datafeed);
+      return datafeed;
+    }
+    return null;
   }
 
   /// Initialize memory cache and global lookup from SharedPreferences on app launch
@@ -70,99 +120,59 @@ class SymbolDetailsCacheService {
     }
   }
 
-  /// Synchronous in-memory lookup for datafeed_symbol.
-  /// Resolves clean symbols like "UKOil" or "XAUUSD" to their exact broker datafeed
-  /// symbol (e.g. "UKOil.c", "XAUUSD.c") based on the active trading account.
+  static String? _activeAccount(String? accountNumber) {
+    if (accountNumber != null && accountNumber.isNotEmpty) return accountNumber;
+    if (!Get.isRegistered<AccountController>()) return null;
+    final active = Get.find<AccountController>().activeMT5Account;
+    return active?.metaAccountNumber.toString();
+  }
+
+  /// Synchronous lookup of the broker `datafeed_symbol` from the
+  /// `user/instruments/{account}` API ("AUDCAD" -> "AUDCAD.c"). The active
+  /// account's instruments win, because each account can use a different
+  /// suffix. Nothing is appended by the app: an unknown symbol is returned
+  /// as-is until the instruments API has been loaded.
   static String resolveDatafeedSymbolSync(String symbol, String? accountNumber) {
     if (symbol.isEmpty) return symbol;
     final symbolUpper = symbol.toUpperCase().trim();
-    final cleanSymbol = symbolUpper.replaceAll('.C', '').replaceAll('.R', '');
 
-    // 1. Check fast global datafeed lookup (populated on startup & from all API responses)
-    final fromGlobal = _globalDatafeedLookup[symbolUpper] ?? _globalDatafeedLookup[cleanSymbol];
+    final acc = _activeAccount(accountNumber);
+    if (acc != null && acc.isNotEmpty) {
+      final fromAccount = _findDatafeed(_memoryCache[acc], symbolUpper);
+      if (fromAccount != null) return fromAccount;
+    }
+
+    final fromGlobal =
+        _globalDatafeedLookup[symbolUpper] ??
+        _globalDatafeedLookup[_cleanKey(symbolUpper)];
     if (fromGlobal != null && fromGlobal.isNotEmpty) return fromGlobal;
 
-    // 2. Try in-memory cache for active account
-    String? acc = accountNumber;
-    if ((acc == null || acc.isEmpty) && Get.isRegistered<AccountController>()) {
-      acc = Get.find<AccountController>().activeMT5Account?.metaAccountNumber.toString();
-    }
-    if (acc != null && acc.isNotEmpty) {
-      final cached = _memoryCache[acc];
-      if (cached != null && cached.isNotEmpty) {
-        for (final s in cached) {
-          final display = (s['display_symbol'] ?? '').toString().toUpperCase();
-          final datafeed = (s['datafeed_symbol'] ?? '').toString().toUpperCase();
-          final cleanDisplay = display.replaceAll('.C', '').replaceAll('.R', '');
-          final cleanDatafeed = datafeed.replaceAll('.C', '').replaceAll('.R', '');
-          if (cleanDisplay == cleanSymbol || cleanDatafeed == cleanSymbol) {
-            final df = (s['datafeed_symbol'] ?? '').toString().trim();
-            if (df.isNotEmpty) {
-              registerDatafeedSymbol(s['display_symbol'] ?? '', df);
-              return df;
-            }
-          }
-        }
-      }
+    for (final symbols in _memoryCache.values) {
+      final fromAny = _findDatafeed(symbols, symbolUpper);
+      if (fromAny != null) return fromAny;
     }
 
-    // 2b. Check in-memory cache across ANY account
-    for (final entry in _memoryCache.entries) {
-      for (final s in entry.value) {
-        final display = (s['display_symbol'] ?? '').toString().toUpperCase();
-        final datafeed = (s['datafeed_symbol'] ?? '').toString().toUpperCase();
-        final cleanDisplay = display.replaceAll('.C', '').replaceAll('.R', '');
-        final cleanDatafeed = datafeed.replaceAll('.C', '').replaceAll('.R', '');
-        if (cleanDisplay == cleanSymbol || cleanDatafeed == cleanSymbol) {
-          final df = (s['datafeed_symbol'] ?? '').toString().trim();
-          if (df.isNotEmpty) {
-            registerDatafeedSymbol(s['display_symbol'] ?? '', df);
-            return df;
-          }
-        }
-      }
-    }
-
-    // 3. Fallback: check live InstrumentsController
     if (Get.isRegistered<InstrumentsController>()) {
       final inst = Get.find<InstrumentsController>().findInstrument(symbol);
-      if (inst != null && inst.symbol.contains('.')) {
-        return inst.symbol;
-      }
+      if (inst != null && inst.symbol.contains('.')) return inst.symbol;
     }
 
-    // 4. If symbol already has a dot suffix (e.g. "UKOil.c"), keep it!
-    if (symbol.contains('.')) return symbol;
-
-    // 5. If broker/flavor is known to use .c suffix (any .c in global lookup)
-    final hasDotCSuffix = _globalDatafeedLookup.values.any((v) => v.toLowerCase().endsWith('.c'));
-    if (hasDotCSuffix || BrandSwitcher.isPipze) {
-      return '$symbol.c';
-    }
-
-    return symbol;
+    return symbol.trim();
   }
 
-  /// Async lookup for datafeed_symbol with persistent cache fallback.
+  /// Async lookup: loads the account's instruments API when it is not cached
+  /// yet, then resolves the `datafeed_symbol` from it.
   static Future<String> resolveDatafeedSymbol(String symbol, String? accountNumber) async {
     if (symbol.isEmpty) return symbol;
-    String? acc = accountNumber;
-    if ((acc == null || acc.isEmpty) && Get.isRegistered<AccountController>()) {
-      acc = Get.find<AccountController>().activeMT5Account?.metaAccountNumber.toString();
-    }
-    final syncRes = resolveDatafeedSymbolSync(symbol, acc);
-    if (syncRes != symbol && syncRes.contains('.')) return syncRes;
-    if (acc == null || acc.isEmpty) return syncRes;
-    try {
-      await ensureCached(acc);
-      final details = await getSymbolDetails(symbol, acc);
-      final df = (details?['datafeed_symbol'] ?? '').toString().trim();
-      if (df.isNotEmpty) {
-        registerDatafeedSymbol(symbol, df);
-        return df;
+    final acc = _activeAccount(accountNumber);
+    if (acc != null && acc.isNotEmpty && !_memoryCache.containsKey(acc)) {
+      try {
+        await ensureCached(acc);
+      } catch (e) {
+        print('SymbolDetailsCacheService: ensureCached failed for $acc: $e');
       }
-    } catch (_) {}
-    return syncRes;
+    }
+    return resolveDatafeedSymbolSync(symbol, acc);
   }
 
   /// Symbol detail model for caching
@@ -325,17 +335,15 @@ class SymbolDetailsCacheService {
 
       // Try to match by display_symbol or datafeed_symbol
       final symbolUpper = symbol.toUpperCase().trim();
-      final cleanSymbol = symbolUpper.replaceAll('.C', '').replaceAll('.R', '');
+      final cleanSymbol = _cleanKey(symbolUpper);
 
       final matchedSymbol = cachedSymbols.firstWhere(
         (s) {
           final displaySymbol = (s['display_symbol'] ?? '').toString().toUpperCase().trim();
           final datafeedSymbol = (s['datafeed_symbol'] ?? '').toString().toUpperCase().trim();
-          // Remove .c suffix for comparison
-          final cleanDisplay = displaySymbol.replaceAll('.C', '').replaceAll('.R', '');
-          final cleanDatafeed = datafeedSymbol.replaceAll('.C', '').replaceAll('.R', '');
-          
-          return cleanDisplay == cleanSymbol || cleanDatafeed == cleanSymbol;
+          return displaySymbol == symbolUpper ||
+              datafeedSymbol == symbolUpper ||
+              _cleanKey(datafeedSymbol) == cleanSymbol;
         },
         orElse: () => <String, dynamic>{},
       );

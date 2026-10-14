@@ -1,5 +1,10 @@
+import 'dart:typed_data';
+
+import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/core/network/api_response.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/http_client_service.dart';
+import 'package:crm_app/services/secure_storage_service.dart';
 
 class IbmApiProvider {
   /// Calls GET /api/ibm/client/system to check if the user is in IBM or legacy system,
@@ -100,6 +105,7 @@ class IbmApiProvider {
   Future<ApiResponse> getPortalWalletTransactions({
     String? currency,
     String? type,
+    String? search,
     int page = 1,
     int perPage = 25,
   }) async {
@@ -109,11 +115,13 @@ class IbmApiProvider {
     };
     if (currency != null && currency.isNotEmpty) query['currency'] = currency;
     if (type != null && type.isNotEmpty && type != 'all' && type != 'Everything') query['type'] = type;
+    if (search != null && search.isNotEmpty) query['search'] = search;
     return await ApiService.get(
       endpoint: 'ibm/portal/wallet/transactions',
       queryParameters: query,
     );
   }
+
 
   /// Request a payout withdrawal
   Future<ApiResponse> requestWithdrawal({
@@ -198,6 +206,184 @@ class IbmApiProvider {
     return await ApiService.put(
       endpoint: 'ibm/portal/partner-plans/$planId',
       data: data,
+    );
+  }
+
+  /// Commission distribution form data (balance, currency, limits)
+  Future<ApiResponse> getDistributionFormData() async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/commission-distributions/create',
+    );
+  }
+
+  /// Search the IB's own clients for the distribution picker
+  Future<ApiResponse> searchDistributionClients({String search = ''}) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/commission-distributions/clients',
+      queryParameters: {if (search.isNotEmpty) 'search': search},
+    );
+  }
+
+  /// Send commission to a client; created as pending broker approval
+  Future<ApiResponse> createDistribution({
+    required int clientUserId,
+    required num amount,
+    String? comment,
+  }) async {
+    return await ApiService.post(
+      endpoint: 'ibm/portal/commission-distributions',
+      data: {
+        'client_user_id': clientUserId,
+        'amount': amount,
+        if (comment != null && comment.isNotEmpty) 'comment': comment,
+      },
+    );
+  }
+
+  /// Past commission distributions (paginated)
+  Future<ApiResponse> getDistributionHistory({
+    int page = 1,
+    int perPage = 25,
+  }) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/commission-distributions',
+      queryParameters: {'page': '$page', 'per_page': '$perPage'},
+    );
+  }
+
+  /// Cancel a pending distribution; held amount returns to the IB wallet
+  Future<ApiResponse> cancelDistribution(int distributionId) async {
+    return await ApiService.delete(
+      endpoint: 'ibm/portal/commission-distributions/$distributionId',
+    );
+  }
+
+  /// Team deposits / withdrawals of the IB's clients.
+  /// `type`: deposit | withdrawal (null = both). Dates are Y-m-d, optional.
+  Future<ApiResponse> getClientFunding({
+    String? from,
+    String? to,
+    String? type,
+    int page = 1,
+    int perPage = 25,
+  }) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/client-funding',
+      queryParameters: {
+        if (from != null) 'from': from,
+        if (to != null) 'to': to,
+        if (type != null) 'type': type,
+        'page': '$page',
+        'per_page': '$perPage',
+      },
+    );
+  }
+
+  /// Commission earned per trade or per account. `from`/`to` are required.
+  /// `type` is the trade side: buy | sell.
+  Future<ApiResponse> getCommissionReport({
+    required String from,
+    required String to,
+    String view = 'trade',
+    String? mt5Account,
+    String? symbol,
+    String? type,
+    int page = 1,
+    int perPage = 25,
+  }) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/commission-report',
+      queryParameters: {
+        'from': from,
+        'to': to,
+        'view': view,
+        if (mt5Account != null && mt5Account.isNotEmpty)
+          'mt5_account': mt5Account,
+        if (symbol != null && symbol.isNotEmpty) 'symbol': symbol,
+        if (type != null && type.isNotEmpty) 'type': type,
+        'page': '$page',
+        'per_page': '$perPage',
+      },
+    );
+  }
+
+  /// IB's own payout requests. `from`/`to` are required.
+  Future<ApiResponse> getPayoutReport({
+    required String from,
+    required String to,
+    String? status,
+    int page = 1,
+    int perPage = 25,
+  }) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/payout-report',
+      queryParameters: {
+        'from': from,
+        'to': to,
+        if (status != null && status.isNotEmpty) 'status': status,
+        'page': '$page',
+        'per_page': '$perPage',
+      },
+    );
+  }
+
+  /// Exports the IB started, newest first
+  Future<ApiResponse> getExports() async {
+    return await ApiService.get(endpoint: 'ibm/portal/exports');
+  }
+
+  /// Queue a CSV build. `kind`: commission_history | client_funding | ib_payouts.
+  /// `filters` may hold from, to, type, status, view, symbol, side.
+  Future<ApiResponse> startExport({
+    required String kind,
+    Map<String, dynamic> filters = const {},
+  }) async {
+    return await ApiService.post(
+      endpoint: 'ibm/portal/exports',
+      data: {
+        'kind': kind,
+        for (final e in filters.entries)
+          if (e.value != null) e.key: e.value,
+      },
+    );
+  }
+
+  /// Poll one export until `status` is ready
+  Future<ApiResponse> getExportStatus(int exportId) async {
+    return await ApiService.get(endpoint: 'ibm/portal/exports/$exportId');
+  }
+
+  /// Download the CSV. The endpoint returns text/csv, not the JSON envelope,
+  /// so it bypasses ApiService parsing. Returns null on a non-200 response.
+  Future<Uint8List?> downloadExport(int exportId) async {
+    final token = await SecureStorageService.getAuthToken();
+    final response = await HttpClientService.instance.client
+        .get(
+          Uri.parse(
+            '${ApiConstants.baseUrl}ibm/portal/exports/$exportId/download',
+          ),
+          headers: {
+            'Accept': 'text/csv',
+            if (token != null && token.isNotEmpty)
+              'Authorization': 'Bearer $token',
+          },
+        )
+        .timeout(const Duration(seconds: 60));
+    return response.statusCode == 200 ? response.bodyBytes : null;
+  }
+
+  /// Rename a Partner Plan (name/description only)
+  Future<ApiResponse> renamePartnerPlan(
+    int planId, {
+    required String planName,
+    String? description,
+  }) async {
+    return await ApiService.patch(
+      endpoint: 'ibm/portal/partner-plans/$planId/rename',
+      data: {
+        'plan_name': planName,
+        if (description != null) 'description': description,
+      },
     );
   }
 

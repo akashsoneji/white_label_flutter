@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -8,8 +10,10 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/screens/ibm/presentation/pages/ibm_client_profile_screen.dart';
+import 'package:crm_app/screens/ibm/presentation/pages/ibm_exports_screen.dart';
 import 'package:crm_app/screens/ibm/presentation/widgets/ibm_shimmer_loading.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 
 class IbmClientsScreen extends StatefulWidget {
   const IbmClientsScreen({super.key});
@@ -36,6 +40,26 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
   String _selectedDateFilter = 'MTD';
   DateTime? _customStartDate;
   DateTime? _customEndDate;
+
+  // Direct-clients filters sent to GET /portal/clients as `status` / `link_id`.
+  static const List<String> _statusFilters = [
+    'all',
+    'active',
+    'idle',
+    'never',
+    'inactive',
+  ];
+  static const Map<String, String> _statusFilterKeys = {
+    'all': 'ibm_status_all',
+    'active': 'chart_active',
+    'idle': 'ibm_status_idle',
+    'never': 'ibm_status_never_traded',
+    'inactive': 'ibm_status_account_inactive',
+  };
+  String _selectedStatus = 'all';
+  String? _selectedLinkId;
+  String? _selectedLinkLabel;
+  bool _isExporting = false;
 
   // Selected Focused Sub-IB node for drilldown 8-card view
   Map<String, dynamic>? _selectedFocusNode;
@@ -108,7 +132,13 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
             ? DateFormat('yyyy-MM-dd').format(_customEndDate!)
             : null;
 
-    controller.fetchClients(period: p);
+    controller.fetchClients(
+      period: p,
+      status: _selectedStatus,
+      linkId: _selectedLinkId,
+      from: from,
+      to: to,
+    );
     controller
         .fetchClientsNetworkTree(period: p, from: from, to: to)
         .then((_) => _enrichVisibleTreeRows());
@@ -383,12 +413,12 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
       final directPartners = treeSummary['direct'] ?? 0;
       final totalPartners = treeSummary['total'] ?? treeSummary['sub_ibs'] ?? 0;
       final totalNetworkClients =
-          treeSummary['clients'] ?? treeSummary['network_clients'] ?? 3;
+          treeSummary['clients'] ?? treeSummary['network_clients'] ?? 0;
       final networkEarned = (double.tryParse(
-                (treeSummary['earned'] ?? treeSummary['you_earned'] ?? 0.09)
+                (treeSummary['earned'] ?? treeSummary['you_earned'] ?? 0)
                     .toString(),
               ) ??
-              0.09)
+              0.0)
           .toStringAsFixed(2);
 
       final List<dynamic> rows = data['rows'] ?? [];
@@ -468,13 +498,14 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                   isSelected: !isNetwork,
                   onTap: () {
                     setState(() => _selectedFocusNode = null);
-                    controller.fetchClients(scope: 'direct');
+                    controller.clientScope.value = 'direct';
+                    _refreshAllData();
                   },
                 ),
                 SizedBox(width: 8.w),
                 _buildSubTabBadge(
                   label: TranslationUtils.tr('ibm_nav_network'),
-                  count: totalNetworkClients,
+                  count: totalPartners,
                   isSelected: isNetwork,
                   onTap: () {
                     controller.fetchClients(scope: 'network');
@@ -737,6 +768,11 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
               ],
             ),
             SizedBox(height: 14.h),
+
+            if (!isNetwork) ...[
+              _buildClientFiltersRow(data, rows.length),
+              SizedBox(height: 14.h),
+            ],
 
             if (isNetwork) ...[
               // Legend
@@ -2358,33 +2394,83 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
     );
   }
 
+  Map _primaryCurrency(Map r) {
+    final list =
+        (r['currencies'] as List? ?? const []).whereType<Map>().toList();
+    if (list.isEmpty) return r;
+    return list.firstWhereOrNull((c) => c['currency'] == 'USD') ?? list.first;
+  }
+
+  double _toDouble(Object? value) =>
+      double.tryParse((value ?? 0).toString()) ?? 0.0;
+
+  /// Sub-cent commissions (e.g. 0.004) would otherwise render as 0.00.
+  String _money(double value, [String currency = 'USD']) {
+    final digits = value != 0 && value.abs() < 0.01 ? 4 : 2;
+    final prefix = currency == 'USD' ? '\$' : '$currency ';
+    return '$prefix${value.toStringAsFixed(digits)}';
+  }
+
+  String _lots(double value) {
+    if (value == 0) return '0';
+    return value
+        .toStringAsFixed(4)
+        .replaceFirst(RegExp(r'0+$'), '')
+        .replaceFirst(RegExp(r'\.$'), '');
+  }
+
+  String _shortDate(Object? raw) {
+    final parsed = raw == null ? null : DateTime.tryParse(raw.toString());
+    if (parsed == null) return '—';
+    return DateFormat('dd MMM yyyy').format(parsed.toLocal());
+  }
+
+  ({String label, Color color}) _clientActivity(Map r) {
+    if (r['is_active'] == true) {
+      return (
+        label: TranslationUtils.tr('chart_active'),
+        color: Colors.green.shade600,
+      );
+    }
+    if (r['last_trade_at'] == null) {
+      return (
+        label: TranslationUtils.tr('ibm_status_never_traded'),
+        color: Theme.of(context).colorScheme.error,
+      );
+    }
+    final idleDays = r['idle_days'];
+    return (
+      label:
+          idleDays == null
+              ? TranslationUtils.tr('ibm_status_idle')
+              : TranslationUtils.trArgs('ibm_idle_days', {'days': '$idleDays'}),
+      color: Colors.orange.shade700,
+    );
+  }
+
   Widget _buildClientRowCard(dynamic row) {
     final r = row is Map ? row : {};
     final name = (r['name'] ?? r['username'] ?? 'Client').toString();
     final email = (r['email'] ?? '').toString();
-    final isIb = r['is_ib'] ?? false;
-    final lastLogin = (r['last_login'] ?? '--').toString();
+    final isIb = r['is_ib'] == true;
+    final activity = _clientActivity(r);
 
-    // Extract financials from currencies array if available
-    Map? firstCurr;
-    final currencies = r['currencies'];
-    if (currencies is List && currencies.isNotEmpty) {
-      firstCurr = currencies.first is Map ? currencies.first : null;
-    }
+    final curr = _primaryCurrency(r);
+    final currency = (curr['currency'] ?? 'USD').toString();
+    final deposits = _toDouble(curr['deposits']);
+    final withdrawals = _toDouble(curr['withdrawals']);
+    final net = deposits - withdrawals;
+    final commission = _toDouble(curr['commission']);
+    final equity = _toDouble(curr['equity']);
 
-    final depositsValue = double.tryParse((firstCurr?['deposits'] ?? r['deposits'] ?? 0).toString()) ?? 0.0;
-    final deposits = depositsValue.toStringAsFixed(2);
-
-    final withdrawalsValue = double.tryParse((firstCurr?['withdrawals'] ?? r['withdrawals'] ?? 0).toString()) ?? 0.0;
-
-    final netRaw = firstCurr?['net_deposit'] ?? firstCurr?['net'] ?? r['net_deposit'] ?? r['net'];
-    final netValue = netRaw != null ? (double.tryParse(netRaw.toString()) ?? 0.0) : (depositsValue - withdrawalsValue);
-    final net = netValue.toStringAsFixed(2);
-
-    final lots = (firstCurr?['lots'] ?? r['lots'])?.toString() ?? '0';
-
-    final commStr = (firstCurr?['commission'] ?? r['commission'] ?? 0).toString();
-    final comm = (double.tryParse(commStr) ?? 0.0).toStringAsFixed(2);
+    final logins =
+        (r['account_logins'] as List? ?? const [])
+            .map((e) => e.toString())
+            .toList();
+    final accountLabel =
+        logins.isEmpty
+            ? '—'
+            : '#${logins.first}${logins.length > 1 ? ' +${logins.length - 1}' : ''}';
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -2397,31 +2483,45 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
         padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
           color: AppColors.card,
-          borderRadius: BorderRadius.circular(14.r),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: AppColors.divider.withOpacity(0.5)),
           boxShadow:
               AppColors.isDarkMode
                   ? []
                   : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
                     ),
                   ],
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  radius: 18.r,
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                Container(
+                  width: 40.w,
+                  height: 40.w,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.primary.withOpacity(0.18),
+                        AppColors.primary.withOpacity(0.06),
+                      ],
+                    ),
+                  ),
                   child: Text(
                     name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'C',
                     style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
-                      fontSize: 14.sp,
+                      fontSize: 15.sp,
                     ),
                   ),
                 ),
@@ -2467,7 +2567,9 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        email.isNotEmpty ? email : lastLogin,
+                        email,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: AppColors.textGrey,
                           fontSize: 11.sp,
@@ -2476,26 +2578,45 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right, color: AppColors.divider, size: 20.w),
+                SizedBox(width: 8.w),
+                _buildStatusBadge(activity.label, activity.color),
               ],
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: 10.h),
+            Wrap(
+              spacing: 6.w,
+              runSpacing: 6.h,
+              children: [
+                _buildInfoTag(Icons.account_balance_wallet_outlined, accountLabel),
+                _buildInfoTag(
+                  Icons.show_chart_rounded,
+                  '${TranslationUtils.tr('ibm_equity')} ${_money(equity, currency)}',
+                ),
+                _buildInfoTag(
+                  Icons.login_rounded,
+                  '${TranslationUtils.tr('ibm_last_login')} ${_shortDate(r['last_login_at'])}',
+                ),
+              ],
+            ),
+            SizedBox(height: 10.h),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
               decoration: BoxDecoration(
-                color:
-                    AppColors.isDarkMode
-                        ? AppColors.surface
-                        : const Color(0xFFF8F9FA),
-                borderRadius: BorderRadius.circular(8.r),
+                color: AppColors.primary.withOpacity(
+                  AppColors.isDarkMode ? 0.10 : 0.04,
+                ),
+                borderRadius: BorderRadius.circular(10.r),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildMiniMetricMobile('DEPOSITS', '\$$deposits'),
-                  _buildMiniMetricMobile('NET', '\$$net'),
-                  _buildMiniMetricMobile('LOTS', lots),
-                  _buildMiniMetricMobile('COMMISSION', '\$$comm'),
+                  _buildMiniMetricMobile('DEPOSITS', _money(deposits, currency)),
+                  _buildMiniMetricMobile('NET', _money(net, currency)),
+                  _buildMiniMetricMobile('LOTS', _lots(_toDouble(curr['lots']))),
+                  _buildMiniMetricMobile(
+                    'COMMISSION',
+                    _money(commission, currency),
+                  ),
                 ],
               ),
             ),
@@ -2503,6 +2624,492 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
         ),
       ),
     );
+  }
+
+  Widget _buildStatusBadge(String label, Color color) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6.w,
+            height: 6.w,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          SizedBox(width: 4.w),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoTag(IconData icon, String text) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12.w, color: AppColors.textGrey),
+          SizedBox(width: 4.w),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 10.5.sp,
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Map<String, dynamic>> _referralLinks(Map<String, dynamic> data) {
+    final raw = data['links'];
+    if (raw is! List) return [];
+    return raw
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .where((l) => l['link_id'] != null)
+        .toList();
+  }
+
+  String _linkLabel(Map<String, dynamic> link) =>
+      (link['label'] ?? link['link_id']).toString();
+
+  void _clearClientFilters() {
+    setState(() {
+      _selectedStatus = 'all';
+      _selectedLinkId = null;
+      _selectedLinkLabel = null;
+    });
+    _refreshAllData();
+  }
+
+  Widget _buildClientFiltersRow(Map<String, dynamic> data, int rowCount) {
+    final links = _referralLinks(data);
+    final fromLinkCount =
+        (data['rows'] as List? ?? const [])
+            .whereType<Map>()
+            .where((r) => r['via_link'] != null)
+            .length;
+    final hasFilters = _selectedStatus != 'all' || _selectedLinkId != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _buildFilterPill(
+                icon: Icons.tune_rounded,
+                label:
+                    '${TranslationUtils.tr('common_status')}: ${TranslationUtils.tr(_statusFilterKeys[_selectedStatus]!)}',
+                isActive: _selectedStatus != 'all',
+                onTap:
+                    () => _showFilterSheet(
+                      title: TranslationUtils.tr('common_status'),
+                      selected: _selectedStatus,
+                      options: [
+                        for (final s in _statusFilters)
+                          (
+                            value: s,
+                            label: TranslationUtils.tr(_statusFilterKeys[s]!),
+                            count: null,
+                          ),
+                      ],
+                      onSelected: (value) {
+                        setState(() => _selectedStatus = value);
+                        _refreshAllData();
+                      },
+                    ),
+              ),
+              SizedBox(width: 8.w),
+              _buildFilterPill(
+                icon: Icons.link_rounded,
+                label:
+                    '${TranslationUtils.tr('ibm_referral_source')}: ${_selectedLinkLabel ?? TranslationUtils.tr('ibm_status_all')}',
+                isActive: _selectedLinkId != null,
+                onTap:
+                    () => _showFilterSheet(
+                      title: TranslationUtils.tr('ibm_referral_source'),
+                      selected: _selectedLinkId ?? '',
+                      options: [
+                        (
+                          value: '',
+                          label: TranslationUtils.tr('ibm_status_all'),
+                          count: null,
+                        ),
+                        for (final l in links)
+                          (
+                            value: l['link_id'].toString(),
+                            label: _linkLabel(l),
+                            count: int.tryParse('${l['clients']}'),
+                          ),
+                      ],
+                      onSelected: (value) {
+                        final link = links.firstWhereOrNull(
+                          (l) => l['link_id'].toString() == value,
+                        );
+                        setState(() {
+                          _selectedLinkId = value.isEmpty ? null : value;
+                          _selectedLinkLabel =
+                              link == null ? null : _linkLabel(link);
+                        });
+                        _refreshAllData();
+                      },
+                    ),
+              ),
+              if (hasFilters) ...[
+                SizedBox(width: 4.w),
+                TextButton.icon(
+                  onPressed: _clearClientFilters,
+                  icon: Icon(Icons.close_rounded, size: 16.w),
+                  label: Text(TranslationUtils.tr('ibm_clear_filters')),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    textStyle: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        SizedBox(height: 10.h),
+        Row(
+          children: [
+            Icon(Icons.link_rounded, size: 14.w, color: AppColors.textGrey),
+            SizedBox(width: 4.w),
+            Expanded(
+              child: Text(
+                TranslationUtils.trArgs('ibm_came_from_a_link', {
+                  'count': '$fromLinkCount',
+                  'total': '$rowCount',
+                }),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            _buildExportButton(),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterPill({
+    required IconData icon,
+    required String label,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    final foreground = isActive ? AppColors.primary : AppColors.textPrimary;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color:
+              isActive ? AppColors.primary.withOpacity(0.08) : AppColors.card,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isActive ? AppColors.primary : AppColors.divider,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 15.w, color: foreground),
+            SizedBox(width: 6.w),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 170.w),
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: foreground,
+                ),
+              ),
+            ),
+            SizedBox(width: 2.w),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 16.w,
+              color: foreground,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExportButton() {
+    return Material(
+      color: AppColors.primary,
+      borderRadius: BorderRadius.circular(20.r),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20.r),
+        onTap: _isExporting ? null : _exportClientsCsv,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _isExporting
+                  ? SizedBox(
+                    width: 14.w,
+                    height: 14.w,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.whiteColor,
+                    ),
+                  )
+                  : Icon(
+                    Icons.file_download_outlined,
+                    size: 16.w,
+                    color: AppColors.whiteColor,
+                  ),
+              SizedBox(width: 6.w),
+              Text(
+                TranslationUtils.tr('ibm_export_csv'),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.whiteColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showFilterSheet({
+    required String title,
+    required String selected,
+    required List<({String value, String label, int? count})> options,
+    required ValueChanged<String> onSelected,
+  }) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.card,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder:
+          (sheetContext) => SafeArea(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 12.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: AppColors.divider,
+                        borderRadius: BorderRadius.circular(2.r),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 14.h),
+                  Text(
+                    title,
+                    style: AppTextStyles.heading.copyWith(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                  Flexible(
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: [
+                        for (final option in options)
+                          _buildSheetOption(
+                            option: option,
+                            isSelected: option.value == selected,
+                            onTap: () {
+                              Navigator.of(sheetContext).pop();
+                              if (option.value != selected) {
+                                onSelected(option.value);
+                              }
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+    );
+  }
+
+  Widget _buildSheetOption({
+    required ({String value, String label, int? count}) option,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        margin: EdgeInsets.only(bottom: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color:
+              isSelected
+                  ? AppColors.primary.withOpacity(0.08)
+                  : Colors.transparent,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.divider,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                option.label,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                ),
+              ),
+            ),
+            if (option.count != null) ...[
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Text(
+                  '${option.count}',
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              SizedBox(width: 10.w),
+            ],
+            Icon(
+              isSelected
+                  ? Icons.check_circle_rounded
+                  : Icons.radio_button_unchecked_rounded,
+              size: 20.w,
+              color: isSelected ? AppColors.primary : AppColors.divider,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _csvCell(Object? value) {
+    final text = (value ?? '').toString();
+    if (text.contains(RegExp(r'[",\n]'))) {
+      return '"${text.replaceAll('"', '""')}"';
+    }
+    return text;
+  }
+
+  /// The server export queue has no "clients" kind (only commission_history,
+  /// client_funding, ib_payouts), so the CSV is built from the rows already
+  /// returned by GET /portal/clients with the active filters applied.
+  Future<void> _exportClientsCsv() async {
+    final rows =
+        (controller.clientsData['rows'] as List? ?? const [])
+            .whereType<Map>()
+            .where((r) {
+              if (_searchQuery.isEmpty) return true;
+              final q = _searchQuery.toLowerCase();
+              return (r['name'] ?? '').toString().toLowerCase().contains(q) ||
+                  (r['email'] ?? '').toString().toLowerCase().contains(q);
+            })
+            .toList();
+    if (rows.isEmpty) {
+      CustomToastService.showError(
+        message: TranslationUtils.tr('my_clients_screen_no_clients_found'),
+      );
+      return;
+    }
+
+    setState(() => _isExporting = true);
+    final buffer =
+        StringBuffer()..writeln(
+          'Name,Email,Phone,Trading Accounts,Currency,Deposits,Withdrawals,Net Deposit,Lots,Commission,Equity,Last Login,Last Deposit,Last Withdrawal,Referral Source,Account Status',
+        );
+    for (final r in rows) {
+      final logins = (r['account_logins'] as List? ?? const []).join(' ');
+      final currencies =
+          (r['currencies'] as List? ?? const []).whereType<Map>().toList();
+      // One line per currency so multi-currency (USD + USC) clients are not truncated.
+      for (final curr in currencies.isEmpty ? [r] : currencies) {
+        final deposits = _toDouble(curr['deposits']);
+        final withdrawals = _toDouble(curr['withdrawals']);
+        buffer.writeln(
+          [
+            r['name'],
+            r['email'],
+            r['phone'],
+            logins,
+            curr['currency'] ?? 'USD',
+            deposits,
+            withdrawals,
+            deposits - withdrawals,
+            curr['lots'] ?? 0,
+            curr['commission'] ?? 0,
+            curr['equity'] ?? 0,
+            r['last_login_at'],
+            r['last_deposit_at'],
+            r['last_withdrawal_at'],
+            r['via_link'] ?? 'No link',
+            _clientActivity(r).label,
+          ].map(_csvCell).join(','),
+        );
+      }
+    }
+
+    final stamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+    await saveAndOpenIbmFile(
+      'my_clients_$stamp.csv',
+      utf8.encode('\uFEFF${buffer.toString()}'),
+    );
+    if (mounted) setState(() => _isExporting = false);
   }
 
   String _mapFilterToApi(String filter) {
@@ -2743,6 +3350,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
       ),
       textConfirm: TranslationUtils.tr('ibm_approve'),
       textCancel: TranslationUtils.tr('account_management_cancel'),
+      cancelTextColor: AppColors.primary,
       confirmTextColor: AppColors.whiteColor,
       buttonColor: AppColors.primary,
       onConfirm: () async {
@@ -2783,6 +3391,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
       ),
       textConfirm: TranslationUtils.tr('ibm_decline'),
       textCancel: TranslationUtils.tr('account_management_cancel'),
+      cancelTextColor: Colors.red,
       confirmTextColor: AppColors.whiteColor,
       buttonColor: Colors.red,
       onConfirm: () async {

@@ -39,17 +39,8 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
   final Set<String> _expanded = <String>{};
   String? _lastError;
 
-  // Dynamic cache for all symbols seen, initialized with common defaults
-  final Set<String> _cachedSymbols = {
-    'All symbols',
-    'BTCUSD.c',
-    'XAUUSD.c',
-    'EURUSD.c',
-    'GBPUSD.c',
-    'USDJPY',
-    'EURUSD',
-    'XAUUSD'
-  };
+  // Symbols seen in the history API responses; no static defaults.
+  final Set<String> _cachedSymbols = {'All symbols'};
 
   @override
   void initState() {

@@ -7,12 +7,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/screens/ibm/presentation/pages/ibm_marketing_screen.dart';
+import 'package:crm_app/screens/ibm/presentation/pages/ibm_reports_screen.dart';
 import 'package:crm_app/screens/ibm/presentation/pages/ibm_settings_screen.dart';
 import 'package:crm_app/services/language_service.dart';
 
-/// Hub for items that don't get their own bottom-nav tab. Currently hosts
-/// Marketing Material and Partner Settings. Reached from the "More" tab on
-/// the bottom navigation.
+/// Hub for items that don't get their own bottom-nav tab: Marketing Material,
+/// Reports and Partner Settings. Reached from the "More" tab on the bottom
+/// navigation.
 class IbmMoreScreen extends StatelessWidget {
   const IbmMoreScreen({super.key});
 
@@ -22,7 +23,7 @@ class IbmMoreScreen extends StatelessWidget {
     final languageService = Get.find<LanguageService>();
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         appBar: AppBar(
@@ -117,6 +118,7 @@ class IbmMoreScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                   tabs: [
+                    Tab(text: languageService.tr('ibm_reports')),
                     Tab(
                       text: languageService.tr(
                         'settings_notifications_marketing',
@@ -131,6 +133,7 @@ class IbmMoreScreen extends StatelessWidget {
         ),
         body: const TabBarView(
           children: [
+            IbmReportsScreen(embedded: true),
             IbmMarketingScreen(embedded: true),
             IbmSettingsScreen(embedded: true),
           ],

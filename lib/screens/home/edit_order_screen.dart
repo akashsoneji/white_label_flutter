@@ -108,13 +108,9 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   String? stopLossError;
   String? takeProfitError;
 
-  // Helper method to get symbol without .c suffix
-  String _getDisplaySymbol(String symbol) {
-    // Only an exact trailing '.c' is stripped so '.cent' symbols stay intact.
-    return symbol.endsWith('.c')
-        ? symbol.substring(0, symbol.length - 2)
-        : symbol;
-  }
+  /// Display symbol from the instruments API (`datafeed_symbol` → `display_symbol`).
+  String _getDisplaySymbol(String symbol) =>
+      SymbolDetailsCacheService.displaySymbolOf(symbol);
 
   // Chart toggle
   bool showChart = false;
@@ -2086,11 +2082,11 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       final socketSymbol = realTimePriceData!['symbol']?.toString() ?? '';
       final originalSymbol = currentSymbol ?? '';
 
-      // Check if symbols match (with or without .c suffix)
+      // Socket sends the broker datafeed symbol; compare display symbols
+      // from the instruments API.
       bool symbolsMatch =
           socketSymbol == originalSymbol ||
-          socketSymbol == '$originalSymbol.c' ||
-          socketSymbol.removeSuffix() == originalSymbol;
+          socketSymbol.removeSuffix() == originalSymbol.removeSuffix();
 
       if (symbolsMatch) {
         final bid = realTimePriceData!['bid']?.toString() ?? '0';
@@ -2116,10 +2112,10 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       final socketSymbol = realTimePriceData!['symbol']?.toString() ?? '';
       final originalSymbol = currentSymbol ?? '';
 
-      // Check if symbols match (with or without .c suffix)
+      // Socket sends the broker datafeed symbol; compare display symbols
+      // from the instruments API.
       return socketSymbol == originalSymbol ||
-          socketSymbol == '$originalSymbol.c' ||
-          socketSymbol.removeSuffix() == originalSymbol;
+          socketSymbol.removeSuffix() == originalSymbol.removeSuffix();
     }
     return false;
   }

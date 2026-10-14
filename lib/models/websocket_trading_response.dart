@@ -191,7 +191,7 @@ class PendingOrder {
     final displayDigits = digits > 0 ? digits : 5;
 
     return TradePosition(
-      symbol: symbol.removeSuffix(), // trailing '.c' only; '.cent' stays
+      symbol: symbol.removeSuffix(), // display_symbol from instruments API
       flag: logo, // Use the actual logo URL from WebSocket
       action:
           action.contains('Buy')

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <!--
-      Tenax Chart 0.1.10 — WebView host page.
+      Tenax Chart 0.1.16 — WebView host page.
 
       user-scalable=no: the chart pinch-zooms its own time scale, and the
       browser zooming the page on top of that fights it.
@@ -31,13 +31,15 @@
       #app {
         position: fixed;
         inset: 0;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right)
+          env(safe-area-inset-bottom) env(safe-area-inset-left);
         box-sizing: border-box;
       }
     </style>
   </head>
   <body>
     <div id="app"></div>
-    <script src="tenax-chart.umd.js"></script>
+    <script src="tenax-chart.umd.cjs"></script>
     <script>
       // Boot values may come from the app before the socket does — either as a
       // query string on the asset URL or as window.TENAX_CHART_BOOT injected
@@ -49,12 +51,7 @@
 
       // The UMD bundle defines TenaxChart; mounting replaces it with the
       // bridge handle the app talks to (receive / send / ui).
-      // IMPORTANT: Reassign window.TenaxChart to the mounted bridge instance.
-      // After mountBridge() runs, the real receive() / send() functions live on
-      // the returned object. The original window.TenaxChart is the UMD export
-      // (which has mountBridge but no receive). Dart calls
-      // window.TenaxChart.receive(...), so we must replace the reference here.
-      window.TenaxChart = TenaxChart.mountBridge(document.getElementById('app'), {
+      var mounted = TenaxChart.mountBridge(document.getElementById('app'), {
         symbol: q.get('symbol') || boot.symbol || 'BTCUSD',
         interval: q.get('interval') || boot.interval || '15m',
         // 'auto' follows the device's light/dark setting; the app can also
@@ -68,9 +65,24 @@
           displayOffsetMinutes: Number(offset !== null ? offset : boot.displayOffsetMinutes || 0),
         },
         orders: Object.assign({ contractSize: 1, allowDrag: true, allowClose: true }, boot.orders),
+        // Same price axis as the web chart: one close-price label with the
+        // bar countdown, no separate Ask / Bid labels or lines.
+        labels: Object.assign(
+          {
+            ohlcBar: true,
+            askLabel: false,
+            bidLabel: false,
+            askBidLines: false,
+            closePrice: true,
+            countdown: true,
+            countdownAxis: true,
+            highLow: false,
+            indicatorLabels: true,
+          },
+          boot.labels
+        ),
         persistence: Object.assign({ key: 'tenax.chart.mobile' }, boot.persistence),
       });
-      var mounted = window.TenaxChart;
 
       // The safe-area strip around the chart is page background, so it has to
       // change with the chart or a notch shows a dark band on a light screen.
