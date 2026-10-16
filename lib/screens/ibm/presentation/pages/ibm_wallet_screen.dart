@@ -16,6 +16,7 @@ import 'package:crm_app/screens/ibm/presentation/widgets/assign_plan_bottom_shee
 import 'package:crm_app/screens/ibm/data/ibm_api_provider.dart';
 import 'package:crm_app/screens/ibm/utils/ibm_currency.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
+import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 
@@ -30,6 +31,8 @@ class _IbmWalletScreenState extends State<IbmWalletScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final IbmController controller = Get.find<IbmController>();
+  final EnabledModulesService _modulesService =
+      Get.find<EnabledModulesService>();
 
   @override
   void initState() {
@@ -37,6 +40,7 @@ class _IbmWalletScreenState extends State<IbmWalletScreen>
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.fetchWallet();
+      _modulesService.fetchEnabledModules(force: true);
     });
   }
 
@@ -79,11 +83,19 @@ class _IbmWalletScreenState extends State<IbmWalletScreen>
           ),
         ),
         actions: [
-          IconButton(
-            tooltip: TranslationUtils.tr('ibm_reports'),
-            icon: Icon(Icons.assessment_outlined, color: AppColors.textPrimary),
-            onPressed: () => Get.to(() => const IbmReportsScreen()),
-          ),
+          Obx(() {
+            if (!_modulesService.isIbmReportsEnabled) {
+              return const SizedBox.shrink();
+            }
+            return IconButton(
+              tooltip: TranslationUtils.tr('ibm_reports'),
+              icon: Icon(
+                Icons.assessment_outlined,
+                color: AppColors.textPrimary,
+              ),
+              onPressed: () => Get.to(() => const IbmReportsScreen()),
+            );
+          }),
           Obx(() {
             final balanceStr = '\$${controller.walletBalance}';
             return Padding(

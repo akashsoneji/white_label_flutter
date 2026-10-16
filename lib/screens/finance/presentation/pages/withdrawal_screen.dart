@@ -40,6 +40,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
   final TextEditingController amountController = TextEditingController(
     text: '0.00',
   );
+  /// Read-only payout amount (e.g. INR), derived from [amountController]
+  /// using the API's conversion_rate.
+  final TextEditingController payoutAmountController = TextEditingController();
   final LanguageService languageService = Get.find<LanguageService>();
   late final FocusNode amountFocusNode;
   bool isAmountConfirmed = true; // Checkbox state
@@ -142,10 +145,22 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
       }
     });
     amountController.addListener(() {
+      _syncPayoutFromSource();
       if (mounted) setState(() {});
     });
+    // USC↔USD account switch or a new method changes the rate.
+    ever(controller.selectedAccount, (_) => _syncPayoutFromSource());
+    ever(controller.withdrawalMethodDetail, (_) => _syncPayoutFromSource());
 
     // OTP handling is now done directly in _buildOtpBox and _buildOtpBoxAndroid methods
+  }
+
+  void _syncPayoutFromSource() {
+    if (!mounted || !controller.hasConversion) return;
+    final source = double.tryParse(amountController.text.trim()) ?? 0;
+    payoutAmountController.text = source > 0
+        ? controller.convertToPayoutCurrency(source).toStringAsFixed(2)
+        : '0.00';
   }
 
   // Method to refresh withdrawal method details when returning from bank list
@@ -163,6 +178,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
   @override
   void dispose() {
     amountController.dispose();
+    payoutAmountController.dispose();
     amountFocusNode.dispose();
     for (var controller in _otpControllers) {
       controller.dispose();
@@ -225,7 +241,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
           }
 
           // Show normal form view
-          return SingleChildScrollView(
+          final form = SingleChildScrollView(
             controller: _scrollController,
             padding: EdgeInsets.symmetric(horizontal: 24.w),
             child: Column(
@@ -289,23 +305,32 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
 
                 // Confirmation Checkbox
                 _buildConfirmationCheckbox(),
+                 SizedBox(height: 16.h),
 
                 // Validation message
                 _buildValidationMessage(),
 
-                SizedBox(
-                  height:
-                      controller.isOtpSent.value
-                          ? MediaQuery.of(context).size.height * 0.15
-                          : MediaQuery.of(context).size.height * 0.3,
-                ),
-
-                // Send OTP Button
-                _buildSendOtpButton(),
-
-                SizedBox(height: 32.h),
+                SizedBox(height: 24.h),
               ],
             ),
+          );
+
+          // Button stays pinned above the scroll content so it is always
+          // visible; it rides up with the keyboard via resizeToAvoidBottomInset.
+          return Column(
+            children: [
+              Expanded(child: form),
+              Container(
+                padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 16.h),
+                decoration: BoxDecoration(
+                  color: AppColors.whiteColor,
+                  border: Border(
+                    top: BorderSide(color: Colors.grey.shade200),
+                  ),
+                ),
+                child: _buildSendOtpButton(),
+              ),
+            ],
           );
         }),
       ),
@@ -660,80 +685,239 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
     });
   }
 
+  /// Limits from the API are in USD; cent accounts also see the USC figure.
+  String _formatLimit(double usdLimit) {
+    final usd = '${usdLimit.toStringAsFixed(2)} USD';
+    if (!controller.isSelectedAccountCent) return usd;
+    return '$usd (${(usdLimit * 100).toStringAsFixed(2)} USC)';
+  }
+
   Widget _buildAmountField() {
     return Obx(() {
       final m = controller.withdrawalMethodDetail.value?.data?.withdrawalMethod;
-      double? minLimit;
-      double? maxLimit;
-      if (m != null) {
-        minLimit = double.tryParse(m.minLimit?.toString() ?? '');
-        maxLimit = double.tryParse(m.maxLimit?.toString() ?? '');
-      }
+      final minLimit = double.tryParse(m?.minLimit?.toString() ?? '');
+      final maxLimit = double.tryParse(m?.maxLimit?.toString() ?? '');
+      final sourceCurrency = controller.sourceCurrency;
+      final isCent = controller.isSelectedAccountCent;
+      final hasConversion = controller.hasConversion;
 
-      final raw = amountController.text.trim();
+      final entered = double.tryParse(amountController.text.trim()) ?? 0;
+      final usdValue = controller.toUsd(entered);
+
       String? error;
-      if (raw.isNotEmpty && raw != '0.00') {
-        final entered = double.tryParse(raw);
-        if (entered != null) {
-          if (minLimit != null && entered < minLimit) {
-            error = TranslationUtils.trArgs(
-              'withdrawal_screen_minimum_withdrawal_is',
-              {'amount': '\$${minLimit.toStringAsFixed(2)}'},
-            );
-          } else if (maxLimit != null && entered > maxLimit) {
-            error = TranslationUtils.trArgs(
-              'withdrawal_screen_maximum_withdrawal_is',
-              {'amount': '\$${maxLimit.toStringAsFixed(2)}'},
-            );
-          }
+      if (entered > 0) {
+        if (minLimit != null && usdValue < minLimit) {
+          error = TranslationUtils.trArgs(
+            'withdrawal_screen_minimum_withdrawal_is',
+            {'amount': _formatLimit(minLimit)},
+          );
+        } else if (maxLimit != null && usdValue > maxLimit) {
+          error = TranslationUtils.trArgs(
+            'withdrawal_screen_maximum_withdrawal_is',
+            {'amount': _formatLimit(maxLimit)},
+          );
         }
       }
+      final limitText = (minLimit != null && maxLimit != null)
+          ? TranslationUtils.trArgs('deposit_real_screen_limit_min_max', {
+              'min': _formatLimit(minLimit),
+              'max': _formatLimit(maxLimit),
+            })
+          : null;
 
-      return RTLHelper.rtlTextField(
-        style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w400),
+      final amountStyle = AppTextStyles.bodyText.copyWith(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w400,
+      );
+      final amountFormatters = [
+        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+        _SingleDecimalTextFormatter(),
+      ];
+
+      final sourceField = RTLHelper.rtlTextField(
+        style: amountStyle,
         controller: amountController,
         focusNode: amountFocusNode,
         keyboardType: const TextInputType.numberWithOptions(
           signed: true,
           decimal: true,
         ),
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-          _SingleDecimalTextFormatter(),
-        ],
-        decoration: InputDecoration(
-          labelText: languageService.tr('deposit_amount'),
-          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
-          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
-          errorText: error,
-          errorStyle: TextStyle(color: AppColors.error, fontSize: 12.sp),
-          helperText: (minLimit != null && maxLimit != null)
-              ? TranslationUtils.trArgs('deposit_real_screen_limit_min_max', {
-                'min': '\$${minLimit.toStringAsFixed(2)}',
-                'max': '\$${maxLimit.toStringAsFixed(2)}',
-              })
-              : null,
-          helperStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.primary, width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.error),
-          ),
+        inputFormatters: amountFormatters,
+        decoration: _amountDecoration(
+          label: languageService.tr('deposit_amount'),
+          currency: sourceCurrency,
+          hasError: error != null,
         ),
       );
+
+      final helperStyle = AppTextStyles.bodyText.copyWith(
+        fontSize: 12.sp,
+        color: AppColors.textSecondary,
+      );
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (hasConversion)
+            Row(
+              children: [
+                Expanded(child: sourceField),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                  child: Text(
+                    '=',
+                    style: AppTextStyles.bodyText.copyWith(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: TextField(
+                    controller: payoutAmountController,
+                    readOnly: true,
+                    canRequestFocus: false,
+                    enableInteractiveSelection: false,
+                    style: amountStyle.copyWith(fontWeight: FontWeight.w600),
+                    textDirection: TextDirection.ltr,
+                    decoration: _amountDecoration(
+                      label: languageService.tr('withdrawal_you_receive'),
+                      currency: controller.payoutCurrency,
+                    ).copyWith(
+                      filled: true,
+                      fillColor: AppColors.primary.withOpacity(0.05),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          else
+            sourceField,
+          SizedBox(height: 6.h),
+          if (error != null)
+            Text(
+              error,
+              style: TextStyle(color: AppColors.error, fontSize: 12.sp),
+            )
+          else if (limitText != null)
+            Text(limitText, style: helperStyle),
+          if (isCent && entered > 0) ...[
+            SizedBox(height: 4.h),
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Text(
+                '${entered.toStringAsFixed(2)} USC → ${usdValue.toStringAsFixed(2)} USD',
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ],
+          if (hasConversion) ...[
+            SizedBox(height: 4.h),
+            Text(
+              '${languageService.tr('withdrawal_exchange_rate')}: 1 USD = ${controller.conversionRate.toStringAsFixed(2)} ${controller.payoutCurrency}',
+              style: helperStyle,
+            ),
+          ],
+          SizedBox(height: 16.h),
+          _buildTotalWithdrawal(usdValue),
+        ],
+      );
     });
+  }
+
+  InputDecoration _amountDecoration({
+    required String label,
+    required String currency,
+    bool hasError = false,
+  }) {
+    final borderColor = hasError ? AppColors.error : AppColors.border;
+    return InputDecoration(
+      labelText: label,
+      labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+      floatingLabelStyle: AppTextStyles.bodyText.copyWith(
+        color: hasError ? AppColors.error : AppColors.primary,
+      ),
+      hintText: '0.00',
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      suffixIcon: _buildCurrencyTag(currency),
+      suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: borderColor),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: borderColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: hasError ? AppColors.error : AppColors.primary,
+          width: 2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCurrencyTag(String currency) {
+    return Container(
+      margin: EdgeInsetsDirectional.only(end: 8.w),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        currency,
+        style: AppTextStyles.bodyText.copyWith(
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w600,
+          color: AppColors.primary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTotalWithdrawal(double usdValue) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              languageService.tr('withdrawal_total_withdrawal'),
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 13.sp,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Text(
+              'USD ${usdValue.toStringAsFixed(2)}',
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildConfirmationCheckbox() {
@@ -1152,18 +1336,19 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
     if (m != null) {
       final minLimit = double.tryParse(m.minLimit?.toString() ?? '');
       final maxLimit = double.tryParse(m.maxLimit?.toString() ?? '');
-      if (minLimit != null && amount < minLimit) {
+      final usdAmount = controller.toUsd(amount);
+      if (minLimit != null && usdAmount < minLimit) {
         _validationMessage.value = languageService.tr(
           'withdrawal_screen_amount_cannot_be_less_than_minimum',
-          {'amount': '\$${minLimit.toStringAsFixed(2)}'},
+          {'amount': _formatLimit(minLimit)},
         );
         _showValidationError.value = true;
         return false;
       }
-      if (maxLimit != null && amount > maxLimit) {
+      if (maxLimit != null && usdAmount > maxLimit) {
         _validationMessage.value = languageService.tr(
           'withdrawal_screen_amount_cannot_be_more_than_maximum',
-          {'amount': '\$${maxLimit.toStringAsFixed(2)}'},
+          {'amount': _formatLimit(maxLimit)},
         );
         _showValidationError.value = true;
         return false;

@@ -404,6 +404,53 @@ class WithdrawalController extends GetxController {
   String get selectedCryptoDisplayLabel =>
       selectedCryptoMethod?.toAccountDisplayLabel ?? '';
 
+  UserWithdrawalMethod? get selectedBankMethod {
+    final selected = selectedBankAccount.value;
+    if (selected == null || selected.isEmpty) return null;
+    for (final method in userWithdrawalMethods) {
+      if (method.bankAccountNo == selected || method.id == selected) {
+        return method;
+      }
+    }
+    return null;
+  }
+
+  WithdrawalMethod? get _methodDetail =>
+      withdrawalMethodDetail.value?.data?.withdrawalMethod;
+
+  /// Payout currency of the selected method (e.g. INR), from the detail API.
+  String get payoutCurrency => _methodDetail?.currencyName ?? '';
+
+  /// Units of [payoutCurrency] per 1 USD; 0 when the method has no conversion.
+  double get conversionRate {
+    final method = _methodDetail;
+    if (method == null || method.hasConversion != true) return 0;
+    return double.tryParse(method.conversionRate ?? '') ?? 0;
+  }
+
+  bool get hasConversion => conversionRate > 0 && payoutCurrency.isNotEmpty;
+
+  bool get isSelectedAccountCent {
+    final selected = selectedAccount.value;
+    if (selected == null) return false;
+    for (final account in userMT5Accounts) {
+      if (account.metaAccountNumber == selected) return account.isCentAccount;
+    }
+    return false;
+  }
+
+  /// Currency the entered amount is denominated in (the source account's).
+  String get sourceCurrency => isSelectedAccountCent ? 'USC' : 'USD';
+
+  /// Cent accounts (USC) hold 100 units per USD.
+  double toUsd(double amount) => isSelectedAccountCent ? amount / 100 : amount;
+
+  /// Converts an amount entered in the source account's currency into the
+  /// payout currency.
+  double convertToPayoutCurrency(double amount) =>
+      toUsd(amount) * conversionRate;
+
+
   String get selectedPaymentMethodDisplayLabel {
     final method = selectedWithdrawalMethod.value;
     if (method == null) return selectedPaymentMethod.value;
@@ -1172,30 +1219,31 @@ class WithdrawalController extends GetxController {
       final paymentMethod = selectedPaymentMethod.value.toLowerCase();
       final amount = _parseWithdrawalAmount(withdrawalAmount.value);
 
-      final Map<String, dynamic> payload;
-      if (paymentMethod == 'crypto') {
-        final toAccountId = selectedCryptoAccount.value ?? '';
-        payload = {
-          'payment_method': _formatPaymentMethodName(
-            selectedPaymentMethod.value,
-          ),
-          'withdrawal_method_id': toAccountId,
-          'withdrawal_method_slug':
-              selectedWithdrawalMethod.value?.methodSlug ?? '',
-          'mt5_account_id': selectedAccount.value ?? '',
-          'to_account': toAccountId,
-          'amount': amount,
-          'currency': 'USD',
-          'otp': otp,
-        };
+      // Server now validates the method identity alongside the OTP, so
+      // every request carries method name + saved-method id + method slug.
+      final String withdrawalMethodId;
+      final String withdrawalMethodSlug;
+      if (paymentMethod == 'local') {
+        withdrawalMethodId = 'local-method';
+        withdrawalMethodSlug = 'local-method';
       } else {
-        payload = {
-          'amount': amount,
-          'currency': 'USD',
-          'otp': otp,
-          'mt5_account_id': selectedAccount.value ?? '',
-        };
+        withdrawalMethodId =
+            paymentMethod == 'crypto'
+                ? (selectedCryptoAccount.value ?? '')
+                : (selectedBankMethod?.id ?? '');
+        withdrawalMethodSlug = selectedWithdrawalMethod.value?.methodSlug ?? '';
       }
+
+      final payload = <String, dynamic>{
+        'mt5_account_id': selectedAccount.value ?? '',
+        'amount': amount,
+        'otp': otp,
+        'withdrawal_method': paymentMethod,
+        'withdrawal_method_id': withdrawalMethodId,
+        'withdrawal_method_slug': withdrawalMethodSlug,
+        'payout_mobile': '',
+        'client_note': '',
+      };
 
       final response = await _repo.submitWithdrawal(
         token: token ?? '',

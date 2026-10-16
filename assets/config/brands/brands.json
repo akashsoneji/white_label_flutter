@@ -1,15 +1,15 @@
 {
-  "default": "pippro",
+  "default": "tenax",
   "brands": [
-    "pippro",
+    "tenax",
     "vantage"
   ],
   "brandDetails": [
     {
-      "name": "pippro",
+      "name": "tenax",
       "type": "child",
       "inheritsFrom": "vantage",
-      "label": "PipPro",
+      "label": "Tenax",
       "themeMode": "both"
     },
     {

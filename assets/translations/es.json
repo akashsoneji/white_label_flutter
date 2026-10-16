@@ -4634,5 +4634,8 @@
   "ibm_payout_requests": "Payout requests",
   "ibm_select_from_date": "Please select a From date",
   "ibm_select_to_date": "Please select a To date",
-  "ibm_select_dates_hint": "Select From and To dates, then tap Apply to see the report."
+  "ibm_select_dates_hint": "Select From and To dates, then tap Apply to see the report.",
+  "withdrawal_exchange_rate": "Tipo de cambio",
+  "withdrawal_you_receive": "Recibirás",
+  "withdrawal_total_withdrawal": "Retiro total"
 }

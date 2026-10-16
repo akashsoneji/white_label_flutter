@@ -3,12 +3,14 @@ class EnabledModulesModel {
   final bool copytrading;
   final bool scratchcard;
   final bool tradewin;
+  final bool ibmReports;
 
   const EnabledModulesModel({
     this.pmam = false,
     this.copytrading = false,
     this.scratchcard = false,
     this.tradewin = false,
+    this.ibmReports = false,
   });
 
   factory EnabledModulesModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +29,7 @@ class EnabledModulesModel {
       copytrading: parseBool(json['copytrading']),
       scratchcard: parseBool(json['scratchcard']),
       tradewin: parseBool(json['tradewin']),
+      ibmReports: parseBool(json['ibm_reports']),
     );
   }
 

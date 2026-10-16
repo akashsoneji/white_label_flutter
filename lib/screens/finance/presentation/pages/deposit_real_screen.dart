@@ -86,6 +86,11 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
   final TextEditingController transferToController = TextEditingController(
     text: '',
   );
+  /// Read-only amount credited to the account (USD/USC), derived from
+  /// [amountController] using the API's conversion_rate.
+  final TextEditingController targetAmountController = TextEditingController(
+    text: '0.00',
+  );
   final TextEditingController paymentModeController = TextEditingController(
     text: '',
   );
@@ -120,8 +125,12 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
     // Rebuild "To be deposited" as user types
     amountController.addListener(() {
+      _syncTargetAmount();
       if (mounted) setState(() {});
     });
+    // Switching to/from a cent account or a new rate changes the credited amount.
+    ever(controller.selectedTransferAccount, (_) => _syncTargetAmount());
+    ever(controller.depositMethod, (_) => _syncTargetAmount());
     final preselectedAccount = widget.preselectedAccountNumber;
     print('DepositRealScreen: initState called');
     print('DepositRealScreen: preselectedAccountNumber: "$preselectedAccount"');
@@ -191,6 +200,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
   void dispose() {
     amountFocusNode.dispose();
     amountController.dispose();
+    targetAmountController.dispose();
     transferToController.dispose();
     paymentModeController.dispose();
     super.dispose();
@@ -247,10 +257,11 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
                 SizedBox(height: 26.h),
 
                 // _buildFeeDisplay(),
-                SizedBox(height: 10.h),
 
                 // To be deposited Section
                 _buildToBeDepositedSection(),
+
+                SizedBox(height: 24.h),
 
                 // Continue Button
 
@@ -264,13 +275,19 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(
-          bottom: kToolbarHeight,
-          left: 24.0,
-          right: 24.0,
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 16.h),
+          decoration: BoxDecoration(
+            color: AppColors.whiteColor,
+            border: Border(top: BorderSide(color: Colors.grey.shade200)),
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            height: 40.h,
+            child: _buildContinueButton(),
+          ),
         ),
-        child: _buildContinueButton(),
       ),
     );
   }
@@ -351,39 +368,49 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
   Widget _buildAmountField() {
     return Obx(() {
       final m = controller.depositMethod.value;
-      double? minLimit;
-      double? maxLimit;
-      if (m != null) {
-        minLimit = double.tryParse(m['min_limit']?.toString() ?? '');
-        maxLimit = double.tryParse(m['max_limit']?.toString() ?? '');
-      }
+      controller.selectedTransferAccount.value; // reactive trigger
+      final minLimit = double.tryParse(m?['min_limit']?.toString() ?? '');
+      final maxLimit = double.tryParse(m?['max_limit']?.toString() ?? '');
+      final sourceCurrency = _sourceCurrency;
+      final targetCurrency = _targetCurrency;
+      final showTarget = sourceCurrency != targetCurrency;
 
-      final raw = amountController.text.trim();
+      final entered = double.tryParse(amountController.text.trim()) ?? 0;
+      final usdValue = _convertedAmount(entered);
+
       String? error;
-      if (raw.isNotEmpty && raw != '0.00') {
-        final entered = double.tryParse(raw);
-        if (entered != null) {
-          final converted = _convertedAmount(entered);
-          if (minLimit != null && converted < minLimit) {
-            error = TranslationUtils.trArgs(
-              'deposit_real_screen_minimum_deposit_is',
-              {'amount': '\$${minLimit.toStringAsFixed(2)}'},
-            );
-          } else if (maxLimit != null && converted > maxLimit) {
-            error = TranslationUtils.trArgs(
-              'deposit_real_screen_maximum_deposit_is',
-              {'amount': '\$${maxLimit.toStringAsFixed(2)}'},
-            );
-          }
+      if (entered > 0) {
+        if (minLimit != null && usdValue < minLimit) {
+          error = TranslationUtils.trArgs(
+            'deposit_real_screen_minimum_deposit_is',
+            {'amount': _formatLimit(minLimit)},
+          );
+        } else if (maxLimit != null && usdValue > maxLimit) {
+          error = TranslationUtils.trArgs(
+            'deposit_real_screen_maximum_deposit_is',
+            {'amount': _formatLimit(maxLimit)},
+          );
         }
       }
+      final limitText = (minLimit != null && maxLimit != null)
+          ? TranslationUtils.trArgs('deposit_real_screen_limit_min_max', {
+              'min': _formatLimit(minLimit),
+              'max': _formatLimit(maxLimit),
+            })
+          : null;
 
-      return RTLHelper.rtlTextField(
-        style: AppTextStyles.bodyText.copyWith(
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w400,
-          color: AppColors.textPrimary,
-        ),
+      final amountStyle = AppTextStyles.bodyText.copyWith(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w400,
+        color: AppColors.textPrimary,
+      );
+      final helperStyle = AppTextStyles.bodyText.copyWith(
+        fontSize: 12.sp,
+        color: AppColors.textSecondary,
+      );
+
+      final sourceField = RTLHelper.rtlTextField(
+        style: amountStyle,
         controller: amountController,
         focusNode: amountFocusNode,
         keyboardType: const TextInputType.numberWithOptions(
@@ -394,37 +421,144 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
           FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
           _SingleDecimalTextFormatter(),
         ],
-        decoration: InputDecoration(
-          labelText: _amountLabel(),
-          errorText: error,
-          errorStyle: TextStyle(color: AppColors.error, fontSize: 12.sp),
-          helperText: (minLimit != null && maxLimit != null)
-              ? TranslationUtils.trArgs('deposit_real_screen_limit_min_max', {
-                'min': '\$${minLimit.toStringAsFixed(2)}',
-                'max': '\$${maxLimit.toStringAsFixed(2)}',
-              })
-              : null,
-          helperStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.primary, width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.error),
-          ),
+        decoration: _amountDecoration(
+          label: TranslationUtils.tr('deposit_amount'),
+          currency: sourceCurrency,
+          hasError: error != null,
         ),
       );
+
+      final flowParts = <String>[
+        '${entered.toStringAsFixed(2)} $sourceCurrency',
+        if (sourceCurrency != 'USD') '${usdValue.toStringAsFixed(2)} USD',
+        if (targetCurrency != 'USD')
+          '${_toTargetAmount(entered).toStringAsFixed(2)} $targetCurrency',
+      ];
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (showTarget)
+            Row(
+              children: [
+                Expanded(child: sourceField),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                  child: Text(
+                    '=',
+                    style: AppTextStyles.bodyText.copyWith(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: TextField(
+                    controller: targetAmountController,
+                    readOnly: true,
+                    canRequestFocus: false,
+                    enableInteractiveSelection: false,
+                    style: amountStyle.copyWith(fontWeight: FontWeight.w600),
+                    textDirection: TextDirection.ltr,
+                    decoration: _amountDecoration(
+                      label: TranslationUtils.tr('withdrawal_you_receive'),
+                      currency: targetCurrency,
+                    ).copyWith(
+                      filled: true,
+                      fillColor: AppColors.primary.withOpacity(0.05),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          else
+            sourceField,
+          SizedBox(height: 6.h),
+          if (error != null)
+            Text(
+              error,
+              style: TextStyle(color: AppColors.error, fontSize: 12.sp),
+            )
+          else if (limitText != null)
+            Text(limitText, style: helperStyle),
+          if (showTarget && entered > 0) ...[
+            SizedBox(height: 4.h),
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Text(
+                flowParts.join(' → '),
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ],
+          if (_hasConversion && _conversionRate > 0) ...[
+            SizedBox(height: 4.h),
+            Text(
+              '${TranslationUtils.tr('withdrawal_exchange_rate')}: 1 USD = ${_conversionRate.toStringAsFixed(2)} $sourceCurrency',
+              style: helperStyle,
+            ),
+          ],
+        ],
+      );
     });
+  }
+
+  InputDecoration _amountDecoration({
+    required String label,
+    required String currency,
+    bool hasError = false,
+  }) {
+    final borderColor = hasError ? AppColors.error : AppColors.border;
+    return InputDecoration(
+      labelText: label,
+      floatingLabelStyle: AppTextStyles.bodyText.copyWith(
+        color: hasError ? AppColors.error : AppColors.primary,
+      ),
+      hintText: '0.00',
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+      suffixIcon: _buildCurrencyTag(currency),
+      suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: borderColor),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: borderColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: hasError ? AppColors.error : AppColors.primary,
+          width: 2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCurrencyTag(String currency) {
+    return Container(
+      margin: EdgeInsetsDirectional.only(end: 8.w),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        currency,
+        style: AppTextStyles.bodyText.copyWith(
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w600,
+          color: AppColors.primary,
+        ),
+      ),
+    );
   }
 
   bool get _hasConversion {
@@ -432,6 +566,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
     return m != null && m['has_conversion'] == true;
   }
 
+  /// Currency the user pays in (e.g. INR from the method's currency_name).
   String get _sourceCurrency {
     final m = controller.depositMethod.value;
     final name = m?['currency_name']?.toString();
@@ -445,17 +580,25 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
     return double.tryParse(raw.toString()) ?? 0;
   }
 
-  String _amountLabel() {
-    if (_hasConversion) {
-      return TranslationUtils.trArgs('deposit_real_screen_amount_currency', {
-        'currency': _sourceCurrency,
-      });
-    }
-    return TranslationUtils.tr('deposit_amount');
+  bool get _isCentAccount {
+    final account = controller.selectedTransferAccount.value;
+    if (account == null) return false;
+    return account['is_cent_account'] == true ||
+        account['currency']?.toString().toUpperCase() == 'USC';
   }
 
-  /// Converts the entered source-currency amount into the target (USD)
-  /// value, which is what min/max limits are expressed in.
+  /// Currency the selected MT5 account / wallet is credited in.
+  String get _targetCurrency => _isCentAccount ? 'USC' : 'USD';
+
+  /// Limits from the API are in USD; cent accounts also see the USC figure.
+  String _formatLimit(double usdLimit) {
+    final usd = '${usdLimit.toStringAsFixed(2)} USD';
+    if (!_isCentAccount) return usd;
+    return '$usd (${(usdLimit * 100).toStringAsFixed(2)} USC)';
+  }
+
+  /// Converts the entered source-currency amount into USD, which is what
+  /// min/max limits are expressed in.
   double _convertedAmount(double entered) {
     if (_hasConversion && _conversionRate > 0) {
       return entered / _conversionRate;
@@ -463,14 +606,16 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
     return entered;
   }
 
-  String _convertedDepositText() {
-    final raw = amountController.text.trim();
-    final entered = double.tryParse(raw.isEmpty ? '0' : raw) ?? 0;
-    if (_hasConversion && _conversionRate > 0) {
-      final converted = entered / _conversionRate;
-      return '${converted.toStringAsFixed(2)} $selectedCurrency';
-    }
-    return '${raw.isEmpty ? "0.00" : raw} $selectedCurrency';
+  /// Amount credited to the account, in [_targetCurrency] (100 USC = 1 USD).
+  double _toTargetAmount(double entered) {
+    final usd = _convertedAmount(entered);
+    return _isCentAccount ? usd * 100 : usd;
+  }
+
+  void _syncTargetAmount() {
+    if (!mounted) return;
+    final entered = double.tryParse(amountController.text.trim()) ?? 0;
+    targetAmountController.text = _toTargetAmount(entered).toStringAsFixed(2);
   }
 
   Widget _buildFeeDisplay() {
@@ -505,38 +650,45 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
   }
 
   Widget _buildToBeDepositedSection() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 11.5.h),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            TranslationUtils.tr('deposit_to_be_deposited'),
-            style: AppTextStyles.bodyText.copyWith(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textGrey,
-            ),
-          ),
-          Obx(() {
-            controller.depositMethod.value; // reactive trigger
-            return Text(
-              _convertedDepositText(),
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
+    return Obx(() {
+      controller.depositMethod.value;
+      controller.selectedTransferAccount.value;
+      final entered = double.tryParse(amountController.text.trim()) ?? 0;
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withOpacity(0.06),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                TranslationUtils.tr('deposit_to_be_deposited'),
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 13.sp,
+                  color: AppColors.textSecondary,
+                ),
               ),
-            );
-          }),
-        ],
-      ),
-    );
+            ),
+            SizedBox(width: 8.w),
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Text(
+                '$_targetCurrency ${_toTargetAmount(entered).toStringAsFixed(2)}',
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildContinueButton() {
