@@ -552,8 +552,10 @@ Future<void> prepareAdaptiveForeground(String flavor) async {
     return;
   }
 
+  final keyed = removeIconBackground(decoded);
+
   final resized = img.copyResize(
-    decoded,
+    keyed,
     width: targetSize,
     height: targetSize,
     interpolation: img.Interpolation.cubic,
@@ -573,6 +575,64 @@ Future<void> prepareAdaptiveForeground(String flavor) async {
   // Point the generated launcher_icons.yaml at the padded foreground so
   // flutter_launcher_icons uses it instead of the full-bleed source.
   await rewriteLauncherForeground(flavor, foregroundPath);
+}
+
+/// Full-bleed brand icons (e.g. a logo on a solid green square) carry their own
+/// opaque background. Composited as the adaptive foreground, that square shows
+/// up as a visible box/border on the Android 12+ splash and launcher, because
+/// its colour never exactly matches ic_launcher_background / my_splash_color.
+/// Flood-fills from the image edges and makes every pixel close to the corner
+/// colour transparent, so only the logo mark remains. No-op for icons whose
+/// corners are already transparent.
+img.Image removeIconBackground(img.Image source) {
+  final image = source.convert(numChannels: 4);
+  final width = image.width;
+  final height = image.height;
+  final corner = image.getPixel(0, 0);
+  if (corner.a < 255) return image;
+
+  const tolerance = 40;
+  final bgR = corner.r.toInt();
+  final bgG = corner.g.toInt();
+  final bgB = corner.b.toInt();
+
+  bool isBackground(int x, int y) {
+    final pixel = image.getPixel(x, y);
+    if (pixel.a == 0) return false;
+    return (pixel.r.toInt() - bgR).abs() <= tolerance &&
+        (pixel.g.toInt() - bgG).abs() <= tolerance &&
+        (pixel.b.toInt() - bgB).abs() <= tolerance;
+  }
+
+  final queue = <int>[];
+  void enqueue(int x, int y) {
+    if (x < 0 || y < 0 || x >= width || y >= height) return;
+    if (!isBackground(x, y)) return;
+    image.setPixelRgba(x, y, 0, 0, 0, 0);
+    queue.add(y * width + x);
+  }
+
+  for (var x = 0; x < width; x++) {
+    enqueue(x, 0);
+    enqueue(x, height - 1);
+  }
+  for (var y = 0; y < height; y++) {
+    enqueue(0, y);
+    enqueue(width - 1, y);
+  }
+
+  while (queue.isNotEmpty) {
+    final index = queue.removeLast();
+    final x = index % width;
+    final y = index ~/ width;
+    enqueue(x + 1, y);
+    enqueue(x - 1, y);
+    enqueue(x, y + 1);
+    enqueue(x, y - 1);
+  }
+
+  print('  ✓ Removed opaque icon background (rgb $bgR,$bgG,$bgB) from foreground');
+  return image;
 }
 
 /// Rewrites lib/clients/<flavor>/launcher_icons.yaml so adaptive_icon_foreground
@@ -710,8 +770,14 @@ Future<void> copyIconsToFlavorFolder(String flavor) async {
 /// flutter_launcher_icons 0.14.x wraps the adaptive-icon foreground in
 /// `<inset android:inset="16%"/>`. Because prepareAdaptiveForeground already
 /// scales the logo to the adaptive-icon safe zone (66%), the extra inset
-/// shrinks the logo a second time. Strip the inset so the logo renders at
-/// the intended ~66% size inside the masked launcher icon.
+/// shrinks the logo a second time. Point the foreground straight at the
+/// drawable instead.
+///
+/// It must be a plain `android:drawable` reference, not
+/// `<bitmap android:gravity="center">`: a gravity bitmap is drawn at its raw
+/// pixel size and never scaled to the layer bounds, so on launchers that
+/// render the adaptive layer at a different size the logo overflowed the
+/// safe zone and filled the circle edge to edge.
 Future<void> removeAdaptiveIconInset(String flavor) async {
   final anydpiDir = Directory(
     path.join('android', 'app', 'src', flavor, 'res', 'mipmap-anydpi-v26'),
@@ -721,16 +787,16 @@ Future<void> removeAdaptiveIconInset(String flavor) async {
 
   var content = await xml.readAsString();
   final before = content;
-  // Drop the inset wrapper — point foreground directly at the drawable.
   content = content.replaceAll(
     RegExp(
-      r'<inset\s+android:drawable="@drawable/ic_launcher_foreground"\s+android:inset="16%"\s*/>',
+      r'<foreground>\s*(?:<inset\s+android:drawable="@drawable/ic_launcher_foreground"\s+android:inset="16%"\s*/>'
+      r'|<bitmap\s+android:src="@drawable/ic_launcher_foreground"\s+android:gravity="center"\s*/>)\s*</foreground>',
     ),
-    '<bitmap android:src="@drawable/ic_launcher_foreground" android:gravity="center" />',
+    '<foreground android:drawable="@drawable/ic_launcher_foreground"/>',
   );
   if (content != before) {
     await xml.writeAsString(content);
-    print('  ✓ Removed extra 16% inset from adaptive icon (uses safe-zone foreground)');
+    print('  ✓ Adaptive icon foreground now scales with the layer (no inset)');
   }
 }
 

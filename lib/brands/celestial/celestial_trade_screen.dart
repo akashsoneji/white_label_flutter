@@ -758,6 +758,26 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
               ),
               SizedBox(height: 16.h),
               Divider(height: 1, thickness: 0.5, color: sub.withOpacity(.2)),
+              InkWell(
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _openModify(p, isPending: true);
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                  alignment: Alignment.center,
+                  child: Text(
+                    Get.find<LanguageService>().tr('celestial_trade_modify'),
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: CelTheme.buy(ctx),
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              Divider(height: 1, thickness: 0.5, color: sub.withOpacity(.2)),
               // Cancel pending order button
               InkWell(
                 onTap: () async {
@@ -829,12 +849,12 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
   }
 
   // ── Modify TP/SL sheet ─────────────────────────────────────────────────────
-  void _openModify(TradePosition p) {
+  void _openModify(TradePosition p, {bool isPending = false}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _ModifySheet(position: p),
+      builder: (_) => _ModifySheet(position: p, isPending: isPending),
     );
   }
 
@@ -855,7 +875,16 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
             bid: _d(p?.entryPrice),
             ask: _d(p?.currentPrice),
             digits: p?.digits ?? 2,
-            onSubmit: (selectedSymbol, isSell, type, volume, price, tp, sl) {
+            onSubmit: (
+              selectedSymbol,
+              isSell,
+              type,
+              volume,
+              price,
+              tp,
+              sl, {
+              stopLimitPrice,
+            }) {
               final activeAccount = accountController.activeMT5Account;
               if (activeAccount == null ||
                   activeAccount.metaAccountNumber.isEmpty) {
@@ -875,6 +904,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                 price: price,
                 takeProfit: tp,
                 stopLoss: sl,
+                stopLimitPrice: stopLimitPrice,
               );
             },
           ),
@@ -1287,7 +1317,11 @@ class _DetailSheetState extends State<_DetailSheet> {
 // ── Modify TP/SL sheet ────────────────────────────────────────────────────────
 class _ModifySheet extends StatefulWidget {
   final TradePosition position;
-  const _ModifySheet({required this.position});
+
+  /// Pending orders are edited through the pending-order endpoint (keyed by
+  /// order id); open positions go through the position TP/SL endpoint.
+  final bool isPending;
+  const _ModifySheet({required this.position, this.isPending = false});
 
   @override
   State<_ModifySheet> createState() => _ModifySheetState();
@@ -1553,13 +1587,21 @@ class _ModifySheetState extends State<_ModifySheet> {
                 return;
               }
 
-              final success = await _c.updateTPSL(
-                mt5Account: activeAccount.metaAccountNumber,
-                positionId: positionId,
-                stopLoss: stopLoss,
-                takeProfit: takeProfit,
-                digits: p.digits,
-              );
+              final success = widget.isPending
+                  ? await _c.updatePendingOrderTPSL(
+                      mt5Account: activeAccount.metaAccountNumber,
+                      orderId: positionId,
+                      stopLoss: stopLoss,
+                      takeProfit: takeProfit,
+                      digits: p.digits,
+                    )
+                  : await _c.updateTPSL(
+                      mt5Account: activeAccount.metaAccountNumber,
+                      positionId: positionId,
+                      stopLoss: stopLoss,
+                      takeProfit: takeProfit,
+                      digits: p.digits,
+                    );
 
               if (success) {
                 Navigator.pop(c);
@@ -1753,8 +1795,9 @@ typedef CelestialSubmitOrder =
       double vol,
       String? price,
       String? tp,
-      String? sl,
-    );
+      String? sl, {
+      String? stopLimitPrice,
+    });
 
 class CelestialOrderTicket extends StatefulWidget {
   final String symbol;
@@ -1787,6 +1830,7 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
   late int _currentDigits;
   late final ChartSocketController _socketController;
   late final TextEditingController _priceController;
+  late final TextEditingController _limitPriceController;
   late final TextEditingController _tpController;
   late final TextEditingController _slController;
   late final TradingController _c;
@@ -1818,6 +1862,7 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
     _priceController = TextEditingController(
       text: (_isSell ? widget.bid : widget.ask).toStringAsFixed(_currentDigits),
     );
+    _limitPriceController = TextEditingController();
     _tpController = TextEditingController();
     _slController = TextEditingController();
 
@@ -1831,6 +1876,7 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
   @override
   void dispose() {
     _priceController.dispose();
+    _limitPriceController.dispose();
     _tpController.dispose();
     _slController.dispose();
     super.dispose();
@@ -1855,6 +1901,61 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
     }
 
     _tpController.text = tpPrice.toStringAsFixed(_currentDigits);
+  }
+
+  Widget _priceRow(
+    BuildContext c,
+    String label,
+    TextEditingController controller,
+    Color color,
+    double marketPrice,
+  ) {
+    final fieldBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8.r),
+      borderSide: BorderSide(color: CelTheme.divider(c)),
+    );
+    final valueStyle = AppTextStyles.bodyText.copyWith(
+      color: color,
+      fontSize: 16.sp,
+      fontWeight: FontWeight.w800,
+    );
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+      child: Row(
+        children: [
+          Text(label, style: CelTheme.label(c).copyWith(fontSize: 12.sp)),
+          const Spacer(),
+          if (_orderIdx == 0)
+            Text(marketPrice.toStringAsFixed(widget.digits), style: valueStyle)
+          else
+            SizedBox(
+              width: 120.w,
+              child: AppTextFormField(
+                controller: controller,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                textAlign: TextAlign.center,
+                style: valueStyle,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: CelTheme.card(c),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 8.w,
+                    vertical: 8.h,
+                  ),
+                  border: fieldBorder,
+                  enabledBorder: fieldBorder,
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: BorderSide(color: color, width: 1.5),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   void _showSymbolSelector() {
@@ -1913,6 +2014,7 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
                             _currentDigits = item.digits;
                             _socketController.changeSymbol(_currentSymbol);
                             _priceController.clear();
+                            _limitPriceController.clear();
                             _tpController.clear();
                             _slController.clear();
                           });
@@ -1942,6 +2044,9 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
           _priceController.text = price.toStringAsFixed(_currentDigits);
         } else if (_priceController.text.isEmpty) {
           _priceController.text = price.toStringAsFixed(_currentDigits);
+        }
+        if (_orderIdx == 3 && _limitPriceController.text.isEmpty) {
+          _limitPriceController.text = price.toStringAsFixed(_currentDigits);
         }
 
         final color = _isSell ? CelTheme.sell(c) : CelTheme.buy(c);
@@ -2059,74 +2164,30 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
               ),
               child: Column(
                 children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 14.w,
-                      vertical: 10.h,
+                  if (_orderIdx == 3) ...[
+                    _priceRow(
+                      c,
+                      languageService.tr('iquote_trigger_price'),
+                      _priceController,
+                      color,
+                      price,
                     ),
-                    child: Row(
-                      children: [
-                        Text(
-                          Get.find<LanguageService>().tr('celestial_trade_column_price'),
-                          style: CelTheme.label(c).copyWith(fontSize: 12.sp),
-                        ),
-                        const Spacer(),
-                        if (_orderIdx == 0)
-                          Text(
-                            price.toStringAsFixed(widget.digits),
-                            style: AppTextStyles.bodyText.copyWith(
-                              color: color,
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          )
-                        else
-                          SizedBox(
-                            width: 120.w,
-                            child: AppTextFormField(
-                              controller: _priceController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.bodyText.copyWith(
-                                color: color,
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w800,
-                              ),
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: CelTheme.card(c),
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 8.w,
-                                  vertical: 8.h,
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.r),
-                                  borderSide: BorderSide(
-                                    color: CelTheme.divider(c),
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.r),
-                                  borderSide: BorderSide(
-                                    color: CelTheme.divider(c),
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.r),
-                                  borderSide: BorderSide(
-                                    color: color,
-                                    width: 1.5,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
+                    Divider(height: 1, color: CelTheme.divider(c)),
+                    _priceRow(
+                      c,
+                      languageService.tr('iquote_limit_price'),
+                      _limitPriceController,
+                      color,
+                      price,
                     ),
-                  ),
+                  ] else
+                    _priceRow(
+                      c,
+                      languageService.tr('celestial_trade_column_price'),
+                      _priceController,
+                      color,
+                      price,
+                    ),
                   Divider(height: 1, color: CelTheme.divider(c)),
                   Padding(
                     padding: EdgeInsets.symmetric(
@@ -2266,6 +2327,10 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
                         _sl && _slController.text.isNotEmpty
                             ? _slController.text
                             : null;
+                    final stopLimitStr =
+                        _orderIdx == 3 && _limitPriceController.text.isNotEmpty
+                            ? _limitPriceController.text
+                            : null;
 
                     final success = await widget.onSubmit(
                       _currentSymbol,
@@ -2275,6 +2340,7 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
                       priceStr,
                       tpStr,
                       slStr,
+                      stopLimitPrice: stopLimitStr,
                     );
                     if (mounted) {
                       setState(() => _placing = false);

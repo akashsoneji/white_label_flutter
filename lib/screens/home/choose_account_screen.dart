@@ -194,7 +194,7 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      '${accountType.tradingPlatform ?? ''} ${accountType.planTitle ?? ''}',
+                      '${accountType.planTitle ?? ''}',
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w500,

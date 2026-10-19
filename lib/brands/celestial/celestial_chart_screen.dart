@@ -33,6 +33,7 @@ import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/tenax_chart_webview.dart';
 
 // ── Resolution map ─────────────────────────────────────────────────────────
@@ -189,10 +190,16 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
 
   void _placeOrder(String side) {
     // Get primary/active MT5 account
-    final accountCtrl = Get.find<AccountController>();
-    final mt5Account = accountCtrl.activeMT5Account?.metaAccountNumber;
+    final accountCtrl = Get.isRegistered<AccountController>()
+        ? Get.find<AccountController>()
+        : null;
+    final mt5Account = accountCtrl?.activeMT5Account?.metaAccountNumber;
 
     if (mt5Account == null || mt5Account.isEmpty) {
+      CustomToastService.showError(
+        title: TranslationUtils.tr('general_error'),
+        message: TranslationUtils.tr('vantage_chart_layout_no_active_trading_account'),
+      );
       return;
     }
 
@@ -407,9 +414,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
         // Candle chart: never mirror the price/time axes.
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: _CelChartArea(
-            isDark: AppColors.chartTheme == 'dark',
-          ),
+          child: _CelChartArea(isDark: AppColors.chartTheme == 'dark'),
         ),
       ),
     );
@@ -678,7 +683,6 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
   }
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // _CelChartArea
 //
@@ -703,7 +707,7 @@ class _CelChartArea extends StatefulWidget {
 class _CelChartAreaState extends State<_CelChartArea>
     with WidgetsBindingObserver {
   final _webViewKey = GlobalKey<ChartInAppWebViewState>();
-  final _tenaxKey   = GlobalKey<TenaxChartWebViewState>();
+  final _tenaxKey = GlobalKey<TenaxChartWebViewState>();
 
   // The symbol the WebView was built with. May be updated on first storage read.
   late String _initialSymbol;
@@ -731,9 +735,10 @@ class _CelChartAreaState extends State<_CelChartArea>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _symService = Get.isRegistered<SymbolSelectionService>()
-        ? Get.find<SymbolSelectionService>()
-        : Get.put(SymbolSelectionService());
+    _symService =
+        Get.isRegistered<SymbolSelectionService>()
+            ? Get.find<SymbolSelectionService>()
+            : Get.put(SymbolSelectionService());
 
     final stored = _strip(_symService.currentSymbol);
     if (stored.isNotEmpty) {
@@ -759,10 +764,9 @@ class _CelChartAreaState extends State<_CelChartArea>
   String _effectiveSymbol(String sym) {
     String? acc;
     if (Get.isRegistered<AccountController>()) {
-      acc = Get.find<AccountController>()
-          .activeMT5Account
-          ?.metaAccountNumber
-          .toString();
+      acc =
+          Get.find<AccountController>().activeMT5Account?.metaAccountNumber
+              .toString();
     }
     return SymbolDetailsCacheService.resolveDatafeedSymbolSync(sym, acc);
   }
@@ -833,11 +837,7 @@ class _CelChartAreaState extends State<_CelChartArea>
     }
     final url = _buildUrl();
     final effective = _effectiveSymbol(_initialSymbol);
-    return ChartInAppWebView(
-      key: _webViewKey,
-      symbol: effective,
-      url: url,
-    );
+    return ChartInAppWebView(key: _webViewKey, symbol: effective, url: url);
   }
 }
 

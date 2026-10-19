@@ -179,7 +179,16 @@ class _CelestialWatchlistScreenState
               bid: price.bid,
               ask: price.ask,
               digits: digits,
-              onSubmit: (selectedSymbol, isSell, type, volume, priceStr, tp, sl) {
+              onSubmit: (
+                selectedSymbol,
+                isSell,
+                type,
+                volume,
+                priceStr,
+                tp,
+                sl, {
+                stopLimitPrice,
+              }) {
                 final activeAccount = accountController.activeMT5Account;
                 if (activeAccount == null || activeAccount.metaAccountNumber.isEmpty) {
                   if (Get.isRegistered<AppNotificationController>()) {
@@ -198,6 +207,7 @@ class _CelestialWatchlistScreenState
                   price: priceStr,
                   takeProfit: tp,
                   stopLoss: sl,
+                  stopLimitPrice: stopLimitPrice,
                 );
               },
             ),

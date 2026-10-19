@@ -1,7 +1,7 @@
 // GENERATED — Do not edit manually. Regenerate with:
-//   dart run scripts/prepare_flavor.dart pippro
-// Active flavor: pippro
-PRODUCT_BUNDLE_IDENTIFIER=com.pippro.app
-BRAND_DISPLAY_NAME=PipPro
+//   dart run scripts/prepare_flavor.dart moneygenius
+// Active flavor: moneygenius
+PRODUCT_BUNDLE_IDENTIFIER=com.moneygenius.app
+BRAND_DISPLAY_NAME=MoneyGenius
 FLUTTER_TARGET=lib/main.dart
-DART_DEFINES=Q0xJRU5UPXBpcHBybw==,RkxBVk9SPXBpcHBybw==
+DART_DEFINES=Q0xJRU5UPW1vbmV5Z2VuaXVz,RkxBVk9SPW1vbmV5Z2VuaXVz

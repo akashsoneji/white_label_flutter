@@ -1,21 +1,21 @@
 {
-  "default": "pippro",
+  "default": "moneygenius",
   "brands": [
-    "pippro",
-    "vantage"
+    "moneygenius",
+    "celestial"
   ],
   "brandDetails": [
     {
-      "name": "pippro",
+      "name": "moneygenius",
       "type": "child",
-      "inheritsFrom": "vantage",
-      "label": "PipPro",
+      "inheritsFrom": "celestial",
+      "label": "MoneyGenius",
       "themeMode": "both"
     },
     {
-      "name": "vantage",
+      "name": "celestial",
       "type": "parent",
-      "label": "Vantage",
+      "label": "Celestial",
       "themeMode": "both"
     }
   ]

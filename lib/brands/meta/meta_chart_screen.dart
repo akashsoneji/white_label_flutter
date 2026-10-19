@@ -32,6 +32,7 @@ import 'package:crm_app/screens/trading/view_models/instruments_controller.dart'
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/tenax_chart_webview.dart';
 
 // ── Resolution map ─────────────────────────────────────────────────────────
@@ -160,10 +161,16 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
 
   void _placeOrder(String side) {
     // Get primary/active MT5 account
-    final accountCtrl = Get.find<AccountController>();
-    final mt5Account  = accountCtrl.activeMT5Account?.metaAccountNumber;
+    final accountCtrl = Get.isRegistered<AccountController>()
+        ? Get.find<AccountController>()
+        : null;
+    final mt5Account = accountCtrl?.activeMT5Account?.metaAccountNumber;
 
     if (mt5Account == null || mt5Account.isEmpty) {
+      CustomToastService.showError(
+        title: TranslationUtils.tr('general_error'),
+        message: TranslationUtils.tr('vantage_chart_layout_no_active_trading_account'),
+      );
       return;
     }
 

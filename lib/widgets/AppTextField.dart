@@ -3,6 +3,18 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/utils/single_decimal_point_formatter.dart';
+
+/// Decimal keyboards let the user type '.' repeatedly ("4163....6661"), so
+/// every decimal field built on these widgets gets a single '.' guard ahead
+/// of any caller-supplied formatters.
+List<TextInputFormatter>? _withSingleDecimalGuard(
+  TextInputType? keyboardType,
+  List<TextInputFormatter>? formatters,
+) {
+  if (keyboardType?.decimal != true) return formatters;
+  return [const SingleDecimalPointFormatter(), ...?formatters];
+}
 
 class AppTextField extends StatelessWidget {
   final TextEditingController? controller;
@@ -58,6 +70,7 @@ class AppTextField extends StatelessWidget {
           onChanged: onChanged,
           obscureText: obscureText,
           keyboardType: keyboardType,
+          inputFormatters: _withSingleDecimalGuard(keyboardType, null),
           maxLines: maxLines,
           enabled: enabled,
           focusNode: focusNode,
@@ -165,7 +178,7 @@ class AppTextFormField extends StatelessWidget {
       enabled: enabled,
       focusNode: focusNode,
       textAlign: textAlign,
-      inputFormatters: inputFormatters,
+      inputFormatters: _withSingleDecimalGuard(keyboardType, inputFormatters),
       readOnly: readOnly,
       onTap: onTap,
       style: style ?? AppTextStyles.bodyText.copyWith(

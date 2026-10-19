@@ -830,11 +830,11 @@ $getters
   /// (`/ws/stream`) instead of the legacy 5-socket layout
   /// (`/ws/op`, `/ws/po`, `/ws/symbol`, `/ws/marketwatch`, `/ws/account`).
   ///
-  /// Only pippro / pipze are migrated for now; every other flavor keeps the
-  /// legacy multi-socket behavior.
+  /// Only pippro / pipze / moneygenius are migrated for now; every other
+  /// flavor keeps the legacy multi-socket behavior.
   static bool get usesSingleStreamSocket {
     final name = (_instance?.flavor.name ?? '').toLowerCase();
-    return const <String>{'pippro', 'pipze'}.contains(name);
+    return const <String>{'pippro', 'pipze', 'moneygenius'}.contains(name);
   }
 
   /// Applies a Tenax multi-broker runtime payload onto the active

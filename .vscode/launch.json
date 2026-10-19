@@ -182,6 +182,36 @@
             "preLaunchTask": "prepare-meta"
         },
         {
+            "name": "MoneyGenius (parent: Celestial) (debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "moneygenius", "--dart-define=CLIENT=moneygenius", "--dart-define=FLAVOR=moneygenius", "--dart-define=PARENT=celestial", "--no-enable-impeller"],
+            "flutterMode": "debug",
+            "console": "terminal",
+            "preLaunchTask": "prepare-moneygenius"
+        },
+        {
+            "name": "MoneyGenius (parent: Celestial) (profile)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "moneygenius", "--dart-define=CLIENT=moneygenius", "--dart-define=FLAVOR=moneygenius", "--dart-define=PARENT=celestial"],
+            "flutterMode": "profile",
+            "console": "terminal",
+            "preLaunchTask": "prepare-moneygenius"
+        },
+        {
+            "name": "MoneyGenius (parent: Celestial) (release)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "moneygenius", "--dart-define=CLIENT=moneygenius", "--dart-define=FLAVOR=moneygenius", "--dart-define=PARENT=celestial"],
+            "flutterMode": "release",
+            "console": "terminal",
+            "preLaunchTask": "prepare-moneygenius"
+        },
+        {
             "name": "PipPro (parent: Vantage) (debug)",
             "request": "launch",
             "type": "dart",

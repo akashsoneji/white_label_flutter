@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Android 12+ splash screen behavior.
-         We force a plain-color splash (no app icon) so the first frame is just background color,
-         then Flutter's own SplashScreen shows the SVG logo. -->
+         Point explicitly at the adaptive icon: with @null many OEM ROMs (ColorOS, MIUI)
+         fall back to the square legacy ic_launcher.png, whose edge renders as a border.
+         The adaptive icon only draws its transparent foreground over the splash colour. -->
     <style name="LaunchTheme" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/my_splash_color</item>
-        <item name="windowSplashScreenAnimatedIcon">@null</item>
-        <item name="windowSplashScreenIconBackgroundColor">@null</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/my_splash_color</item>
         <!-- Keep compatibility with older embedding which reads windowBackground -->
         <item name="android:windowBackground">@drawable/launch_background</item>
     </style>

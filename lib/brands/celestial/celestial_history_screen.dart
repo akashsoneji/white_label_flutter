@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'package:crm_app/models/trade_history_model.dart';
+import 'package:crm_app/screens/home/dashboard_screen.dart';
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'celestial_theme.dart';
@@ -14,8 +16,13 @@ class CelestialHistoryScreen extends StatefulWidget {
   /// subsequent tab-switch back to it). Used by the shell to trigger a fresh
   /// history fetch so the list is always up-to-date when the user arrives.
   final Future<void> Function()? onActivated;
+  final Function(int)? onNavigateToTab;
 
-  const CelestialHistoryScreen({super.key, this.onActivated});
+  const CelestialHistoryScreen({
+    super.key,
+    this.onActivated,
+    this.onNavigateToTab,
+  });
 
   @override
   State<CelestialHistoryScreen> createState() => _CelestialHistoryScreenState();
@@ -33,6 +40,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
       // previously-cached list.
     }
   }
+
   TradingController get _c => Get.find<TradingController>();
 
   String _periodLabel = 'Today';
@@ -69,7 +77,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
 
   // ── Period → timestamps ────────────────────────────────────────────────────
   void _applyPeriod(String label) {
-    final now   = DateTime.now().toUtc();
+    final now = DateTime.now().toUtc();
     final today = DateTime.utc(now.year, now.month, now.day);
 
     DateTime from;
@@ -105,7 +113,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
       page: 1,
       refresh: true,
       fromTimestamp: (from.millisecondsSinceEpoch / 1000).round(),
-      toTimestamp:   (to.millisecondsSinceEpoch   / 1000).round(),
+      toTimestamp: (to.millisecondsSinceEpoch / 1000).round(),
       filterType: label.toLowerCase().replaceAll(' ', '_'),
     );
   }
@@ -121,9 +129,10 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
             _header(context),
             _summaryRow(context),
             Divider(
-                height: 1,
-                thickness: 0.5,
-                color: CelTheme.divider(context)),
+              height: 1,
+              thickness: 0.5,
+              color: CelTheme.divider(context),
+            ),
             Expanded(child: _body(context)),
           ],
         ),
@@ -137,7 +146,10 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
       padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 16.w, 4.h),
       child: Row(
         children: [
-          Text(Get.find<LanguageService>().tr('celestial_history_title'), style: CelTheme.title(c)),
+          Text(
+            Get.find<LanguageService>().tr('celestial_history_title'),
+            style: CelTheme.title(c),
+          ),
           const Spacer(),
           GestureDetector(
             onTap: () => _pickPeriod(c),
@@ -150,17 +162,26 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.calendar_today_rounded,
-                      size: 13.sp, color: CelTheme.subText(c)),
+                  Icon(
+                    Icons.calendar_today_rounded,
+                    size: 13.sp,
+                    color: CelTheme.subText(c),
+                  ),
                   SizedBox(width: 5.w),
-                  Text(_periodLabelText(_periodLabel),
-                      style: AppTextStyles.bodyText.copyWith(
-                          color: CelTheme.mainText(c),
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w700)),
+                  Text(
+                    _periodLabelText(_periodLabel),
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: CelTheme.mainText(c),
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   SizedBox(width: 4.w),
-                  Icon(Icons.keyboard_arrow_down,
-                      size: 14.sp, color: CelTheme.subText(c)),
+                  Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 14.sp,
+                    color: CelTheme.subText(c),
+                  ),
                 ],
               ),
             ),
@@ -172,35 +193,49 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
 
   void _pickPeriod(BuildContext c) {
     const options = [
-      'Today', 'Last Week', 'Last Month',
-      'Last Three Months', 'Last Six Months', 'Last Year', 'All History',
+      'Today',
+      'Last Week',
+      'Last Month',
+      'Last Three Months',
+      'Last Six Months',
+      'Last Year',
+      'All History',
     ];
     showModalBottomSheet(
       context: c,
       backgroundColor: CelTheme.card(c),
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16.r))),
-      builder: (_) => SafeArea(
-        child: Wrap(
-          children: options.map((o) {
-            final active = o == _periodLabel;
-            return ListTile(
-              title: Text(_periodLabelText(o),
-                  style: AppTextStyles.bodyText.copyWith(
-                      color: active ? CelTheme.buy(c) : CelTheme.mainText(c),
-                      fontWeight:
-                          active ? FontWeight.w800 : FontWeight.w500)),
-              trailing:
-                  active ? Icon(Icons.check, color: CelTheme.buy(c)) : null,
-              onTap: () {
-                setState(() => _periodLabel = o);
-                Navigator.pop(c);
-                _applyPeriod(o);
-              },
-            );
-          }).toList(),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
       ),
+      builder:
+          (_) => SafeArea(
+            child: Wrap(
+              children:
+                  options.map((o) {
+                    final active = o == _periodLabel;
+                    return ListTile(
+                      title: Text(
+                        _periodLabelText(o),
+                        style: AppTextStyles.bodyText.copyWith(
+                          color:
+                              active ? CelTheme.buy(c) : CelTheme.mainText(c),
+                          fontWeight:
+                              active ? FontWeight.w800 : FontWeight.w500,
+                        ),
+                      ),
+                      trailing:
+                          active
+                              ? Icon(Icons.check, color: CelTheme.buy(c))
+                              : null,
+                      onTap: () {
+                        setState(() => _periodLabel = o);
+                        Navigator.pop(c);
+                        _applyPeriod(o);
+                      },
+                    );
+                  }).toList(),
+            ),
+          ),
     );
   }
 
@@ -218,11 +253,14 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
           children: [
             Text(label, style: CelTheme.label(c)),
             SizedBox(height: 2.h),
-            Text(value,
-                style: AppTextStyles.bodyText.copyWith(
-                    color: color ?? CelTheme.mainText(c),
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w800)),
+            Text(
+              value,
+              style: AppTextStyles.bodyText.copyWith(
+                color: color ?? CelTheme.mainText(c),
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ],
         );
       }
@@ -234,31 +272,44 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
             Row(
               children: [
                 Expanded(
-                    child: cell(TranslationUtils.tr('common_deposit'),
-                        _n(t?.deposit))),
+                  child: cell(
+                    TranslationUtils.tr('common_deposit'),
+                    _n(t?.deposit),
+                  ),
+                ),
                 Expanded(
-                    child: cell(TranslationUtils.tr('general_withdrawal'),
-                        _n(t?.withdrawal))),
+                  child: cell(
+                    TranslationUtils.tr('general_withdrawal'),
+                    _n(t?.withdrawal),
+                  ),
+                ),
                 Expanded(
-                    child: cell(TranslationUtils.tr('dashboard_profit'),
-                        _n(profit),
-                        color: profit < 0
-                            ? CelTheme.sell(c)
-                            : CelTheme.tpGreen)),
+                  child: cell(
+                    TranslationUtils.tr('dashboard_profit'),
+                    _n(profit),
+                    color: profit < 0 ? CelTheme.sell(c) : CelTheme.tpGreen,
+                  ),
+                ),
               ],
             ),
             SizedBox(height: 8.h),
             Row(
               children: [
                 Expanded(
-                    child: cell(TranslationUtils.tr('dashboard_balance'),
-                        _n(t?.balance))),
+                  child: cell(
+                    TranslationUtils.tr('dashboard_balance'),
+                    _n(t?.balance),
+                  ),
+                ),
                 Expanded(
-                    child: cell(
-                        TranslationUtils.tr('general_swap'), _n(t?.swap))),
+                  child: cell(TranslationUtils.tr('general_swap'), _n(t?.swap)),
+                ),
                 Expanded(
-                    child: cell(TranslationUtils.tr('general_commission'),
-                        _n(t?.commission))),
+                  child: cell(
+                    TranslationUtils.tr('general_commission'),
+                    _n(t?.commission),
+                  ),
+                ),
               ],
             ),
           ],
@@ -275,54 +326,136 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
       color: CelTheme.buyBlue,
       onRefresh: refreshHistory,
       child: Obx(() {
-      if (_c.isLoadingHistory) {
-        return Center(child: CircularProgressIndicator());
-      }
-      final items = _c.tradeHistory.toList();
-      if (items.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.history, size: 56.sp, color: CelTheme.subText(c)),
-              SizedBox(height: 8.h),
-              Text(
-                  Get.find<LanguageService>().tr('celestial_history_no_period',
-                      {'period': _periodLabelText(_periodLabel)}),
-                  style: AppTextStyles.bodyText.copyWith(
-                      color: CelTheme.subText(c),
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600)),
-            ],
+        if (_c.isLoadingHistory) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final items = _c.tradeHistory.toList();
+        final accountCtrl =
+            Get.isRegistered<AccountController>()
+                ? Get.find<AccountController>()
+                : null;
+        final activeAcc = accountCtrl?.activeMT5AccountRx.value;
+        final bool hasNoAccount =
+            accountCtrl == null ||
+            accountCtrl.mt5Accounts.isEmpty ||
+            activeAcc == null ||
+            activeAcc.metaAccountNumber.isEmpty;
+
+        if (items.isEmpty) {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24.w,
+                        vertical: 32.h,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.history,
+                            size: 56.sp,
+                            color: CelTheme.subText(c),
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            Get.find<LanguageService>().tr(
+                              'celestial_history_no_period',
+                              {'period': _periodLabelText(_periodLabel)},
+                            ),
+                            style: AppTextStyles.bodyText.copyWith(
+                              color: CelTheme.subText(c),
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          if (hasNoAccount) ...[
+                            SizedBox(height: 50.h),
+                            ElevatedButton.icon(
+                              onPressed: () async {
+                                await Get.to(
+                                  () => DashboardScreen(
+                                    onNavigateToTab: widget.onNavigateToTab,
+                                  ),
+                                );
+                                refreshHistory();
+                              },
+                              icon: Icon(
+                                Icons.add_rounded,
+                                size: 18.sp,
+                                color: Colors.white,
+                              ),
+                              label: Text(
+                                TranslationUtils.tr(
+                                  'create_account_create_button',
+                                ),
+                                style: AppTextStyles.bodyText.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: CelTheme.buy(c),
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 22.w,
+                                  vertical: 11.h,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                                elevation: 0,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        }
+        return NotificationListener<ScrollNotification>(
+          onNotification: (n) {
+            if (n is ScrollEndNotification &&
+                n.metrics.extentAfter < 100 &&
+                _c.hasMoreHistoryPages) {
+              _c.loadTradeHistory(page: _c.currentHistoryPage + 1);
+            }
+            return false;
+          },
+          child: ListView.separated(
+            padding: EdgeInsets.only(bottom: 12.h),
+            itemCount: items.length + (_c.hasMoreHistoryPages ? 1 : 0),
+            separatorBuilder:
+                (_, __) => Divider(
+                  color: CelTheme.divider(c),
+                  height: 1,
+                  thickness: 0.5,
+                ),
+            itemBuilder: (_, i) {
+              if (i == items.length) {
+                return Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+              return _tradeRow(c, items[i]);
+            },
           ),
         );
-      }
-      return NotificationListener<ScrollNotification>(
-        onNotification: (n) {
-          if (n is ScrollEndNotification &&
-              n.metrics.extentAfter < 100 &&
-              _c.hasMoreHistoryPages) {
-            _c.loadTradeHistory(page: _c.currentHistoryPage + 1);
-          }
-          return false;
-        },
-        child: ListView.separated(
-          padding: EdgeInsets.only(bottom: 12.h),
-          itemCount: items.length + (_c.hasMoreHistoryPages ? 1 : 0),
-          separatorBuilder: (_, __) =>
-              Divider(color: CelTheme.divider(c), height: 1, thickness: 0.5),
-          itemBuilder: (_, i) {
-            if (i == items.length) {
-              return Center(
-                  child: Padding(
-                      padding: EdgeInsets.all(12),
-                      child: CircularProgressIndicator()));
-            }
-            return _tradeRow(c, items[i]);
-          },
-        ),
-      );
-    }),
+      }),
     );
   }
 
@@ -361,15 +494,20 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(t.tradeSymbol,
-                        style: AppTextStyles.bodyText.copyWith(
-                            color: CelTheme.mainText(c),
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w800)),
+                    Text(
+                      t.tradeSymbol,
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: CelTheme.mainText(c),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     SizedBox(width: 6.w),
                     Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 6.w,
+                        vertical: 2.h,
+                      ),
                       decoration: BoxDecoration(
                         color: sideColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(4.r),
@@ -377,20 +515,27 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
                       child: Text(
                         '${isBuy ? 'BUY' : 'SELL'} $vol',
                         style: AppTextStyles.bodyText.copyWith(
-                            color: sideColor,
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w700),
+                          color: sideColor,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: 3.h),
                 // Open → Close price
-                Text(Get.find<LanguageService>().tr('celestial_history_open_close', {'open': '$open', 'close': '$close'}),
-                    style: AppTextStyles.bodyText.copyWith(
-                        color: CelTheme.subText(c),
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w600)),
+                Text(
+                  Get.find<LanguageService>().tr(
+                    'celestial_history_open_close',
+                    {'open': '$open', 'close': '$close'},
+                  ),
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: CelTheme.subText(c),
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 SizedBox(height: 2.h),
                 // Open time → Close time
                 Text(
@@ -398,9 +543,10 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
                       ? '${t.tradeOpenTime}  →  ${t.tradeCloseTime}'
                       : t.tradeOpenTime,
                   style: AppTextStyles.bodyText.copyWith(
-                      color: CelTheme.subText(c),
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w500),
+                    color: CelTheme.subText(c),
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
@@ -410,9 +556,10 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
           Text(
             '${profit >= 0 ? '+' : ''}${profit.toStringAsFixed(2)}',
             style: AppTextStyles.bodyText.copyWith(
-                color: plColor,
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w800),
+              color: plColor,
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),

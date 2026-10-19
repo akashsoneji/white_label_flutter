@@ -153,8 +153,9 @@ class DashboardController extends GetxController {
   void _bindStreamAccountChannel() {
     if (!Get.isRegistered<StreamWebSocketService>()) return;
     _unifiedAccountSub?.cancel();
-    _unifiedAccountSub =
-        Get.find<StreamWebSocketService>().accounts.listen(_onStreamAccounts);
+    _unifiedAccountSub = Get.find<StreamWebSocketService>().accounts.listen(
+      _onStreamAccounts,
+    );
     _isWebSocketConnected.value = true;
   }
 
@@ -376,7 +377,9 @@ class DashboardController extends GetxController {
             if (mt5Accounts.isEmpty) {
               hasMT5Accounts.value = false;
             }
-            print('User has no MT5 accounts - keeping existing visible data if any');
+            print(
+              'User has no MT5 accounts - keeping existing visible data if any',
+            );
             // _redirectToAccountOpening();
           }
         } else {
@@ -397,7 +400,8 @@ class DashboardController extends GetxController {
         if (mt5Accounts.isEmpty) {
           hasMT5Accounts.value = false;
         }
-        final errorMsg = response.message ??
+        final errorMsg =
+            response.message ??
             TranslationUtils.tr(
               'dashboard_controller_failed_to_fetch_mt5_accounts',
             );
@@ -488,11 +492,11 @@ class DashboardController extends GetxController {
             );
             // This will reconnect all WebSockets (Account, Trading, Instruments, Chart)
             // and update the active account in AccountController
-            accountController.reconnectAllSocketsForAccount(
-              accountNumber,
-            ).catchError((e) {
-              if (kDebugMode) print('Error reconnecting sockets: $e');
-            });
+            accountController
+                .reconnectAllSocketsForAccount(accountNumber)
+                .catchError((e) {
+                  if (kDebugMode) print('Error reconnecting sockets: $e');
+                });
 
             // Also refresh dashboard WebSocket
             unsubscribeAndResubscribe().catchError((e) {
@@ -521,7 +525,8 @@ class DashboardController extends GetxController {
         // API call failed
         hasMT5Accounts.value = false;
         isLoadingMT5Accounts.value = false;
-        final errorMsg = response.message ??
+        final errorMsg =
+            response.message ??
             TranslationUtils.tr(
               'dashboard_controller_failed_to_change_primary_account',
             );
@@ -757,7 +762,8 @@ class DashboardController extends GetxController {
         // Return the account data including account number
         return response.data;
       } else {
-        final errorMsg = response.message ??
+        final errorMsg =
+            response.message ??
             TranslationUtils.tr(
               'dashboard_controller_failed_to_create_mt5_account',
             );

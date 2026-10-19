@@ -1,0 +1,33 @@
+name: moneygenius
+type: child
+inheritsFrom: celestial
+label: MoneyGenius
+themeMode: both
+
+android:
+  applicationId: "com.moneygenius.app"
+  appName: "MoneyGenius"
+
+ios:
+  bundleId: "com.moneygenius.app"
+  appName: "MoneyGenius"
+
+colors:
+  primary: "#006838"
+  secondary: "#006838"
+  accent: "#24324D"
+  splashColor: "#006838"
+  launcherBackground: "#006838"
+
+urls:
+  api: "https://portal.moneygeniuss.com/api/"
+  websocket: "wss://portal.moneygeniuss.com/trade-engine"
+  chart: "https://portal.moneygeniuss.com"
+
+assets:
+  appIcon: icon.png
+  logo: logo.svg
+  splashLogo: splash_logo.svg
+
+features:
+  useNewChart: false

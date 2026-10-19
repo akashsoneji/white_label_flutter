@@ -30,13 +30,31 @@ class GetStartedScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Center(
-                        child: BrandLogo(
-                          source: FlavorConfig.instance.appIconPath,
-                          // color: AppColors.primary,
-                          height: 100.h,
-                          width: 180.w,
-                        ),
-                      ),
+                        child: Container(
+                                      height: 110.w,
+                                      width: 110.w,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withAlpha(30),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      padding: EdgeInsets.all(14.w),
+                                      child: BrandLogo(
+                                        source:
+                                            FlavorConfig.instance.appIconPath,
+                                        isCircle: true,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                  ),
+                        // child: CircleAvatar(
+                        //   child: BrandLogo(
+                        //     source: FlavorConfig.instance.appIconPath,
+                        //     // color: AppColors.primary,
+                        //     height: 100.h,
+                        //     width: 180.w,
+                        //   ),
+                        // ),
+                      // ),
                       SizedBox(height: 30.h),
                       Text(
                         languageService.tr("onboarding_slide1_description"),

@@ -451,8 +451,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       SizedBox(height: 24.h),
                       Center(
                         child: Container(
-                          height: 80.w,
-                          width: 80.w,
+                          height: 110.w,
+                          width: 110.w,
                           decoration: BoxDecoration(
                             color: AppColors.primary.withAlpha(30),
                             shape: BoxShape.circle,

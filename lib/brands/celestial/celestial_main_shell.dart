@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 
 import 'package:crm_app/services/language_service.dart';
 
@@ -68,6 +70,7 @@ class _CelestialMainShellState extends State<CelestialMainShell> {
   /// to call when the screen has not yet been mounted — the
   /// IndexedStack only builds a tab lazily.
   void _refreshHistoryIfPossible() {
+    _warnIfNoActiveAccount();
     final state = _historyKey.currentState as dynamic;
     try {
       state?.refreshHistory();
@@ -77,11 +80,32 @@ class _CelestialMainShellState extends State<CelestialMainShell> {
     }
   }
 
+  /// History needs an MT5 account. The controller no longer toasts this on
+  /// every load (it fired while the user was opening a new account), so the
+  /// warning is raised only when the user explicitly taps the History tab.
+  void _warnIfNoActiveAccount() {
+    final accountNumber = Get.isRegistered<AccountController>()
+        ? Get.find<AccountController>().activeMT5Account?.metaAccountNumber
+        : null;
+    final hasActiveAccount = accountNumber != null && accountNumber.isNotEmpty;
+    if (hasActiveAccount) return;
+
+    CustomToastService.showError(
+      title: TranslationUtils.tr('general_error'),
+      message: TranslationUtils.tr(
+        'vantage_chart_layout_no_active_trading_account',
+      ),
+    );
+  }
+
   late final List<Widget> _screens = [
     CelestialWatchlistScreen(onSymbolTap: (_) => setState(() => _index = 1)),
     const CelestialChartScreen(),
     const CelestialTradeScreen(),
-    CelestialHistoryScreen(key: _historyKey),
+    CelestialHistoryScreen(
+      key: _historyKey,
+      onNavigateToTab: (i) => setState(() => _index = i),
+    ),
     CelestialSettingsScreen(onNavigateToTab: (i) => setState(() => _index = i)),
   ];
 
