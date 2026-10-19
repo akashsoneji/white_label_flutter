@@ -373,7 +373,8 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
       final maxLimit = double.tryParse(m?['max_limit']?.toString() ?? '');
       final sourceCurrency = _sourceCurrency;
       final targetCurrency = _targetCurrency;
-      final showTarget = sourceCurrency != targetCurrency;
+      // "You will receive" always shows the USD value of the entered amount.
+      final showTarget = sourceCurrency != 'USD';
 
       final entered = double.tryParse(amountController.text.trim()) ?? 0;
       final usdValue = _convertedAmount(entered);
@@ -463,7 +464,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
                     textDirection: TextDirection.ltr,
                     decoration: _amountDecoration(
                       label: TranslationUtils.tr('withdrawal_you_receive'),
-                      currency: targetCurrency,
+                      currency: 'USD',
                     ).copyWith(
                       filled: true,
                       fillColor: AppColors.primary.withOpacity(0.05),
@@ -615,7 +616,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
   void _syncTargetAmount() {
     if (!mounted) return;
     final entered = double.tryParse(amountController.text.trim()) ?? 0;
-    targetAmountController.text = _toTargetAmount(entered).toStringAsFixed(2);
+    targetAmountController.text = _convertedAmount(entered).toStringAsFixed(2);
   }
 
   Widget _buildFeeDisplay() {
