@@ -1831,6 +1831,11 @@ class AuthController extends GetxController {
   }
 
   Future<void> _navigatePostAuth() async {
+    // The regulation questionnaire is a Riyadex-only requirement.
+    if (!FlavorConfig.isRiyadex()) {
+      Get.offAllNamed(AppPages.TRADING);
+      return;
+    }
     try {
       final profile = await getProfile();
       if (profile != null) {

@@ -740,49 +740,62 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                         children: [
                           Row(
                             children: [
-                              Obx(() {
-                                final name =
-                                    authController.userFullName?.isNotEmpty ==
-                                            true
-                                        ? authController.userFullName!
-                                        : (authController
-                                                .profileData
-                                                ?.data
-                                                .user
-                                                .fullName ??
-                                            '');
-                                return Text(
-                                  name,
-                                  style: AppTextStyles.bodyText.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 18.sp,
-                                    color: AppColors.whiteColor,
-                                  ),
-                                );
-                              }),
-                              SizedBox(width: 6.w),
-                              GetBuilder<MoreController>(
-                                builder: (controller) {
-                                  final model = controller.dashboardModel.value;
-                                  final stage = model?.data?.stageCompletion;
-                                  final completion = _calculateCompletion(
-                                    stage,
-                                  );
-                                  return Icon(
-                                    (completion == 100)
-                                        ? Icons.verified
-                                        : Icons.verified_outlined,
-                                    color:
-                                        (completion == 100)
-                                            ? AppColors.whiteColor
-                                            : AppColors.whiteColor.withValues(
-                                              alpha: 0.45,
-                                            ),
-                                    size: 18.r,
-                                  );
-                                },
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Flexible(
+                                      child: Obx(() {
+                                        final name =
+                                            authController
+                                                        .userFullName
+                                                        ?.isNotEmpty ==
+                                                    true
+                                                ? authController.userFullName!
+                                                : (authController
+                                                        .profileData
+                                                        ?.data
+                                                        .user
+                                                        .fullName ??
+                                                    '');
+                                        return Text(
+                                          name,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppTextStyles.bodyText
+                                              .copyWith(
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 18.sp,
+                                                color: AppColors.whiteColor,
+                                              ),
+                                        );
+                                      }),
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    GetBuilder<MoreController>(
+                                      builder: (controller) {
+                                        final model =
+                                            controller.dashboardModel.value;
+                                        final stage =
+                                            model?.data?.stageCompletion;
+                                        final completion =
+                                            _calculateCompletion(stage);
+                                        return Icon(
+                                          (completion == 100)
+                                              ? Icons.verified
+                                              : Icons.verified_outlined,
+                                          color:
+                                              (completion == 100)
+                                                  ? AppColors.whiteColor
+                                                  : AppColors.whiteColor
+                                                      .withValues(alpha: 0.45),
+                                          size: 18.r,
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
-                              const Spacer(),
+                              SizedBox(width: 8.w),
                               Obx(() {
                                 final model =
                                     moreController.dashboardModel.value;
