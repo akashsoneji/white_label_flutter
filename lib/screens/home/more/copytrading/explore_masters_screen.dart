@@ -195,8 +195,8 @@ class _HeroPerformanceBanner extends StatelessWidget {
           end: AlignmentDirectional.bottomEnd,
           colors: isDark
               ? [
-                  const Color(0xFF1E1B4B),
-                  const Color(0xFF0F172A),
+                  AppColors.primary.withValues(alpha: 0.45),
+                  AppColors.primary.withValues(alpha: 0.80),
                 ]
               : [
                   AppColors.primary,

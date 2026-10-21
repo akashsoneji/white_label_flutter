@@ -141,6 +141,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                         style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
+                                          color: AppColors.whiteColor
                                         ),
                                       ),
                                     );

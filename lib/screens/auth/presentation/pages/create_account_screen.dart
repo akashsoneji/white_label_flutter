@@ -551,7 +551,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 setState(() => _enableBiometricAfterRegister = true);
               },
               activeColor: AppColors.primary,
-              checkColor: AppColors.pureWhite,
+              checkColor: AppColors.whiteColor,
               side: BorderSide(color: AppColors.border),
             ),
             Expanded(

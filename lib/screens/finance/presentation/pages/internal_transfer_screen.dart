@@ -599,7 +599,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.pureWhite,
+                    color: AppColors.whiteColor,
                   ),
                 ),
       ),
