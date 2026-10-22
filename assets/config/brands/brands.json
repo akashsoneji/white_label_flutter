@@ -1,21 +1,21 @@
 {
-  "default": "tenax",
+  "default": "moneygenius",
   "brands": [
-    "tenax",
-    "vantage"
+    "moneygenius",
+    "celestial"
   ],
   "brandDetails": [
     {
-      "name": "tenax",
+      "name": "moneygenius",
       "type": "child",
-      "inheritsFrom": "vantage",
-      "label": "Tenax",
+      "inheritsFrom": "celestial",
+      "label": "MoneyGenius",
       "themeMode": "both"
     },
     {
-      "name": "vantage",
+      "name": "celestial",
       "type": "parent",
-      "label": "Vantage",
+      "label": "Celestial",
       "themeMode": "both"
     }
   ]

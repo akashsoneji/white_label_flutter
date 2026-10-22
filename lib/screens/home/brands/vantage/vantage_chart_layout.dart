@@ -635,17 +635,12 @@ class _Header extends StatelessWidget {
           Builder(
             builder: (pillContext) => GestureDetector(
               onTap: () {
-                if (!Get.isRegistered<AccountController>()) return;
                 final accCtrl = Get.find<AccountController>();
                 accCtrl.resetToDefaultAccounts();
                 _showAccountPopup(pillContext, accCtrl);
               },
               child: Obx(() {
-                // Logout disposes AccountController before this route is
-                // removed, so the last rebuild must not assume it exists.
-                final active = Get.isRegistered<AccountController>()
-                    ? Get.find<AccountController>().activeMT5Account
-                    : null;
+                final active = Get.find<AccountController>().activeMT5Account;
                 final accNumber = active?.metaAccountNumber ?? '------';
                 final isDemo =
                     (active?.accountType ?? 'REAL').toUpperCase() == 'DEMO';
