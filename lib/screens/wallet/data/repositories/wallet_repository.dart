@@ -11,6 +11,7 @@ abstract class WalletRepository {
     Map<String, dynamic>? queryParameters,
   });
 
+
   Future<ApiResponse> checkBalance({
     required String token,
     required Map<String, dynamic> payload,

@@ -32,6 +32,7 @@ class WalletRepositoryImpl implements WalletRepository {
     );
   }
 
+
   @override
   Future<ApiResponse> checkBalance({
     required String token,

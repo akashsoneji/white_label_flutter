@@ -55,6 +55,7 @@ class ApiConstants {
   static const String cregisDepositStatus = '${ajax}deposit/by-reference';
   static const String realPlanDetails = '${ajax}mt5accounts/plandetails';
   static const String getTransactions = '${ajax}transactions';
+  static const String getFinanceActivity = '${ajax}finance-activity';
   static const String depositProofProxy = '${ajax}deposit-proof-proxy/';
   // Bonus APIs
   static const String bonusList = '${ajax}bonus';
@@ -79,6 +80,7 @@ class ApiConstants {
   static const String checkMobile = '${ajax}auth/google/check-mobile';
   static const String getWalletData = '${ajax}internaltransfer';
   static const String getWalletDetailsNew = '${ajax}wallet';
+
   static const String currencyList = '${ajax}utility/currency-list';
   static const String withdrawalRequest = '${ajax}withdrawal';
   static const String withdrawalSendOTPRequest = '${ajax}withdrawal/sendOTP';

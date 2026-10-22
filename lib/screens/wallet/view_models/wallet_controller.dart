@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import 'package:crm_app/screens/finance/presentation/pages/deposit_screen.dart';
 import 'package:crm_app/screens/wallet/data/repositories/wallet_repository.dart';
-import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
-import 'package:crm_app/screens/finance/view_models/transaction_history_controller.dart' show Data;
+
+
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 
@@ -160,7 +162,7 @@ class IbAccount {
 
 class WalletController extends GetxController {
   final WalletRepository _repo = Get.find<WalletRepository>();
-  final FinanceRepository _financeRepo = Get.find<FinanceRepository>();
+
   var walletId = 'PIPW008'.obs;
   var balance = ''.obs;
   var transferFromAccount = ''.obs;
@@ -191,19 +193,34 @@ class WalletController extends GetxController {
   final amountController = TextEditingController(text: '0.00');
 
   // History State
+  final FinanceRepository _financeRepo = Get.find<FinanceRepository>();
+  static const int _historyPerPage = 10;
+  int _historyRequestId = 0;
   var isHistoryLoading = false.obs;
   var isLoadingMore = false.obs;
   var hasMore = true.obs;
-  var historyTransactions = <Data>[].obs;
+
+  final completedTransactions = <WalletHistoryEntry>[].obs;
+  final pendingTransactions = <WalletHistoryEntry>[].obs;
+  final rejectedTransactions = <WalletHistoryEntry>[].obs;
+  final selectedHistoryTab = WalletHistoryTab.completed.obs;
   var currentPage = 1.obs;
   var lastPage = 1.obs;
-  var totalItems = 0.obs;
-  
-  // History Filters
+
+  // History Filters (yyyy-MM-dd)
   var filterDateFrom = ''.obs;
   var filterDateTo = ''.obs;
-  var filterType = 'All Types'.obs;
-  var filterStatus = 'All Status'.obs;
+
+  List<WalletHistoryEntry> get visibleHistoryTransactions {
+    switch (selectedHistoryTab.value) {
+      case WalletHistoryTab.completed:
+        return completedTransactions;
+      case WalletHistoryTab.pending:
+        return pendingTransactions;
+      case WalletHistoryTab.rejected:
+        return rejectedTransactions;
+    }
+  }
 
   // Sample account options for dropdown
   final List<String> accountOptions = [
@@ -531,8 +548,20 @@ class WalletController extends GetxController {
     super.onClose();
   }
 
+  /// Rx writes notify every Obx synchronously. This controller is shared by
+  /// several screens and is started from initState / Get.put field
+  /// initializers, i.e. mid-build, where that notification throws
+  /// "markNeedsBuild() called during build". Wait for the frame to finish.
+  Future<void> _waitForBuildToFinish() async {
+    final scheduler = SchedulerBinding.instance;
+    if (scheduler.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      await scheduler.endOfFrame;
+    }
+  }
+
   Future<void> fetchWalletData() async {
     try {
+      await _waitForBuildToFinish();
       isLoading.value = true;
 
       final token = await SecureStorageService.getAuthToken();
@@ -676,80 +705,121 @@ class WalletController extends GetxController {
 
   // --- History & Pagination Logic ---
 
+  /// Wallet history comes from `user/finance-activity`, a single paginated
+  /// list. The Completed/Pending/Rejected tabs are split client-side by
+  /// status.
   Future<void> fetchWalletHistory({int page = 1}) async {
+    // A page-1 fetch (initial load, filter change, refresh) starts a new
+    // generation; page>1 fetches belong to the current one. Responses from an
+    // older generation are dropped — otherwise an unfiltered request still in
+    // flight when a date filter is applied lands afterwards and overwrites (or
+    // appends to) the filtered list.
+    final requestId = page == 1 ? ++_historyRequestId : _historyRequestId;
+    bool isStale() => requestId != _historyRequestId;
+
     try {
-      print('DEBUG: fetchWalletHistory page = $page');
+      await _waitForBuildToFinish();
+      if (isStale()) return;
       if (page == 1) {
         isHistoryLoading.value = true;
+        // Any in-flight load-more belongs to the old generation and will be
+        // discarded, so release its flag here.
+        isLoadingMore.value = false;
         hasMore.value = true;
-        historyTransactions.clear();
       } else {
         isLoadingMore.value = true;
       }
 
       final token = await SecureStorageService.getAuthToken();
-      
-      final typeQuery = filterType.value != 'All Types' ? filterType.value : '';
-      final statusQuery = filterStatus.value != 'All Status' ? filterStatus.value : '';
-      final fromQuery = filterDateFrom.value;
-      final toQuery = filterDateTo.value;
-
-      print('DEBUG: calling getTransactions with type: $typeQuery, status: $statusQuery');
+      final dateFrom = filterDateFrom.value;
+      final dateTo = filterDateTo.value;
       final response = await _financeRepo.getTransactions(
         token: token ?? '',
         page: page,
-        perPage: 10,
-        transactionType: typeQuery,
-        type: typeQuery,
-        status: statusQuery,
-        dateFrom: fromQuery,
-        dateTo: toQuery,
-        t: DateTime.now().millisecondsSinceEpoch.toString(),
+        perPage: _historyPerPage,
+        dateFrom: dateFrom,
+        dateTo: dateTo,
       );
+      if (isStale()) return;
 
-      print('DEBUG: getTransactions response success = ${response.success}');
-      if (response.success && response.data != null) {
-        final data = response.data;
-        print('DEBUG: getTransactions data keys = ${data is Map ? data.keys : "Not a Map"}');
-        List<Data> newItems = [];
-        if (data['data'] != null) {
-          final List transactionsList = data['data'];
-          print('DEBUG: transactionsList length = ${transactionsList.length}');
-          newItems = transactionsList.map((e) => Data.fromJson(e)).toList();
-        }
+      final body =
+          response.data is Map<String, dynamic>
+              ? response.data as Map<String, dynamic>
+              : const <String, dynamic>{};
+      final rows = body['data'];
+      if (!response.success || rows is! List) {
+        if (page == 1) _clearHistoryLists();
+        hasMore.value = false;
+        return;
+      }
 
-        if (data['pagination'] != null) {
-          currentPage.value = data['pagination']['current_page'] ?? page;
-          lastPage.value = data['pagination']['last_page'] ?? 1;
-          totalItems.value = data['pagination']['total'] ?? 0;
-          print('DEBUG: pagination: current = ${currentPage.value}, last = ${lastPage.value}');
-        }
+      final entries =
+          rows
+              .whereType<Map<String, dynamic>>()
+              .map(WalletHistoryEntry.fromFinanceActivity)
+              .toList();
 
-        if (page == 1) {
-          historyTransactions.assignAll(newItems);
-        } else {
-          historyTransactions.addAll(newItems);
-        }
+      final pagination = body['pagination'];
+      final pageInfo =
+          pagination is Map<String, dynamic>
+              ? pagination
+              : const <String, dynamic>{};
+      currentPage.value = _toInt(pageInfo['current_page'], page);
+      lastPage.value = _toInt(pageInfo['last_page'], currentPage.value);
 
-        if (newItems.isEmpty || currentPage.value >= lastPage.value) {
-          hasMore.value = false;
-        }
-      } else {
-        print('DEBUG: getTransactions failed with message: ${response.message}');
-        if (page == 1) {
-          hasMore.value = false;
+      if (page == 1) _clearHistoryLists();
+      for (final entry in entries) {
+        switch (entry.tab) {
+          case WalletHistoryTab.completed:
+            completedTransactions.add(entry);
+            break;
+          case WalletHistoryTab.pending:
+            pendingTransactions.add(entry);
+            break;
+          case WalletHistoryTab.rejected:
+            rejectedTransactions.add(entry);
+            break;
         }
       }
+
+      hasMore.value = entries.isNotEmpty && currentPage.value < lastPage.value;
     } catch (e, stack) {
       print("Error fetching wallet history: $e");
       print(stack);
-      if (page == 1) {
-        hasMore.value = false;
-      }
+      if (isStale()) return;
+      if (page == 1) _clearHistoryLists();
+      hasMore.value = false;
     } finally {
-      isHistoryLoading.value = false;
-      isLoadingMore.value = false;
+      // A stale request must not reset the flags of the newer one.
+      if (!isStale()) {
+        isHistoryLoading.value = false;
+        isLoadingMore.value = false;
+      }
     }
+    if (isStale()) return;
+    _fillVisibleTab();
+  }
+
+  int _toInt(dynamic value, int fallback) =>
+      int.tryParse(value?.toString() ?? '') ?? fallback;
+
+  void _clearHistoryLists() {
+    completedTransactions.clear();
+    pendingTransactions.clear();
+    rejectedTransactions.clear();
+  }
+
+  /// Tabs are client-side slices of one paginated list, so the selected tab
+  /// can be short (or empty) while later pages still hold its entries. Keep
+  /// paging until it has a screenful or the server runs out.
+  void _fillVisibleTab() {
+    if (visibleHistoryTransactions.length >= _historyPerPage) return;
+    loadMoreTransactions();
+  }
+
+  void selectHistoryTab(WalletHistoryTab tab) {
+    selectedHistoryTab.value = tab;
+    _fillVisibleTab();
   }
 
   void loadMoreTransactions() {
@@ -766,8 +836,116 @@ class WalletController extends GetxController {
   void clearFilters() {
     filterDateFrom.value = '';
     filterDateTo.value = '';
-    filterType.value = 'All Types';
-    filterStatus.value = 'All Status';
     fetchWalletHistory(page: 1);
+  }
+}
+
+enum WalletHistoryTab { completed, pending, rejected }
+
+/// One row of `GET user/finance-activity`. The sign of [amount] is the
+/// direction: positive = money in, negative = money out.
+class WalletHistoryEntry {
+  final String id;
+  final DateTime? date;
+  final String type;
+  final String from;
+  final String to;
+  final double amount;
+  final String status;
+  final String reference;
+  final String reason;
+
+  const WalletHistoryEntry({
+    required this.id,
+    required this.date,
+    required this.type,
+    required this.from,
+    required this.to,
+    required this.amount,
+    required this.status,
+    required this.reference,
+    required this.reason,
+  });
+
+  bool get isCredit => amount >= 0;
+
+  /// Processing/approved rows belong to Completed, matching the web tabs.
+  WalletHistoryTab get tab {
+    final s = status.toLowerCase();
+    if (s.contains('reject') ||
+        s.contains('fail') ||
+        s.contains('cancel') ||
+        s.contains('declin')) {
+      return WalletHistoryTab.rejected;
+    }
+    if (s.contains('pending')) return WalletHistoryTab.pending;
+    return WalletHistoryTab.completed;
+  }
+
+  factory WalletHistoryEntry.fromFinanceActivity(Map<String, dynamic> json) {
+    String str(String key) => json[key]?.toString().trim() ?? '';
+
+    final type = str('transaction_type').isNotEmpty
+        ? str('transaction_type')
+        : str('paymentMethod');
+    final lowerType = type.toLowerCase();
+    final fromAccount = str('from_account');
+
+    // The API sends an unsigned "$100.00"; direction comes from the type,
+    // and for transfers from whether the wallet is the source account.
+    final bool isOutgoing;
+    if (lowerType.contains('withdraw')) {
+      isOutgoing = true;
+    } else if (lowerType.contains('transfer')) {
+      isOutgoing = fromAccount.isNotEmpty && fromAccount == str('wallet_id');
+    } else {
+      isOutgoing = false;
+    }
+    final magnitude =
+        (double.tryParse(
+                  str('amount').replaceAll(RegExp(r'[^0-9.\-]'), ''),
+                ) ??
+                0)
+            .abs();
+
+    // account_label is "WA#123 → TA#456" for transfers, a single account
+    // label otherwise; the payment method is the other side.
+    final label = str('account_label');
+    final method = str('paymentMethod');
+    final labelParts =
+        label
+            .split('\u2192')
+            .map((part) => part.trim())
+            .where((part) => part.isNotEmpty)
+            .toList();
+    final String from;
+    final String to;
+    if (labelParts.length == 2) {
+      from = labelParts[0];
+      to = labelParts[1];
+    } else if (isOutgoing) {
+      from = label;
+      to = method;
+    } else {
+      from = method;
+      to = label;
+    }
+
+    final rejectReason = str('reject_reason');
+
+    return WalletHistoryEntry(
+      id: str('id'),
+      date:
+          DateTime.tryParse(str('created_at_iso')) ??
+          DateTime.tryParse(str('created_at')),
+      type: type,
+      from: from,
+      to: to,
+      amount: isOutgoing ? -magnitude : magnitude,
+      status: str('status'),
+      reference: str('reference_number'),
+      reason:
+          rejectReason.isNotEmpty ? rejectReason : str('comment_for_client'),
+    );
   }
 }

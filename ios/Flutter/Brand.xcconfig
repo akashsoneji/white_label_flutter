@@ -1,7 +1,7 @@
 // GENERATED — Do not edit manually. Regenerate with:
-//   dart run scripts/prepare_flavor.dart moneygenius
-// Active flavor: moneygenius
-PRODUCT_BUNDLE_IDENTIFIER=com.moneygenius.app
-BRAND_DISPLAY_NAME=MoneyGenius
+//   dart run scripts/prepare_flavor.dart tenax
+// Active flavor: tenax
+PRODUCT_BUNDLE_IDENTIFIER=com.tenax.app
+BRAND_DISPLAY_NAME=Tenax
 FLUTTER_TARGET=lib/main.dart
-DART_DEFINES=Q0xJRU5UPW1vbmV5Z2VuaXVz,RkxBVk9SPW1vbmV5Z2VuaXVz
+DART_DEFINES=Q0xJRU5UPXRlbmF4,RkxBVk9SPXRlbmF4

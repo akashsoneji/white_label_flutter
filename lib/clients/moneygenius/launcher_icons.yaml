@@ -5,4 +5,4 @@ flutter_launcher_icons:
   image_path: "assets/brands/moneygenius/icon.png"
   min_sdk_android: 21
   adaptive_icon_background: "#006838"
-  adaptive_icon_foreground: "assets/clients/moneygenius/ic_adaptive_foreground.png"
+  adaptive_icon_foreground: "assets/brands/moneygenius/icon.png"

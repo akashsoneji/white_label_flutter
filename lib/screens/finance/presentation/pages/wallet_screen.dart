@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
@@ -47,24 +47,7 @@ class _WalletScreenState extends State<WalletScreen> {
     super.dispose();
   }
 
-  bool checkIfDeposit(dynamic tx) {
-    final String type = tx.transactionType?.toLowerCase() ?? '';
-    final String amountStr = tx.amount?.toString() ?? '';
-    if (type == 'deposit') return true;
-    if (type == 'withdrawal') return false;
-    return !amountStr.contains('-');
-  }
-
-  String formatAmount(dynamic amount, bool isDeposit) {
-    if (amount == null) return '0.00';
-    String amountStr = amount.toString();
-    amountStr = amountStr.replaceAll('+', '').replaceAll('-', '').trim();
-    String prefix = isDeposit ? '+' : '-';
-    if (amountStr.startsWith('\$')) {
-      return '$prefix$amountStr';
-    }
-    return '$prefix\$$amountStr';
-  }
+  final NumberFormat _amountFormat = NumberFormat('#,##0.00');
 
   @override
   Widget build(BuildContext context) {
@@ -90,112 +73,129 @@ class _WalletScreenState extends State<WalletScreen> {
         children: [
           SafeArea(
             child: Obx(() {
+              final transactions = controller.visibleHistoryTransactions;
+              // A tab can be empty while later pages (which may hold its
+              // rows) are still being fetched — show a loader, not "empty".
               final isInitialLoading =
-                  controller.isHistoryLoading.value &&
-                  controller.historyTransactions.isEmpty;
+                  transactions.isEmpty &&
+                  (controller.isHistoryLoading.value ||
+                      controller.isLoadingMore.value);
 
-              return CustomScrollView(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  // 1. Balance Card
-                  SliverToBoxAdapter(child: _buildPremiumBalanceCard()),
-
-                  // 2. Action buttons
-                  SliverToBoxAdapter(child: _buildQuickActions()),
-
-                  // 3. Filter Bar
-                  SliverToBoxAdapter(child: _buildFilterBar()),
-
-                  // 4. Initial Loading State
-                  if (isInitialLoading)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    )
-                  // 5. Empty State
-                  else if (controller.historyTransactions.isEmpty)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 40.w,
-                            vertical: 40.h,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.receipt_long_outlined,
-                                size: 48.sp,
-                                color: AppColors.textSecondary.withOpacity(0.5),
-                              ),
-                              SizedBox(height: 16.h),
-                              Text(
-                                languageService.tr(
-                                  'transaction_history_no_transactions',
-                                ),
-                                style: TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    )
-                  // 6. Transactions List
-                  else ...[
-                    SliverPadding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 20.w,
-                        vertical: 8.h,
-                      ),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final tx = controller.historyTransactions[index];
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 12.h),
-                            child: _buildTransactionCard(tx),
-                          );
-                        }, childCount: controller.historyTransactions.length),
+              return RefreshIndicator(
+                color: AppColors.primary,
+                onRefresh: () async {
+                  await Future.wait([
+                    controller.fetchWalletData(),
+                    controller.fetchWalletHistory(page: 1),
+                  ]);
+                },
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverToBoxAdapter(child: _buildWalletHeader()),
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: _PinnedControlsDelegate(
+                        // Taller when the active date-range chip is visible.
+                        extent:
+                            (controller.filterDateFrom.value.isNotEmpty ||
+                                    controller.filterDateTo.value.isNotEmpty)
+                                ? 54.h + 38.h
+                                : 54.h,
+                        child: _buildHistoryControls(),
                       ),
                     ),
 
-                    // 7. Load More Loading / No More Items Indicator at bottom
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 24.h),
+                    if (isInitialLoading)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
                         child: Center(
-                          child:
-                              controller.isLoadingMore.value
-                                  ? CircularProgressIndicator(
-                                    color: AppColors.primary,
-                                  )
-                                  : !controller.hasMore.value &&
-                                      controller.historyTransactions.isNotEmpty
-                                  ? Text(
-                                    languageService.tr(
-                                      'wallet_screen_no_more_transactions_to_show',
-                                    ),
-                                    style: TextStyle(
-                                      color: AppColors.textSecondary,
-                                      fontSize: 11.sp,
-                                    ),
-                                  )
-                                  : const SizedBox.shrink(),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      )
+                    else if (transactions.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 40.w,
+                              vertical: 40.h,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.receipt_long_outlined,
+                                  size: 48.sp,
+                                  color: AppColors.textSecondary.withOpacity(
+                                    0.5,
+                                  ),
+                                ),
+                                SizedBox(height: 16.h),
+                                Text(
+                                  languageService.tr(
+                                    'transaction_history_no_transactions',
+                                  ),
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    else ...[
+                      Builder(
+                        builder: (context) {
+                          final groups = _groupByDay(transactions);
+                          return SliverPadding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 20.w,
+                              vertical: 4.h,
+                            ),
+                            sliver: SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) =>
+                                    _buildTransactionGroup(groups[index]),
+                                childCount: groups.length,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24.h),
+                          child: Center(
+                            child:
+                                controller.isLoadingMore.value
+                                    ? CircularProgressIndicator(
+                                      color: AppColors.primary,
+                                    )
+                                    : !controller.hasMore.value
+                                    ? Text(
+                                      languageService.tr(
+                                        'wallet_screen_no_more_transactions_to_show',
+                                      ),
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontSize: 11.sp,
+                                      ),
+                                    )
+                                    : const SizedBox.shrink(),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               );
             }),
           ),
@@ -217,377 +217,445 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  Widget _buildPremiumBalanceCard() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.r),
-        gradient: LinearGradient(
-          colors: [
-            AppColors.isDarkMode
-                ? AppColors.secondary.withOpacity(0.15)
-                : AppColors.primary,
-            AppColors.isDarkMode
-                ? AppColors.secondary.withOpacity(0.15)
-                : AppColors.primary.withOpacity(0.85),
-            AppColors.isDarkMode
-                ? AppColors.secondary.withOpacity(0.15)
-                : AppColors.secondary.withOpacity(0.9),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+  /// Compact header that replaces the old hero card, two action buttons and
+  /// three summary tiles: balance + wallet ID on the left, icon actions on
+  /// the right, and an in/out flow bar summarising the selected period.
+  Widget _buildWalletHeader() {
+    return Obx(() {
+      final walletId = controller.wallet.value?.walletId ?? '';
+
+      return Container(
+        margin: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 8.h),
+        padding: EdgeInsets.all(14.w),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: AppColors.border.withOpacity(0.2)),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.isDarkMode
-                ? Colors.black.withOpacity(0.4)
-                : AppColors.primary.withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20.r),
-        child: Stack(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          // Background circles decoration
-          PositionedDirectional(
-            end: -20.w,
-            top: -20.h,
-            child: CircleAvatar(
-              radius: 60.r,
-              backgroundColor:
-                  AppColors.isDarkMode
-                      ? AppColors.secondary.withOpacity(0.15)
-                      : Colors.white.withOpacity(0.08),
-            ),
-          ),
-          PositionedDirectional(
-            start: -40.w,
-            bottom: -40.h,
-            child: CircleAvatar(
-              radius: 80.r,
-              backgroundColor:
-                  AppColors.isDarkMode
-                      ? AppColors.secondary.withOpacity(0.15)
-                      : Colors.white.withOpacity(0.05),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(24.w),
-            child: Column(
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      languageService.tr('wallet_title').toUpperCase(),
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        languageService.tr('wallet_history_current_balance'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10.5.sp,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                    ),
-                    Icon(
-                      Icons.account_balance_wallet_outlined,
-                      color: Colors.white.withOpacity(0.8),
-                      size: 24.sp,
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20.h),
-                Obx(
-                  () => Text(
-                    '\$${controller.balance.value}',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 32.sp,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          languageService.tr('wallet_wallet_id'),
+                      SizedBox(height: 2.h),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          '\$${controller.balance.value}',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
-                            fontSize: 10.sp,
+                            fontSize: 24.sp,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                            color: AppColors.textPrimary,
                           ),
                         ),
-                        SizedBox(height: 4.h),
-                        Obx(
-                          () => Row(
+                      ),
+                      if (walletId.isNotEmpty) ...[
+                        SizedBox(height: 2.h),
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            Clipboard.setData(ClipboardData(text: walletId));
+                            CustomToastService.showSuccess(
+                              message: TranslationUtils.tr(
+                                'wallet_screen_wallet_id_copied',
+                              ),
+                            );
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                controller.wallet.value?.walletId ?? '',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w600,
+                              Flexible(
+                                child: Text(
+                                  '${languageService.tr('wallet_wallet_id')} $walletId',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
                               ),
-                              SizedBox(width: 8.w),
-                              GestureDetector(
-                                onTap: () {
-                                  final walletId =
-                                      controller.wallet.value?.walletId ?? '';
-                                  if (walletId.isNotEmpty) {
-                                    Clipboard.setData(
-                                      ClipboardData(text: walletId),
-                                    );
-                                    CustomToastService.showSuccess(
-                                      message: TranslationUtils.tr(
-                                        'wallet_screen_wallet_id_copied',
-                                      ),
-                                    );
-                                  }
-                                },
-                                child: Icon(
-                                  Icons.copy,
-                                  size: 14.sp,
-                                  color: Colors.white.withOpacity(0.8),
-                                ),
+                              SizedBox(width: 4.w),
+                              Icon(
+                                Icons.copy_rounded,
+                                size: 12.sp,
+                                color: AppColors.primary,
                               ),
                             ],
                           ),
                         ),
                       ],
-                    ),
-                  ],
+                    ],
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                _buildHeaderAction(
+                  icon: Icons.add_rounded,
+                  label: languageService.tr('wallet_deposit_wallet'),
+                  isPrimary: true,
+                  onTap:
+                      () =>
+                          Get.to(() => PaymentMethodsScreen(accountNumber: '')),
+                ),
+                SizedBox(width: 10.w),
+                _buildHeaderAction(
+                  icon: Icons.swap_horiz_rounded,
+                  label: languageService.tr('internal_transfer'),
+                  isPrimary: false,
+                  onTap:
+                      () => Get.to(
+                        () => const InternalTransferScreen(
+                          preselectWallet: true,
+                        ),
+                      ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-  Widget _buildQuickActions() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildActionButton(
-              label: languageService.tr('wallet_deposit_wallet'),
-              icon: Icons.add_circle_outline,
-              onPressed: () {
-                Get.to(() => PaymentMethodsScreen(accountNumber: ''));
-              },
-              isPrimary: true,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _buildActionButton(
-              label: languageService.tr('internal_transfer'),
-              icon: Icons.swap_horiz,
-              onPressed: () {
-                Get.to(() => InternalTransferScreen());
-              },
-              isPrimary: false,
-            ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 
-  Widget _buildActionButton({
-    required String label,
+  Widget _buildHeaderAction({
     required IconData icon,
-    required VoidCallback onPressed,
+    required String label,
     required bool isPrimary,
+    required VoidCallback onTap,
   }) {
-    final bool isDark =
-        Theme.of(context).brightness == Brightness.dark || AppColors.isDarkMode;
-    return Container(
-      height: 48.h,
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(
-          icon,
-          size: 18.sp,
-          color: isPrimary ? AppColors.onPrimary : AppColors.primary,
-        ),
-        label: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.bold,
-            color: isPrimary ? AppColors.onPrimary : AppColors.primary,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor:
-              isPrimary
-                  ? AppColors.primary
-                  : isDark
-                  ? AppColors.textFieldBg
-                  : AppColors.primary.withOpacity(0.08),
-          elevation: 0,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
-            side:
+    final foreground = isPrimary ? AppColors.onPrimary : AppColors.primary;
+    return SizedBox(
+      width: 58.w,
+      child: Column(
+        children: [
+          Material(
+            color:
                 isPrimary
-                    ? BorderSide.none
-                    : BorderSide(
-                      color: AppColors.primary.withOpacity(0.2),
-                      width: 1,
-                    ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterBar() {
-    return Obx(() {
-      final List<Widget> chips = [];
-
-      if (controller.filterType.value != 'All Types') {
-        chips.add(
-          _buildFilterChip(
-            label:
-                '${languageService.tr('transaction_history_transaction_type')}: ${_filterLabel(controller.filterType.value)}',
-            onDeleted: () {
-              controller.filterType.value = 'All Types';
-              controller.applyFilters();
-            },
-          ),
-        );
-      }
-
-      if (controller.filterStatus.value != 'All Status') {
-        chips.add(
-          _buildFilterChip(
-            label:
-                '${languageService.tr('common_status')}: ${_filterLabel(controller.filterStatus.value)}',
-            onDeleted: () {
-              controller.filterStatus.value = 'All Status';
-              controller.applyFilters();
-            },
-          ),
-        );
-      }
-
-      if (controller.filterDateFrom.value.isNotEmpty ||
-          controller.filterDateTo.value.isNotEmpty) {
-        final from =
-            controller.filterDateFrom.value.isNotEmpty
-                ? controller.filterDateFrom.value
-                : languageService.tr('wallet_screen_any');
-        final to =
-            controller.filterDateTo.value.isNotEmpty
-                ? controller.filterDateTo.value
-                : languageService.tr('wallet_screen_any');
-        chips.add(
-          _buildFilterChip(
-            label:
-                '$from ${languageService.tr('pmam_trade_history_to')} $to',
-            onDeleted: () {
-              controller.filterDateFrom.value = '';
-              controller.filterDateTo.value = '';
-              controller.applyFilters();
-            },
-          ),
-        );
-      }
-
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-        child: Row(
-          children: [
-            InkWell(
-              onTap: _showFilterBottomSheet,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.15),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.filter_alt_outlined,
-                      size: 16.sp,
-                      color: AppColors.primary,
-                    ),
-                    SizedBox(width: 4.w),
-                    Text(
-                      languageService.tr('wallet_screen_filters'),
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
+                    ? AppColors.primary
+                    : AppColors.primary.withOpacity(0.08),
+            shape: const CircleBorder(),
+            child: InkWell(
+              onTap: onTap,
+              customBorder: const CircleBorder(),
+              child: SizedBox(
+                width: 42.w,
+                height: 42.w,
+                child: Icon(icon, size: 20.sp, color: foreground),
               ),
             ),
-            SizedBox(width: 8.w),
-            Expanded(
-              child:
-                  chips.isEmpty
-                      ? Text(
-                        languageService.tr('wallet_screen_all_transactions'),
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
-                        ),
-                      )
-                      : SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children:
-                              chips
-                                  .map(
-                                    (c) => Padding(
-                                      padding: EdgeInsetsDirectional.only(end: 6.w),
-                                      child: c,
-                                    ),
-                                  )
-                                  .toList(),
-                        ),
-                      ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            label,
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 9.5.sp,
+              height: 1.2,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
             ),
-            if (chips.isNotEmpty) ...[
-              SizedBox(width: 6.w),
-              GestureDetector(
-                onTap: controller.clearFilters,
-                child: Text(
-                  languageService.tr('wallet_screen_clear_all'),
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Single strip: segmented status tabs + filter icon. The active date
+  /// range (if any) shows as a removable chip underneath.
+  Widget _buildHistoryControls() {
+    return Obx(() {
+      final selected = controller.selectedHistoryTab.value;
+      final hasDateFilter =
+          controller.filterDateFrom.value.isNotEmpty ||
+          controller.filterDateTo.value.isNotEmpty;
+      final from =
+          controller.filterDateFrom.value.isNotEmpty
+              ? controller.filterDateFrom.value
+              : languageService.tr('wallet_screen_any');
+      final to =
+          controller.filterDateTo.value.isNotEmpty
+              ? controller.filterDateTo.value
+              : languageService.tr('wallet_screen_any');
+      final tabs = [
+        (
+          tab: WalletHistoryTab.completed,
+          label: languageService.tr('transaction_history_completed'),
+          count: controller.completedTransactions.length,
+        ),
+        (
+          tab: WalletHistoryTab.pending,
+          label: languageService.tr('transaction_history_pending'),
+          count: controller.pendingTransactions.length,
+        ),
+        (
+          tab: WalletHistoryTab.rejected,
+          label: languageService.tr('kyc_verification_rejected'),
+          count: controller.rejectedTransactions.length,
+        ),
+      ];
+
+      return Container(
+        color: AppColors.background,
+        padding: EdgeInsets.fromLTRB(20.w, 6.h, 20.w, 8.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatusSegmentedControl(tabs, selected),
                 ),
+                SizedBox(width: 8.w),
+                Builder(
+                  builder:
+                      (buttonContext) => _buildSquareIconButton(
+                        icon: Icons.tune_rounded,
+                        tooltip: languageService.tr('wallet_screen_filters'),
+                        onTap: () => _showFilterPopup(buttonContext),
+                        highlighted: hasDateFilter,
+                      ),
+                ),
+              ],
+            ),
+            if (hasDateFilter) ...[
+              SizedBox(height: 8.h),
+              _buildFilterChip(
+                label:
+                    '$from ${languageService.tr('pmam_trade_history_to')} $to',
+                onDeleted: controller.clearFilters,
               ),
             ],
           ],
         ),
       );
     });
+  }
+
+  ({IconData icon, Color color}) _tabVisual(WalletHistoryTab tab) {
+    switch (tab) {
+      case WalletHistoryTab.completed:
+        return (icon: Icons.check_circle_rounded, color: AppColors.success);
+      case WalletHistoryTab.pending:
+        return (icon: Icons.schedule_rounded, color: AppColors.warning);
+      case WalletHistoryTab.rejected:
+        return (icon: Icons.cancel_rounded, color: AppColors.error);
+    }
+  }
+
+  /// Segmented control with a thumb that slides to the selected tab. Each
+  /// tab carries its status colour (green / amber / red) on the icon, the
+  /// thumb outline and the count pill.
+  Widget _buildStatusSegmentedControl(
+    List<({WalletHistoryTab tab, String label, int count})> tabs,
+    WalletHistoryTab selected,
+  ) {
+    final selectedIndex = tabs.indexWhere((t) => t.tab == selected);
+    final selectedColor = _tabVisual(selected).color;
+    // -1, 0, 1 for three tabs; directional so RTL mirrors with the Row.
+    final thumbX =
+        tabs.length > 1 ? -1 + 2 * selectedIndex / (tabs.length - 1) : 0.0;
+
+    return Container(
+      height: 40.h,
+      padding: EdgeInsets.all(3.w),
+      decoration: BoxDecoration(
+        color: AppColors.textFieldBg,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.border.withOpacity(0.15)),
+      ),
+      child: Stack(
+        children: [
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
+            alignment: AlignmentDirectional(thumbX, 0),
+            child: FractionallySizedBox(
+              widthFactor: 1 / tabs.length,
+              heightFactor: 1,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 260),
+                decoration: BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: BorderRadius.circular(9.r),
+                  border: Border.all(color: selectedColor.withOpacity(0.35)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: selectedColor.withOpacity(0.18),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Row(
+            children:
+                tabs.map((t) {
+                  final isSelected = t.tab == selected;
+                  final visual = _tabVisual(t.tab);
+                  return Expanded(
+                    child: Semantics(
+                      button: true,
+                      selected: isSelected,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          if (isSelected) return;
+                          HapticFeedback.selectionClick();
+                          controller.selectHistoryTab(t.tab);
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4.w),
+                          child: Center(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  AnimatedSwitcher(
+                                    duration: const Duration(
+                                      milliseconds: 200,
+                                    ),
+                                    transitionBuilder:
+                                        (child, animation) => ScaleTransition(
+                                          scale: animation,
+                                          child: child,
+                                        ),
+                                    child:
+                                        isSelected
+                                            ? Padding(
+                                              key: const ValueKey('icon'),
+                                              padding:
+                                                  EdgeInsetsDirectional.only(
+                                                    end: 4.w,
+                                                  ),
+                                              child: Icon(
+                                                visual.icon,
+                                                size: 14.sp,
+                                                color: visual.color,
+                                              ),
+                                            )
+                                            : const SizedBox.shrink(
+                                              key: ValueKey('none'),
+                                            ),
+                                  ),
+                                  AnimatedDefaultTextStyle(
+                                    duration: const Duration(
+                                      milliseconds: 200,
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      fontWeight:
+                                          isSelected
+                                              ? FontWeight.w700
+                                              : FontWeight.w500,
+                                      color:
+                                          isSelected
+                                              ? AppColors.textPrimary
+                                              : AppColors.textSecondary,
+                                    ),
+                                    child: Text(t.label, maxLines: 1),
+                                  ),
+                                  SizedBox(width: 5.w),
+                                  AnimatedContainer(
+                                    duration: const Duration(
+                                      milliseconds: 200,
+                                    ),
+                                    constraints: BoxConstraints(
+                                      minWidth: 18.w,
+                                    ),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 5.w,
+                                      vertical: 1.5.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          isSelected
+                                              ? visual.color
+                                              : visual.color.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(
+                                        10.r,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      '${t.count}',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 10.sp,
+                                        fontWeight: FontWeight.w800,
+                                        color:
+                                            isSelected
+                                                ? Colors.white
+                                                : visual.color,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSquareIconButton({
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback onTap,
+    bool highlighted = false,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color:
+            highlighted
+                ? AppColors.primary
+                : AppColors.primary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10.r),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10.r),
+          child: SizedBox(
+            width: 40.h,
+            height: 40.h,
+            child: Icon(
+              icon,
+              size: 18.sp,
+              color: highlighted ? AppColors.onPrimary : AppColors.primary,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildFilterChip({
@@ -626,213 +694,273 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  void _showFilterBottomSheet() {
-    final localType = controller.filterType.value.obs;
-    final localStatus = controller.filterStatus.value.obs;
-    final localDateFrom = controller.filterDateFrom.value.obs;
-    final localDateTo = controller.filterDateTo.value.obs;
+  /// Dropdown panel anchored under the filter button instead of a bottom
+  /// sheet, so the history stays visible behind it. Quick ranges apply on
+  /// tap; a custom range needs Apply.
+  void _showFilterPopup(BuildContext anchorContext) {
+    final box = anchorContext.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.cardBackground,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+    final anchor = box.localToGlobal(Offset.zero) & box.size;
+    final screen = MediaQuery.sizeOf(context);
+    final maxPanelWidth = screen.width - 32.w;
+    final panelWidth = maxPanelWidth < 300.w ? maxPanelWidth : 300.w;
+    // Open towards the side with room: a button on the right half aligns the
+    // panel's right edge to it (works for both LTR and RTL layouts).
+    final alignToRight = anchor.center.dx > screen.width / 2;
+    final rawLeft = alignToRight ? anchor.right - panelWidth : anchor.left;
+    final left =
+        rawLeft.clamp(16.w, screen.width - panelWidth - 16.w).toDouble();
+    final top = anchor.bottom + 6.h;
+
+    final today = DateTime.now();
+    String fmt(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
+    final presets = [
+      (label: languageService.tr('ibm_range_all_time'), from: '', to: ''),
+      (
+        label: languageService.tr('time_today'),
+        from: fmt(today),
+        to: fmt(today),
       ),
-      builder: (context) {
-        return Container(
-          padding: EdgeInsetsDirectional.fromSTEB(
-            24.w,
-            24.h,
-            24.w,
-            MediaQuery.of(context).padding.bottom + 24.h,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    languageService.tr('wallet_screen_filter_transactions'),
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+      (
+        label: languageService.tr('ibm_last_7_days'),
+        from: fmt(today.subtract(const Duration(days: 6))),
+        to: fmt(today),
+      ),
+      (
+        label: languageService.tr('ibm_last_30_days'),
+        from: fmt(today.subtract(const Duration(days: 29))),
+        to: fmt(today),
+      ),
+      (
+        label: languageService.tr('time_this_month'),
+        from: fmt(DateTime(today.year, today.month)),
+        to: fmt(today),
+      ),
+    ];
+
+    var customFrom = controller.filterDateFrom.value;
+    var customTo = controller.filterDateTo.value;
+
+    void apply(BuildContext dialogContext, String from, String to) {
+      // yyyy-MM-dd compares correctly as a string; swap a reversed range.
+      final isReversed =
+          from.isNotEmpty && to.isNotEmpty && from.compareTo(to) > 0;
+      controller.filterDateFrom.value = isReversed ? to : from;
+      controller.filterDateTo.value = isReversed ? from : to;
+      controller.applyFilters();
+      Navigator.pop(dialogContext);
+    }
+
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.black.withOpacity(0.08),
+      transitionDuration: const Duration(milliseconds: 160),
+      transitionBuilder: (_, __, ___, child) => child,
+      pageBuilder: (dialogContext, animation, _) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        );
+        return Stack(
+          children: [
+            Positioned(
+              left: left,
+              top: top,
+              width: panelWidth,
+              child: FadeTransition(
+                opacity: curved,
+                child: ScaleTransition(
+                  scale: Tween<double>(begin: 0.95, end: 1).animate(curved),
+                  alignment:
+                      alignToRight ? Alignment.topRight : Alignment.topLeft,
+                  child: Material(
+                    color: AppColors.cardBackground,
+                    elevation: 8,
+                    shadowColor: Colors.black26,
+                    borderRadius: BorderRadius.circular(14.r),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: screen.height - top - 16.h,
+                      ),
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.all(14.w),
+                        child: StatefulBuilder(
+                          builder: (panelContext, setPanelState) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  languageService.tr('wallet_screen_date_range'),
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                SizedBox(height: 10.h),
+                                Wrap(
+                                  spacing: 6.w,
+                                  runSpacing: 6.h,
+                                  children:
+                                      presets.map((preset) {
+                                        final isActive =
+                                            controller.filterDateFrom.value ==
+                                                preset.from &&
+                                            controller.filterDateTo.value ==
+                                                preset.to;
+                                        return InkWell(
+                                          onTap:
+                                              () => apply(
+                                                dialogContext,
+                                                preset.from,
+                                                preset.to,
+                                              ),
+                                          borderRadius: BorderRadius.circular(
+                                            16.r,
+                                          ),
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 10.w,
+                                              vertical: 6.h,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  isActive
+                                                      ? AppColors.primary
+                                                      : AppColors.textFieldBg,
+                                              borderRadius:
+                                                  BorderRadius.circular(16.r),
+                                            ),
+                                            child: Text(
+                                              preset.label,
+                                              style: TextStyle(
+                                                fontSize: 11.sp,
+                                                fontWeight: FontWeight.w600,
+                                                color:
+                                                    isActive
+                                                        ? AppColors.onPrimary
+                                                        : AppColors.textPrimary,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                ),
+                                SizedBox(height: 12.h),
+                                Divider(height: 1, color: AppColors.divider),
+                                SizedBox(height: 12.h),
+                                Text(
+                                  languageService.tr('ibm_custom_range'),
+                                  style: TextStyle(
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                SizedBox(height: 8.h),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildDateField(
+                                        label: languageService.tr(
+                                          'internal_transfer_history_screen_from_date',
+                                        ),
+                                        value: customFrom,
+                                        onTap: () async {
+                                          final picked = await _pickDate(
+                                            dialogContext,
+                                          );
+                                          if (picked != null) {
+                                            setPanelState(
+                                              () => customFrom = picked,
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(width: 8.w),
+                                    Expanded(
+                                      child: _buildDateField(
+                                        label: languageService.tr(
+                                          'internal_transfer_history_screen_to_date',
+                                        ),
+                                        value: customTo,
+                                        onTap: () async {
+                                          final picked = await _pickDate(
+                                            dialogContext,
+                                          );
+                                          if (picked != null) {
+                                            setPanelState(
+                                              () => customTo = picked,
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 12.h),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextButton(
+                                        onPressed:
+                                            () => apply(dialogContext, '', ''),
+                                        child: Text(
+                                          languageService.tr('common_clear'),
+                                          style: TextStyle(
+                                            color: AppColors.textSecondary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 8.w),
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed:
+                                            () => apply(
+                                              dialogContext,
+                                              customFrom,
+                                              customTo,
+                                            ),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppColors.primary,
+                                          elevation: 0,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.r),
+                                          ),
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 10.h,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          languageService.tr('common_apply'),
+                                          style: TextStyle(
+                                            color: AppColors.onPrimary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.close, color: AppColors.textSecondary),
-                  ),
-                ],
-              ),
-              Divider(color: AppColors.divider),
-              SizedBox(height: 16.h),
-              Text(
-                languageService.tr('wallet_screen_date_range'),
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
                 ),
               ),
-              SizedBox(height: 10.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: Obx(
-                      () => _buildDateField(
-                        label: languageService.tr(
-                          'internal_transfer_history_screen_from_date',
-                        ),
-                        value: localDateFrom.value,
-                        onTap: () async {
-                          final picked = await _pickDate(context);
-                          if (picked != null) localDateFrom.value = picked;
-                        },
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Obx(
-                      () => _buildDateField(
-                        label: languageService.tr(
-                          'internal_transfer_history_screen_to_date',
-                        ),
-                        value: localDateTo.value,
-                        onTap: () async {
-                          final picked = await _pickDate(context);
-                          if (picked != null) localDateTo.value = picked;
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          languageService.tr(
-                            'transaction_history_transaction_type',
-                          ),
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Obx(
-                          () => _buildFilterDropdownWidget(
-                            value: localType.value,
-                            options: [
-                              'All Types',
-                              'Deposit',
-                              'Withdrawal',
-                              'Transfer',
-                            ],
-                            onChanged: (val) {
-                              if (val != null) localType.value = val;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          languageService.tr('common_status'),
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Obx(
-                          () => _buildFilterDropdownWidget(
-                            value: localStatus.value,
-                            options: [
-                              'All Status',
-                              'Approved',
-                              'Pending',
-                              'Rejected',
-                            ],
-                            onChanged: (val) {
-                              if (val != null) localStatus.value = val;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 32.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () {
-                        localType.value = 'All Types';
-                        localStatus.value = 'All Status';
-                        localDateFrom.value = '';
-                        localDateTo.value = '';
-                      },
-                      child: Text(
-                        languageService.tr('wallet_screen_reset_filters'),
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        controller.filterType.value = localType.value;
-                        controller.filterStatus.value = localStatus.value;
-                        controller.filterDateFrom.value = localDateFrom.value;
-                        controller.filterDateTo.value = localDateTo.value;
-                        controller.applyFilters();
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                      ),
-                      child: Text(
-                        languageService.tr(
-                          'internal_transfer_history_screen_apply_filters',
-                        ),
-                        style: TextStyle(
-                          color: AppColors.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
@@ -911,217 +1039,238 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  /// Display label for a filter logic value (raw values drive the API query).
-  String _filterLabel(String value) {
-    switch (value) {
-      case 'All Types':
-        return languageService.tr('wallet_screen_all_types');
-      case 'Deposit':
-        return languageService.tr('common_deposit');
-      case 'Withdrawal':
-        return languageService.tr('general_withdrawal');
-      case 'Transfer':
-        return languageService.tr('general_transfer');
-      case 'All Status':
-        return languageService.tr('ticket_all_status');
-      case 'Approved':
-        return languageService.tr('kyc_verification_approved');
-      case 'Pending':
-        return languageService.tr('transaction_history_pending');
-      case 'Rejected':
-        return languageService.tr('kyc_verification_rejected');
-    }
-    return value;
+  String _formatSignedAmount(double amount) {
+    final formatted = _amountFormat.format(amount.abs());
+    return amount < 0 ? '-\$$formatted' : '+\$$formatted';
   }
 
-  Widget _buildFilterDropdownWidget({
-    required String value,
-    required List<String> options,
-    required ValueChanged<String?> onChanged,
-  }) {
+  String _formatDate(DateTime? date, String pattern) {
+    if (date == null) return '';
+    return DateFormat(pattern).format(date.toLocal());
+  }
+
+  ({Color foreground, Color background}) _statusColors(String status) {
+    final Color base;
+    switch (status.toLowerCase()) {
+      case 'completed':
+      case 'approved':
+      case 'success':
+        base = AppColors.success;
+        break;
+      case 'processing':
+        base = AppColors.primary;
+        break;
+      case 'rejected':
+      case 'failed':
+      case 'cancelled':
+        base = AppColors.error;
+        break;
+      default:
+        base = AppColors.warning;
+    }
+    return (foreground: base, background: base.withOpacity(0.12));
+  }
+
+  ({IconData icon, Color color}) _typeVisual(WalletHistoryEntry tx) {
+    final type = tx.type.toLowerCase();
+    if (type.contains('transfer')) {
+      return (icon: Icons.swap_horiz, color: AppColors.primary);
+    }
+    if (type.contains('deposit') || (!type.contains('withdraw') && tx.isCredit)) {
+      return (icon: Icons.arrow_downward, color: AppColors.success);
+    }
+    return (icon: Icons.arrow_upward, color: AppColors.error);
+  }
+
+  Widget _buildStatusBadge(String status, {double fontSize = 9}) {
+    final colors = _statusColors(status);
     return Container(
-      height: 44.h,
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: AppColors.textFieldBg,
-        border: Border.all(color: AppColors.border.withOpacity(0.2)),
-        borderRadius: BorderRadius.circular(8.r),
+        color: colors.background,
+        borderRadius: BorderRadius.circular(12.r),
       ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          isExpanded: true,
-          dropdownColor: AppColors.cardBackground,
-          value: options.contains(value) ? value : options.first,
-          items:
-              options.map((opt) {
-                return DropdownMenuItem(
-                  value: opt,
-                  child: Text(
-                    _filterLabel(opt),
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                );
-              }).toList(),
-          onChanged: onChanged,
+      child: Text(
+        (status.isEmpty ? 'Pending' : status).toUpperCase(),
+        style: TextStyle(
+          fontSize: fontSize.sp,
+          fontWeight: FontWeight.bold,
+          color: colors.foreground,
         ),
       ),
     );
   }
 
-  Widget _buildTransactionCard(dynamic tx) {
-    final bool isDeposit = checkIfDeposit(tx);
-    final bool isApproved = tx.status?.toLowerCase() == 'approved';
-    final bool isRejected = tx.status?.toLowerCase() == 'rejected';
-    final String amountText = formatAmount(tx.amount, isDeposit);
-
-    IconData iconData;
-    Color iconColor;
-    Color iconBgColor;
-
-    final String typeStr = tx.transactionType?.toLowerCase() ?? '';
-    if (typeStr == 'deposit') {
-      iconData = Icons.arrow_downward;
-      iconColor = const Color(0xFF22C55E);
-      iconBgColor = const Color(0xFF22C55E).withOpacity(0.1);
-    } else if (typeStr == 'withdrawal') {
-      iconData = Icons.arrow_upward;
-      iconColor = const Color(0xFFEF4444);
-      iconBgColor = const Color(0xFFEF4444).withOpacity(0.1);
-    } else {
-      iconData = Icons.swap_horiz;
-      iconColor = const Color(0xFF3478F6);
-      iconBgColor = const Color(0xFF3478F6).withOpacity(0.1);
+  /// Groups consecutive entries that share a calendar day, preserving the
+  /// API's ordering. Entries without a date fall into a header-less group.
+  List<({String header, List<WalletHistoryEntry> items})> _groupByDay(
+    List<WalletHistoryEntry> entries,
+  ) {
+    final groups = <({String header, List<WalletHistoryEntry> items})>[];
+    for (final tx in entries) {
+      final header = _formatDate(tx.date, 'dd MMM yyyy');
+      if (groups.isNotEmpty && groups.last.header == header) {
+        groups.last.items.add(tx);
+      } else {
+        groups.add((header: header, items: [tx]));
+      }
     }
+    return groups;
+  }
 
-    Color statusTextColor;
-    Color statusBgColor;
-    if (isApproved) {
-      statusTextColor = const Color(0xFF15803D);
-      statusBgColor = const Color(0xFFECFDF5);
-    } else if (isRejected) {
-      statusTextColor = const Color(0xFFB91C1C);
-      statusBgColor = const Color(0xFFFEF2F2);
-    } else {
-      statusTextColor = const Color(0xFFB45309);
-      statusBgColor = const Color(0xFFFFFBEB);
-    }
+  Widget _buildTransactionGroup(
+    ({String header, List<WalletHistoryEntry> items}) group,
+  ) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 14.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (group.header.isNotEmpty)
+            Padding(
+              padding: EdgeInsetsDirectional.only(start: 4.w, bottom: 6.h),
+              child: Text(
+                group.header.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+          Material(
+            color: AppColors.cardBackground,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14.r),
+              side: BorderSide(color: AppColors.border.withOpacity(0.2)),
+            ),
+            child: Column(
+              children: [
+                for (var i = 0; i < group.items.length; i++) ...[
+                  if (i > 0)
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      indent: 58.w,
+                      color: AppColors.divider.withOpacity(0.5),
+                    ),
+                  _buildTransactionTile(group.items[i]),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransactionTile(WalletHistoryEntry tx) {
+    final visual = _typeVisual(tx);
+    final amountColor = tx.isCredit ? AppColors.success : AppColors.error;
+    final statusColor = _statusColors(tx.status).foreground;
+    final statusText = tx.status.isEmpty ? 'Pending' : tx.status;
+    final route = [tx.from, tx.to].where((s) => s.isNotEmpty).join('  →  ');
+    final subtitle = [
+      tx.reference,
+      _formatDate(tx.date, 'hh:mm a'),
+    ].where((s) => s.isNotEmpty).join(' · ');
 
     return InkWell(
       onTap: () => _showTransactionDetails(tx),
-      borderRadius: BorderRadius.circular(16.r),
-      child: Container(
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          color: AppColors.cardBackground,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          border: Border.all(color: AppColors.border.withOpacity(0.2)),
-        ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         child: Row(
           children: [
             Container(
-              width: 40.w,
-              height: 40.h,
+              width: 34.w,
+              height: 34.w,
               decoration: BoxDecoration(
-                color: iconBgColor,
-                shape: BoxShape.circle,
+                color: visual.color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10.r),
               ),
-              child: Icon(iconData, size: 20.sp, color: iconColor),
+              child: Icon(visual.icon, size: 17.sp, color: visual.color),
             ),
-            SizedBox(width: 14.w),
+            SizedBox(width: 12.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    tx.transactionType ??
-                        languageService.tr('wallet_screen_transaction'),
+                    tx.type.isNotEmpty
+                        ? tx.type
+                        : languageService.tr('wallet_screen_transaction'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    tx.referenceNumber ?? 'N/A',
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontFamily: 'monospace',
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  if (tx.paymentDetails != null &&
-                      tx.paymentDetails!.isNotEmpty) ...[
-                    SizedBox(height: 4.h),
+                  if (route.isNotEmpty) ...[
+                    SizedBox(height: 2.h),
                     Text(
-                      tx.paymentDetails!,
+                      route,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 11.sp,
-                        color: AppColors.textSecondary,
+                        fontSize: 10.5.sp,
                         fontWeight: FontWeight.w500,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
-                  SizedBox(height: 4.h),
-                  Text(
-                    tx.createdAt != null
-                        ? (() {
-                          final parsedDate = DateTime.tryParse(tx.createdAt!);
-                          if (parsedDate != null) {
-                            return DateFormat(
-                              'MMM dd, yyyy hh:mm a',
-                            ).format(parsedDate.toLocal());
-                          }
-                          return tx.createdAt!;
-                        })()
-                        : '',
-                    style: TextStyle(
-                      fontSize: 10.sp,
-                      color: AppColors.textSecondary.withOpacity(0.8),
+                  if (subtitle.isNotEmpty) ...[
+                    SizedBox(height: 2.h),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        color: AppColors.textSecondary.withOpacity(0.8),
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
+            SizedBox(width: 8.w),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  amountText,
+                  _formatSignedAmount(tx.amount),
                   style: TextStyle(
-                    fontSize: 15.sp,
+                    fontSize: 13.5.sp,
                     fontWeight: FontWeight.w800,
-                    color:
-                        isDeposit
-                            ? const Color(0xFF22C55E)
-                            : const Color(0xFFEF4444),
+                    color: amountColor,
                   ),
                 ),
-                SizedBox(height: 6.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: statusBgColor,
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Text(
-                    (tx.status ?? 'PENDING').toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 9.sp,
-                      fontWeight: FontWeight.bold,
-                      color: statusTextColor,
+                SizedBox(height: 3.h),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6.w,
+                      height: 6.w,
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      statusText,
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w600,
+                        color: statusColor,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1131,11 +1280,9 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  void _showTransactionDetails(dynamic tx) {
-    final bool isDeposit = checkIfDeposit(tx);
-    final bool isApproved = tx.status?.toLowerCase() == 'approved';
-    final bool isRejected = tx.status?.toLowerCase() == 'rejected';
-    final String amountText = formatAmount(tx.amount, isDeposit);
+  void _showTransactionDetails(WalletHistoryEntry tx) {
+    final amountColor = tx.isCredit ? AppColors.success : AppColors.error;
+    final dateText = _formatDate(tx.date, 'MMMM dd, yyyy hh:mm a');
 
     showModalBottomSheet(
       context: context,
@@ -1179,134 +1326,45 @@ class _WalletScreenState extends State<WalletScreen> {
                 child: Column(
                   children: [
                     Text(
-                      amountText,
+                      _formatSignedAmount(tx.amount),
                       style: TextStyle(
                         fontSize: 28.sp,
                         fontWeight: FontWeight.w800,
-                        color:
-                            isDeposit
-                                ? const Color(0xFF22C55E)
-                                : const Color(0xFFEF4444),
+                        color: amountColor,
                       ),
                     ),
                     SizedBox(height: 8.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12.w,
-                        vertical: 6.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                            isApproved
-                                ? const Color(0xFFECFDF5)
-                                : isRejected
-                                ? const Color(0xFFFEF2F2)
-                                : const Color(0xFFFFFBEB),
-                        borderRadius: BorderRadius.circular(20.r),
-                        border: Border.all(
-                          color:
-                              isApproved
-                                  ? const Color(0xFFBBF7D0)
-                                  : isRejected
-                                  ? const Color(0xFFFEE2E2)
-                                  : const Color(0xFFFEF3C7),
-                        ),
-                      ),
-                      child: Text(
-                        (tx.status ?? 'PENDING').toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.bold,
-                          color:
-                              isApproved
-                                  ? const Color(0xFF15803D)
-                                  : isRejected
-                                  ? const Color(0xFFB91C1C)
-                                  : const Color(0xFFB45309),
-                        ),
-                      ),
-                    ),
+                    _buildStatusBadge(tx.status, fontSize: 12),
                   ],
                 ),
               ),
               SizedBox(height: 24.h),
               _buildDetailRow(
                 languageService.tr('tw_reference_number'),
-                tx.referenceNumber ?? 'N/A',
+                tx.reference.isNotEmpty ? tx.reference : 'N/A',
               ),
               _buildDetailRow(
                 languageService.tr('transaction_history_transaction_type'),
-                tx.transactionType ?? 'N/A',
+                tx.type.isNotEmpty ? tx.type : 'N/A',
               ),
               _buildDetailRow(
-                languageService.tr('deposit_screen_payment_method'),
-                tx.paymentMethod ?? 'N/A',
+                languageService.tr('internal_transfer_history_from'),
+                tx.from.isNotEmpty ? tx.from : 'N/A',
               ),
               _buildDetailRow(
-                languageService.tr('wallet_screen_account_wallet'),
-                tx.mt5AccountId != null && tx.mt5AccountId.toString().isNotEmpty
-                    ? 'MT5: ${tx.mt5AccountId}'
-                    : languageService.tr('bottom_navigation_wallet'),
+                languageService.tr('pmam_trade_history_to'),
+                tx.to.isNotEmpty ? tx.to : 'N/A',
               ),
-              _buildDetailRow(
-                languageService.tr('wallet_screen_date_and_time'),
-                tx.createdAt != null
-                    ? (() {
-                      final parsedDate = DateTime.tryParse(tx.createdAt!);
-                      if (parsedDate != null) {
-                        return DateFormat(
-                          'MMMM dd, yyyy hh:mm a',
-                        ).format(parsedDate.toLocal());
-                      }
-                      return tx.createdAt!;
-                    })()
-                    : 'N/A',
-              ),
-              if (tx.paymentDetails != null && tx.paymentDetails!.isNotEmpty)
+              if (dateText.isNotEmpty)
                 _buildDetailRow(
-                  languageService.tr('wallet_screen_payment_details'),
-                  tx.paymentDetails!,
+                  languageService.tr('wallet_screen_date_and_time'),
+                  dateText,
                 ),
-
-              if (tx.proofUrl != null && tx.proofUrl!.isNotEmpty) ...[
-                SizedBox(height: 20.h),
-                SizedBox(
-                  width: double.infinity,
-                  height: 44.h,
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      final Uri uri = Uri.parse(tx.proofUrl!);
-                      if (await canLaunchUrl(uri)) {
-                        await launchUrl(
-                          uri,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      } else {
-                        CustomToastService.showError(
-                          message: languageService.tr(
-                            'wallet_screen_could_not_open_proof_link',
-                          ),
-                        );
-                      }
-                    },
-                    icon: Icon(Icons.receipt_long, color: AppColors.onPrimary),
-                    label: Text(
-                      languageService.tr('wallet_screen_view_proof'),
-                      style: TextStyle(
-                        color: AppColors.onPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                      elevation: 0,
-                    ),
-                  ),
+              if (tx.reason.isNotEmpty)
+                _buildDetailRow(
+                  languageService.tr('order_history_screen_reason'),
+                  tx.reason,
                 ),
-              ],
             ],
           ),
         );
@@ -1341,6 +1399,31 @@ class _WalletScreenState extends State<WalletScreen> {
       ),
     );
   }
+}
+
+class _PinnedControlsDelegate extends SliverPersistentHeaderDelegate {
+  final double extent;
+  final Widget child;
+
+  _PinnedControlsDelegate({required this.extent, required this.child});
+
+  @override
+  double get minExtent => extent;
+
+  @override
+  double get maxExtent => extent;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return SizedBox.expand(child: child);
+  }
+
+  @override
+  bool shouldRebuild(covariant _PinnedControlsDelegate oldDelegate) => true;
 }
 
 class ExampleNavigationScreen extends StatelessWidget {

@@ -66,6 +66,13 @@ class Data {
   String? createdAt;
   String? transactionType;
   String? type;
+  String? accountType;
+  String? accountLabel;
+  String? fromAccount;
+  String? toAccount;
+  String? walletId;
+  String? rejectReason;
+  String? commentForClient;
 
   Data({
     this.id,
@@ -83,7 +90,17 @@ class Data {
     this.createdAt,
     this.transactionType,
     this.type,
+    this.accountType,
+    this.accountLabel,
+    this.fromAccount,
+    this.toAccount,
+    this.walletId,
+    this.rejectReason,
+    this.commentForClient,
   });
+
+  bool get isInternalTransfer =>
+      (transactionType ?? '').toLowerCase().contains('transfer');
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id']?.toString();
@@ -104,6 +121,13 @@ class Data {
     createdAt = json['created_at_iso']?.toString() ?? json['created_at']?.toString();
     transactionType = json['transaction_type']?.toString();
     type = json['type']?.toString();
+    accountType = json['account_type']?.toString();
+    accountLabel = json['account_label']?.toString();
+    fromAccount = json['from_account']?.toString();
+    toAccount = json['to_account']?.toString();
+    walletId = json['wallet_id']?.toString();
+    rejectReason = json['reject_reason']?.toString();
+    commentForClient = json['comment_for_client']?.toString();
   }
 
   // USC (US Cent) accounts report `amount` in cents (as a display string like
@@ -301,7 +325,7 @@ class TransactionHistoryController extends GetxController {
         name: 'TRANSACTION_HISTORY',
       );
       dev.log(
-        'Endpoint: ${ApiConstants.getTransactions}',
+        'Endpoint: ${ApiConstants.getFinanceActivity}',
         name: 'TRANSACTION_HISTORY',
       );
       dev.log('Page: $page', name: 'TRANSACTION_HISTORY');
@@ -318,12 +342,15 @@ class TransactionHistoryController extends GetxController {
       print('═══════════════════════════════════════════════════════════');
       print('📤 TRANSACTION HISTORY API REQUEST');
       print('═══════════════════════════════════════════════════════════');
-      print('🔗 Endpoint: ${ApiConstants.getTransactions}');
+      print('🔗 Endpoint: ${ApiConstants.getFinanceActivity}');
       print('📄 Page: $page');
       print('🔑 Token exists: ${token != null && token.isNotEmpty}');
       print('═══════════════════════════════════════════════════════════');
 
-      final response = await _repo.getTransactions(token: token ?? '');
+      final response = await _repo.getTransactions(
+        token: token ?? '',
+        page: page,
+      );
 
       // Log full response - Always log with both dev.log and print
       dev.log(
