@@ -4,6 +4,7 @@ class CrmSettingsModel {
   final CrmAgreements agreements;
   final List<CrmDisclaimer> disclaimers;
   final CrmMobileAppDetails? mobileAppDetails;
+  final CrmFinancialSettings financialSettings;
 
   const CrmSettingsModel({
     this.meta,
@@ -11,6 +12,7 @@ class CrmSettingsModel {
     required this.agreements,
     this.disclaimers = const [],
     this.mobileAppDetails,
+    this.financialSettings = const CrmFinancialSettings(),
   });
 
   factory CrmSettingsModel.fromJson(Map<String, dynamic> json) {
@@ -47,6 +49,44 @@ class CrmSettingsModel {
                 Map<String, dynamic>.from(json['mobile_app_details'] as Map),
               )
               : null,
+      financialSettings:
+          json['financial_settings'] is Map
+              ? CrmFinancialSettings.fromJson(
+                Map<String, dynamic>.from(json['financial_settings'] as Map),
+              )
+              : const CrmFinancialSettings(),
+    );
+  }
+}
+
+/// Admin "Financial Settings" switches. They only drive the UI; the backend
+/// re-checks every rule. Missing keys default to `false`.
+class CrmFinancialSettings {
+  final bool internalTransferOtpRequired;
+  final bool depositCreditToWalletOnly;
+  final bool withdrawalDeductFromWalletOnly;
+  final bool internalTransferApprovalRequired;
+  final bool ibCommissionToWalletTransferEnabled;
+
+  const CrmFinancialSettings({
+    this.internalTransferOtpRequired = false,
+    this.depositCreditToWalletOnly = false,
+    this.withdrawalDeductFromWalletOnly = false,
+    this.internalTransferApprovalRequired = false,
+    this.ibCommissionToWalletTransferEnabled = false,
+  });
+
+  factory CrmFinancialSettings.fromJson(Map<String, dynamic> json) {
+    return CrmFinancialSettings(
+      internalTransferOtpRequired:
+          json['internal_transfer_otp_required'] == true,
+      depositCreditToWalletOnly: json['deposit_credit_to_wallet_only'] == true,
+      withdrawalDeductFromWalletOnly:
+          json['withdrawal_deduct_from_wallet_only'] == true,
+      internalTransferApprovalRequired:
+          json['internal_transfer_approval_required'] == true,
+      ibCommissionToWalletTransferEnabled:
+          json['ib_commission_to_wallet_transfer_enabled'] == true,
     );
   }
 }

@@ -11,6 +11,7 @@ import 'package:crm_app/controllers/copy_trading/copy_trading_master_copiers_con
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/home/more/copytrading/subscribe_to_plan_screen.dart';
+import 'package:crm_app/screens/home/more/copytrading/copier_subscription_history_screen.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_master_details_controller.dart';
 import 'package:crm_app/services/language_service.dart';
 
@@ -711,6 +712,25 @@ class _CopierCardItem extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                TextButton(
+                  onPressed: () => Get.to(
+                    () => CopierSubscriptionHistoryScreen(copierId: item.id),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 8.h,
+                    ),
+                  ),
+                  child: Text(
+                    TranslationUtils.tr('general_history'),
+                    style: AppTextStyles.bodyText.copyWith(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+                ),
                 TextButton(
                   onPressed: () async {
                     final plan = CopyTradingPlan(

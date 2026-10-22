@@ -10,6 +10,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
 import 'master_dashboard_overview_tab.dart';
+import 'master_settlements_screen.dart';
 
 /// Master Dashboard screen.
 ///
@@ -53,6 +54,15 @@ class MasterDashboardScreen extends StatelessWidget {
           onPressed: () => Get.offAllNamed(AppPages.TRADING),
         ),
         actions: [
+          IconButton(
+            tooltip: TranslationUtils.tr('settlements_screen_title'),
+            onPressed: () => Get.to(() => const MasterSettlementsScreen()),
+            icon: Icon(
+              Icons.account_balance_wallet_outlined,
+              size: 20.r,
+              color: AppColors.textPrimary,
+            ),
+          ),
           IconButton(
             onPressed: () => controller.refreshAll(showLoading: true),
             icon: Icon(Icons.refresh, size: 20.r, color: AppColors.textPrimary),

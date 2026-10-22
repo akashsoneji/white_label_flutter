@@ -175,16 +175,16 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
 
     final symbolToApply = _pendingSymbol!;
     _pendingSymbol = null;
-    debugPrint('📊 Chart: applying symbol $symbolToApply');
+    // debugPrint('📊 Chart: applying symbol $symbolToApply');
 
     unawaited(
       updateSymbol(symbolToApply).then((success) {
         if (!mounted) return;
-        debugPrint('📊 Chart: updateSymbol $symbolToApply → $success');
+        // debugPrint('📊 Chart: updateSymbol $symbolToApply → $success');
         if (!success) {
-          debugPrint(
-            '📊 Chart: JS update not available, reloading URL for $symbolToApply',
-          );
+          // debugPrint(
+          //   '📊 Chart: JS update not available, reloading URL for $symbolToApply',
+          // );
           _controller?.loadUrl(
             urlRequest: URLRequest(url: WebUri(_urlWithSymbol(symbolToApply))),
           );

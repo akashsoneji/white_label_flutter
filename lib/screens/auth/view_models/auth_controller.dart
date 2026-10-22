@@ -1831,11 +1831,9 @@ class AuthController extends GetxController {
   }
 
   Future<void> _navigatePostAuth() async {
-    // The regulation questionnaire is a Riyadex-only requirement.
-    if (!FlavorConfig.isRiyadex()) {
-      Get.offAllNamed(AppPages.TRADING);
-      return;
-    }
+    // The server flags below decide whether the regulation questionnaire is
+    // needed; any broker can switch it on, and KYC upload then answers 403
+    // "Please submit the compliance form" until it is submitted.
     try {
       final profile = await getProfile();
       if (profile != null) {

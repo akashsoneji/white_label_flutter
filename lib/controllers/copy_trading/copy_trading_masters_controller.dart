@@ -5,11 +5,14 @@ import 'package:crm_app/utils/app_logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
+/// One card on Explore Masters — a single plan from `GET copytrading/plans`.
+/// `masterCode` opens the master profile; `planId` is the subscribe `plan_id`.
 class CopyTradingMasterListItem {
+  final int planId;
+  final String planName;
   final String masterCode;
   final String nickname;
   final String name;
-  final int planCount;
   final int totalCopiers;
   final num totalAum;
   final int? riskScore;
@@ -17,19 +20,23 @@ class CopyTradingMasterListItem {
   final int activeDays;
   final num winRate;
   final bool isEnrolled;
+  final bool isFull;
   final String serverType;
+  final String accountCurrency;
   final String strategyDescription;
   final num totalPnl;
   final double totalGainPercent;
   final num maxDrawdown;
   final num minInvestment;
   final num minimumCapital;
+  final num? commissionPercentage;
 
   const CopyTradingMasterListItem({
+    required this.planId,
+    required this.planName,
     required this.masterCode,
     required this.nickname,
     required this.name,
-    required this.planCount,
     required this.totalCopiers,
     required this.totalAum,
     required this.riskScore,
@@ -37,47 +44,79 @@ class CopyTradingMasterListItem {
     required this.activeDays,
     required this.winRate,
     required this.isEnrolled,
+    required this.isFull,
     required this.serverType,
+    required this.accountCurrency,
     required this.strategyDescription,
     required this.totalPnl,
     required this.totalGainPercent,
     required this.maxDrawdown,
     required this.minInvestment,
     required this.minimumCapital,
+    required this.commissionPercentage,
   });
 
-  static double _parseGainPercent(dynamic value) {
-    if (value == null) return 0.0;
-    if (value is num) return value.toDouble();
-    if (value is String) {
-      if (value.trim().isEmpty) return 0.0;
-      return double.tryParse(value) ?? 0.0;
-    }
-    return 0.0;
+  /// Copy is possible only for a real plan that still has copier slots.
+  bool get canCopy => planId > 0 && !isFull;
+
+  // Backend turns `null` into "" (spec §0.2), so numeric keys can be "" or a
+  // numeric string — a plain `as num` cast would throw and fail the whole list.
+  static num? _numOrNull(dynamic value) {
+    if (value is num) return value;
+    if (value is String) return num.tryParse(value.trim());
+    return null;
   }
 
+  static num _num(dynamic value) => _numOrNull(value) ?? 0;
+
   factory CopyTradingMasterListItem.fromJson(Map<String, dynamic> json) {
+    final minimumCapital = _num(json['minimum_capital']);
     return CopyTradingMasterListItem(
+      planId: _num(json['id'] ?? json['plan_id']).toInt(),
+      planName: (json['plan_name'] ?? '').toString(),
       masterCode: (json['master_code'] ?? '').toString(),
       nickname: (json['master_nickname'] ?? '').toString(),
       name: (json['master_name'] ?? '').toString(),
-      planCount: (json['plan_count'] ?? 0) is num ? (json['plan_count'] as num).toInt() : 0,
-      totalCopiers:
-          (json['total_copiers'] ?? 0) is num ? (json['total_copiers'] as num).toInt() : 0,
-      totalAum: (json['total_aum'] ?? 0) as num? ?? 0,
-      riskScore: json['risk_score'] is num ? (json['risk_score'] as num).toInt() : null,
-      totalGain: (json['total_gain'] ?? 0) as num? ?? 0,
-      activeDays:
-          (json['active_days'] ?? 0) is num ? (json['active_days'] as num).toInt() : 0,
-      winRate: (json['win_rate'] ?? 0) as num? ?? 0,
+      totalCopiers: _num(json['total_copiers']).toInt(),
+      totalAum: _num(json['total_aum']),
+      riskScore: _numOrNull(json['risk_score'])?.toInt(),
+      totalGain: _num(json['total_gain']),
+      activeDays: _num(json['active_days']).toInt(),
+      winRate: _num(json['win_rate']),
       isEnrolled: json['is_enrolled'] == true,
+      isFull: json['is_full'] == true,
       serverType: (json['server_type'] ?? '').toString(),
+      accountCurrency:
+          (json['master_account_currency'] ?? json['account_currency'] ?? '')
+              .toString(),
       strategyDescription: (json['strategy_description'] ?? '').toString(),
-      totalPnl: (json['total_pnl'] ?? 0) as num? ?? 0,
-      totalGainPercent: _parseGainPercent(json['total_gain_percent']),
-      maxDrawdown: (json['max_drawdown'] ?? 0) as num? ?? 0,
-      minInvestment: (json['min_investment'] ?? 0) as num? ?? 0,
-      minimumCapital: (json['minimum_capital'] ?? 0) as num? ?? 0,
+      totalPnl: _num(json['total_pnl']),
+      totalGainPercent: _num(json['total_gain_percent']).toDouble(),
+      maxDrawdown: _num(json['max_drawdown']),
+      minInvestment: _numOrNull(json['min_investment']) ?? minimumCapital,
+      minimumCapital: minimumCapital,
+      commissionPercentage: _numOrNull(json['commission_percentage']),
+    );
+  }
+}
+
+/// One row of `GET copytrading/masters/search?q=` — `{code, name, plans_count}`.
+class MasterSearchSuggestion {
+  final String code;
+  final String name;
+  final int plansCount;
+
+  const MasterSearchSuggestion({
+    required this.code,
+    required this.name,
+    required this.plansCount,
+  });
+
+  factory MasterSearchSuggestion.fromJson(Map<String, dynamic> json) {
+    return MasterSearchSuggestion(
+      code: (json['code'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      plansCount: int.tryParse('${json['plans_count']}') ?? 0,
     );
   }
 }
@@ -100,6 +139,25 @@ class CopyTradingMastersController extends GetxController {
   /// Filter chips shown under the tab bar.
   final RxString riskFilter = 'All Risks'.obs;
   final RxString timeFilter = 'All Time'.obs;
+
+  /// Period chip → backend `timeframe`. The backend only knows
+  /// 7d / 2w / 1m / 3m / 6m; anything else (incl. `1y`) silently returns
+  /// all-time data, so "All Time" sends nothing.
+  static const Map<String, String> timeframeByFilter = {
+    'Last 7 Days': '7d',
+    'Last 2 Weeks': '2w',
+    'Last 30 Days': '1m',
+    'Last 90 Days': '3m',
+    'Last 6 Months': '6m',
+  };
+
+  static String? timeframeForFilter(String filter) => timeframeByFilter[filter];
+
+  void selectTimeFilter(String filter) {
+    if (timeFilter.value == filter) return;
+    timeFilter.value = filter;
+    loadMasters(showLoading: true);
+  }
   final RxString sortBy = 'Gain %'.obs;
 
   /// Aliases used by the redesigned UI.
@@ -107,18 +165,50 @@ class CopyTradingMastersController extends GetxController {
   RxList<CopyTradingMasterListItem> get allMasters => masters;
   Future<void> refreshMasters() async => loadMasters();
 
-  /// Masters from API; [search] filters this list **client-side** (nickname / name / code).
-  List<CopyTradingMasterListItem> get filteredMasters {
-    search.value;
+  /// Dropdown suggestions under the search box, from `GET copytrading/masters/search`
+  /// (same as the web Explore page).
+  final RxList<MasterSearchSuggestion> masterSuggestions =
+      <MasterSearchSuggestion>[].obs;
+
+  /// Master picked from the dropdown; while set, only that master's plans show.
+  final Rxn<MasterSearchSuggestion> selectedMaster = Rxn<MasterSearchSuggestion>();
+  String _lastServerQuery = '';
+
+  /// Plans after the tab, search, risk chip and sort chip are applied.
+  List<CopyTradingMasterListItem> get visibleMasters {
+    final tab = selectedFilter.value;
     final q = search.value.trim().toLowerCase();
-    if (q.isEmpty) return masters.toList();
-    return masters.where((m) {
-      final nick = m.nickname.toLowerCase();
-      final name = m.name.toLowerCase();
-      final code = m.masterCode.toLowerCase();
-      return nick.contains(q) || name.contains(q) || code.contains(q);
+    final risk = riskFilter.value;
+    final pickedCode = selectedMaster.value?.code;
+
+    final result = masters.where((m) {
+      if (tab == MasterFilterTab.enrolled && !m.isEnrolled) return false;
+      if (tab == MasterFilterTab.discover && m.isEnrolled) return false;
+      if (!_matchesRisk(m.riskScore ?? 0, risk)) return false;
+      if (pickedCode != null) return m.masterCode == pickedCode;
+      if (q.isEmpty) return true;
+      return m.nickname.toLowerCase().contains(q) ||
+          m.name.toLowerCase().contains(q) ||
+          m.planName.toLowerCase().contains(q) ||
+          m.masterCode.toLowerCase().contains(q);
     }).toList();
+
+    final num Function(CopyTradingMasterListItem) sortKey = switch (sortBy.value) {
+      'AUM' => (m) => m.totalAum,
+      'Copiers' => (m) => m.totalCopiers,
+      'Active Days' => (m) => m.activeDays,
+      _ => (m) => m.totalGainPercent,
+    };
+    result.sort((a, b) => sortKey(b).compareTo(sortKey(a)));
+    return result;
   }
+
+  static bool _matchesRisk(int score, String risk) => switch (risk) {
+        'Low (1-2)' => score <= 2,
+        'Medium (3)' => score == 3,
+        'High (4-5)' => score >= 4,
+        _ => true,
+      };
 
   @override
   void onInit() {
@@ -133,6 +223,63 @@ class CopyTradingMastersController extends GetxController {
     // the first assignAll() runs (avoids any race on the very first
     // build).
     Future.microtask(() => loadMasters(showLoading: true));
+    debounce<String>(
+      search,
+      _fetchMasterSuggestions,
+      time: const Duration(milliseconds: 400),
+    );
+  }
+
+  /// Picks a dropdown suggestion: the box shows its name and the list is
+  /// narrowed to that master's plans.
+  void selectMasterSuggestion(MasterSearchSuggestion suggestion) {
+    selectedMaster.value = suggestion;
+    masterSuggestions.clear();
+    _lastServerQuery = suggestion.name;
+    search.value = suggestion.name;
+  }
+
+  void clearSearch() {
+    selectedMaster.value = null;
+    masterSuggestions.clear();
+    search.value = '';
+  }
+
+  /// Typing again after a pick means a new search, so drop the picked master.
+  void onSearchTyped(String text) {
+    if (selectedMaster.value != null && text != selectedMaster.value!.name) {
+      selectedMaster.value = null;
+    }
+    search.value = text;
+  }
+
+  Future<void> _fetchMasterSuggestions(String rawQuery) async {
+    final query = rawQuery.trim();
+    if (selectedMaster.value != null || query == _lastServerQuery) return;
+    _lastServerQuery = query;
+    if (query.isEmpty) {
+      masterSuggestions.clear();
+      return;
+    }
+
+    final res = await ApiService.get(
+      endpoint: ApiConstants.copyTradingMastersSearch,
+      queryParameters: {'q': query},
+    );
+    // A newer keystroke (or a pick) already moved on; drop stale results.
+    if (query != _lastServerQuery || selectedMaster.value != null) return;
+
+    final body = res.data?['data'];
+    if (!res.success || body is! List) {
+      masterSuggestions.clear();
+      return;
+    }
+    masterSuggestions.assignAll(
+      body
+          .whereType<Map>()
+          .map((e) => MasterSearchSuggestion.fromJson(e.cast<String, dynamic>()))
+          .where((s) => s.code.isNotEmpty),
+    );
   }
 
   Future<void> loadMasters({bool showLoading = false}) async {
@@ -141,16 +288,18 @@ class CopyTradingMastersController extends GetxController {
     try {
       final qp = <String, dynamic>{};
       if (sort.value.trim().isNotEmpty) qp['sort'] = sort.value.trim();
+      final timeframe = timeframeForFilter(timeFilter.value);
+      if (timeframe != null) qp['timeframe'] = timeframe;
 
       if (kDebugMode) {
         AppLogger.api(
-          '[CopyTradingMasters] GET ${ApiConstants.copyTradingMasters} '
+          '[CopyTradingMasters] GET ${ApiConstants.copyTradingPlans} '
           'qp=$qp',
         );
       }
 
       final res = await ApiService.get(
-        endpoint: ApiConstants.copyTradingMasters,
+        endpoint: ApiConstants.copyTradingPlans,
         queryParameters: qp,
       );
       if (kDebugMode) {

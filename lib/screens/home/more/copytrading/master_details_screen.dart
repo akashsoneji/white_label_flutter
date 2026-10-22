@@ -63,7 +63,10 @@ class MasterDetailsScreen extends StatelessWidget {
         if (controller.errorMessage.value.isNotEmpty) {
           return _ErrorState(
             message: controller.errorMessage.value,
-            onRetry: () => controller.loadProfile(showLoading: true),
+            isUnavailable: controller.isMasterUnavailable.value,
+            onRetry: () => controller.isMasterUnavailable.value
+                ? Get.back()
+                : controller.loadProfile(showLoading: true),
           );
         }
 
@@ -1326,7 +1329,12 @@ class _TField extends StatelessWidget {
 class _ErrorState extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
-  const _ErrorState({required this.message, required this.onRetry});
+  final bool isUnavailable;
+  const _ErrorState({
+    required this.message,
+    required this.onRetry,
+    this.isUnavailable = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1349,7 +1357,11 @@ class _ErrorState extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.brandPrimary,
               ),
-              child: Text(TranslationUtils.tr('common_retry')),
+              child: Text(
+                TranslationUtils.tr(
+                  isUnavailable ? 'copy_trading_back_to_masters' : 'common_retry',
+                ),
+              ),
             ),
           ],
         ),

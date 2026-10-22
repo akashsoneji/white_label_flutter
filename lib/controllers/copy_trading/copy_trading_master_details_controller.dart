@@ -248,6 +248,10 @@ class CopyTradingMasterDetailsController extends GetxController {
   final RxBool isPlanOrTimeframeLoading = false.obs;
   final RxBool isTradeHistoryLoading = false.obs;
   final RxString errorMessage = ''.obs;
+
+  /// True when the profile API returned 404 — the screen sends the user back
+  /// to the list instead of offering a retry.
+  final RxBool isMasterUnavailable = false.obs;
   final Rxn<CopyTradingMasterProfile> profile = Rxn<CopyTradingMasterProfile>();
   final RxList<CopyTradingTradeItem> tradeHistory = <CopyTradingTradeItem>[].obs;
   final RxString selectedTimeframe = '3m'.obs;
@@ -310,8 +314,18 @@ class CopyTradingMasterDetailsController extends GetxController {
       final res = await ApiService.get(endpoint: ApiConstants.copyTradingMasterProfile(masterCode, timeframe: timeframe, selectedPlanId: planId));
       if (!res.success || res.data == null) {
         profile.value = null;
-      errorMessage.value = res.message ??
-          TranslationUtils.tr('copy_trading_failed_to_load_master_profile');
+        // Backend 404 message is exactly "Master not found": wrong code, or
+        // master not approved / not visible in this user's branch.
+        final isNotFound =
+            (res.message ?? '').toLowerCase().contains('master not found');
+        if (isNotFound) {
+          isMasterUnavailable.value = true;
+          errorMessage.value =
+              TranslationUtils.tr('copy_trading_master_no_longer_available');
+          return;
+        }
+        errorMessage.value = res.message ??
+            TranslationUtils.tr('copy_trading_failed_to_load_master_profile');
         return;
       }
       final data = res.data?['data'];

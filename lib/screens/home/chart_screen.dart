@@ -1601,9 +1601,9 @@ Placing Order:
         final preferredInstrument = _findPreferredInstrument(
           instrumentsController.allInstruments,
         );
-        print(
-          '📊 Chart: Updating symbol dynamically from instruments: ${preferredInstrument.symbol}',
-        );
+        // print(
+        //   '📊 Chart: Updating symbol dynamically from instruments: ${preferredInstrument.symbol}',
+        // );
         setState(() {
           selectedSymbol = preferredInstrument.symbol;
         });
@@ -1613,7 +1613,7 @@ Placing Order:
     } else {
       // Instruments not loaded yet - ensure Instruments WebSocket is running
       if (!instrumentsController.isConnected.value) {
-        print('📊 Chart: Starting Instruments WebSocket to get symbol data');
+        // print('📊 Chart: Starting Instruments WebSocket to get symbol data');
         instrumentsController.startWebSocket();
       }
     }
@@ -1621,10 +1621,10 @@ Placing Order:
     // ✅ FIX: Initialize socket if we have a valid symbol
     // This ensures socket connects/subscribes even when navigating from bottom nav
     if (selectedSymbol.isNotEmpty) {
-      print('📊 Chart: Initializing socket for symbol: $selectedSymbol');
+      // print('📊 Chart: Initializing socket for symbol: $selectedSymbol');
       chartSocketController.initializeSocketForSymbol(selectedSymbol);
     } else {
-      print('📊 Chart: Waiting for instruments to load...');
+      // print('📊 Chart: Waiting for instruments to load...');
       // The _initializeWithFirstInstrument() will handle this via ever() listener
     }
   }

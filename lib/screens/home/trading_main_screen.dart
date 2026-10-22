@@ -419,8 +419,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   }
 
   Future<void> _checkCompliance() async {
-    // The regulation questionnaire is a Riyadex-only requirement.
-    if (!FlavorConfig.isRiyadex()) return;
+    // Server flags decide whether the regulation questionnaire is required.
     try {
       if (!Get.isRegistered<AuthController>()) return;
       final authController = Get.find<AuthController>();

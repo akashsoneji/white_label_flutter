@@ -995,6 +995,16 @@ class _InvestmentRow extends StatelessWidget {
                       ),
                   ],
                 ),
+                if (canEdit) ...[
+                  SizedBox(height: 6.h),
+                  _SmallActionBtn(
+                    label: TranslationUtils.tr('investment_detail_screen_add_capital'),
+                    icon: Icons.add_circle_outline,
+                    color: AppColors.primary,
+                    enabled: true,
+                    onTap: onAddCapital,
+                  ),
+                ],
               ],
             ),
           ),

@@ -4,6 +4,7 @@ import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/utils/precision_helper.dart';
+import 'package:crm_app/services/crm_settings_service.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import 'package:crm_app/screens/finance/presentation/pages/deposit_screen.dart';
 import 'package:crm_app/screens/wallet/data/repositories/wallet_repository.dart';
@@ -338,7 +339,10 @@ class WalletController extends GetxController {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final response = await _repo.sendOtp(
         token: token ?? '',
-        queryParameters: {'_t': timestamp.toString()},
+        queryParameters: {
+          'request_type': 'internal_transfer',
+          '_t': timestamp.toString(),
+        },
       );
 
       if (response.success && response.data != null) {
@@ -371,15 +375,16 @@ class WalletController extends GetxController {
     }
   }
 
-  // Submit internal transfer with OTP
+  // Submit internal transfer. Pass `otp: null` when the broker has
+  // `internal_transfer_otp_required` off, so no `otp` key is sent.
   Future<bool> submitInternalTransfer(
-    String otp,
+    String? otp,
     String comment,
     String fromAccountId,
     String toAccountId,
     String amount,
   ) async {
-    if (otp.isEmpty) {
+    if (otp != null && otp.isEmpty) {
       CustomToastService.showError(
         message: TranslationUtils.tr('kyc_bank_controller_please_enter_otp'),
       );
@@ -413,15 +418,13 @@ class WalletController extends GetxController {
           'to_account': toAccountId,
           'amount': amount,
           'comment': comment,
-          'otp': otp,
+          if (otp != null) 'otp': otp,
         },
       );
 
       if (response.success && response.data != null) {
         CustomToastService.showSuccess(
-          message: TranslationUtils.tr(
-            'wallet_controller_transfer_completed_successfully',
-          ),
+          message: _transferSuccessMessage(response.message),
         );
 
         // Refresh wallet data to get updated balances
@@ -446,6 +449,26 @@ class WalletController extends GetxController {
     } finally {
       isTransferLoading.value = false;
     }
+  }
+
+  // With approval on, some transfers wait for admin approval, so the API's own
+  // message is the accurate one; "completed" would be wrong.
+  String _transferSuccessMessage(String? apiMessage) {
+    final approvalRequired = Get.isRegistered<CrmSettingsService>() &&
+        (Get.find<CrmSettingsService>()
+                .current
+                ?.financialSettings
+                .internalTransferApprovalRequired ??
+            false);
+    if (approvalRequired) {
+      final message = apiMessage?.trim() ?? '';
+      return message.isNotEmpty
+          ? message
+          : TranslationUtils.tr('wallet_controller_transfer_sent_for_approval');
+    }
+    return TranslationUtils.tr(
+      'wallet_controller_transfer_completed_successfully',
+    );
   }
 
   // Reset transfer form

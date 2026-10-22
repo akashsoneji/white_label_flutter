@@ -660,7 +660,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
     //   '📤 ChartSocket: Sent subscription request for ${currentSymbol.value} (account: $accountNumber)',
     // );
     if (kDebugMode) {
-      dev.log('📤 ChartSocket: Subscription payload: $subscriptionPayload');
+      // dev.log('📤 ChartSocket: Subscription payload: $subscriptionPayload');
     }
     WebSocketEndpointHelper.logSwitchStep(
       'Chart subscribed',
@@ -813,9 +813,9 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
 
         if (data['type'] == 'singleSymbolPrice' || isSymbolMatch) {
           if (kDebugMode) {
-            dev.log(
-              '✅ Chart: Processing price update for symbol: $responseSymbol (current: ${currentSymbol.value})',
-            );
+            // dev.log(
+            //   '✅ Chart: Processing price update for symbol: $responseSymbol (current: ${currentSymbol.value})',
+            // );
           }
           final normalized = Map<String, dynamic>.from(data);
           if (normalized.containsKey('Bid') && !normalized.containsKey('bid')) {
@@ -841,9 +841,9 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
             realTimePrice.value = normalized;
             noteTickObserved();
             if (kDebugMode) {
-              dev.log(
-                '📊 Chart: Updated realTimePrice - bid: ${normalized['bid']}, ask: ${normalized['ask']}',
-              );
+              // dev.log(
+              //   '📊 Chart: Updated realTimePrice - bid: ${normalized['bid']}, ask: ${normalized['ask']}',
+              // );
             }
           }
           if (!_priceStreamController.isClosed) {

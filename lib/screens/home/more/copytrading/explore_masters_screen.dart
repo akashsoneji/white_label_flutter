@@ -96,27 +96,7 @@ class _ExploreMastersScreenState extends State<ExploreMastersScreen> {
           );
         }
 
-        // ─── Filtered items ─────────────────────────────────────
-        final filter = controller.selectedFilter.value;
-        final filtered =
-            controller.allMasters.where((m) {
-              if (filter == MasterFilterTab.enrolled) return m.isEnrolled;
-              if (filter == MasterFilterTab.discover) return !m.isEnrolled;
-              return true;
-            }).toList();
-
-        final q = controller.searchQuery.value.trim().toLowerCase();
-        final visible =
-            q.isEmpty
-                ? filtered
-                : filtered
-                    .where(
-                      (m) =>
-                          m.nickname.toLowerCase().contains(q) ||
-                          m.name.toLowerCase().contains(q) ||
-                          m.masterCode.toLowerCase().contains(q),
-                    )
-                    .toList();
+        final visible = controller.visibleMasters;
 
         return RefreshIndicator(
           color: AppColors.primary,
@@ -149,7 +129,7 @@ class _ExploreMastersScreenState extends State<ExploreMastersScreen> {
                 _NoSearchMatchesState(
                   query: controller.searchQuery.value,
                   onClear: () {
-                    controller.search.value = '';
+                    controller.clearSearch();
                     controller.selectedFilter.value = MasterFilterTab.all;
                     controller.riskFilter.value = 'All Risks';
                   },
@@ -381,7 +361,7 @@ class _HeroPerformanceBanner extends StatelessWidget {
                   _heroSubItem(
                     icon: Icons.groups_rounded,
                     label: TranslationUtils.tr('copy_trading_available_masters'),
-                    value: '${all.length}',
+                    value: '${all.map((m) => m.masterCode).toSet().length}',
                   ),
                   Container(
                     height: 20.h,
@@ -436,46 +416,153 @@ class _HeroPerformanceBanner extends StatelessWidget {
 
 // ─────────────────────────── 2. SEARCH BAR ───────────────────────────
 
-class _SearchBarSection extends StatelessWidget {
+class _SearchBarSection extends StatefulWidget {
   final CopyTradingMastersController controller;
   const _SearchBarSection({required this.controller});
 
   @override
+  State<_SearchBarSection> createState() => _SearchBarSectionState();
+}
+
+class _SearchBarSectionState extends State<_SearchBarSection> {
+  late final TextEditingController _textController;
+  late final Worker _searchSync;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController(text: widget.controller.search.value);
+    // search can change from outside the field (clear icon, empty-state
+    // "Clear filters", picking a suggestion), so mirror it into the box.
+    _searchSync = ever<String>(widget.controller.search, (value) {
+      if (_textController.text.trim() == value) return;
+      _textController.value = TextEditingValue(
+        text: value,
+        selection: TextSelection.collapsed(offset: value.length),
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchSync.dispose();
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(
-          color: AppColors.border.withValues(alpha: 0.5),
-        ),
-      ),
-      child: TextField(
-        onChanged: (v) => controller.search.value = v.trim(),
-        style: AppTextStyles.bodyText.copyWith(
-          color: AppColors.textPrimary,
-          fontSize: 13.sp,
-        ),
-        decoration: InputDecoration(
-          hintText: TranslationUtils.tr('copy_trading_search_master_hint'),
-          hintStyle: AppTextStyles.bodyText.copyWith(
-            color: AppColors.textGrey,
-            fontSize: 12.5.sp,
+    final controller = widget.controller;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(14.r),
+            border: Border.all(
+              color: AppColors.border.withValues(alpha: 0.5),
+            ),
           ),
-          prefixIcon: Icon(
-            Icons.search_rounded,
-            size: 18.sp,
-            color: AppColors.textGrey,
+          child: TextField(
+            controller: _textController,
+            onChanged: (v) => controller.onSearchTyped(v.trim()),
+            style: AppTextStyles.bodyText.copyWith(
+              color: AppColors.textPrimary,
+              fontSize: 13.sp,
+            ),
+            decoration: InputDecoration(
+              hintText: TranslationUtils.tr('copy_trading_search_master_hint'),
+              hintStyle: AppTextStyles.bodyText.copyWith(
+                color: AppColors.textGrey,
+                fontSize: 12.5.sp,
+              ),
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                size: 18.sp,
+                color: AppColors.textGrey,
+              ),
+              suffixIcon: Obx(() {
+                if (controller.search.value.isEmpty) return const SizedBox.shrink();
+                return IconButton(
+                  icon: Icon(Icons.clear_rounded, size: 16.sp, color: AppColors.textGrey),
+                  onPressed: controller.clearSearch,
+                );
+              }),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+            ),
           ),
-          suffixIcon: Obx(() {
-            if (controller.search.value.isEmpty) return const SizedBox.shrink();
-            return IconButton(
-              icon: Icon(Icons.clear_rounded, size: 16.sp, color: AppColors.textGrey),
-              onPressed: () => controller.search.value = '',
-            );
-          }),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+        ),
+        Obx(() {
+          final suggestions = controller.masterSuggestions.toList();
+          if (suggestions.isEmpty) return const SizedBox.shrink();
+          return Container(
+            margin: EdgeInsets.only(top: 6.h),
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: AppColors.border.withValues(alpha: 0.4)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: [
+                for (final s in suggestions)
+                  _MasterSuggestionTile(
+                    suggestion: s,
+                    onTap: () {
+                      FocusScope.of(context).unfocus();
+                      controller.selectMasterSuggestion(s);
+                    },
+                  ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
+
+class _MasterSuggestionTile extends StatelessWidget {
+  final MasterSearchSuggestion suggestion;
+  final VoidCallback onTap;
+  const _MasterSuggestionTile({required this.suggestion, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final plansLabel = suggestion.plansCount == 1
+        ? TranslationUtils.tr('copy_trading_search_one_plan')
+        : TranslationUtils.trArgs('copy_trading_search_plans_count', {
+            'count': '${suggestion.plansCount}',
+          });
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                suggestion.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Text(
+              plansLabel,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 11.sp,
+                color: AppColors.textGrey,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -614,9 +701,10 @@ String _filterLabel(String raw) => switch (raw) {
       'High (4-5)' => TranslationUtils.tr('copy_trading_risk_high'),
       'All Time' => TranslationUtils.tr('ibm_range_all_time'),
       'Last 7 Days' => TranslationUtils.tr('ibm_last_7_days'),
+      'Last 2 Weeks' => TranslationUtils.tr('copy_trading_last_2_weeks'),
       'Last 30 Days' => TranslationUtils.tr('ibm_last_30_days'),
       'Last 90 Days' => TranslationUtils.tr('copy_trading_last_90_days'),
-      'Last Year' => TranslationUtils.tr('copy_trading_last_year'),
+      'Last 6 Months' => TranslationUtils.tr('copy_trading_last_6_months'),
       'Gain %' => TranslationUtils.tr('copy_trading_gain_percent'),
       'AUM' => TranslationUtils.tr('copy_trading_aum'),
       'Copiers' => TranslationUtils.tr('my_plans_tab_copiers'),
@@ -733,13 +821,10 @@ class _FilterChipsStrip extends StatelessWidget {
       title: TranslationUtils.tr('copy_trading_performance_timeframe'),
       options: [
         'All Time',
-        'Last 7 Days',
-        'Last 30 Days',
-        'Last 90 Days',
-        'Last Year',
+        ...CopyTradingMastersController.timeframeByFilter.keys,
       ],
       current: c.timeFilter.value,
-      onSelect: (v) => c.timeFilter.value = v,
+      onSelect: c.selectTimeFilter,
     );
   }
 
@@ -841,7 +926,7 @@ class _FilterChipsStrip extends StatelessWidget {
 // ─────────────────────────── 5. PRO MASTER TRADER CARDS ───────────────────────────
 
 class _ProMasterCardWrapper extends StatelessWidget {
-  final dynamic m;
+  final CopyTradingMasterListItem m;
   const _ProMasterCardWrapper({required this.m});
 
   @override
@@ -870,7 +955,7 @@ class _ProMasterCardWrapper extends StatelessWidget {
 }
 
 class _ProMasterCard extends StatelessWidget {
-  final dynamic item;
+  final CopyTradingMasterListItem item;
   final VoidCallback onTap;
   final VoidCallback onCopy;
 
@@ -882,23 +967,22 @@ class _ProMasterCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gain = (item.totalGainPercent as num).toDouble();
-    final drawdown = (item.maxDrawdown as num).toDouble();
-    final pnl = (item.totalPnl as num).toDouble();
-    final minInvest = (item.minInvestment as num).toDouble();
-    final activeDays = item.activeDays as int;
-    final totalCopiers = item.totalCopiers as int;
-    final riskScore = item.riskScore as int? ?? 0;
-    final hasPlan = (item.planCount as int) > 0;
-    final serverType =
-        (item.serverType is String && (item.serverType as String).isNotEmpty)
-            ? (item.serverType as String)
-            : 'mt5';
-    final commissionPct = _safeCommission(item);
-    final displayName =
-        (item.nickname?.toString().isNotEmpty ?? false)
-            ? item.nickname.toString()
-            : item.name.toString();
+    final gain = item.totalGainPercent;
+    final drawdown = item.maxDrawdown.toDouble();
+    final pnl = item.totalPnl.toDouble();
+    final minInvest = item.minInvestment.toDouble();
+    final activeDays = item.activeDays;
+    final totalCopiers = item.totalCopiers;
+    final riskScore = item.riskScore ?? 0;
+    final hasPlan = item.canCopy;
+    final serverType = item.serverType.isNotEmpty ? item.serverType : 'mt5';
+    final commission = item.commissionPercentage;
+    final commissionPct =
+        commission == null ? '—' : '${commission.toStringAsFixed(0)}%';
+    final displayName = item.nickname.isNotEmpty ? item.nickname : item.name;
+    final planLabel = item.planName.isNotEmpty && item.planName != displayName
+        ? item.planName
+        : null;
 
     final gainText = '${gain >= 0 ? '+' : ''}${gain.toStringAsFixed(2)}%';
     final drawdownText = '-${drawdown.toStringAsFixed(0)}%';
@@ -1020,14 +1104,22 @@ class _ProMasterCard extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(width: 6.w),
-                              Text(
-                                TranslationUtils.trArgs('copy_trading_days_active', {
-                                  'days': '$activeDays',
-                                }),
-                                style: AppTextStyles.bodyText.copyWith(
-                                  fontSize: 11.sp,
-                                  color: AppColors.textGrey,
-                                  fontWeight: FontWeight.w500,
+                              Flexible(
+                                child: Text(
+                                  planLabel == null
+                                      ? TranslationUtils.trArgs('copy_trading_days_active', {
+                                          'days': '$activeDays',
+                                        })
+                                      : '$planLabel • ${TranslationUtils.trArgs('copy_trading_days_active', {
+                                          'days': '$activeDays',
+                                        })}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    fontSize: 11.sp,
+                                    color: AppColors.textGrey,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                             ],
@@ -1261,13 +1353,6 @@ class _ProMasterCard extends StatelessWidget {
 
 // ─────────────────────────── HELPERS ───────────────────────────
 
-String _safeCommission(dynamic item) {
-  try {
-    final dynamic raw = item.commissionPercentage;
-    if (raw is num) return '${raw.toStringAsFixed(0)}%';
-  } catch (_) {}
-  return '—';
-}
 
 Color _riskColor(int risk) {
   if (risk <= 2) return const Color(0xFF10B981);

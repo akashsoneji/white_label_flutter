@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/api_const.dart';
@@ -550,6 +552,16 @@ class AuthServiceImpl extends AuthService {
     return '';
   }
 
+  /// Fields the backend expects on every `user/register` call (both the
+  /// `register` and `verifyOtp` steps), added here so all brand screens send them.
+  Map<String, dynamic> _withRegisterMeta(Map<String, dynamic> data) {
+    return {
+      ...data,
+      'device_type': Platform.isIOS ? 'ios' : 'android',
+      'utm_source': 'app',
+    };
+  }
+
   // ==================== REGISTER ====================
   @override
   Future<ApiResponse<Map<String, dynamic>>> register({
@@ -566,7 +578,7 @@ class AuthServiceImpl extends AuthService {
 
       final response = await _api.post(
         endpoint: ApiConstants.register,
-        data: data,
+        data: _withRegisterMeta(data),
       );
 
       // If response failed, check for validation errors in data
@@ -617,7 +629,7 @@ class AuthServiceImpl extends AuthService {
 
       final response = await _api.post(
         endpoint: ApiConstants.register,
-        data: data,
+        data: _withRegisterMeta(data),
       );
 
       // If response failed, check for validation errors in data

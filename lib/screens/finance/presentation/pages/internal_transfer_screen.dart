@@ -17,6 +17,8 @@ import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/utils/currency_format.dart';
 import 'package:crm_app/models/mt5_account.dart' as mt5m;
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
+import 'package:crm_app/models/crm_settings_model.dart';
+import 'package:crm_app/services/crm_settings_service.dart';
 
 mt5m.MT5Account? _resolveMt5Account(String? metaAccountNumber) {
   if (metaAccountNumber == null || metaAccountNumber.isEmpty) return null;
@@ -75,6 +77,20 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
   // Reactive submitting flag (GetX)
   final RxBool _isSubmitting = false.obs;
 
+  // Missing settings (API failed / old backend) fall back to all-false
+  // defaults: no OTP step, and IB commission cannot go to Wallet.
+  CrmFinancialSettings get _financialSettings {
+    if (!Get.isRegistered<CrmSettingsService>()) {
+      return const CrmFinancialSettings();
+    }
+    return Get.find<CrmSettingsService>().current?.financialSettings ??
+        const CrmFinancialSettings();
+  }
+
+  bool get _isWalletBlockedForSource =>
+      _selectedTransferFromType == 'ib' &&
+      !_financialSettings.ibCommissionToWalletTransferEnabled;
+
   @override
   void initState() {
     super.initState();
@@ -92,6 +108,14 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
     });
     // Fetch wallet data when screen loads
     _fetchData();
+    // Admin may have toggled transfer switches since app start.
+    if (Get.isRegistered<CrmSettingsService>()) {
+      Get.find<CrmSettingsService>()
+          .fetchCrmSettings(force: true)
+          .then((_) {
+            if (mounted) setState(() {});
+          });
+    }
   }
 
   Future<void> _fetchData() async {
@@ -113,7 +137,8 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
     }
     if (controller.wallet.value != null &&
         _selectedTransferTo == null &&
-        _selectedTransferFromType != 'wallet') {
+        _selectedTransferFromType != 'wallet' &&
+        !_isWalletBlockedForSource) {
       final wallet = controller.wallet.value!;
       setState(() {
         _selectedTransferTo = wallet.walletId;
@@ -740,8 +765,11 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                       controller.selectedFromAccountType.value = 'ibmwallet';
                     }
 
-                    // Reset Transfer To if it was the same account
-                    if (_selectedTransferTo == identifier) {
+                    // Reset Transfer To if it was the same account, or if
+                    // Wallet is no longer a valid destination for this source
+                    if (_selectedTransferTo == identifier ||
+                        (_selectedTransferToType == 'wallet' &&
+                            _isWalletBlockedForSource)) {
                       _selectedTransferTo = null;
                       _selectedTransferToType = null;
                       _selectedTransferToAccount = null;
@@ -867,8 +895,11 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
             }
           }
 
-          // Add Wallet option (exclude if selected as From)
-          if (wallet != null && _selectedTransferFromType != 'wallet') {
+          // Add Wallet option (exclude if selected as From, or if IB
+          // commission is not allowed to go to Wallet)
+          if (wallet != null &&
+              _selectedTransferFromType != 'wallet' &&
+              !_isWalletBlockedForSource) {
             accountItems.add({
               'type': 'wallet',
               'wallet': wallet,
@@ -1360,6 +1391,11 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
         return;
       }
 
+      if (!_financialSettings.internalTransferOtpRequired) {
+        await _submitTransfer(otp: null);
+        return;
+      }
+
       // 5. Send OTP
       final otpSent = await controller.sendOTP(fromAccountId);
       _isSubmitting.value = false;
@@ -1396,64 +1432,65 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
         return;
       }
 
-      // Validate accounts are still selected
-      if (_selectedTransferFrom == null || _selectedTransferTo == null) {
-        CustomToastService.showError(
-          message: languageService.tr('internal_transfer_select_both'),
-        );
-        return;
-      }
+      await _submitTransfer(otp: otp);
+    }
+  }
 
-      // Get account identifiers
-      final fromAccountId = _getAccountIdentifier(
-        _selectedTransferFromType,
-        _selectedTransferFromAccount,
+  Future<void> _submitTransfer({required String? otp}) async {
+    // Validate accounts are still selected
+    if (_selectedTransferFrom == null || _selectedTransferTo == null) {
+      CustomToastService.showError(
+        message: languageService.tr('internal_transfer_select_both'),
       );
-      final toAccountId = _getAccountIdentifier(
-        _selectedTransferToType,
-        _selectedTransferToAccount,
+      return;
+    }
+
+    // Get account identifiers
+    final fromAccountId = _getAccountIdentifier(
+      _selectedTransferFromType,
+      _selectedTransferFromAccount,
+    );
+    final toAccountId = _getAccountIdentifier(
+      _selectedTransferToType,
+      _selectedTransferToAccount,
+    );
+
+    if (fromAccountId.isEmpty || toAccountId.isEmpty) {
+      CustomToastService.showError(
+        message: languageService.tr('internal_transfer_invalid_selection'),
       );
+      return;
+    }
 
-      if (fromAccountId.isEmpty || toAccountId.isEmpty) {
-        CustomToastService.showError(
-          message: languageService.tr('internal_transfer_invalid_selection'),
-        );
-        return;
-      }
+    // Parse amount
+    final rawText = _amountController.text.trim();
+    final cleanedText = rawText.replaceAll(RegExp(r'[^0-9.]'), '');
 
-      // Parse amount
-      final rawText = _amountController.text.trim();
-      final cleanedText = rawText.replaceAll(RegExp(r'[^0-9.]'), '');
+    // Get comment
+    final comment = _commentController.text.trim();
 
-      // Get comment
-      final comment = _commentController.text.trim();
+    // Submit transfer
+    _isSubmitting.value = true;
+    final success = await controller.submitInternalTransfer(
+      otp,
+      comment,
+      fromAccountId,
+      toAccountId,
+      cleanedText,
+    );
 
-      // Submit transfer
-      _isSubmitting.value = true;
-      final success = await controller.submitInternalTransfer(
-        otp,
-        comment,
-        fromAccountId,
-        toAccountId,
-        cleanedText,
-      );
-
-      if (success && mounted) {
-        // Keep submitting state true until we navigate away to avoid
-        // a brief enabled/disabled flicker on the button during transition.
-        // Navigate back to More screen with bottom navigation after successful transfer
-        Future.delayed(Duration(seconds: 1), () {
-          if (mounted) {
-            // Navigate back to main trading screen (which has bottom navigation)
-            // This will clear the navigation stack and return to TradingMainScreen
-            // The user can then access the More tab from bottom navigation
-            Get.offAllNamed(AppPages.TRADING);
-          }
-        });
-      }
-      if (!success && mounted) {
-        _isSubmitting.value = false;
-      }
+    if (success && mounted) {
+      // Keep submitting state true until we navigate away to avoid
+      // a brief enabled/disabled flicker on the button during transition.
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          // Return to TradingMainScreen (has bottom navigation)
+          Get.offAllNamed(AppPages.TRADING);
+        }
+      });
+    }
+    if (!success && mounted) {
+      _isSubmitting.value = false;
     }
   }
 }

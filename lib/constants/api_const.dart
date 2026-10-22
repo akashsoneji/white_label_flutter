@@ -214,6 +214,10 @@ class ApiConstants {
       '${ajax}copytrading/copier/subscriptions?page=$page&per_page=$perPage';
   static String copyTradingMasterCopiers({int page = 1, int perPage = 20}) =>
       '${ajax}copytrading/master/copiers?page=$page&per_page=$perPage';
+  static String copyTradingMasterCopierSubscriptionHistory(int copierId) =>
+      '${ajax}copytrading/master/copiers/$copierId/subscription-history';
+  static const String copyTradingMasterSettlements =
+      '${ajax}copytrading/master/settlements';
   static String copyTradingCopierSubscriptionDetail(int id) =>
       '${ajax}copytrading/copier/subscriptions/$id/detail';
   static String copyTradingCopierSubscriptionTrades(
@@ -238,6 +242,8 @@ class ApiConstants {
 
   // Public endpoints
   static const String copyTradingMasters = 'copytrading/masters';
+  static const String copyTradingPlans = 'copytrading/plans';
+  static const String copyTradingMastersSearch = 'copytrading/masters/search';
   static String copyTradingMasterProfile(
     String masterCode, {
     String? timeframe,

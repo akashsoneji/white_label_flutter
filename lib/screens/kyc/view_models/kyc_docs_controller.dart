@@ -4,6 +4,7 @@ import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/routes/app_pages.dart';
 import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
@@ -755,6 +756,14 @@ class KycDocsController extends GetxController {
         return true;
       } else {
         print('❌ $documentName upload failed: ${response.message}');
+        // Server requires the compliance questionnaire before any KYC upload.
+        final reason = response.data is Map
+            ? (response.data['data'] is Map ? response.data['data']['reason'] : null)
+            : null;
+        if (reason == 'no_submission') {
+          CustomToastService.showWarning(message: response.message ?? '');
+          Get.toNamed(AppPages.COMPLIANCE_WIZARD);
+        }
         return false;
       }
     } catch (e) {
