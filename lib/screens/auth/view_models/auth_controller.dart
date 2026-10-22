@@ -1834,6 +1834,7 @@ class AuthController extends GetxController {
     // The server flags below decide whether the regulation questionnaire is
     // needed; any broker can switch it on, and KYC upload then answers 403
     // "Please submit the compliance form" until it is submitted.
+
     try {
       final profile = await getProfile();
       if (profile != null) {

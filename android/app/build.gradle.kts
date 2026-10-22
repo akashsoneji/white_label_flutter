@@ -7,6 +7,7 @@ plugins {
 
 import java.util.Properties
 import java.io.FileInputStream
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 apply(from = rootProject.file("brand_flavors.gradle"))
 
@@ -29,9 +30,6 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
 
     packaging {
         jniLibs {
@@ -48,6 +46,7 @@ android {
 
     buildFeatures {
         buildConfig = true
+        resValues = true
     }
 
     sourceSets {
@@ -77,7 +76,7 @@ android {
         }
         // Per-flavor keystores: android/keystore/<flavor>/<flavor>.properties
         // Add a folder + properties file for any new flavor — no code change needed.
-        val brandFlavors = extra["brandFlavors"] as List<Map<String, Any?>>
+        val brandFlavors = project.extra["brandFlavors"] as List<Map<String, Any?>>
         brandFlavors.forEach { brand ->
             val flavorName = brand["name"] as String
             val propsFile = rootProject.file("keystore/$flavorName/$flavorName.properties")
@@ -94,7 +93,7 @@ android {
     }
 
     productFlavors {
-        val brandFlavors = extra["brandFlavors"] as List<Map<String, Any?>>
+        val brandFlavors = project.extra["brandFlavors"] as List<Map<String, Any?>>
         brandFlavors.forEach { brand ->
             val name = brand["name"] as String
             create(name) {
@@ -129,6 +128,12 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
+}
+
 flutter {
     source = "../.."
 }
@@ -157,21 +162,24 @@ afterEvaluate {
         logger.warn("16KB: scripts/realign_elf_16kb.py not found — skipping ELF realignment.")
     } else {
         android.applicationVariants.all {
-            val mergeTask = tasks.findByName("merge${name.capitalize()}JniLibs")
+            val variantName = name
+            val mergeTask = tasks.findByName("merge${variantName.replaceFirstChar { it.uppercaseChar() }}JniLibs")
             if (mergeTask != null) {
                 mergeTask.doLast {
-                    val jniRoot = file("$buildDir/intermediates/merged_native_libs/${name}/out/lib")
+                    val jniRoot = layout.buildDirectory
+                        .dir("intermediates/merged_native_libs/$variantName/out/lib")
+                        .get().asFile
                     if (!jniRoot.exists()) return@doLast
                     val soFiles = jniRoot.walkTopDown().filter { it.extension == "so" }.toList()
                     if (soFiles.isNotEmpty()) {
                         logger.lifecycle("16KB: realigning ${soFiles.size} .so file(s) in ${jniRoot.path}")
-                        exec {
+                        providers.exec {
                             commandLine(
                                 "python3", realignScript.absolutePath,
                                 "--lib-dir", jniRoot.absolutePath,
                                 "--ndk", "${android.sdkDirectory}/ndk/${android.ndkVersion}"
                             )
-                        }
+                        }.result.get()
                     }
                 }
             }

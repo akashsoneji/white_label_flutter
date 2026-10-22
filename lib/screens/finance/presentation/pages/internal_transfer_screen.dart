@@ -35,7 +35,12 @@ String _fmtMt5(dynamic balanceLike, String? metaAccountNumber) {
 }
 
 class InternalTransferScreen extends StatefulWidget {
-  const InternalTransferScreen({Key? key}) : super(key: key);
+  /// When true (opened from the Wallet screen), the wallet is preselected as
+  /// the "From" account instead of the first MT5 account.
+  final bool preselectWallet;
+
+  const InternalTransferScreen({Key? key, this.preselectWallet = false})
+    : super(key: key);
 
   @override
   State<InternalTransferScreen> createState() => _InternalTransferScreenState();
@@ -116,11 +121,23 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
             if (mounted) setState(() {});
           });
     }
+    // fetchWalletData sets Rx values synchronously; the WalletController is
+    // shared with the Wallet screen underneath, whose Obx would be marked
+    // dirty mid-build. Start the fetch after this frame instead.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _fetchData();
+    });
   }
 
   Future<void> _fetchData() async {
     // Fetch wallet data which includes MT5 accounts
     await controller.fetchWalletData();
+    if (!mounted) return;
+
+    if (widget.preselectWallet && controller.wallet.value != null) {
+      _preselectWalletAsSource();
+      return;
+    }
 
     // Set default values if available
     if (controller.mt5Accounts.isNotEmpty && _selectedTransferFrom == null) {
@@ -150,6 +167,30 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
         controller.selectedToAccountType.value = 'wallet';
       });
     }
+  }
+
+  void _preselectWalletAsSource() {
+    final wallet = controller.wallet.value!;
+    setState(() {
+      _selectedTransferFrom = wallet.walletId;
+      _selectedTransferFromType = 'wallet';
+      _selectedTransferFromAccount = wallet;
+      _transferFromController.text =
+          '${wallet.walletId} - \$ ${wallet.walletBalance}';
+      controller.selectedFromAccount.value = null;
+      controller.selectedFromAccountType.value = 'wallet';
+
+      if (controller.mt5Accounts.isNotEmpty && _selectedTransferTo == null) {
+        final firstAccount = controller.mt5Accounts.first;
+        _selectedTransferTo = firstAccount.metaAccountNumber;
+        _selectedTransferToType = 'mt5';
+        _selectedTransferToAccount = firstAccount;
+        _transferToController.text =
+            '${firstAccount.metaAccountNumber} - ${_fmtMt5(firstAccount.balance, firstAccount.metaAccountNumber)}';
+        controller.selectedToAccount.value = firstAccount;
+        controller.selectedToAccountType.value = 'mt5';
+      }
+    });
   }
 
   // Get account identifier for API request

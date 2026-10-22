@@ -3005,6 +3005,10 @@
   "transaction_history_screen_select_end_date": "Select end date",
   "transaction_history_screen_count_transactions": "{count} transactions",
   "wallet_screen_no_more_transactions_to_show": "No more transactions to show",
+  "wallet_history_total_in": "Total in",
+  "wallet_history_total_out": "Total out",
+  "wallet_history_current_balance": "Current Wallet Balance",
+  "wallet_history_completed_hint": "Every movement in and out of your wallet. Balance is your wallet balance after that entry.",
   "wallet_screen_any": "Any",
   "wallet_screen_filters": "Filters",
   "wallet_screen_all_transactions": "All Transactions",
@@ -4657,4 +4661,5 @@
   "copy_trading_last_6_months": "Last 6 Months",
   "copy_trading_master_no_longer_available": "This master is no longer available.",
   "copy_trading_back_to_masters": "Back to masters"
+
 }

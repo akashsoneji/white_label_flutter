@@ -105,19 +105,25 @@ class FinanceRepositoryImpl implements FinanceRepository {
     String? status,
     String? t,
   }) {
+    // finance-activity reads the date filter only as `dateRange=from|to`
+    // (same contract as the web client); separate dateFrom/dateTo are ignored.
+    final from = dateFrom ?? '';
+    final to = dateTo ?? '';
+    final dateRange = from.isEmpty && to.isEmpty ? '' : '$from|$to';
+
     final Map<String, dynamic> queryParams = {
       'page': (page ?? 1).toString(),
       'perPage': (perPage ?? 10).toString(),
       'transactionType': transactionType ?? '',
-      'dateFrom': dateFrom ?? '',
-      'dateTo': dateTo ?? '',
+      'includeTraderTransfers': '1',
       'type': type ?? '',
       'status': status ?? '',
+      'dateRange': dateRange,
       '_t': t ?? DateTime.now().millisecondsSinceEpoch.toString(),
     };
 
     return _api.get(
-      endpoint: ApiConstants.getTransactions,
+      endpoint: ApiConstants.getFinanceActivity,
       queryParameters: queryParams,
       token: token,
     );

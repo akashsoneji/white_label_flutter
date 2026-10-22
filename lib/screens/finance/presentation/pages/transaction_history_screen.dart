@@ -594,14 +594,28 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   Widget _buildTransactionCard(Data transaction) {
     final bool isDeposit = (transaction.transactionType?.toLowerCase() ?? '')
         .contains('deposit');
-    final Color amountColor = isDeposit ? Colors.green : Colors.red;
-    final String amountPrefix = isDeposit ? '' : '-';
+    final bool isTransfer = transaction.isInternalTransfer;
+    // Transfers move money between the user's own accounts, so they are
+    // neither income nor expense: shown neutral, without a minus sign.
+    final Color amountColor =
+        isTransfer
+            ? AppColors.primary
+            : (isDeposit ? Colors.green : Colors.red);
+    final String amountPrefix = (isDeposit || isTransfer) ? '' : '-';
     final String statusText = (transaction.status ?? '').trim().toLowerCase();
     final bool isApproved = [
       'approved',
       'success',
       'completed',
     ].contains(statusText);
+    final String reference =
+        (transaction.referenceNumber ?? '').isNotEmpty
+            ? transaction.referenceNumber!
+            : (transaction.transactionType ?? '');
+    final String iconAsset =
+        isDeposit
+            ? 'assets/svg/deshboard/money-recive.svg'
+            : 'assets/svg/deshboard/money-send.svg';
 
     Color _statusColor() {
       if (isApproved) return Colors.green;
@@ -622,7 +636,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           ),
         ],
         border: Border.all(
-          color: isApproved ? Colors.green : Colors.red,
+          color: _statusColor().withOpacity(0.6),
           width: 1.5,
         ),
       ),
@@ -634,55 +648,66 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 40.w,
-                    height: 40.h,
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      color:
-                          isDeposit
-                              ? Colors.green.withOpacity(0.1)
-                              : Colors.red.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40.w,
+                      height: 40.h,
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: amountColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child:
+                          isTransfer
+                              ? Icon(
+                                Icons.swap_horiz_rounded,
+                                size: 20,
+                                color: amountColor,
+                              )
+                              : SvgPicture.asset(
+                                iconAsset,
+                                width: 20,
+                                height: 20,
+                                colorFilter: ColorFilter.mode(
+                                  amountColor,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
                     ),
-                    child: SvgPicture.asset(
-                      isDeposit
-                          ? 'assets/svg/deshboard/money-recive.svg'
-                          : 'assets/svg/deshboard/money-send.svg',
-                      width: 20,
-                      height: 20,
-                      colorFilter: ColorFilter.mode(
-                        isDeposit ? Colors.green : Colors.red,
-                        BlendMode.srcIn,
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            reference,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          SizedBox(height: 2.h),
+                          Text(
+                            transaction.transactionType ?? "",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 12.sp,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        transaction.referenceNumber as String,
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      SizedBox(height: 2.h),
-                      Text(
-                        transaction.transactionType ?? "",
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 12.sp,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
+              SizedBox(width: 8.w),
               Column(
                 children: [
                   Text(
@@ -737,7 +762,15 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     ),
                   ],
 
-                  if ((transaction.mt5AccountId ?? '').isNotEmpty) ...[
+                  if ((transaction.accountLabel ?? '').isNotEmpty) ...[
+                    SizedBox(width: 6.w),
+                    _buildChip(
+                      text: transaction.accountLabel!,
+                      border: Colors.indigo.shade300,
+                      bg: Colors.indigo.withOpacity(0.06),
+                      fg: Colors.indigo.shade700,
+                    ),
+                  ] else if ((transaction.mt5AccountId ?? '').isNotEmpty) ...[
                     SizedBox(width: 6.w),
                     _buildChip(
                       text:
@@ -767,8 +800,48 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               ),
             ),
           ),
+          if ((transaction.rejectReason ?? '').trim().isNotEmpty) ...[
+            SizedBox(height: 8.h),
+            _buildNoteLine(
+              icon: Icons.error_outline_rounded,
+              color: Colors.red,
+              text:
+                  '${languageService.tr('order_history_screen_reason')}: ${transaction.rejectReason!.trim()}',
+            ),
+          ],
+          if ((transaction.commentForClient ?? '').trim().isNotEmpty) ...[
+            SizedBox(height: 6.h),
+            _buildNoteLine(
+              icon: Icons.chat_bubble_outline_rounded,
+              color: Colors.grey.shade700,
+              text: transaction.commentForClient!.trim(),
+            ),
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _buildNoteLine({
+    required IconData icon,
+    required Color color,
+    required String text,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 14.sp, color: color),
+        SizedBox(width: 6.w),
+        Expanded(
+          child: Text(
+            text,
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 12.sp,
+              color: color,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
