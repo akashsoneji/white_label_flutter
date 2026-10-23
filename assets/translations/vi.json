@@ -4660,5 +4660,6 @@
   "copy_trading_last_2_weeks": "2 tuần qua",
   "copy_trading_last_6_months": "6 tháng qua",
   "copy_trading_master_no_longer_available": "Master này không còn khả dụng.",
-  "copy_trading_back_to_masters": "Quay lại danh sách master"
+  "copy_trading_back_to_masters": "Quay lại danh sách master",
+  "compliance_form_rejected_title": "Biểu mẫu tuân thủ của bạn đã bị từ chối. Vui lòng sửa và gửi lại."
 }

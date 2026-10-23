@@ -1214,7 +1214,8 @@ Future<void> updateTasksJson(List<Map<String, dynamic>> brands) async {
     'problemMatcher': [],
   });
 
-  // Dynamic prepare tasks for all brands
+  // Dynamic prepare tasks for all brands. scripts/fast_clean.sh deletes the
+  // same artifacts as `flutter clean` but skips its ~28s `xcodebuild clean`.
   for (final brand in brands) {
     final name = brand['name'] as String;
     tasks.add({
@@ -1223,7 +1224,7 @@ Future<void> updateTasksJson(List<Map<String, dynamic>> brands) async {
       'command': 'bash',
       'args': [
         '-lc',
-        'CLIENT=all dart run scripts/generate_brand_config.dart && dart run scripts/prepare_flavor.dart $name && flutter clean && flutter pub get',
+        'CLIENT=all dart run scripts/generate_brand_config.dart && dart run scripts/prepare_flavor.dart $name && bash scripts/fast_clean.sh && flutter pub get',
       ],
       'options': {'cwd': '\${workspaceFolder}'},
       'problemMatcher': [],
@@ -1235,6 +1236,22 @@ Future<void> updateTasksJson(List<Map<String, dynamic>> brands) async {
       },
     });
   }
+
+  // Full `flutter clean` incl. the Xcode workspace, for iOS runs.
+  tasks.add({
+    'label': 'clean-ios-full',
+    'type': 'shell',
+    'command': 'bash',
+    'args': ['scripts/fast_clean.sh', '--ios'],
+    'options': {'cwd': '\${workspaceFolder}'},
+    'problemMatcher': [],
+    'presentation': {
+      'reveal': 'always',
+      'panel': 'dedicated',
+      'focus': false,
+      'clear': true,
+    },
+  });
 
   final jsonStr = const JsonEncoder.withIndent(
     '  ',

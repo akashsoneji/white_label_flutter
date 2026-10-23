@@ -151,6 +151,10 @@ dev_dependencies:
 
 dependency_overrides:
   intl: ^0.20.2
+  # 1.1.3 (latest) fails on AGP 9 (`proguard-android.txt`); local copy is
+  # patched. Remove once upstream ships an AGP 9 compatible release.
+  flutter_inappwebview_android:
+    path: third_party/flutter_inappwebview_android
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

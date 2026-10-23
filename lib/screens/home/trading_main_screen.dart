@@ -426,18 +426,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
       final profile = await authController.getProfile();
       if (profile != null) {
-        final user = profile.data.user;
-
-        // Only force the wizard when the broker has the regulated profile form
-        // enabled. force_regulated_form can remain 1 on the user row after the
-        // module is switched off, and user/regulation then returns 403.
-        final isRegulationFormEnabled =
-            user.regulatedBrokerEnabled == 1 && user.regulationRequired == 1;
-
-        if (isRegulationFormEnabled &&
-            user.forceRegulatedForm == 1 &&
-            user.regulationSubmitted == 0) {
-          // Step 1: Questionnaire is required, redirect and block
+        if (profile.data.user.mustSubmitRegulation) {
           Get.toNamed(AppPages.COMPLIANCE_WIZARD);
         }
       }

@@ -19,7 +19,13 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.example.pipze"
-    compileSdk = 37
+    // AGP 9 resolves a bare `37` to `android-37`, but the SDK installs it as
+    // `android-37.0`; name the minor level explicitly.
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 0
+        }
+    }
     ndkVersion = "29.0.14206865"
 
     compileOptions {

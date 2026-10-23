@@ -4660,6 +4660,6 @@
   "copy_trading_last_2_weeks": "Last 2 Weeks",
   "copy_trading_last_6_months": "Last 6 Months",
   "copy_trading_master_no_longer_available": "This master is no longer available.",
-  "copy_trading_back_to_masters": "Back to masters"
-
+  "copy_trading_back_to_masters": "Back to masters",
+  "compliance_form_rejected_title": "Your compliance form was rejected. Please correct it and submit again."
 }

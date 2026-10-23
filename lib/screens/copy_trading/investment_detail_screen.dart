@@ -233,61 +233,6 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
     }
   }
 
-  void _showAddCapitalDialog() async {
-    final amountCtrl = TextEditingController();
-    final amount = await showDialog<num?>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: Text(TranslationUtils.tr('investment_detail_add_capital')),
-            content: TextField(
-              controller: amountCtrl,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                hintText: TranslationUtils.tr('investment_detail_amount_usd'),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(null),
-                child: Text(
-                  TranslationUtils.tr('account_management_cancel'),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  final v = num.tryParse(amountCtrl.text.trim());
-                  if (v == null || v <= 0) return;
-                  Navigator.of(ctx).pop(v);
-                },
-                child: Text(TranslationUtils.tr('investment_detail_add')),
-              ),
-            ],
-          ),
-    );
-    if (amount == null) return;
-    final res = await _subscriptionsCtrl.addCapital(
-      subscriptionId: widget.subscriptionId ?? 0,
-      amount: amount,
-    );
-    if (res.success) {
-      CustomToastService.showSuccess(
-        title: TranslationUtils.tr('create_account_success'),
-        message: TranslationUtils.tr('investment_detail_capital_added'),
-      );
-      _fetchDetail();
-    } else {
-      CustomToastService.showError(
-        title: TranslationUtils.tr('close_position_error'),
-        message: res.message ??
-            TranslationUtils.tr('investment_detail_failed_to_add_capital'),
-      );
-    }
-  }
-
-
 
   String getCopyMethodDisplay(CopierSubscriptionItem? item) {
     final equalX1 = TranslationUtils.tr('subscription_setup_screen_equal_x1');
@@ -884,12 +829,6 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
       child: _SummaryCard(
         child: Column(
           children: [
-            _OptionItem(
-              icon: Icons.add_circle_outline,
-              label: TranslationUtils.tr('add_investment_screen_add_investment'),
-              onTap: _showAddCapitalDialog,
-            ),
-            _divider(),
             _OptionItem(
               icon: Icons.remove_circle_outline,
               label: TranslationUtils.tr(

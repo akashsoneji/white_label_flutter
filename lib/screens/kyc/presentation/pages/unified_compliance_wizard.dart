@@ -761,13 +761,18 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
       // Register dependency on formAnswers so visibility recalculates when answers change
       // ignore: unused_local_variable
       final _deps = controller.formAnswers.values.toList();
+      final isRejected = controller.reviewStatus.value.toLowerCase() == 'rejected';
+      final offset = isRejected ? 1 : 0;
 
       return ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: controller.schemaFields.length,
+        itemCount: controller.schemaFields.length + offset,
         itemBuilder: (context, index) {
-          final field = controller.schemaFields[index];
+          if (isRejected && index == 0) {
+            return _RegulationRejectedBanner(notes: controller.reviewNotes.value);
+          }
+          final field = controller.schemaFields[index - offset];
           if (field is! Map<String, dynamic>) return const SizedBox.shrink();
 
         if (!controller.isFieldVisible(field)) {
@@ -3289,6 +3294,58 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
       ),
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+    );
+  }
+}
+
+/// Shown above the questionnaire when the admin rejected the last submission.
+class _RegulationRejectedBanner extends StatelessWidget {
+  final String notes;
+  const _RegulationRejectedBanner({required this.notes});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 14.h),
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: AppColors.error.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.error_outline, color: AppColors.error, size: 18.sp),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  TranslationUtils.tr('compliance_form_rejected_title'),
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: AppColors.error,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13.sp,
+                  ),
+                ),
+                if (notes.trim().isNotEmpty) ...[
+                  SizedBox(height: 4.h),
+                  Text(
+                    notes.trim(),
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: AppColors.textPrimary,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

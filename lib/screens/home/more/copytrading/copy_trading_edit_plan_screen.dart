@@ -614,13 +614,19 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
     final body = <String, dynamic>{
       'plan_name': _nameCtrl.text.trim(),
       'commission_type': _commissionType,
-      'min_capital': minCap,
       'no_fee_days': int.tryParse(_noFeeDaysCtrl.text.trim()) ?? 0,
-      'commission_value': commissionValue,
-      'copy_ratio': num.tryParse(_copyRatioCtrl.text.trim()) ?? 1,
       'strategy_description': _strategyCtrl.text.trim(),
-      'risk_information': _riskCtrl.text.trim(),
+      'risk_info': _riskCtrl.text.trim(),
     };
+
+    // Copiers already joined on these terms; the API returns 422 "prohibited"
+    // for pricing/sizing fields once a plan has active copiers.
+    final hasActiveCopiers = widget.plan.activeCopiersCount > 0;
+    if (!hasActiveCopiers) {
+      body['min_capital'] = minCap;
+      body['commission_value'] = commissionValue;
+      body['copy_ratio'] = num.tryParse(_copyRatioCtrl.text.trim()) ?? 1;
+    }
 
     final maxCopiersText = _maxCopiersCtrl.text.trim();
     if (maxCopiersText.isNotEmpty) {

@@ -28,6 +28,11 @@ class ComplianceController extends GetxController {
 
   // Dynamic Questionnaire State
   final RxList<dynamic> schemaFields = <dynamic>[].obs;
+
+  /// From `GET user/regulation`: '', pending, approved or rejected, plus the
+  /// admin's notes (shown when the form was rejected and must be re-filled).
+  final RxString reviewStatus = ''.obs;
+  final RxString reviewNotes = ''.obs;
   final RxMap<String, dynamic> formAnswers = <String, dynamic>{}.obs;
 
   // Selected Documents
@@ -182,10 +187,13 @@ class ComplianceController extends GetxController {
 
       final response = await _repo.getRegulationSchema(token: token);
       if (response.success && response.data != null) {
-        final schema = response.data['data']?['schema'];
+        final data = response.data['data'];
+        final schema = data?['schema'];
         if (schema is List) {
           schemaFields.assignAll(schema);
         }
+        reviewStatus.value = (data?['review_status'] ?? '').toString();
+        reviewNotes.value = (data?['review_notes'] ?? '').toString();
       } else {
         print('ComplianceController: Dynamic schema fetch failed');
       }

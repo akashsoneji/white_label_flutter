@@ -129,7 +129,8 @@ class CopyTradingSubscribeController extends GetxController {
       final list =
           data.whereType<Map>().map((e) => EligibleCopyAccount.fromJson(e.cast<String, dynamic>())).toList();
       eligibleAccounts.assignAll(list);
-      if (autoSelectFirstAccount && selectedAccount.value == null && list.isNotEmpty) {
+      final onlyOneChoice = list.length == 1;
+      if ((autoSelectFirstAccount || onlyOneChoice) && selectedAccount.value == null && list.isNotEmpty) {
         selectedAccount.value = list.first;
       }
     } catch (e) {

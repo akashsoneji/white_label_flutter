@@ -4660,5 +4660,6 @@
   "copy_trading_last_2_weeks": "最近 2 周",
   "copy_trading_last_6_months": "最近 6 个月",
   "copy_trading_master_no_longer_available": "该大师已不可用。",
-  "copy_trading_back_to_masters": "返回大师列表"
+  "copy_trading_back_to_masters": "返回大师列表",
+  "compliance_form_rejected_title": "您的合规表单已被拒绝，请修改后重新提交。"
 }

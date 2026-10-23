@@ -241,7 +241,6 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
                       _SubscriptionsTab(
                         items: list,
                         controller: controller,
-                        onAddCapital: (id) => _showAddCapitalDialog(id),
                         onPause: (id) => _pause(id),
                         onResume: (id) => _resume(id),
                         onStop: (id) => _stop(id),
@@ -285,53 +284,6 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
         );
       }),
     );
-  }
-
-  void _showAddCapitalDialog(int subscriptionId) async {
-    final amountCtrl = TextEditingController();
-    final amount = await showDialog<num?>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: Text(TranslationUtils.tr('investment_detail_add_capital')),
-            content: TextField(
-              controller: amountCtrl,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                hintText: TranslationUtils.tr('investment_detail_amount_usd'),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(null),
-                child: Text(TranslationUtils.tr('general_cancel')),
-              ),
-              TextButton(
-                onPressed: () {
-                  final v = num.tryParse(amountCtrl.text.trim());
-                  // Don't close dialog for invalid amount.
-                  if (v == null || v <= 0) return;
-                  Navigator.of(ctx).pop(v);
-                },
-                child: Text(TranslationUtils.tr('investment_detail_add')),
-              ),
-            ],
-          ),
-    );
-    // Cancel pressed -> amount is null. Don't show any error.
-    if (amount == null) return;
-    final res = await controller.addCapital(
-      subscriptionId: subscriptionId,
-      amount: amount,
-    );
-    if (!res.success) {
-      _toastError(
-        res.message ??
-            TranslationUtils.tr('investment_detail_failed_to_add_capital'),
-      );
-    }
   }
 
   void _pause(int id) async {
@@ -652,7 +604,6 @@ class _SummaryMetricTile extends StatelessWidget {
 class _SubscriptionsTab extends StatelessWidget {
   final List<CopierSubscriptionItem> items;
   final CopyTradingCopierSubscriptionsController controller;
-  final void Function(int id) onAddCapital;
   final void Function(int id) onPause;
   final void Function(int id) onResume;
   final void Function(int id) onStop;
@@ -662,7 +613,6 @@ class _SubscriptionsTab extends StatelessWidget {
   const _SubscriptionsTab({
     required this.items,
     required this.controller,
-    required this.onAddCapital,
     required this.onPause,
     required this.onResume,
     required this.onStop,
@@ -682,7 +632,6 @@ class _SubscriptionsTab extends StatelessWidget {
         final item = items[i];
         return _InvestmentRow(
           item: item,
-          onAddCapital: () => onAddCapital(item.id),
           onPause: () => onPause(item.id),
           onResume: () => onResume(item.id),
           onStop: () => onStop(item.id),
@@ -696,7 +645,6 @@ class _SubscriptionsTab extends StatelessWidget {
 
 class _InvestmentRow extends StatelessWidget {
   final CopierSubscriptionItem item;
-  final VoidCallback onAddCapital;
   final VoidCallback onPause;
   final VoidCallback onResume;
   final VoidCallback onStop;
@@ -705,7 +653,6 @@ class _InvestmentRow extends StatelessWidget {
 
   const _InvestmentRow({
     required this.item,
-    required this.onAddCapital,
     required this.onPause,
     required this.onResume,
     required this.onStop,
@@ -995,16 +942,6 @@ class _InvestmentRow extends StatelessWidget {
                       ),
                   ],
                 ),
-                if (canEdit) ...[
-                  SizedBox(height: 6.h),
-                  _SmallActionBtn(
-                    label: TranslationUtils.tr('investment_detail_screen_add_capital'),
-                    icon: Icons.add_circle_outline,
-                    color: AppColors.primary,
-                    enabled: true,
-                    onTap: onAddCapital,
-                  ),
-                ],
               ],
             ),
           ),

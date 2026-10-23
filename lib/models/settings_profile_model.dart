@@ -74,9 +74,24 @@ class User {
   final int regulationSubmitted;
   final int regulationRequired;
   final int regulatedBrokerEnabled;
+
+  /// Review state of the latest compliance form: '', pending, approved, rejected.
+  final String regulationReviewStatus;
+  final String regulationReviewNotes;
   final UserDetails userDetails;
 
   String get fullName => '$firstName $lastName'.trim();
+
+  bool get isRegulationRejected =>
+      regulationReviewStatus.toLowerCase() == 'rejected';
+
+  /// Compliance form must be (re)filled before KYC upload. Backend already
+  /// folds the force/skip flags into `regulation_required`, and
+  /// `regulation_submitted` stays 1 after a rejection, so the review status
+  /// is what tells a rejected form apart.
+  bool get mustSubmitRegulation =>
+      regulationRequired == 1 &&
+      (regulationSubmitted == 0 || isRegulationRejected);
 
   User({
     required this.id,
@@ -96,6 +111,8 @@ class User {
     required this.regulationSubmitted,
     required this.regulationRequired,
     required this.regulatedBrokerEnabled,
+    this.regulationReviewStatus = '',
+    this.regulationReviewNotes = '',
     required this.userDetails,
   });
 
@@ -136,6 +153,9 @@ class User {
           json['regulated_broker_enabled'] is int
               ? json['regulated_broker_enabled']
               : int.tryParse(json['regulated_broker_enabled'].toString()) ?? 0,
+      regulationReviewStatus:
+          (json['regulation_review_status'] ?? '').toString(),
+      regulationReviewNotes: (json['regulation_review_notes'] ?? '').toString(),
       userDetails:
           json['user_details'] is Map<String, dynamic>
               ? UserDetails.fromJson(

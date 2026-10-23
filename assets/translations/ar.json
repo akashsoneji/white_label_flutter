@@ -4660,5 +4660,6 @@
   "copy_trading_last_2_weeks": "آخر أسبوعين",
   "copy_trading_last_6_months": "آخر 6 أشهر",
   "copy_trading_master_no_longer_available": "هذا الماستر لم يعد متاحًا.",
-  "copy_trading_back_to_masters": "العودة إلى الماسترز"
+  "copy_trading_back_to_masters": "العودة إلى الماسترز",
+  "compliance_form_rejected_title": "تم رفض نموذج الامتثال الخاص بك. يرجى تصحيحه وإرساله مرة أخرى."
 }

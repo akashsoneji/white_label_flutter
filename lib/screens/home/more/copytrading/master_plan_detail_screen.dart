@@ -318,7 +318,19 @@ class _PlanHeaderCard extends StatelessWidget {
 
   String _statusLabel() {
     if (plan.status.isEmpty) return TranslationUtils.tr('ib_status_unknown');
-    return plan.status[0].toUpperCase() + plan.status.substring(1);
+    switch (plan.status.toLowerCase()) {
+      case 'approved':
+      case 'active':
+        return TranslationUtils.tr('kyc_verification_approved');
+      case 'pending_admin':
+      case 'pending_review':
+        return TranslationUtils.tr('copy_trading_hub_screen_pending_review');
+      case 'rejected':
+        return TranslationUtils.tr('kyc_verification_rejected');
+      default:
+        final readable = plan.status.replaceAll('_', ' ');
+        return readable[0].toUpperCase() + readable.substring(1);
+    }
   }
 
   @override

@@ -760,7 +760,7 @@ class KycDocsController extends GetxController {
         final reason = response.data is Map
             ? (response.data['data'] is Map ? response.data['data']['reason'] : null)
             : null;
-        if (reason == 'no_submission') {
+        if (reason == 'no_submission' || reason == 'rejected') {
           CustomToastService.showWarning(message: response.message ?? '');
           Get.toNamed(AppPages.COMPLIANCE_WIZARD);
         }

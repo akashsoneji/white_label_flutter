@@ -646,7 +646,7 @@ class _CopyTradingCreatePlanScreenState
       'commission_value': commissionValue,
       'copy_ratio': num.tryParse(_copyRatioCtrl.text.trim()) ?? 1,
       'strategy_description': _strategyCtrl.text.trim(),
-      'risk_information': _riskCtrl.text.trim(),
+      'risk_info': _riskCtrl.text.trim(),
     };
     final maxCopiersText = _maxCopiersCtrl.text.trim();
     if (maxCopiersText.isNotEmpty) {

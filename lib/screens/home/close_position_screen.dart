@@ -788,9 +788,12 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
   }
 
   Widget _buildChartSection() {
-    return Container(
-      height: showChart ? MediaQuery.of(context).size.height * 0.4 : 64.h,
+    // Collapsed: size to the switch row — a fixed 64.h was 1.4px too short
+    // for padding + border + switch on 720x1604 and overflowed.
+    return SizedBox(
+      height: showChart ? MediaQuery.sizeOf(context).height * 0.4 : null,
       child: Column(
+        mainAxisSize: showChart ? MainAxisSize.max : MainAxisSize.min,
         children: [
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),

@@ -399,10 +399,17 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
     }
   }
 
+  /// Stopped/cancelled subscriptions have released their capital
+  /// ("Your capital has been released"), so they don't count as invested.
+  static bool _holdsCapital(CopierSubscriptionItem e) {
+    final status = e.status.toLowerCase();
+    return status != 'stopped' && status != 'cancelled';
+  }
+
   void _computeSummaryFromList(List<CopierSubscriptionItem> list, {required bool isFirstPage}) {
     if (isFirstPage) {
       summaryTotal.value = _totalCount;
-      summaryTotalCapital.value = list.fold(0.0, (p, e) => p + e.capitalAmount);
+      summaryTotalCapital.value = list.where(_holdsCapital).fold(0.0, (p, e) => p + e.capitalAmount);
       summaryTotalPnl.value = list.fold(0.0, (p, e) => p + e.totalPnl);
       summaryTotalCommissionPaid.value = list.fold(0.0, (p, e) => p + e.totalCommissionPaid);
       summaryPending.value = list.where((e) => e.status.toLowerCase() == 'pending').length;
@@ -411,7 +418,7 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
       summaryStopped.value = list.where((e) => e.status.toLowerCase() == 'stopped').length;
       summaryCancelled.value = list.where((e) => e.status.toLowerCase() == 'cancelled').length;
     } else {
-      summaryTotalCapital.value = subscriptions.fold(0.0, (p, e) => p + e.capitalAmount);
+      summaryTotalCapital.value = subscriptions.where(_holdsCapital).fold(0.0, (p, e) => p + e.capitalAmount);
       summaryTotalPnl.value = subscriptions.fold(0.0, (p, e) => p + e.totalPnl);
       summaryTotalCommissionPaid.value = subscriptions.fold(0.0, (p, e) => p + e.totalCommissionPaid);
     }

@@ -799,7 +799,7 @@ class CopyTradingMasterDashboardController extends GetxController {
     errorMessage.value = '';
     try {
       final endpoint = '${ApiConstants.copyTradingMasterPlans}/$planId';
-      final res = await ApiService.post(endpoint: endpoint, data: body);
+      final res = await ApiService.put(endpoint: endpoint, data: body);
       if (res.success) {
         await _loadPlans();
         await _loadStats();

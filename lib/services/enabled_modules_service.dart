@@ -27,6 +27,23 @@ class EnabledModulesService extends GetxService {
 
     try {
       isLoading.value = true;
+      final model = await _requestModules();
+      if (model != null) return model;
+
+      // A transient failure (e.g. "Connection closed before full header")
+      // would otherwise hide Copy Trading / PAMM until the next screen refresh.
+      if (modules.value == null) {
+        await Future<void>.delayed(const Duration(seconds: 2));
+        return await _requestModules() ?? modules.value;
+      }
+      return modules.value;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<EnabledModulesModel?> _requestModules() async {
+    try {
       final response = await ApiService.get(
         endpoint: ApiConstants.enabledModules,
       );
@@ -35,13 +52,13 @@ class EnabledModulesService extends GetxService {
         AppLogger.error(
           'EnabledModulesService: Failed - ${response.message}',
         );
-        return modules.value;
+        return null;
       }
 
       final payload = _extractPayload(response.data);
       if (payload == null) {
         AppLogger.error('EnabledModulesService: Could not parse payload');
-        return modules.value;
+        return null;
       }
 
       final model = EnabledModulesModel.fromJson(payload);
@@ -54,9 +71,7 @@ class EnabledModulesService extends GetxService {
         error: e,
         stackTrace: stackTrace,
       );
-      return modules.value;
-    } finally {
-      isLoading.value = false;
+      return null;
     }
   }
 
