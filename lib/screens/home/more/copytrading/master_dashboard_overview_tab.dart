@@ -1548,7 +1548,7 @@ class _TradeRow extends StatelessWidget {
             flex: 3,
             child: Text(
               trade.symbol,
-              style: theme.textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),

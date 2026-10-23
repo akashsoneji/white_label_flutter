@@ -210,6 +210,16 @@ class CopyTradingMasterCopiersController extends GetxController {
 
   final RxList<CopyTradingMasterPlanItem> masterPlans = <CopyTradingMasterPlanItem>[].obs;
 
+  /// `active_copiers_count` per plan id, from the master plans API.
+  final RxMap<int, int> activeCopiersByPlan = <int, int>{}.obs;
+
+  /// Active copiers for the selected plan, or across all plans when no plan filter is set.
+  int get activeCopiersCount {
+    final selectedPlanId = planFilter.value;
+    if (selectedPlanId != null) return activeCopiersByPlan[selectedPlanId] ?? 0;
+    return activeCopiersByPlan.values.fold(0, (sum, count) => sum + count);
+  }
+
   // Filter & Pagination States
   final RxString searchQuery = ''.obs;
   final RxString statusFilter = 'all'.obs; // 'all', 'active', 'pending', 'paused', 'stopped'
@@ -229,7 +239,6 @@ class CopyTradingMasterCopiersController extends GetxController {
   }
 
   Future<void> _loadInitialData() async {
-    await fetchPlans();
     await load(showLoading: true);
   }
 
@@ -245,6 +254,13 @@ class CopyTradingMasterCopiersController extends GetxController {
           masterPlans.assignAll(
             data.whereType<Map>().map((e) => CopyTradingMasterPlanItem.fromJson(e.cast<String, dynamic>())),
           );
+          final counts = <int, int>{};
+          for (final plan in data.whereType<Map>()) {
+            final planId = int.tryParse(plan['id']?.toString() ?? '');
+            if (planId == null) continue;
+            counts[planId] = num.tryParse(plan['active_copiers_count']?.toString() ?? '')?.toInt() ?? 0;
+          }
+          activeCopiersByPlan.assignAll(counts);
         }
       }
     } catch (_) {}
@@ -271,10 +287,13 @@ class CopyTradingMasterCopiersController extends GetxController {
         params['plan_id'] = planFilter.value.toString();
       }
 
+      // Refresh plans alongside copiers so active_copiers_count stays current after pull-to-refresh / actions.
+      final plansRefresh = fetchPlans();
       final res = await ApiService.get(
         endpoint: '${ApiConstants.ajax}copytrading/master/copiers',
         queryParameters: params,
       );
+      await plansRefresh;
 
       if (!res.success || res.data == null) {
         copiers.clear();

@@ -28,17 +28,14 @@ class _CopyTradingCreatePlanScreenState
   final _formKey = GlobalKey<FormState>();
   int? _selectedEligibleAccountIndex;
   final _nameCtrl = TextEditingController();
-  String _commissionType = 'per_trade';
   final _commissionCtrl = TextEditingController();
-  String? _subscriptionPeriod;
+  String _settlementCycle = 'monthly';
   final _noFeeDaysCtrl = TextEditingController(text: '0');
   final _minCapitalCtrl = TextEditingController();
   final _strategyCtrl = TextEditingController();
   final _riskCtrl = TextEditingController();
-  final _copyRatioCtrl = TextEditingController(text: '1');
+
   final _maxCopiersCtrl = TextEditingController();
-  final _tpPipsCtrl = TextEditingController();
-  final _slPipsCtrl = TextEditingController();
 
   CopyTradingMasterDashboardController get _controller => widget.controller;
 
@@ -56,10 +53,8 @@ class _CopyTradingCreatePlanScreenState
     _minCapitalCtrl.dispose();
     _strategyCtrl.dispose();
     _riskCtrl.dispose();
-    _copyRatioCtrl.dispose();
+
     _maxCopiersCtrl.dispose();
-    _tpPipsCtrl.dispose();
-    _slPipsCtrl.dispose();
     super.dispose();
   }
 
@@ -200,41 +195,6 @@ class _CopyTradingCreatePlanScreenState
                       ),
                       SizedBox(height: 14.h),
                       _buildCommissionSection(),
-                      if (_commissionType == 'subscription') ...[
-                        SizedBox(height: 14.h),
-                        Text(
-                          TranslationUtils.tr('copy_trading_create_plan_billing_period'),
-                          style: AppTextStyles.bodyText.copyWith(
-                            fontSize: 12.sp,
-                            color: _mutedText,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(height: 6.h),
-                        AppSelectField<String>(
-                          value: _subscriptionPeriod ?? 'monthly',
-                          hint: TranslationUtils.tr('copy_trading_plan_select_billing_period'),
-                          sheetTitle: TranslationUtils.tr('copy_trading_plan_billing_period_title'),
-                          options: [
-                            AppSelectOption(
-                              value: 'weekly',
-                              title: TranslationUtils.tr('dc_range_weekly'),
-                            ),
-                            AppSelectOption(
-                              value: 'monthly',
-                              title: TranslationUtils.tr('dc_range_monthly'),
-                            ),
-                            AppSelectOption(
-                              value: 'quarterly',
-                              title: TranslationUtils.tr('copy_trading_plan_quarterly'),
-                            ),
-                          ],
-                          onChanged:
-                              (v) => setState(
-                                () => _subscriptionPeriod = v ?? 'monthly',
-                              ),
-                        ),
-                      ],
                       SizedBox(height: 14.h),
                       _buildGraceAndCapitalRow(),
                       SizedBox(height: 14.h),
@@ -280,7 +240,7 @@ class _CopyTradingCreatePlanScreenState
                         ),
                       ),
                       SizedBox(height: 14.h),
-                      _buildRatioAndCopiersRow(),
+                      _buildMaxCopiersField(),
                     ],
                   ),
                 ),
@@ -293,58 +253,17 @@ class _CopyTradingCreatePlanScreenState
     );
   }
 
+  /// Commission % and settlement cycle — the pricing fields POST master/plans accepts.
   Widget _buildCommissionSection() {
     return LayoutBuilder(
       builder: (context, constraints) {
         final stack = constraints.maxWidth < 360;
 
-        final left = Column(
+        final commission = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              TranslationUtils.tr('copy_trading_create_plan_commission_type'),
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 12.sp,
-                color: _mutedText,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(height: 6.h),
-            AppSelectField<String>(
-              value: _commissionType,
-              hint: TranslationUtils.tr('copy_trading_plan_select_commission_type'),
-              sheetTitle: TranslationUtils.tr('copy_trading_plan_commission_type_title'),
-              options: [
-                AppSelectOption(
-                  value: 'per_trade',
-                  title: TranslationUtils.tr('copy_trading_create_plan_per_trade_commission'),
-                ),
-                AppSelectOption(
-                  value: 'subscription',
-                  title: TranslationUtils.tr('copy_trading_create_plan_subscription_flat_fee'),
-                ),
-              ],
-              onChanged:
-                  (v) => setState(() {
-                    _commissionType = v ?? 'per_trade';
-                    if (_commissionType != 'subscription') {
-                      _subscriptionPeriod = null;
-                      _commissionCtrl.clear();
-                    } else {
-                      _subscriptionPeriod ??= 'monthly';
-                    }
-                  }),
-            ),
-          ],
-        );
-
-        final right = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              _commissionType == 'per_trade'
-                  ? TranslationUtils.tr('copy_trading_plan_commission_percent_required')
-                  : TranslationUtils.tr('copy_trading_plan_subscription_fee_usd_required'),
+              TranslationUtils.tr('copy_trading_plan_commission_percent_required'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
@@ -362,23 +281,57 @@ class _CopyTradingCreatePlanScreenState
                       ? TranslationUtils.tr('ibm_required')
                       : null,
               decoration: InputDecoration(
-                hintText: _commissionType == 'per_trade'
-                    ? TranslationUtils.tr('copy_trading_plan_eg_30')
-                    : TranslationUtils.tr('copy_trading_plan_eg_50'),
+                hintText: TranslationUtils.tr('copy_trading_plan_eg_30'),
                 hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: _mutedText),
               ),
             ),
           ],
         );
 
+        final settlement = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              TranslationUtils.tr('master_plan_detail_screen_settlement_cycle'),
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 12.sp,
+                color: _mutedText,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 6.h),
+            AppSelectField<String>(
+              value: _settlementCycle,
+              hint: TranslationUtils.tr('master_plan_detail_screen_settlement_cycle'),
+              sheetTitle: TranslationUtils.tr('master_plan_detail_screen_settlement_cycle'),
+              options: [
+                AppSelectOption(
+                  value: 'daily',
+                  title: TranslationUtils.tr('dc_range_daily'),
+                ),
+                AppSelectOption(
+                  value: 'weekly',
+                  title: TranslationUtils.tr('dc_range_weekly'),
+                ),
+                AppSelectOption(
+                  value: 'monthly',
+                  title: TranslationUtils.tr('dc_range_monthly'),
+                ),
+              ],
+              onChanged: (v) => setState(() => _settlementCycle = v ?? _settlementCycle),
+            ),
+          ],
+        );
+
         if (stack) {
-          return Column(children: [left, SizedBox(height: 12.h), right]);
+          return Column(children: [commission, SizedBox(height: 12.h), settlement]);
         }
         return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: left),
+            Expanded(child: commission),
             SizedBox(width: 12.w),
-            Expanded(child: right),
+            Expanded(child: settlement),
           ],
         );
       },
@@ -462,78 +415,28 @@ class _CopyTradingCreatePlanScreenState
     );
   }
 
-  Widget _buildRatioAndCopiersRow() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final stack = constraints.maxWidth < 360;
-
-        final left = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              TranslationUtils.tr('copy_trading_create_plan_copy_ratio'),
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 12.sp,
-                color: _mutedText,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(height: 6.h),
-            TextFormField(
-              controller: _copyRatioCtrl,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: const InputDecoration(
-                hintText: '1',
-              ),
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              TranslationUtils.tr('copy_trading_create_plan_default_copier_volume_scales_from_this'),
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 10.sp,
-                color: _mutedText,
-              ),
-            ),
-          ],
-        );
-
-        final right = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              TranslationUtils.tr('copy_trading_create_plan_max_copiers'),
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 12.sp,
-                color: _mutedText,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(height: 6.h),
-            TextFormField(
-              controller: _maxCopiersCtrl,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: TranslationUtils.tr('copy_trading_create_plan_unlimited_if_empty'),
-                hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: _mutedText),
-              ),
-            ),
-          ],
-        );
-
-        if (stack) {
-          return Column(children: [left, SizedBox(height: 12.h), right]);
-        }
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: left),
-            SizedBox(width: 12.w),
-            Expanded(child: right),
-          ],
-        );
-      },
+  Widget _buildMaxCopiersField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          TranslationUtils.tr('copy_trading_create_plan_max_copiers'),
+          style: AppTextStyles.bodyText.copyWith(
+            fontSize: 12.sp,
+            color: _mutedText,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        SizedBox(height: 6.h),
+        TextFormField(
+          controller: _maxCopiersCtrl,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: TranslationUtils.tr('copy_trading_create_plan_unlimited_if_empty'),
+            hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: _mutedText),
+          ),
+        ),
+      ],
     );
   }
 
@@ -636,27 +539,20 @@ class _CopyTradingCreatePlanScreenState
       return;
     }
 
+    final riskInfo = _riskCtrl.text.trim();
+    final maxCopiersText = _maxCopiersCtrl.text.trim();
     final body = <String, dynamic>{
       'trading_account_id': acc.id,
       'plan_name': _nameCtrl.text.trim(),
-      'commission_type': _commissionType,
-      'subscription_period': _commissionType == 'subscription' ? (_subscriptionPeriod ?? 'monthly') : null,
-      'min_capital': minCap,
-      'no_fee_days': int.tryParse(_noFeeDaysCtrl.text.trim()) ?? 0,
-      'commission_value': commissionValue,
-      'copy_ratio': num.tryParse(_copyRatioCtrl.text.trim()) ?? 1,
       'strategy_description': _strategyCtrl.text.trim(),
-      'risk_info': _riskCtrl.text.trim(),
+      'risk_info': riskInfo.isEmpty ? null : riskInfo,
+      'commission_value': commissionValue,
+      'settlement_cycle': _settlementCycle,
+      'no_fee_days': int.tryParse(_noFeeDaysCtrl.text.trim()) ?? 0,
+      'min_capital': minCap,
+
+      'max_copiers': maxCopiersText.isEmpty ? null : int.tryParse(maxCopiersText),
     };
-    final maxCopiersText = _maxCopiersCtrl.text.trim();
-    if (maxCopiersText.isNotEmpty) {
-      body['max_copiers'] = int.tryParse(maxCopiersText);
-    } else {
-      body['max_copiers'] = null;
-    }
-    if (_commissionType == 'subscription') {
-      body['subscription_fee'] = commissionValue;
-    }
 
     AppLogger.debug('Create plan payload: $body');
     final res = await _controller.createPlan(body);

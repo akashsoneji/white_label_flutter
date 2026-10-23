@@ -30,15 +30,16 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
   final _formKey = GlobalKey<FormState>();
   
   late final TextEditingController _nameCtrl;
-  late String _commissionType;
   late final TextEditingController _commissionCtrl;
-  String? _subscriptionPeriod;
   late final TextEditingController _noFeeDaysCtrl;
   late final TextEditingController _minCapitalCtrl;
   late final TextEditingController _strategyCtrl;
   late final TextEditingController _riskCtrl;
   late final TextEditingController _copyRatioCtrl;
   late final TextEditingController _maxCopiersCtrl;
+  late String _settlementCycle;
+
+  static const List<String> _settlementCycles = ['daily', 'weekly', 'monthly'];
 
   CopyTradingMasterDashboardController get _controller => widget.controller;
   Color get _mutedText => AppColors.textGrey;
@@ -48,8 +49,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
     super.initState();
     final p = widget.plan;
     _nameCtrl = TextEditingController(text: p.planName);
-    _commissionType = p.commissionType;
-    
+
     final commissionVal = p.commissionType == 'subscription' ? p.subscriptionFee : p.commissionPercentage;
     _commissionCtrl = TextEditingController(
       text: commissionVal == commissionVal.toInt() ? commissionVal.toInt().toString() : commissionVal.toString(),
@@ -70,8 +70,10 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
     _maxCopiersCtrl = TextEditingController(text: p.maxCopiers?.toString() ?? '');
     _strategyCtrl = TextEditingController(text: p.strategyDescription);
     _riskCtrl = TextEditingController(text: p.riskInformation);
-    
-    _subscriptionPeriod = 'monthly';
+    final planCycle = p.settlementCycle.toLowerCase();
+    _settlementCycle = _settlementCycles.contains(planCycle) ? planCycle : 'monthly';
+
+
   }
 
   @override
@@ -196,40 +198,8 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
                     ),
                     SizedBox(height: 14.h),
 
-                    // Commission Type & Value Section
+                    // Commission % & Settlement cycle
                     _buildCommissionSection(),
-                    if (_commissionType == 'subscription') ...[
-                      SizedBox(height: 14.h),
-                      Text(
-                        TranslationUtils.tr('copy_trading_create_plan_billing_period'),
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 12.sp,
-                          color: _mutedText,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(height: 6.h),
-                      AppSelectField<String>(
-                        value: _subscriptionPeriod ?? 'monthly',
-                        hint: TranslationUtils.tr('copy_trading_plan_select_billing_period'),
-                        sheetTitle: TranslationUtils.tr('copy_trading_plan_billing_period_title'),
-                        options: [
-                          AppSelectOption(
-                            value: 'weekly',
-                            title: TranslationUtils.tr('dc_range_weekly'),
-                          ),
-                          AppSelectOption(
-                            value: 'monthly',
-                            title: TranslationUtils.tr('dc_range_monthly'),
-                          ),
-                          AppSelectOption(
-                            value: 'quarterly',
-                            title: TranslationUtils.tr('copy_trading_plan_quarterly'),
-                          ),
-                        ],
-                        onChanged: (v) => setState(() => _subscriptionPeriod = v ?? 'monthly'),
-                      ),
-                    ],
                     SizedBox(height: 14.h),
 
                     // Grace period & Min Capital Row
@@ -296,57 +266,17 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
     );
   }
 
+  /// Commission % and settlement cycle — the pricing fields PUT master/plans/{id} accepts.
   Widget _buildCommissionSection() {
     return LayoutBuilder(
       builder: (context, constraints) {
         final stack = constraints.maxWidth < 360;
 
-        final left = Column(
+        final commission = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              TranslationUtils.tr('copy_trading_create_plan_commission_type'),
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 12.sp,
-                color: _mutedText,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(height: 6.h),
-            AppSelectField<String>(
-              value: _commissionType,
-              hint: TranslationUtils.tr('copy_trading_plan_select_commission_type'),
-              sheetTitle: TranslationUtils.tr('copy_trading_plan_commission_type_title'),
-              options: [
-                AppSelectOption(
-                  value: 'per_trade',
-                  title: TranslationUtils.tr('copy_trading_create_plan_per_trade_commission'),
-                ),
-                AppSelectOption(
-                  value: 'subscription',
-                  title: TranslationUtils.tr('copy_trading_create_plan_subscription_flat_fee'),
-                ),
-              ],
-              onChanged: (v) => setState(() {
-                _commissionType = v ?? 'per_trade';
-                if (_commissionType != 'subscription') {
-                  _subscriptionPeriod = null;
-                  _commissionCtrl.clear();
-                } else {
-                  _subscriptionPeriod ??= 'monthly';
-                }
-              }),
-            ),
-          ],
-        );
-
-        final right = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              _commissionType == 'per_trade'
-                  ? TranslationUtils.tr('copy_trading_plan_commission_percent_required')
-                  : TranslationUtils.tr('copy_trading_plan_subscription_fee_usd_required'),
+              TranslationUtils.tr('copy_trading_plan_commission_percent_required'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
@@ -361,23 +291,57 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
                   ? TranslationUtils.tr('ibm_required')
                   : null,
               decoration: InputDecoration(
-                hintText: _commissionType == 'per_trade'
-                    ? TranslationUtils.tr('copy_trading_plan_eg_30')
-                    : TranslationUtils.tr('copy_trading_plan_eg_50'),
+                hintText: TranslationUtils.tr('copy_trading_plan_eg_30'),
                 hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: _mutedText),
               ),
             ),
           ],
         );
 
+        final settlement = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              TranslationUtils.tr('master_plan_detail_screen_settlement_cycle'),
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 12.sp,
+                color: _mutedText,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 6.h),
+            AppSelectField<String>(
+              value: _settlementCycle,
+              hint: TranslationUtils.tr('master_plan_detail_screen_settlement_cycle'),
+              sheetTitle: TranslationUtils.tr('master_plan_detail_screen_settlement_cycle'),
+              options: [
+                AppSelectOption(
+                  value: 'daily',
+                  title: TranslationUtils.tr('dc_range_daily'),
+                ),
+                AppSelectOption(
+                  value: 'weekly',
+                  title: TranslationUtils.tr('dc_range_weekly'),
+                ),
+                AppSelectOption(
+                  value: 'monthly',
+                  title: TranslationUtils.tr('dc_range_monthly'),
+                ),
+              ],
+              onChanged: (v) => setState(() => _settlementCycle = v ?? _settlementCycle),
+            ),
+          ],
+        );
+
         if (stack) {
-          return Column(children: [left, SizedBox(height: 12.h), right]);
+          return Column(children: [commission, SizedBox(height: 12.h), settlement]);
         }
         return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: left),
+            Expanded(child: commission),
             SizedBox(width: 12.w),
-            Expanded(child: right),
+            Expanded(child: settlement),
           ],
         );
       },
@@ -613,10 +577,10 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
 
     final body = <String, dynamic>{
       'plan_name': _nameCtrl.text.trim(),
-      'commission_type': _commissionType,
+      'settlement_cycle': _settlementCycle,
       'no_fee_days': int.tryParse(_noFeeDaysCtrl.text.trim()) ?? 0,
       'strategy_description': _strategyCtrl.text.trim(),
-      'risk_info': _riskCtrl.text.trim(),
+      'risk_info': _riskCtrl.text.trim().isEmpty ? null : _riskCtrl.text.trim(),
     };
 
     // Copiers already joined on these terms; the API returns 422 "prohibited"
@@ -633,10 +597,6 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
       body['max_copiers'] = int.tryParse(maxCopiersText);
     } else {
       body['max_copiers'] = null;
-    }
-
-    if (_commissionType == 'subscription') {
-      body['subscription_fee'] = commissionValue;
     }
 
     AppLogger.debug('Update plan payload: $body');

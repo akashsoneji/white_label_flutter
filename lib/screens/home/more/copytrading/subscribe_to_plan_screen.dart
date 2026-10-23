@@ -845,11 +845,6 @@ class _CopySettingsCard extends StatelessWidget {
                     _SelectItem(value: 'proportional_equity', label: TranslationUtils.tr('copy_trading_sizing_equity_based')),
                     _SelectItem(value: 'proportional_balance', label: TranslationUtils.tr('copy_trading_sizing_balance_based')),
                     _SelectItem(value: 'multiplier_only', label: TranslationUtils.tr('copy_trading_sizing_multiplier')),
-                    _SelectItem(value: 'mirror_ratio', label: TranslationUtils.tr('copy_trading_sizing_mirror_ratio')),
-                    _SelectItem(value: 'percentage_risk', label: TranslationUtils.tr('copy_trading_sizing_percentage_risk')),
-                    _SelectItem(value: 'reverse', label: TranslationUtils.tr('copy_trading_sizing_reverse')),
-                    _SelectItem(value: 'dynamic_lot', label: TranslationUtils.tr('copy_trading_sizing_dynamic_lot')),
-                    _SelectItem(value: 'fixed_ratio', label: TranslationUtils.tr('copy_trading_sizing_fixed_ratio')),
                   ],
                   onChanged: (v) {
                     controller.sizingMethod.value = v;

@@ -9,6 +9,7 @@ import 'package:crm_app/controllers/copy_trading/copy_trading_copier_subscriptio
 import 'package:crm_app/screens/home/more/copytrading/explore_masters_screen.dart';
 import 'package:crm_app/screens/home/more/copytrading/master_details_screen.dart';
 import 'package:crm_app/screens/home/more/copytrading/subscribe_to_plan_screen.dart';
+import 'package:crm_app/screens/copy_trading/subscription_detail_screen.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_master_details_controller.dart'
     show CopyTradingPlan;
 import 'package:crm_app/controllers/copy_trading/copy_trading_hub_controller.dart';
@@ -338,15 +339,8 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
   }
 
   void _view(int id) {
-    final sub = controller.subscriptions.firstWhereOrNull((e) => e.id == id);
-    if (sub == null) return;
-
     Get.to(
-      () => MasterDetailsScreen(
-        masterCode: sub.masterCode,
-        masterNickname:
-            sub.masterName.isNotEmpty ? sub.masterName : sub.masterCode,
-      ),
+      () => SubscriptionDetailScreen(subscriptionId: id),
       transition: Transition.rightToLeft,
       duration: const Duration(milliseconds: 250),
     );

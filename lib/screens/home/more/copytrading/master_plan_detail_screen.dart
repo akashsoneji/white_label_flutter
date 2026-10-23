@@ -91,6 +91,47 @@ class MasterPlanDetailScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 12),
 
+                _CollapsibleSection(
+                  title: TranslationUtils.tr('master_plan_detail_screen_copiers'),
+                  count: plan.copiersTotal > 0 ? plan.copiersTotal : plan.copiers.length,
+                  tokens: t,
+                  child: _PlanItemList(
+                    itemCount: plan.copiers.length,
+                    emptyText: TranslationUtils.tr('master_plan_detail_screen_no_copiers'),
+                    tokens: t,
+                    itemBuilder: (_, i) => _PlanCopierRow(copier: plan.copiers[i], tokens: t),
+                  ),
+                ),
+                SizedBox(height: 12),
+
+                _CollapsibleSection(
+                  title: TranslationUtils.tr('dashboard_open_positions'),
+                  count: plan.openPositionsDetail.length,
+                  tokens: t,
+                  child: _PlanItemList(
+                    itemCount: plan.openPositionsDetail.length,
+                    emptyText: TranslationUtils.tr('master_plan_detail_screen_no_open_positions'),
+                    tokens: t,
+                    itemBuilder: (_, i) =>
+                        _OpenPositionRow(position: plan.openPositionsDetail[i], tokens: t),
+                  ),
+                ),
+                SizedBox(height: 12),
+
+                _CollapsibleSection(
+                  title: TranslationUtils.tr('master_plan_detail_screen_trade_history'),
+                  count: plan.tradeHistory.length,
+                  tokens: t,
+                  accentColor: t.success,
+                  child: _PlanItemList(
+                    itemCount: plan.tradeHistory.length,
+                    emptyText: TranslationUtils.tr('master_plan_detail_screen_no_trades'),
+                    tokens: t,
+                    itemBuilder: (_, i) => _TradeHistoryRow(trade: plan.tradeHistory[i], tokens: t),
+                  ),
+                ),
+                SizedBox(height: 12),
+
                 // Commission summary
                 _SectionCard(
                   title: TranslationUtils.tr('master_plan_detail_screen_commission_summary'),
@@ -99,6 +140,21 @@ class MasterPlanDetailScreen extends StatelessWidget {
                   child: _CommissionSummary(
                     comm: plan.commissionSummary,
                     tokens: t,
+                  ),
+                ),
+                SizedBox(height: 12),
+
+                _CollapsibleSection(
+                  title: TranslationUtils.tr('master_plan_detail_screen_commission_history'),
+                  count: plan.commissionHistory.length,
+                  tokens: t,
+                  accentColor: t.warning,
+                  child: _PlanItemList(
+                    itemCount: plan.commissionHistory.length,
+                    emptyText: TranslationUtils.tr('master_plan_detail_screen_no_commission_history'),
+                    tokens: t,
+                    itemBuilder: (_, i) =>
+                        _CommissionHistoryRow(entry: plan.commissionHistory[i], tokens: t),
                   ),
                 ),
                 SizedBox(height: 12),
@@ -142,6 +198,20 @@ class MasterPlanDetailScreen extends StatelessWidget {
                   title: TranslationUtils.tr('master_plan_detail_screen_account_system'),
                   tokens: t,
                   child: _AccountSystem(plan: plan, tokens: t),
+                ),
+                SizedBox(height: 12),
+
+                _CollapsibleSection(
+                  title: TranslationUtils.tr('master_plan_detail_screen_activity'),
+                  count: plan.activityFeed.length,
+                  tokens: t,
+                  accentColor: t.brandBlue,
+                  child: _PlanItemList(
+                    itemCount: plan.activityFeed.length,
+                    emptyText: TranslationUtils.tr('master_plan_detail_screen_no_activity'),
+                    tokens: t,
+                    itemBuilder: (_, i) => _ActivityRow(item: plan.activityFeed[i], tokens: t),
+                  ),
                 ),
                 SizedBox(height: 12),
 
@@ -1021,6 +1091,58 @@ class _PerformanceRow extends StatelessWidget {
             ),
           ],
         ),
+        SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _PerfCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_wins'),
+                value: '${perf.wins}',
+                valueColor: tokens.success,
+                tokens: tokens,
+              ),
+            ),
+            SizedBox(width: 8),
+            Expanded(
+              child: _PerfCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_losses'),
+                value: '${perf.losses}',
+                valueColor: tokens.danger,
+                tokens: tokens,
+              ),
+            ),
+            SizedBox(width: 8),
+            Expanded(
+              child: _PerfCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_breakeven'),
+                value: '${perf.breakeven}',
+                tokens: tokens,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _PerfCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_gross_profit'),
+                value: _planMoney(perf.grossProfit),
+                valueColor: tokens.success,
+                tokens: tokens,
+              ),
+            ),
+            SizedBox(width: 8),
+            Expanded(
+              child: _PerfCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_gross_loss'),
+                value: _planMoney(perf.grossLoss),
+                valueColor: tokens.danger,
+                tokens: tokens,
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -1242,6 +1364,618 @@ class _EquityPt {
   final DateTime date;
   final double value;
   _EquityPt(this.date, this.value);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Collapsible list sections (copiers, positions, trades, commission, activity)
+// ─────────────────────────────────────────────────────────────────────────────
+
+String _planMoney(num value) => value < 0
+    ? '-\$${value.abs().toStringAsFixed(2)}'
+    : '\$${value.toStringAsFixed(2)}';
+
+String _planDateTime(String iso) {
+  if (iso.isEmpty) return '—';
+  final parsed = DateTime.tryParse(iso);
+  if (parsed == null) return iso;
+  return DateFormat('d MMM yyyy, HH:mm').format(parsed.toLocal());
+}
+
+Color _pnlColor(num value, PlanTokens tokens) {
+  if (value > 0) return tokens.success;
+  if (value < 0) return tokens.danger;
+  return tokens.textPrimary;
+}
+
+class _CollapsibleSection extends StatefulWidget {
+  final String title;
+  final int count;
+  final PlanTokens tokens;
+  final Color? accentColor;
+  final Widget child;
+
+  const _CollapsibleSection({
+    required this.title,
+    required this.count,
+    required this.tokens,
+    required this.child,
+    this.accentColor,
+  });
+
+  @override
+  State<_CollapsibleSection> createState() => _CollapsibleSectionState();
+}
+
+class _CollapsibleSectionState extends State<_CollapsibleSection> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = widget.tokens;
+    final accent = widget.accentColor ?? tokens.brandBlue;
+    return Container(
+      width: double.infinity,
+      decoration: tokens.cardDecoration,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => setState(() => _expanded = !_expanded),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(14, 12, 10, 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 3,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: accent,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: tokens.textPrimary,
+                        letterSpacing: 0.1,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '${widget.count}',
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: accent,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  AnimatedRotation(
+                    turns: _expanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 20,
+                      color: tokens.mutedText,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_expanded)
+            Padding(
+              padding: EdgeInsets.fromLTRB(14, 0, 14, 12),
+              child: widget.child,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlanItemList extends StatelessWidget {
+  final int itemCount;
+  final IndexedWidgetBuilder itemBuilder;
+  final String emptyText;
+  final PlanTokens tokens;
+
+  const _PlanItemList({
+    required this.itemCount,
+    required this.itemBuilder,
+    required this.emptyText,
+    required this.tokens,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (itemCount == 0) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Center(
+          child: Text(
+            emptyText,
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 12,
+              color: tokens.mutedText,
+            ),
+          ),
+        ),
+      );
+    }
+    return Column(
+      children: [
+        for (int i = 0; i < itemCount; i++) ...[
+          if (i > 0) _Divider(tokens: tokens),
+          itemBuilder(context, i),
+        ],
+      ],
+    );
+  }
+}
+
+/// Bold title, optional pills, optional trailing widget — shared by every row.
+class _ItemHeader extends StatelessWidget {
+  final String title;
+  final List<Widget> pills;
+  final Widget? trailing;
+  final PlanTokens tokens;
+
+  const _ItemHeader({
+    required this.title,
+    required this.tokens,
+    this.pills = const [],
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Flexible(
+          child: Text(
+            title,
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: tokens.textPrimary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        for (final pill in pills) ...[SizedBox(width: 6), pill],
+        const Spacer(),
+        if (trailing != null) trailing!,
+      ],
+    );
+  }
+}
+
+class _ItemSubtitle extends StatelessWidget {
+  final String text;
+  final PlanTokens tokens;
+  const _ItemSubtitle({required this.text, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(top: 3),
+      child: Text(
+        text,
+        style: AppTextStyles.bodyText.copyWith(
+          fontSize: 11,
+          color: tokens.mutedText,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+}
+
+/// Row of summary cells separated by thin vertical lines.
+class _ItemStats extends StatelessWidget {
+  final List<_SummaryCell> cells;
+  final PlanTokens tokens;
+  const _ItemStats({required this.cells, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(top: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (int i = 0; i < cells.length; i++) ...[
+            if (i > 0) _SummaryVSep(tokens: tokens),
+            Expanded(child: cells[i]),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _DirectionPill extends StatelessWidget {
+  final String direction;
+  final PlanTokens tokens;
+  const _DirectionPill({required this.direction, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    final isBuy = direction.toLowerCase() == 'buy';
+    return _StatusPill(
+      label: direction.toUpperCase(),
+      color: isBuy ? tokens.success : tokens.danger,
+      tokens: tokens,
+    );
+  }
+}
+
+class _PlanCopierRow extends StatelessWidget {
+  final PlanCopierItem copier;
+  final PlanTokens tokens;
+  const _PlanCopierRow({required this.copier, required this.tokens});
+
+  Color _statusColor() {
+    switch (copier.status.toLowerCase()) {
+      case 'active':
+        return tokens.success;
+      case 'paused':
+      case 'pending':
+        return tokens.warning;
+      case 'stopped':
+      case 'cancelled':
+        return tokens.mutedText;
+      default:
+        return tokens.brandBlue;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final subtitle = [copier.accountNumber, copier.userEmail]
+        .where((part) => part.isNotEmpty)
+        .join(' · ');
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _ItemHeader(
+            title: copier.userName.isNotEmpty ? copier.userName : '—',
+            tokens: tokens,
+            trailing: _StatusPill(
+              label: _capitalize(copier.status),
+              color: _statusColor(),
+              tokens: tokens,
+            ),
+          ),
+          if (subtitle.isNotEmpty) _ItemSubtitle(text: subtitle, tokens: tokens),
+          _ItemStats(
+            tokens: tokens,
+            cells: [
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_capital'),
+                value: _planMoney(copier.capitalAmount),
+                tokens: tokens,
+              ),
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_pnl'),
+                value: _planMoney(copier.totalPnl),
+                valueColor: _pnlColor(copier.totalPnl, tokens),
+                tokens: tokens,
+              ),
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_commission_paid'),
+                value: _planMoney(copier.totalCommissionPaid),
+                tokens: tokens,
+              ),
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_pending_commission'),
+                value: _planMoney(copier.pendingCommission),
+                valueColor: tokens.warning,
+                tokens: tokens,
+              ),
+            ],
+          ),
+          _ItemSubtitle(
+            text: '${TranslationUtils.tr('master_plan_detail_screen_joined')}: '
+                '${_planDateTime(copier.joinedAt)} · '
+                '${TranslationUtils.tr('master_plan_detail_screen_open_trades')}: '
+                '${copier.openTradesCount}',
+            tokens: tokens,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OpenPositionRow extends StatelessWidget {
+  final PlanOpenPositionItem position;
+  final PlanTokens tokens;
+  const _OpenPositionRow({required this.position, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    final subtitle = [
+      position.copierName,
+      position.copierAccount,
+      _planDateTime(position.openTime),
+    ].where((part) => part.isNotEmpty).join(' · ');
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _ItemHeader(
+            title: position.symbol,
+            tokens: tokens,
+            pills: [
+              if (position.direction.isNotEmpty)
+                _DirectionPill(direction: position.direction, tokens: tokens),
+            ],
+            trailing: Text(
+              _planMoney(position.profit),
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: _pnlColor(position.profit, tokens),
+              ),
+            ),
+          ),
+          _ItemSubtitle(text: subtitle, tokens: tokens),
+          _ItemStats(
+            tokens: tokens,
+            cells: [
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_master_volume'),
+                value: '${position.masterVolume}',
+                tokens: tokens,
+              ),
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_copier_volume'),
+                value: '${position.copierVolume}',
+                tokens: tokens,
+              ),
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_open_price'),
+                value: '${position.openPrice}',
+                tokens: tokens,
+              ),
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_current_price'),
+                value: '${position.currentPrice}',
+                tokens: tokens,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TradeHistoryRow extends StatelessWidget {
+  final CopyTradingMasterTradeHistoryItem trade;
+  final PlanTokens tokens;
+  const _TradeHistoryRow({required this.trade, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    final subtitle = [
+      trade.copierName,
+      trade.copierAccount,
+      _planDateTime(trade.closeTime),
+    ].where((part) => part.isNotEmpty).join(' · ');
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _ItemHeader(
+            title: trade.symbol,
+            tokens: tokens,
+            pills: [
+              if (trade.direction.isNotEmpty)
+                _DirectionPill(direction: trade.direction, tokens: tokens),
+            ],
+            trailing: trade.distributionStatus.isEmpty
+                ? null
+                : _GrayPill(
+                    label: _capitalize(trade.distributionStatus),
+                    tokens: tokens,
+                  ),
+          ),
+          _ItemSubtitle(text: subtitle, tokens: tokens),
+          _ItemStats(
+            tokens: tokens,
+            cells: [
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_master_volume'),
+                value: '${trade.masterVolume}',
+                tokens: tokens,
+              ),
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_copier_volume'),
+                value: '${trade.copierVolume}',
+                tokens: tokens,
+              ),
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_price'),
+                value: '${trade.openPrice} → ${trade.closePrice}',
+                tokens: tokens,
+              ),
+            ],
+          ),
+          _ItemStats(
+            tokens: tokens,
+            cells: [
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_master_pnl'),
+                value: _planMoney(trade.masterProfit),
+                valueColor: _pnlColor(trade.masterProfit, tokens),
+                tokens: tokens,
+              ),
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_copier_pnl'),
+                value: _planMoney(trade.copierProfit),
+                valueColor: _pnlColor(trade.copierProfit, tokens),
+                tokens: tokens,
+              ),
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_commission_accrued'),
+                value: _planMoney(trade.commissionAccruedDisplay),
+                valueColor: tokens.warning,
+                tokens: tokens,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CommissionHistoryRow extends StatelessWidget {
+  final CopyTradingMasterCommissionHistoryItem entry;
+  final PlanTokens tokens;
+  const _CommissionHistoryRow({required this.entry, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    final subtitle = [
+      entry.copierName,
+      entry.copierAccount,
+      _planDateTime(entry.settledAt),
+    ].where((part) => part.isNotEmpty).join(' · ');
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _ItemHeader(
+            title: entry.symbol.isNotEmpty ? entry.symbol : '—',
+            tokens: tokens,
+            pills: [
+              if (entry.direction.isNotEmpty)
+                _DirectionPill(direction: entry.direction, tokens: tokens),
+              if (entry.inGracePeriod)
+                _StatusPill(
+                  label: TranslationUtils.tr('master_plan_detail_screen_grace_period'),
+                  color: tokens.warning,
+                  tokens: tokens,
+                ),
+            ],
+            trailing: entry.status.isEmpty
+                ? null
+                : _GrayPill(label: _capitalize(entry.status), tokens: tokens),
+          ),
+          _ItemSubtitle(text: subtitle, tokens: tokens),
+          _ItemStats(
+            tokens: tokens,
+            cells: [
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_gross_share'),
+                value: _planMoney(entry.grossProfitShare),
+                valueColor: _pnlColor(entry.grossProfitShare, tokens),
+                tokens: tokens,
+              ),
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_commission_accrued'),
+                value: _planMoney(entry.commissionAccruedDisplay),
+                valueColor: tokens.warning,
+                tokens: tokens,
+              ),
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_commission_preview'),
+                value: _planMoney(entry.commissionPreview),
+                tokens: tokens,
+              ),
+              _SummaryCell(
+                label: TranslationUtils.tr('master_plan_detail_screen_commission_credited'),
+                value: _planMoney(entry.masterCommissionCredited),
+                tokens: tokens,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActivityRow extends StatelessWidget {
+  final CopyTradingPlanActivityFeedItem item;
+  final PlanTokens tokens;
+  const _ActivityRow({required this.item, required this.tokens});
+
+  IconData _icon() {
+    final type = item.type.toLowerCase();
+    if (type.contains('trade')) return Icons.swap_vert_rounded;
+    if (type.contains('join') || type.contains('copier')) {
+      return Icons.person_add_alt_1_rounded;
+    }
+    return Icons.notifications_none_rounded;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: tokens.brandBlue.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(_icon(), size: 15, color: tokens.brandBlue),
+          ),
+          SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.title,
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: tokens.textPrimary,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (item.subtitle.isNotEmpty)
+                  _ItemSubtitle(text: item.subtitle, tokens: tokens),
+                _ItemSubtitle(text: _planDateTime(item.at), tokens: tokens),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
