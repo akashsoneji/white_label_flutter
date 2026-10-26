@@ -4,7 +4,6 @@ import 'package:crm_app/controllers/copy_trading/copy_trading_master_copiers_con
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/home/more/copytrading/copier_subscription_history_screen.dart';
 import 'package:crm_app/services/language_service.dart';
-import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -597,8 +596,10 @@ class _CopierListSliver extends StatelessWidget {
       }
 
       final showLoader = controller.isLoadingMore.value;
+      // Bottom inset clears the floating copy-trading nav pill, which
+      // overlays page content (FAB slot in CopyTradingMainScreen).
       return SliverPadding(
-        padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 40.h),
+        padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 120.h),
         sliver: SliverList.separated(
           itemCount: copiers.length + (showLoader ? 1 : 0),
           separatorBuilder: (_, _) => SizedBox(height: 8.h),
@@ -694,15 +695,11 @@ class _CopierCard extends StatelessWidget {
 
   const _CopierCard({super.key, required this.item, required this.controller});
 
-  bool get _isPaused => item.status.toLowerCase() == 'paused';
-  bool get _isActive => item.status.toLowerCase() == 'active';
-
   @override
   Widget build(BuildContext context) {
-    final canManage = _isActive || _isPaused;
-    final accountLabel = item.serverType.isEmpty
-        ? item.accountNumber
-        : '${item.accountNumber}';
+    // The copiers API sends no net_pnl, so Net P&L is the copier's P&L
+    // after the estimated (pending, not yet settled) commission.
+    final netPnl = item.totalPnl - item.pendingCommission;
     final subtitle = [item.planName, item.accountNumber]
         .where((s) => s.isNotEmpty)
         .join('  •  ');
@@ -766,13 +763,26 @@ class _CopierCard extends StatelessWidget {
               ),
             ),
             SizedBox(width: 8.w),
-            Text(
-              _money(item.totalPnl),
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w800,
-                color: _pnlColor(item.totalPnl),
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  _money(item.totalPnl),
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w800,
+                    color: _pnlColor(item.totalPnl),
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+                Text(
+                  TranslationUtils.tr('my_copies_card_pnl'),
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 9.5.sp,
+                    color: AppColors.textGrey,
+                  ),
+                ),
+              ],
             ),
             AnimatedRotation(
               turns: expanded ? 0.5 : 0,
@@ -786,246 +796,65 @@ class _CopierCard extends StatelessWidget {
           ],
         ),
       ),
+      // Name, status, plan, account and P&L are already in the header, so
+      // the body only carries the remaining fields.
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Divider(height: 1, color: AppColors.border.withValues(alpha: 0.12)),
           Padding(
-            padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
+            padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (item.userEmail.isNotEmpty) ...[
-                  Row(
-                    children: [
-                      Icon(Icons.mail_outline_rounded, size: 14.r, color: AppColors.textGrey),
-                      SizedBox(width: 6.w),
-                      Expanded(
-                        child: Text(
-                          item.userEmail,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.bodyText.copyWith(
-                            fontSize: 11.sp,
-                            color: AppColors.textGrey,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8.h),
-                ],
-                if (item.planName.isNotEmpty || item.commissionDisplay.isNotEmpty) ...[
-                  Wrap(
-                    spacing: 6.w,
-                    runSpacing: 6.h,
-                    children: [
-                      if (item.planName.isNotEmpty)
-                        _InfoChip(icon: Icons.layers_outlined, label: item.planName),
-                      if (item.commissionDisplay.isNotEmpty)
-                        _InfoChip(icon: Icons.percent_rounded, label: item.commissionDisplay),
-                    ],
-                  ),
-                  SizedBox(height: 8.h),
-                ],
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 8.h),
-                  decoration: BoxDecoration(
-                    color: AppColors.tradeBackgroundCenterColor.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Row(
-                    children: [
-                      _KeyMetric(
-                        label: TranslationUtils.tr('copy_trading_capital_allocated_upper'),
-                        value: _money(item.capitalAmount),
-                      ),
-                      _KeyMetric(
-                        label: TranslationUtils.tr('copy_trading_combined_pnl_upper'),
-                        value: _money(item.totalPnl),
-                        valueColor: _pnlColor(item.totalPnl),
-                      ),
-                      _KeyMetric(
-                        label: TranslationUtils.tr('copy_trading_commission_paid_upper'),
-                        value: _money(item.totalCommissionPaid),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 10.h),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _DetailLine(
-                        icon: Icons.account_balance_wallet_outlined,
-                        label: TranslationUtils.tr('copy_trading_account_upper'),
-                        value: accountLabel,
-                      ),
+                _MoneyStrip(
+                  tiles: [
+                    _MoneyTile(
+                      label: TranslationUtils.tr('my_copies_card_capital'),
+                      value: _money(item.capitalAmount),
                     ),
-                    SizedBox(width: 8.w),
-                    Expanded(
-                      child: _DetailLine(
-                        icon: Icons.swap_vert_rounded,
-                        label: TranslationUtils.tr('copy_trading_open_trades_upper'),
-                        value: item.openTradesCount.toString(),
-                      ),
+                    _MoneyTile(
+                      label: TranslationUtils.tr('my_copies_card_estimated_commission'),
+                      value: _money(item.pendingCommission),
                     ),
-                  ],
-                ),
-                SizedBox(height: 8.h),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _DetailLine(
-                        icon: Icons.tune_rounded,
-                        label: TranslationUtils.tr('copy_trading_method_upper'),
-                        value: item.sizingMethod.isEmpty
-                            ? '-'
-                            : item.sizingMethod.replaceAll('_', ' ').toUpperCase(),
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Expanded(
-                      child: _DetailLine(
-                        icon: Icons.schedule_rounded,
-                        label: TranslationUtils.tr('copy_trading_last_update_upper'),
-                        value: _formatDate(item.updatedAt),
-                      ),
+                    _MoneyTile(
+                      label: TranslationUtils.tr('my_copies_card_net_pnl'),
+                      value: _money(netPnl),
+                      color: _pnlColor(netPnl),
                     ),
                   ],
                 ),
                 SizedBox(height: 10.h),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _CardActionButton(
-                        icon: Icons.history_rounded,
-                        label: TranslationUtils.tr('general_history'),
-                        color: AppColors.primary,
-                        onPressed: () => Get.to(
-                          () => CopierSubscriptionHistoryScreen(copierId: item.id),
-                        ),
-                      ),
+                _InfoGrid(
+                  cells: [
+                    _InfoCell(
+                      label: TranslationUtils.tr('my_copies_card_commission_rate'),
+                      value: item.commissionDisplay,
                     ),
-                    if (canManage) ...[
-                      SizedBox(width: 6.w),
-                      Expanded(
-                        child: _CardActionButton(
-                          icon: _isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
-                          label: _isPaused
-                              ? TranslationUtils.tr('my_plans_tab_resume')
-                              : TranslationUtils.tr('my_plans_tab_pause'),
-                          color: _isPaused ? AppColors.green : AppColors.warning,
-                          onPressed: () => _togglePauseResume(context),
-                        ),
-                      ),
-                      SizedBox(width: 6.w),
-                      Expanded(
-                        child: _CardActionButton(
-                          icon: Icons.stop_circle_outlined,
-                          label: TranslationUtils.tr('investment_detail_stop'),
-                          color: AppColors.error,
-                          filled: true,
-                          onPressed: () => _stopCopier(context),
-                        ),
-                      ),
-                    ],
+                    _InfoCell(
+                      label: TranslationUtils.tr('my_copies_card_open'),
+                      value: item.openTradesCount.toString(),
+                    ),
+                    _InfoCell(
+                      label: TranslationUtils.tr('my_copies_card_method'),
+                      value: _methodLabel(item),
+                    ),
+                    _InfoCell(
+                      label: TranslationUtils.tr('my_copies_card_last_update'),
+                      value: _formatDate(item.updatedAt),
+                    ),
                   ],
+                ),
+                SizedBox(height: 12.h),
+                _CardActionButton(
+                  icon: Icons.history_rounded,
+                  label: TranslationUtils.tr('general_history'),
+                  color: AppColors.primary,
+                  onPressed: () => Get.to(
+                    () => CopierSubscriptionHistoryScreen(copierId: item.id),
+                  ),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _togglePauseResume(BuildContext context) {
-    final isPaused = _isPaused;
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(
-          isPaused
-              ? TranslationUtils.tr('my_plans_tab_resume_copying')
-              : TranslationUtils.tr('my_plans_tab_pause_copying'),
-        ),
-        content: Text(
-          isPaused
-              ? TranslationUtils.tr('copy_trading_confirm_resume_copying_investor')
-              : TranslationUtils.tr('copy_trading_confirm_pause_copying_investor'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(TranslationUtils.tr('general_cancel')),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              final res = isPaused
-                  ? await controller.resume(item.id)
-                  : await controller.pause(item.id);
-              if (res.success) {
-                CustomToastService.showSuccess(
-                  title: TranslationUtils.tr('general_success'),
-                  message: res.message ??
-                      TranslationUtils.tr('my_plans_tab_state_updated_successfully'),
-                );
-              } else {
-                CustomToastService.showError(
-                  title: TranslationUtils.tr('transaction_history_failed'),
-                  message: res.message ??
-                      TranslationUtils.tr('copy_trading_failed_to_update_copier_state'),
-                );
-              }
-            },
-            child: Text(
-              isPaused
-                  ? TranslationUtils.tr('my_plans_tab_resume')
-                  : TranslationUtils.tr('my_plans_tab_pause'),
-              style: AppTextStyles.bodyText.copyWith(
-                color: isPaused ? AppColors.green : AppColors.warning,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _stopCopier(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(TranslationUtils.tr('my_copies_screen_stop_copy')),
-        content: Text(TranslationUtils.tr('my_copies_screen_are_you_sure_you_want_to')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(TranslationUtils.tr('general_cancel')),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              final res = await controller.stop(item.id);
-              if (res.success) {
-                CustomToastService.showSuccess(
-                  title: TranslationUtils.tr('general_success'),
-                  message: res.message ??
-                      TranslationUtils.tr('copy_trading_copier_stopped_successfully'),
-                );
-              } else {
-                CustomToastService.showError(
-                  title: TranslationUtils.tr('transaction_history_failed'),
-                  message: res.message ??
-                      TranslationUtils.tr('copy_trading_failed_to_stop_copier'),
-                );
-              }
-            },
-            child: Text(
-              TranslationUtils.tr('investment_detail_stop'),
-              style: AppTextStyles.bodyText.copyWith(color: AppColors.error),
             ),
           ),
         ],
@@ -1111,30 +940,93 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
-class _InfoChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  const _InfoChip({required this.icon, required this.label});
+/// Small upper-case caption used above every value in the expanded card.
+Text _caption(String text) => Text(
+      text.toUpperCase(),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: AppTextStyles.bodyText.copyWith(
+        fontSize: 9.5.sp,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.4,
+        color: AppColors.textGrey,
+      ),
+    );
+
+/// "multiplier_only" + lot_multiplier 3 → "Multiplier Only · 3x".
+String _methodLabel(MasterCopierItem item) {
+  final name = item.sizingMethod
+      .split('_')
+      .where((w) => w.isNotEmpty)
+      .map((w) => '${w[0].toUpperCase()}${w.substring(1)}')
+      .join(' ');
+  final usesMultiplier = item.sizingMethod.contains('multiplier');
+  if (!usesMultiplier || item.lotMultiplier <= 0) return name;
+  return '$name · ${item.lotMultiplier}x';
+}
+
+/// Capital, estimated commission and net P&L shown as one tinted strip.
+class _MoneyStrip extends StatelessWidget {
+  final List<_MoneyTile> tiles;
+  const _MoneyStrip({required this.tiles});
 
   @override
   Widget build(BuildContext context) {
+    final children = <Widget>[];
+    for (var i = 0; i < tiles.length; i++) {
+      if (i > 0) {
+        children.add(Container(
+          width: 1,
+          height: 28.h,
+          color: AppColors.border.withValues(alpha: 0.18),
+        ));
+      }
+      children.add(Expanded(child: tiles[i]));
+    }
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 4.w),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(6.r),
+        color: AppColors.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(10.r),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(children: children),
+    );
+  }
+}
+
+class _MoneyTile extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? color;
+  const _MoneyTile({required this.label, required this.value, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 6.w),
+      child: Column(
         children: [
-          Icon(icon, size: 12.r, color: AppColors.primary),
-          SizedBox(width: 4.w),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: color ?? AppColors.textPrimary,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ),
+          SizedBox(height: 3.h),
           Text(
             label,
+            maxLines: 2,
+            textAlign: TextAlign.center,
             style: AppTextStyles.bodyText.copyWith(
-              fontSize: 10.5.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primary,
+              fontSize: 9.5.sp,
+              height: 1.2,
+              color: AppColors.textGrey,
             ),
           ),
         ],
@@ -1143,88 +1035,60 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-class _KeyMetric extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color? valueColor;
-  const _KeyMetric({required this.label, required this.value, this.valueColor});
+/// Two-column grid of caption/value pairs for the remaining card details.
+class _InfoGrid extends StatelessWidget {
+  final List<_InfoCell> cells;
+  const _InfoGrid({required this.cells});
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 6.w),
-        child: Column(
+    final rows = <Widget>[];
+    for (var i = 0; i < cells.length; i += 2) {
+      rows.add(Padding(
+        padding: EdgeInsets.only(top: i == 0 ? 0 : 10.h),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 8.5.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textGrey,
-              ),
-            ),
-            SizedBox(height: 4.h),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                value,
-                style: AppTextStyles.bodyText.copyWith(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w800,
-                  color: valueColor ?? AppColors.textPrimary,
-                ),
-              ),
+            Expanded(child: cells[i]),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: i + 1 < cells.length ? cells[i + 1] : const SizedBox.shrink(),
             ),
           ],
         ),
+      ));
+    }
+    return Container(
+      padding: EdgeInsets.all(10.r),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.14)),
+        borderRadius: BorderRadius.circular(10.r),
       ),
+      child: Column(children: rows),
     );
   }
 }
 
-class _DetailLine extends StatelessWidget {
-  final IconData icon;
+class _InfoCell extends StatelessWidget {
   final String label;
   final String value;
-  const _DetailLine({required this.icon, required this.label, required this.value});
+  const _InfoCell({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16.r, color: AppColors.textGrey),
-        SizedBox(width: 6.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.bodyText.copyWith(
-                  fontSize: 8.5.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textGrey,
-                ),
-              ),
-              SizedBox(height: 2.h),
-              Text(
-                value.isEmpty ? '-' : value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.bodyText.copyWith(
-                  fontSize: 11.5.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
+        _caption(label),
+        SizedBox(height: 3.h),
+        Text(
+          value.isEmpty ? '-' : value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyles.bodyText.copyWith(
+            fontSize: 11.5.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
           ),
         ),
       ],
@@ -1236,21 +1100,19 @@ class _CardActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
-  final bool filled;
   final VoidCallback onPressed;
   const _CardActionButton({
     required this.icon,
     required this.label,
     required this.color,
     required this.onPressed,
-    this.filled = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final fg = filled ? AppColors.onColoredBackground : color;
+    final fg = color;
     return Material(
-      color: filled ? color : color.withValues(alpha: 0.08),
+      color: color.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(10.r),
       child: InkWell(
         borderRadius: BorderRadius.circular(10.r),

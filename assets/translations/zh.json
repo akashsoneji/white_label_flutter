@@ -4696,5 +4696,13 @@
   "copy_trading_last_6_months": "最近 6 个月",
   "copy_trading_master_no_longer_available": "该大师已不可用。",
   "copy_trading_back_to_masters": "返回大师列表",
-  "compliance_form_rejected_title": "您的合规表单已被拒绝，请修改后重新提交。"
+  "compliance_form_rejected_title": "您的合规表单已被拒绝，请修改后重新提交。",
+  "my_copies_card_capital": "资金",
+  "my_copies_card_pnl": "盈亏",
+  "my_copies_card_commission_rate": "佣金比例",
+  "my_copies_card_estimated_commission": "预估佣金",
+  "my_copies_card_net_pnl": "净盈亏",
+  "my_copies_card_open": "持仓",
+  "my_copies_card_method": "方式",
+  "my_copies_card_last_update": "最后更新"
 }

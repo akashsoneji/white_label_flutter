@@ -4696,5 +4696,13 @@
   "copy_trading_last_6_months": "6 tháng qua",
   "copy_trading_master_no_longer_available": "Master này không còn khả dụng.",
   "copy_trading_back_to_masters": "Quay lại danh sách master",
-  "compliance_form_rejected_title": "Biểu mẫu tuân thủ của bạn đã bị từ chối. Vui lòng sửa và gửi lại."
+  "compliance_form_rejected_title": "Biểu mẫu tuân thủ của bạn đã bị từ chối. Vui lòng sửa và gửi lại.",
+  "my_copies_card_capital": "Vốn",
+  "my_copies_card_pnl": "Lãi/Lỗ",
+  "my_copies_card_commission_rate": "Tỷ lệ hoa hồng",
+  "my_copies_card_estimated_commission": "Hoa hồng ước tính",
+  "my_copies_card_net_pnl": "Lãi/Lỗ ròng",
+  "my_copies_card_open": "Đang mở",
+  "my_copies_card_method": "Phương thức",
+  "my_copies_card_last_update": "Cập nhật lần cuối"
 }

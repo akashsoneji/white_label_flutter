@@ -4696,5 +4696,13 @@
   "copy_trading_last_6_months": "آخر 6 أشهر",
   "copy_trading_master_no_longer_available": "هذا الماستر لم يعد متاحًا.",
   "copy_trading_back_to_masters": "العودة إلى الماسترز",
-  "compliance_form_rejected_title": "تم رفض نموذج الامتثال الخاص بك. يرجى تصحيحه وإرساله مرة أخرى."
+  "compliance_form_rejected_title": "تم رفض نموذج الامتثال الخاص بك. يرجى تصحيحه وإرساله مرة أخرى.",
+  "my_copies_card_capital": "رأس المال",
+  "my_copies_card_pnl": "الربح/الخسارة",
+  "my_copies_card_commission_rate": "نسبة العمولة",
+  "my_copies_card_estimated_commission": "العمولة المقدرة",
+  "my_copies_card_net_pnl": "صافي الربح/الخسارة",
+  "my_copies_card_open": "مفتوحة",
+  "my_copies_card_method": "الطريقة",
+  "my_copies_card_last_update": "آخر تحديث"
 }

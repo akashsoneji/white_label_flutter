@@ -4696,5 +4696,13 @@
   "copy_trading_last_6_months": "Last 6 Months",
   "copy_trading_master_no_longer_available": "This master is no longer available.",
   "copy_trading_back_to_masters": "Back to masters",
-  "compliance_form_rejected_title": "Your compliance form was rejected. Please correct it and submit again."
+  "compliance_form_rejected_title": "Your compliance form was rejected. Please correct it and submit again.",
+  "my_copies_card_capital": "Capital",
+  "my_copies_card_pnl": "P&L",
+  "my_copies_card_commission_rate": "Commission Rate",
+  "my_copies_card_estimated_commission": "Estimated Commission",
+  "my_copies_card_net_pnl": "Net P&L",
+  "my_copies_card_open": "Open",
+  "my_copies_card_method": "Method",
+  "my_copies_card_last_update": "Last Update"
 }

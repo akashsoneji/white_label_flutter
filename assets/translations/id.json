@@ -4696,5 +4696,13 @@
   "copy_trading_last_6_months": "6 bulan terakhir",
   "copy_trading_master_no_longer_available": "Master ini sudah tidak tersedia.",
   "copy_trading_back_to_masters": "Kembali ke master",
-  "compliance_form_rejected_title": "Formulir kepatuhan Anda ditolak. Silakan perbaiki dan kirim ulang."
+  "compliance_form_rejected_title": "Formulir kepatuhan Anda ditolak. Silakan perbaiki dan kirim ulang.",
+  "my_copies_card_capital": "Modal",
+  "my_copies_card_pnl": "L/R",
+  "my_copies_card_commission_rate": "Tingkat Komisi",
+  "my_copies_card_estimated_commission": "Estimasi Komisi",
+  "my_copies_card_net_pnl": "L/R Bersih",
+  "my_copies_card_open": "Terbuka",
+  "my_copies_card_method": "Metode",
+  "my_copies_card_last_update": "Pembaruan Terakhir"
 }
