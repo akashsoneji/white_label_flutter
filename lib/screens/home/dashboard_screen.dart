@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:crm_app/widgets/active_notices_banner.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1837,10 +1838,12 @@ class DashboardScreen extends StatelessWidget {
       return Scaffold(
         backgroundColor: bgColor,
         appBar: appBar,
-        body: RefreshIndicator(
-          onRefresh: _onRefresh,
-          color: AppColors.primary,
-          child: _buildIquoteDashboardContent(context),
+        body: _withNotices(
+          RefreshIndicator(
+            onRefresh: _onRefresh,
+            color: AppColors.primary,
+            child: _buildIquoteDashboardContent(context),
+          ),
         ),
       );
     }
@@ -1853,11 +1856,13 @@ class DashboardScreen extends StatelessWidget {
         // No outer Obx here — _buildCelestialDashboardContent owns its own
         // reactive scope. Wrapping RefreshIndicator in an empty Obx
         // triggers GetX "improper use" error.
-        body: RefreshIndicator(
-          onRefresh: _onRefresh,
-          color: CelTheme.buyBlue,
-          backgroundColor: CelTheme.card(context),
-          child: _buildCelestialDashboardContent(context),
+        body: _withNotices(
+          RefreshIndicator(
+            onRefresh: _onRefresh,
+            color: CelTheme.buyBlue,
+            backgroundColor: CelTheme.card(context),
+            child: _buildCelestialDashboardContent(context),
+          ),
         ),
       );
     }
@@ -1875,7 +1880,9 @@ class DashboardScreen extends StatelessWidget {
               controller.isLoadingMT5Accounts.value
                   ? Center(child: CommonLoadingWidget(isFullScreen: true))
                   : null,
-          child: _buildDashboardContent(context, includeLoadingOverlay: false),
+          child: _withNotices(
+            _buildDashboardContent(context, includeLoadingOverlay: false),
+          ),
         ),
       );
     }
@@ -1883,12 +1890,25 @@ class DashboardScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
       appBar: appBar,
-      body: Obx(
-        () => RefreshIndicator(
-          onRefresh: _onRefresh,
-          child: _buildDashboardContent(context, includeLoadingOverlay: true),
+      body: _withNotices(
+        Obx(
+          () => RefreshIndicator(
+            onRefresh: _onRefresh,
+            child: _buildDashboardContent(context, includeLoadingOverlay: true),
+          ),
         ),
       ),
+    );
+  }
+
+  /// Puts the admin's active notices above the dashboard body; the banner
+  /// collapses to nothing when there are no notices.
+  Widget _withNotices(Widget body) {
+    return Column(
+      children: [
+        const ActiveNoticesBanner(),
+        Expanded(child: body),
+      ],
     );
   }
 

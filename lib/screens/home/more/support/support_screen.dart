@@ -9,6 +9,7 @@ import '../../../../constants/color.dart';
 import '../../../../constants/text_styles.dart';
 import '../../../../routes/app_pages.dart';
 import '../../../../services/language_service.dart';
+import '../../../../services/live_chat_service.dart';
 
 class SupportScreen extends StatelessWidget {
   const SupportScreen({super.key});
@@ -41,9 +42,7 @@ class SupportScreen extends StatelessWidget {
               _MenuItem(
                 icon: 'live-chat',
                 label: languageService.tr('live_chat'),
-                onTap: () {
-                  Get.toNamed(AppPages.CHAT_WITH_US);
-                },
+                onTap: LiveChatService.open,
                 showTopBorder: true,
                 color: AppColors.textPrimary,
               ),

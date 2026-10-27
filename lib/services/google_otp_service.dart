@@ -22,6 +22,23 @@ class GoogleOtpService extends GetxService {
     return fallback;
   }
 
+  /// Server-side 2FA state; the cached login user can be stale after the user
+  /// enables/disables 2FA from the web portal. Returns null when unknown.
+  Future<bool?> fetchEnabledStatus() async {
+    try {
+      final response = await ApiService.get(
+        endpoint: ApiConstants.googleOtpStatus,
+      );
+      if (!response.success) return null;
+      final enabled = _innerData(response.data)?['google_otp_enabled'];
+      if (enabled is bool) return enabled;
+      if (enabled == null) return null;
+      return enabled.toString() == '1' || enabled.toString() == 'true';
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<ApiResponse<GoogleOtpGenerateData>> generate() async {
     try {
       final response = await ApiService.post(

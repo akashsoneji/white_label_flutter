@@ -43,6 +43,7 @@ import '../screens/auth/presentation/pages/privacy_policy_screen.dart';
 import '../screens/auth/presentation/pages/account_created_screen.dart';
 import '../screens/home/change_password_screen.dart';
 import '../screens/home/more/two_factor_auth_screen.dart';
+import '../screens/home/more/active_sessions_screen.dart';
 import '../screens/auth/presentation/pages/google_login_otp_screen.dart';
 import '../screens/home/more/chat_with_us_screen.dart';
 import '../screens/home/more/edit_profile_screen.dart';
@@ -50,6 +51,8 @@ import '../screens/home/more/view_profile_screen.dart';
 import '../screens/finance/presentation/pages/deposit_screen.dart';
 import '../screens/finance/presentation/pages/internal_transfer_history_screen.dart';
 import '../screens/finance/presentation/pages/internal_transfer_screen.dart';
+import '../screens/finance/presentation/pages/trader_transfer_screen.dart';
+import '../screens/finance/view_models/trader_transfer_controller.dart';
 import '../screens/finance/presentation/pages/wallet_screen.dart';
 import '../screens/finance/presentation/pages/withdrawal_screen.dart';
 import '../screens/home/more/kyc_verification_screen.dart';
@@ -135,6 +138,7 @@ class AppPages {
   static const FINANCE = _Paths.FINANCE;
   static const INTERNAL_TRANSFER = _Paths.INTERNAL_TRANSFER;
   static const INTERNAL_TRANSFER_HISTORY = _Paths.INTERNAL_TRANSFER_HISTORY;
+  static const TRADER_TRANSFER = _Paths.TRADER_TRANSFER;
   static const IB_DASHBOARD = _Paths.IB_DASHBOARD;
   static const IB_MAIN = _Paths.IB_MAIN;
   static const COPY_TRADING_MAIN = _Paths.COPY_TRADING_MAIN;
@@ -171,6 +175,7 @@ class AppPages {
   static const BANK_LIST = _Paths.BANK_LIST;
   static const CHANGE_PASSWORD = _Paths.CHANGE_PASSWORD;
   static const TWO_FACTOR_AUTH = _Paths.TWO_FACTOR_AUTH;
+  static const ACTIVE_SESSIONS = _Paths.ACTIVE_SESSIONS;
   static const GOOGLE_LOGIN_OTP = _Paths.GOOGLE_LOGIN_OTP;
   static const TENAX_BROKER_SELECTION = _Paths.TENAX_BROKER_SELECTION;
   static const TENAX_BROKER_INFO = _Paths.TENAX_BROKER_INFO;
@@ -219,6 +224,10 @@ class AppPages {
     GetPage(
       name: _Paths.TWO_FACTOR_AUTH,
       page: () => const TwoFactorAuthScreen(),
+    ),
+    GetPage(
+      name: _Paths.ACTIVE_SESSIONS,
+      page: () => const ActiveSessionsScreen(),
     ),
     GetPage(
       name: _Paths.PAYMENT_METHOD,
@@ -351,6 +360,13 @@ class AppPages {
     GetPage(
       name: _Paths.INTERNAL_TRANSFER_HISTORY,
       page: () => const InternalTransferHistoryScreen(),
+    ),
+    GetPage(
+      name: _Paths.TRADER_TRANSFER,
+      page: () => const TraderTransferScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<TraderTransferController>(() => TraderTransferController());
+      }),
     ),
     GetPage(name: _Paths.CHART, page: () => const ChartScreen()),
     GetPage(name: _Paths.FINANCE, page: () => const FinanceScreen()),

@@ -30,6 +30,24 @@ class NotificationsScreen extends GetView<NotificationController> {
           ),
           onPressed: () => Get.back(),
         ),
+        actions: [
+          Obx(() {
+            if (controller.unreadTotal.value == 0) {
+              return const SizedBox.shrink();
+            }
+            return IconButton(
+              tooltip: TranslationUtils.tr('notifications_mark_all_read'),
+              onPressed: controller.isMarkingAllRead.value
+                  ? null
+                  : controller.markAllAsRead,
+              icon: Icon(
+                Icons.done_all_rounded,
+                color: AppColors.primary,
+                size: 22.r,
+              ),
+            );
+          }),
+        ],
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -78,7 +96,12 @@ class NotificationsScreen extends GetView<NotificationController> {
               }
               final item = controller.notifications[index];
               final isUnread = item.readAt == null;
-              return Container(
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => item.isMt5Credentials
+                    ? controller.openMt5Credentials(item)
+                    : controller.markAsRead(item),
+                child: Container(
                 decoration: BoxDecoration(
                   color: isUnread ? AppColors.primary.withValues(alpha: 0.05) : AppColors.cardBackground,
                   borderRadius: BorderRadius.circular(16.r),
@@ -130,6 +153,7 @@ class NotificationsScreen extends GetView<NotificationController> {
                     ),
                   ],
                 ),
+              ),
               );
             },
           ),

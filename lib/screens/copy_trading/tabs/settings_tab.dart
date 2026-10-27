@@ -9,6 +9,7 @@ import 'package:crm_app/controllers/copy_trading/copy_trading_settings_controlle
 import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/services/live_chat_service.dart';
 
 class SettingsTab extends StatelessWidget {
   const SettingsTab({super.key});
@@ -118,7 +119,7 @@ class SettingsTab extends StatelessWidget {
             _MenuItem(
               svgIconPath: 'assets/svg/more/ib_dashboard/ib-support.svg',
               label: TranslationUtils.tr('settings_tab_start_a_live_chat'),
-              onTap: () {},
+              onTap: LiveChatService.open,
             ),
             _MenuItem(
               svgIconPath: 'assets/svg/copy_trading/setting/document-text.svg',

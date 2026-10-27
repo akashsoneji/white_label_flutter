@@ -27,6 +27,19 @@ class TwoFactorAuthController extends GetxController {
   void onInit() {
     super.onInit();
     _syncEnabledState();
+    _refreshEnabledStateFromServer();
+  }
+
+  Future<void> _refreshEnabledStateFromServer() async {
+    final enabled = await _googleOtpService.fetchEnabledStatus();
+    if (enabled == null || enabled == _authController.isGoogleOtpEnabled) {
+      return;
+    }
+    await _authController.updateGoogleOtpEnabled(enabled);
+    // Don't yank the user out of a setup/disable flow already in progress.
+    final isIdle = _uiState.value == TwoFactorAuthUiState.enabled ||
+        _uiState.value == TwoFactorAuthUiState.disabled;
+    if (isIdle) _syncEnabledState();
   }
 
   void _syncEnabledState() {

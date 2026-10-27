@@ -25,12 +25,25 @@ class ApiConstants {
   static const String googleOtpGenerate = '${ajax}settings/google-otp/generate';
   static const String googleOtpVerify = '${ajax}settings/google-otp/verify';
   static const String googleOtpDisable = '${ajax}settings/google-otp/disable';
+  static const String googleOtpStatus = '${ajax}settings/google-otp/status';
+  static const String userSessions = '${ajax}sessions';
+  static String userSession(int id) => '${ajax}sessions/$id';
   static const String googleOtpVerifyLogin = '${ajax}auth/google/verify-login-otp';
   static const String register = '${ajax}register';
   static const String registerFcmToken = '${ajax}register-fcm-token';
   static const String marketWatch = '${ajax}trade/marketwatch';
   static const String dashboard = '${ajax}dashboard';
   static const String getNotifications = '${ajax}notifications';
+  static const String activeNotices = '${ajax}notices/active';
+  static const String liveChatConfig = '${ajax}live-chat';
+  static const String markAllNotificationsRead =
+      '${ajax}notifications/markasread';
+  static String markNotificationRead(int id) =>
+      '${ajax}notifications/markasread/$id';
+  static String mt5CredentialsNotification(int id) =>
+      '${ajax}notifications/mt5-credentials/$id';
+  static String mt5CredentialsAck(int id) =>
+      '${ajax}notifications/mt5-credentials/$id/ack';
   static const String priceAlerts = '${ajax}price-alerts';
   static const String profile = '${ajax}settings/profile';
   static const String getMT5Accounts = '${ajax}mt5accounts/get';
@@ -91,6 +104,12 @@ class ApiConstants {
       '${ajax}internaltransfer/request';
   static const String internalTransferHistory =
       '${ajax}internaltransfer/history';
+  static const String traderTransferConfig = '${ajax}trader-transfer/config';
+  static const String traderTransferVerifyRecipient =
+      '${ajax}trader-transfer/verify-recipient';
+  static const String traderTransferSendOtp = '${ajax}trader-transfer/send-otp';
+  static const String traderTransferSubmit = '${ajax}trader-transfer/submit';
+  static const String traderTransferHistory = '${ajax}trader-transfer/history';
   static const String withdrawalMethods =
       '${ajax}withdrawal/withdrawal-method/';
   static const String bankWithdrawalList =

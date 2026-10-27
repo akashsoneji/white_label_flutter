@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/services/theme_service.dart';
 import 'package:crm_app/widgets/theme_bottom_sheet.dart';
 
 import '../../../../constants/color.dart';
@@ -36,19 +37,28 @@ class SettingScreen extends StatelessWidget {
           child: _CardGroup(
             children: [
               _MenuItem(
-                svgPath: 'assets/svg/language.svg',
+                icon: const _LanguageGlyph(),
                 label: languageService.tr('settings_language_title'),
                 onTap: () => Get.toNamed(AppPages.LANGUAGE_SELECTOR),
               ),
               _MenuItem(
-                svgPath: 'assets/svg/more/theme.svg',
+                icon: const _ThemeModeIcon(),
                 label: languageService.tr('settings_theme'),
                 onTap: () => showThemeBottomSheet(context),
               ),
               _MenuItem(
-                svgPath: 'assets/svg/more/change_password.svg',
+                icon: _SvgIcon('assets/svg/more/change_password.svg'),
                 label: languageService.tr('settings_change_password'),
                 onTap: () => Get.toNamed(AppPages.CHANGE_PASSWORD),
+              ),
+              _MenuItem(
+                icon: Icon(
+                  Icons.devices_rounded,
+                  size: 17.sp,
+                  color: AppColors.primary,
+                ),
+                label: languageService.tr('active_sessions_title'),
+                onTap: () => Get.toNamed(AppPages.ACTIVE_SESSIONS),
               ),
             ],
           ),
@@ -93,13 +103,74 @@ class _CardGroup extends StatelessWidget {
   }
 }
 
+/// "a अ" glyph for the Language row (Latin + Devanagari), drawn as text so it
+/// follows the theme colour without a separate asset.
+class _LanguageGlyph extends StatelessWidget {
+  const _LanguageGlyph();
+
+  @override
+  Widget build(BuildContext context) {
+    final style = TextStyle(
+      color: AppColors.primary,
+      fontWeight: FontWeight.w700,
+      height: 1,
+    );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text('a', style: style.copyWith(fontSize: 13.sp)),
+        SizedBox(width: 1.w),
+        Text('अ', style: style.copyWith(fontSize: 12.sp)),
+      ],
+    );
+  }
+}
+
+/// Sun in light mode, moon in dark mode.
+class _ThemeModeIcon extends StatelessWidget {
+  const _ThemeModeIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Get.isRegistered<ThemeService>()) {
+      return Icon(Icons.contrast_rounded, size: 17.sp, color: AppColors.primary);
+    }
+    final themeService = Get.find<ThemeService>();
+    return Obx(
+      () => Icon(
+        themeService.isDarkModeObs.value
+            ? Icons.dark_mode_rounded
+            : Icons.light_mode_rounded,
+        size: 17.sp,
+        color: AppColors.primary,
+      ),
+    );
+  }
+}
+
+class _SvgIcon extends StatelessWidget {
+  final String path;
+  const _SvgIcon(this.path);
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.asset(
+      path,
+      height: 16.h,
+      width: 16.w,
+      colorFilter: ColorFilter.mode(AppColors.primary, BlendMode.srcIn),
+    );
+  }
+}
+
 class _MenuItem extends StatelessWidget {
-  final String svgPath;
+  final Widget icon;
   final String label;
   final VoidCallback onTap;
 
   const _MenuItem({
-    required this.svgPath,
+    required this.icon,
     required this.label,
     required this.onTap,
   });
@@ -129,17 +200,7 @@ class _MenuItem extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(11.r),
                 ),
-                child: Center(
-                  child: SvgPicture.asset(
-                    svgPath,
-                    height: 16.h,
-                    width: 16.w,
-                    colorFilter: ColorFilter.mode(
-                      AppColors.primary,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
+                child: Center(child: icon),
               ),
               SizedBox(width: 12.w),
               Expanded(
