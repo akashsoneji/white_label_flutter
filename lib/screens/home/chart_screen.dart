@@ -167,6 +167,8 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
 
   // GetX reactive listener worker to be disposed
   Worker? _instrumentsWorker;
+  Worker? _staleRestoredSymbolWorker;
+  bool _staleRestoredSymbolChecked = false;
 
   // GlobalKey to access WebView state for explicit symbol updates
   final GlobalKey<ChartInAppWebViewState> _webViewKey =
@@ -377,6 +379,12 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
 
       // Initialize with cached or first available instrument from socket data
       _initializeWithFirstInstrument();
+
+      // Instruments/favourites may not be loaded yet; re-check when they are.
+      _staleRestoredSymbolWorker = ever(
+        Get.find<InstrumentsController>().allInstruments,
+        (_) => _replaceStaleRestoredSymbol(),
+      );
 
       _volumeController = TextEditingController(
         text: PrecisionHelper.formatVolume(volume),
@@ -1474,6 +1482,7 @@ Placing Order:
 
     // Dispose GetX reactive listener worker
     _instrumentsWorker?.dispose();
+    _staleRestoredSymbolWorker?.dispose();
 
     // Remove lifecycle observer
     WidgetsBinding.instance.removeObserver(this);
@@ -1589,6 +1598,8 @@ Placing Order:
     // Dynamic symbol initialization: Check if we have valid instruments data
     bool isSymbolFromInstruments = false;
     if (instrumentsController.allInstruments.isNotEmpty) {
+      _replaceStaleRestoredSymbol();
+
       // Check if current symbol exists in instruments list (valid symbol)
       isSymbolFromInstruments = instrumentsController.allInstruments.any(
         (instrument) => instrument.symbol == selectedSymbol,
@@ -1993,6 +2004,32 @@ Placing Order:
 
     // Return XAUUSD if found, otherwise first instrument
     return xauusd.symbol.toUpperCase() == 'XAUUSD' ? xauusd : instruments.first;
+  }
+
+  /// Once per screen: if the symbol restored from the previous session is no
+  /// longer a favourite, switch to the preferred instrument. Goes through
+  /// [_handleSymbolChange] so the service, notifier, socket and WebView all
+  /// move together; updating only some of them makes them fight (flicker).
+  void _replaceStaleRestoredSymbol() {
+    if (_staleRestoredSymbolChecked || !mounted) return;
+    final current = symbolSelectionService.currentSymbol;
+    // Saved symbol not read from storage yet: retry on the next update.
+    if (current.isEmpty) return;
+    if (!symbolSelectionService.isRestoredSelection) {
+      _staleRestoredSymbolChecked = true;
+      return;
+    }
+    final instrumentsController = Get.find<InstrumentsController>();
+    final favorites = instrumentsController.favoriteInstruments.toList();
+    final instruments = instrumentsController.allInstruments;
+    if (favorites.isEmpty || instruments.isEmpty) return;
+    _staleRestoredSymbolChecked = true;
+
+    final isStale =
+        !SymbolSelectionService.isInFavorites(current, favorites) &&
+        !SymbolSelectionService.isInFavorites(current, const ['XAUUSD']);
+    if (!isStale) return;
+    _handleSymbolChange(_findPreferredInstrument(instruments).symbol);
   }
 
   // Initialize chart with first available instrument from socket data

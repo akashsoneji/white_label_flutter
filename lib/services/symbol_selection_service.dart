@@ -1,13 +1,16 @@
 import 'package:get/get.dart';
+import 'package:crm_app/services/market_watch_v2_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 
-/// Maintains the last selected trading symbol for the current app session.
+/// Maintains the last selected trading symbol.
 /// - Defaults to XAUUSD on first use.
-/// - Not persisted across app restarts.
+/// - Persisted across app restarts. A restored symbol that is no longer a
+///   favourite is replaced once by the chart screen on startup.
 class SymbolSelectionService extends GetxService {
   final RxString _lastSymbol = ''.obs;
   final RxBool _hasUserSelection = false.obs;
   bool _initialized = false;
+  bool _isRestoredSelection = false;
 
   @override
   void onInit() {
@@ -25,9 +28,14 @@ class SymbolSelectionService extends GetxService {
   RxString get lastSymbolRx => _lastSymbol;
   bool get hasUserSelection => _hasUserSelection.value;
 
+  /// True while the current symbol is the one restored from the previous
+  /// session (cleared as soon as a symbol is picked in this session).
+  bool get isRestoredSelection => _isRestoredSelection;
+
   /// Update the current symbol and mark that the user made an explicit choice.
   void setSymbol(String symbol) {
     if (symbol.isEmpty) return;
+    _isRestoredSelection = false;
     _lastSymbol.value = symbol;
     _hasUserSelection.value = true;
     // Persist asynchronously; caller doesn't need to await
@@ -41,9 +49,18 @@ class SymbolSelectionService extends GetxService {
 
   /// Reset back to default and clear the user selection flag.
   void resetToDefault() {
+    _isRestoredSelection = false;
     _lastSymbol.value = '';
     _hasUserSelection.value = false;
     SecureStorageService.saveSelectedSymbol('');
+  }
+
+  /// Suffix-agnostic check (`XAUUSD` == `XAUUSD.c` == `XAUUSD.r`).
+  static bool isInFavorites(String symbol, List<String> favorites) {
+    final normalized = MarketWatchV2Service.normalizeSymbol(symbol);
+    return favorites.any(
+      (fav) => MarketWatchV2Service.normalizeSymbol(fav) == normalized,
+    );
   }
 
   Future<void> _ensureInitialized() async {
@@ -55,6 +72,7 @@ class SymbolSelectionService extends GetxService {
         if (!_hasUserSelection.value) {
           _lastSymbol.value = savedSymbol;
           _hasUserSelection.value = true;
+          _isRestoredSelection = true;
         }
       }
     } catch (_) {
