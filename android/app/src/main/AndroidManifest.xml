@@ -72,6 +72,25 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Links are delivered to Dart over the app/deeplink channels in
+                 MainActivity, so Flutter's built-in router handling is off. -->
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="false"/>
+            <!-- App Links. The host comes from deepLink.host in the flavor's
+                 brand.yaml; flavors without one get deeplink.invalid, which
+                 never matches. Paths: keep in sync with deepLinkPaths. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https"/>
+                <data android:host="${deepLinkHost}"/>
+                <data android:host="${deepLinkHostAlt}"/>
+                <data android:pathPrefix="/ref"/>
+                <data android:pathPrefix="/register"/>
+                <data android:pathPrefix="/reset-password"/>
+                <data android:pathPrefix="/verify-email"/>
+                <data android:pathPrefix="/app"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

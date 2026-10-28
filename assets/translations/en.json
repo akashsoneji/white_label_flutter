@@ -2482,6 +2482,7 @@
   "auth_search_hint": "Start typing to search",
   "auth_search_btn": "Search",
   "auth_referrer_code": "Referrer Code",
+  "deeplink_referral_already_registered": "You already have an account, so this referral link can't be applied.",
   "auth_create_password_title": "Create New Password",
   "auth_create_password_instruction": "Your new password must be different from previously used passwords.",
   "auth_enter_new_password": "Enter new password",

@@ -30,6 +30,10 @@ class ApiConstants {
   static String userSession(int id) => '${ajax}sessions/$id';
   static const String googleOtpVerifyLogin = '${ajax}auth/google/verify-login-otp';
   static const String register = '${ajax}register';
+
+  // Deep linking (public, no auth). See docs/DEEP_LINKING_BACKEND_SPEC.md §6-7.
+  static const String deepLinkDeferredClaim = 'deeplink/deferred/claim';
+  static const String deepLinkAttribution = 'deeplink/attribution';
   static const String registerFcmToken = '${ajax}register-fcm-token';
   static const String marketWatch = '${ajax}trade/marketwatch';
   static const String dashboard = '${ajax}dashboard';

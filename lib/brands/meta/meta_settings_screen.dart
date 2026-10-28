@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/widgets/responsive_layout.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -552,7 +553,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 8.h,
       crossAxisSpacing: 8.w,
-      childAspectRatio: 2.2,
+      childAspectRatio: ResponsiveGrid.aspectRatio(2.2),
       children: items.map((item) => _buildGridCard(c, item)).toList(),
     );
   }

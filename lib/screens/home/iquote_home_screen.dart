@@ -6,6 +6,7 @@ import 'package:crm_app/screens/home/brands/iquote/view_models/iquote_chart_cont
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/widgets/responsive_layout.dart';
 import 'package:get/get.dart';
 
 import 'package:crm_app/constants/color.dart';
@@ -212,7 +213,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                           physics: const NeverScrollableScrollPhysics(),
                           mainAxisSpacing: 8.h,
                           crossAxisSpacing: 8.w,
-                          childAspectRatio: 0.88,
+                          childAspectRatio: ResponsiveGrid.aspectRatio(0.88),
                           children: [
                             // 1. Demo
                             _buildShortcutItem(

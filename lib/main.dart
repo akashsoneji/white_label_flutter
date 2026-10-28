@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +19,8 @@ import 'package:crm_app/services/loading_service.dart';
 import 'package:crm_app/services/notification_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
+import 'package:crm_app/services/deep_link_service.dart';
+import 'package:crm_app/services/referral_service.dart';
 import 'package:crm_app/services/trading_websocket_service.dart';
 import 'package:crm_app/services/stream_websocket_service.dart';
 import 'package:crm_app/services/symbol_details_cache_service.dart';
@@ -386,6 +389,17 @@ Future<void> initServices() async {
     permanent: true,
   );
   Get.put<ConnectivityController>(ConnectivityController(), permanent: true);
+
+  // Deep links + referral (no-ops for flavors without deepLink.host).
+  // ReferralService first: DeepLinkService saves codes into it.
+  await Get.putAsync<ReferralService>(
+    () => ReferralService().init(),
+    permanent: true,
+  );
+  await Get.putAsync<DeepLinkService>(
+    () => DeepLinkService().init(),
+    permanent: true,
+  );
 }
 
 /// Build light theme
@@ -671,10 +685,37 @@ ThemeData _buildDarkTheme() {
 class MyGetXApp extends StatelessWidget {
   const MyGetXApp({super.key});
 
+  static const Size _phoneDesignSize = Size(375, 812);
+
+  // Phones keep the 375x812 design. On wide screens (unfolded foldables,
+  // tablets) the design size grows with the screen so that .w/.h/.sp all stay
+  // near 1.15x; otherwise width-based scaling roughly doubles while fixed .h
+  // row heights do not, and every list row / button overflows.
+  static const double _maxScale = 1.15;
+
+  static Size _designSizeFor(Size screen) {
+    if (screen.isEmpty) return _phoneDesignSize;
+    return Size(
+      math.max(_phoneDesignSize.width, screen.width / _maxScale),
+      math.max(_phoneDesignSize.height, screen.height / _maxScale),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    return MediaQuery.fromView(
+      view: View.of(context),
+      child: Builder(
+        builder: (context) => _buildApp(
+          _designSizeFor(MediaQuery.sizeOf(context)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildApp(Size designSize) {
     return ScreenUtilInit(
-      designSize: const Size(375, 812),
+      designSize: designSize,
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
@@ -706,7 +747,7 @@ class MyGetXApp extends StatelessWidget {
                       children: [
                         MediaQuery(
                           data: mediaQuery.copyWith(
-                            textScaleFactor: 1.0,
+                            textScaler: TextScaler.noScaling,
                             boldText: false,
                           ),
                           child: themedChild,
@@ -743,6 +784,11 @@ class MyGetXApp extends StatelessWidget {
                   theme: _buildLightTheme(),
                   darkTheme: _buildDarkTheme(),
                   navigatorObservers: [KeyboardUnfocusNavigatorObserver()],
+                  routingCallback: (routing) {
+                    if (Get.isRegistered<DeepLinkService>()) {
+                      Get.find<DeepLinkService>().onRouteChanged(routing?.current);
+                    }
+                  },
                   initialRoute: AppPages.SPLASH,
                   getPages: AppPages.routes,
                 ),

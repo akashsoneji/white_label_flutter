@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/widgets/responsive_layout.dart';
 import 'package:get/get.dart';
 
 import '../../../../constants/color.dart';
@@ -617,7 +618,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
           crossAxisCount: 2,
           crossAxisSpacing: 10.w,
           mainAxisSpacing: 10.h,
-          childAspectRatio: 0.62,
+          childAspectRatio: ResponsiveGrid.aspectRatio(0.62),
         ),
         delegate: SliverChildBuilderDelegate(
           (ctx, i) => _ManagerCard(manager: managers[i], compact: true),

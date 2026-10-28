@@ -1,6 +1,7 @@
 import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/widgets/responsive_layout.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
@@ -139,7 +140,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 10.h,
                 crossAxisSpacing: 10.w,
-                childAspectRatio: 1.5,
+                childAspectRatio: ResponsiveGrid.aspectRatio(1.5),
                 children: [
                   _buildStepCard(
                     title: 'Email Verification',

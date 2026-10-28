@@ -1,6 +1,7 @@
 import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/widgets/responsive_layout.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
@@ -141,7 +142,7 @@ class TradeWinHomeTab extends StatelessWidget {
                       crossAxisCount: 2,
                       mainAxisSpacing: 12.h,
                       crossAxisSpacing: 12.w,
-                      childAspectRatio: 0.46, // reduced to give more height and prevent overflow
+                      childAspectRatio: ResponsiveGrid.aspectRatio(0.46), // reduced to give more height and prevent overflow
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => _ProductCatalogCard(

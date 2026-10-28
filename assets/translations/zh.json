@@ -2482,6 +2482,7 @@
   "auth_search_hint": "输入以搜索",
   "auth_search_btn": "搜索",
   "auth_referrer_code": "推荐码",
+  "deeplink_referral_already_registered": "您已拥有账户，因此无法使用此推荐链接。",
   "auth_create_password_title": "创建新密码",
   "auth_create_password_instruction": "新密码必须与以前使用的密码不同。",
   "auth_enter_new_password": "输入新密码",

@@ -2482,6 +2482,7 @@
   "auth_search_hint": "Empieza a escribir para buscar",
   "auth_search_btn": "Buscar",
   "auth_referrer_code": "Código de referido",
+  "deeplink_referral_already_registered": "Ya tienes una cuenta, por lo que no se puede aplicar este enlace de referido.",
   "auth_create_password_title": "Crear nueva contraseña",
   "auth_create_password_instruction": "Tu nueva contraseña debe ser diferente de las anteriores.",
   "auth_enter_new_password": "Ingresa la nueva contraseña",

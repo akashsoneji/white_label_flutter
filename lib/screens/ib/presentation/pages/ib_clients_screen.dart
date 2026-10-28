@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/widgets/responsive_layout.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
@@ -367,7 +368,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
         crossAxisCount: 2,
         crossAxisSpacing: 12.w,
         mainAxisSpacing: 12.h,
-        childAspectRatio: 1.6,
+        childAspectRatio: ResponsiveGrid.aspectRatio(1.6),
         children: [
           _buildStatCard(
             icon: Icons.people_outline,

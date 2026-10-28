@@ -193,6 +193,23 @@ class AdaptiveContainer extends StatelessWidget {
   }
 }
 
+/// A grid with a fixed `crossAxisCount` and `childAspectRatio` makes its cells
+/// taller as the screen widens, so on unfolded foldables and tablets the cards
+/// end up roughly twice their phone height with empty space inside.
+class ResponsiveGrid {
+  ResponsiveGrid._();
+
+  static const double _maxPhoneWidth = 430;
+
+  /// Returns [phoneRatio] on phones; on wider screens widens the ratio by the
+  /// same factor the cells widen, so each cell keeps its phone height.
+  static double aspectRatio(double phoneRatio) {
+    final screenWidth = ScreenUtil().screenWidth;
+    if (screenWidth <= _maxPhoneWidth) return phoneRatio;
+    return phoneRatio * screenWidth / _maxPhoneWidth;
+  }
+}
+
 class AdaptiveGrid extends StatelessWidget {
   final List<Widget> children;
   final int mobileCrossAxisCount;

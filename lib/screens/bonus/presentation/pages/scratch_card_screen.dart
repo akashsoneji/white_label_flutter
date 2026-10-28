@@ -11,6 +11,7 @@ import 'package:crm_app/widgets/rtl_components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/widgets/responsive_layout.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:scratcher/scratcher.dart';
@@ -1066,7 +1067,7 @@ class _ScratchCardsGridState extends State<_ScratchCardsGrid> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 12.h,
                 crossAxisSpacing: 12.w,
-                childAspectRatio: 1,
+                childAspectRatio: ResponsiveGrid.aspectRatio(1),
               ),
               itemCount: itemCount,
               itemBuilder: (context, index) {

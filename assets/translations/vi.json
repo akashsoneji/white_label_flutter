@@ -2482,6 +2482,7 @@
   "auth_search_hint": "Bắt đầu nhập để tìm kiếm",
   "auth_search_btn": "Tìm kiếm",
   "auth_referrer_code": "Mã người giới thiệu",
+  "deeplink_referral_already_registered": "Bạn đã có tài khoản nên không thể áp dụng liên kết giới thiệu này.",
   "auth_create_password_title": "Tạo mật khẩu mới",
   "auth_create_password_instruction": "Mật khẩu mới của bạn phải khác với các mật khẩu đã dùng trước đây.",
   "auth_enter_new_password": "Nhập mật khẩu mới",

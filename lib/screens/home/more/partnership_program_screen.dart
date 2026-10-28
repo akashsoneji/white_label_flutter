@@ -1,6 +1,7 @@
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/widgets/responsive_layout.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
@@ -89,7 +90,7 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
       mainAxisSpacing: 16.h,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 1.1,
+      childAspectRatio: ResponsiveGrid.aspectRatio(1.1),
       children: [
         _buildVerificationCard(
           icon: 'assets/svg/partnership_program/email.svg',

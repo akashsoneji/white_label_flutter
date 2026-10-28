@@ -2482,6 +2482,7 @@
   "auth_search_hint": "Mulai mengetik untuk mencari",
   "auth_search_btn": "Cari",
   "auth_referrer_code": "Kode Referal",
+  "deeplink_referral_already_registered": "Anda sudah memiliki akun, jadi tautan referal ini tidak dapat diterapkan.",
   "auth_create_password_title": "Buat Kata Sandi Baru",
   "auth_create_password_instruction": "Kata sandi baru harus berbeda dari yang sebelumnya.",
   "auth_enter_new_password": "Masukkan kata sandi baru",

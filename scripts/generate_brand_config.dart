@@ -199,6 +199,7 @@ List<Map<String, dynamic>> parseYaml(String yaml) {
         'urls': <String, dynamic>{},
         'assets': <String, dynamic>{},
         'features': <String, dynamic>{},
+        'deepLink': <String, dynamic>{},
       };
       currentSection = '';
       continue;
@@ -249,6 +250,7 @@ List<Map<String, dynamic>> parseYaml(String yaml) {
       'urls',
       'assets',
       'features',
+      'deepLink',
     ]) {
       if (trimmed.startsWith('$section:')) {
         currentSection = section;
@@ -326,6 +328,26 @@ String _brandClassName(String name) {
 
 String _dartString(String value) =>
     value.replaceAll(r'\', r'\\').replaceAll("'", r"\'");
+
+/// Path prefixes the app claims on every deep-link host. Shared by the
+/// generated FlavorConfig, the Android intent filter and the AASA generator.
+const List<String> deepLinkPaths = [
+  '/ref',
+  '/register',
+  '/reset-password',
+  '/verify-email',
+  '/app',
+];
+
+/// Deep-link hosts for [brand] (`[host, hostAlt]` without duplicates), or an
+/// empty list when the brand has no `deepLink.host`.
+List<String> _deepLinkHosts(Map<String, dynamic> brand) {
+  final deepLink = brand['deepLink'] as Map<String, dynamic>? ?? const {};
+  final host = deepLink['host']?.toString().trim() ?? '';
+  if (host.isEmpty) return const [];
+  final hostAlt = deepLink['hostAlt']?.toString().trim() ?? '';
+  return [host, if (hostAlt.isNotEmpty && hostAlt != host) hostAlt];
+}
 
 String _envClientName() {
   final direct =
@@ -506,6 +528,13 @@ Future<void> generateLegacyBrandsYaml(
         buffer.writeln(' $key: "$value"');
       });
     }
+    final deepLink = brand['deepLink'] as Map<String, dynamic>? ?? const {};
+    if (deepLink.isNotEmpty) {
+      buffer.writeln(' deepLink:');
+      deepLink.forEach((key, value) {
+        buffer.writeln(' $key: "$value"');
+      });
+    }
     buffer.writeln();
   }
 
@@ -585,6 +614,16 @@ Future<void> generateFlavorConfig(
   final vantageUiBrands = vantageUiSet.map((n) => "'$n'").join(', ');
   final iquoteUiBrands = iquoteUiSet.map((n) => "'$n'").join(', ');
   final celestialUiBrands = celestialUiSet.map((n) => "'$n'").join(', ');
+  final deepLinkHostEntries = brands
+      .where((brand) => _deepLinkHosts(brand).isNotEmpty)
+      .map((brand) {
+        final hosts = _deepLinkHosts(brand)
+            .map((h) => "'${_dartString(h)}'")
+            .join(', ');
+        return "    '${brand['name']}': <String>[$hosts],";
+      })
+      .join('\n');
+  final deepLinkPathList = deepLinkPaths.map((p) => "'$p'").join(', ');
   final cases = buildBrands
       .map((brand) {
         final name = brand['name'] as String;
@@ -758,6 +797,21 @@ $getters
     final name = (_instance?.flavor.name ?? Flavor.$fallbackBrand.name).toLowerCase();
     return const <String>{$iquoteUiBrands}.contains(name);
   }
+
+  /// Hosts this flavor claims for App Links / Universal Links. Empty means
+  /// deep linking is disabled for the flavor (set `deepLink.host` in its
+  /// brand.yaml to enable it).
+  static const Map<String, List<String>> _deepLinkHostsByFlavor = {
+$deepLinkHostEntries
+  };
+
+  /// Path prefixes the app handles on [deepLinkHosts].
+  static const List<String> deepLinkPaths = <String>[$deepLinkPathList];
+
+  List<String> get deepLinkHosts =>
+      _deepLinkHostsByFlavor[flavor.name] ?? const <String>[];
+
+  bool get isDeepLinkEnabled => deepLinkHosts.isNotEmpty;
 
   static String get svgLogoAsset => instance.svgLogoPath;
   static String? get remoteLogo => instance.remoteLogoUrl;
@@ -969,6 +1023,11 @@ Future<void> generateAndroidFlavors(List<Map<String, dynamic>> brands) async {
     buffer.writeln('        type: "${brand['type']}",');
     if (brand['inheritsFrom'] != null)
       buffer.writeln('        inheritsFrom: "${brand['inheritsFrom']}",');
+    final deepLinkHosts = _deepLinkHosts(brand);
+    if (deepLinkHosts.isNotEmpty) {
+      buffer.writeln('        deepLinkHost: "${deepLinkHosts.first}",');
+      buffer.writeln('        deepLinkHostAlt: "${deepLinkHosts.last}",');
+    }
     buffer.writeln('    ],');
   }
 

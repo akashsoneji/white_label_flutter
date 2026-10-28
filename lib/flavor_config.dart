@@ -264,6 +264,21 @@ class FlavorConfig {
     return const <String>{'iquote', 'skyriss'}.contains(name);
   }
 
+  /// Hosts this flavor claims for App Links / Universal Links. Empty means
+  /// deep linking is disabled for the flavor (set `deepLink.host` in its
+  /// brand.yaml to enable it).
+  static const Map<String, List<String>> _deepLinkHostsByFlavor = {
+    'pippro': <String>['my.pipze.com'],
+  };
+
+  /// Path prefixes the app handles on [deepLinkHosts].
+  static const List<String> deepLinkPaths = <String>['/ref', '/register', '/reset-password', '/verify-email', '/app'];
+
+  List<String> get deepLinkHosts =>
+      _deepLinkHostsByFlavor[flavor.name] ?? const <String>[];
+
+  bool get isDeepLinkEnabled => deepLinkHosts.isNotEmpty;
+
   static String get svgLogoAsset => instance.svgLogoPath;
   static String? get remoteLogo => instance.remoteLogoUrl;
   static bool get hasRemoteLogo => (instance.remoteLogoUrl ?? '').trim().isNotEmpty;

@@ -7,6 +7,7 @@ import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/widgets/responsive_layout.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
@@ -1276,7 +1277,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
           crossAxisCount: 3,
           crossAxisSpacing: 12.w,
           mainAxisSpacing: 12.h,
-          childAspectRatio: 0.85,
+          childAspectRatio: ResponsiveGrid.aspectRatio(0.85),
           children: [
             // Row 1: First card - Show "Master IB" or "Sub IB" based on selection
             _buildStatCard(

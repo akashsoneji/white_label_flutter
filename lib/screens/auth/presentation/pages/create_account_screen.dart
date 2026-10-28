@@ -25,6 +25,7 @@ import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
 import 'package:crm_app/services/biometric_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
+import 'package:crm_app/services/referral_service.dart';
 
 
 class CreateAccountScreen extends StatefulWidget {
@@ -60,16 +61,32 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final AuthController _authController = Get.find<AuthController>();
   final LanguageService _languageService = Get.find<LanguageService>();
   bool _enableBiometricAfterRegister = false;
+  final ReferralService? _referralService =
+      Get.isRegistered<ReferralService>() ? Get.find<ReferralService>() : null;
+  Worker? _referralWorker;
+
+  /// The referrer field is only shown when a deep link supplied a code.
+  bool get _hasLinkReferral => _referralService?.pending.value != null;
 
   @override
   void initState() {
     super.initState();
     _addListeners();
     _setDeviceCountry();
+    final referralService = _referralService;
+    if (referralService != null) {
+      _referrerController.text = referralService.pending.value?.code ?? '';
+      // A link opened while this screen is visible still fills the field.
+      _referralWorker = ever<PendingReferral?>(referralService.pending, (referral) {
+        if (!mounted || referral == null) return;
+        setState(() => _referrerController.text = referral.code);
+      });
+    }
   }
 
   @override
   void dispose() {
+    _referralWorker?.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _cityController.dispose();
@@ -266,6 +283,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       final referrerCode = _referrerController.text.trim();
       if (referrerCode.isNotEmpty) {
         registrationData["ib_affiliate_refcode"] = referrerCode;
+        registrationData.addAll(
+          _referralService?.registrationFieldsFor(referrerCode) ?? const {},
+        );
       }
 
       final otpVerified = await _authController.register(data: registrationData);
@@ -273,6 +293,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       _hideLoadingDialog();
 
       if (otpVerified) {
+        await _referralService?.clear();
+        if (!mounted) return;
         Navigator.of(context).pop();
 
         CustomToastService.showSuccess(
@@ -349,6 +371,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     final referrerCode = _referrerController.text.trim();
     if (referrerCode.isNotEmpty) {
       registrationData["ib_affiliate_refcode"] = referrerCode;
+      registrationData.addAll(
+        _referralService?.registrationFieldsFor(referrerCode) ?? const {},
+      );
     }
 
     Get.toNamed(
@@ -522,12 +547,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
           validator: (value) => _validateEmail(value),
         ),
         _buildPasswordField(),
-        // _buildTextField(
-        //   controller: _referrerController,
-        //   label: 'Referrer Code',
-        //   keyboardType: TextInputType.text,
-        //   maxLength: 30,
-        // ),
+        if (_hasLinkReferral)
+          _buildTextField(
+            controller: _referrerController,
+            label: _languageService.tr('auth_referrer_code'),
+            keyboardType: TextInputType.text,
+            maxLength: 30,
+          ),
         Row(
           children: [
             Checkbox(

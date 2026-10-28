@@ -113,6 +113,13 @@ android {
                 resValue("color", "ic_launcher_background", brand["launcherBackground"] as String)
                 buildConfigField("String", "FLAVOR", "\"$name\"")
                 manifestPlaceholders["FLAVOR"] = name
+                // Deep links: host from deepLink.host in the brand.yaml. Flavors
+                // without one get a host that can never match.
+                val deepLinkHost = brand["deepLinkHost"] as String?
+                manifestPlaceholders["deepLinkHost"] = deepLinkHost ?: "deeplink.invalid"
+                manifestPlaceholders["deepLinkHostAlt"] =
+                    (brand["deepLinkHostAlt"] as String?) ?: deepLinkHost ?: "deeplink.invalid"
+                buildConfigField("boolean", "DEEP_LINK_ENABLED", (deepLinkHost != null).toString())
                 // Flavor-specific key wins; fallback to global release or debug key.
                 signingConfig = signingConfigs.findByName(name)
                     ?: if (keystorePropertiesFile.exists()) signingConfigs.getByName("release")
@@ -148,6 +155,8 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     // Android 12+ splash screen customization (disable default app icon splash)
     implementation("androidx.core:core-splashscreen:1.0.1")
+    // Deferred deep links: reads the referral code Play passes via `referrer=`.
+    implementation("com.android.installreferrer:installreferrer:2.2")
 }
 
 // ────────────────────────────────────────────────────────────────────────────

@@ -226,6 +226,11 @@ brands:
  splashLogo: "assets/brands/pippro/home_icon.png"
  features:
  useNewChart: "false"
+ deepLink:
+ host: "my.pipze.com"
+ iosTeamId: "8WXRXCSTK2"
+ iosAppStoreId: "<PIPPRO_APP_STORE_ID>"
+ androidSha256: "<PIPPRO_UPLOAD_SHA256>,<PIPPRO_PLAY_SIGNING_SHA256>"
 
   - name: pipze
     type: child

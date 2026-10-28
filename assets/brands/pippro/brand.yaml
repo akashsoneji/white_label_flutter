@@ -31,3 +31,14 @@ assets:
 
 features:
   useNewChart: false
+
+# Universal links / App Links. Remove this block to disable deep linking for
+# the flavor. Keys stay flat (no nested ios:/android:) because the brand
+# parsers are line-based. iosTeamId / iosAppStoreId / androidSha256 only feed
+# scripts/generate_well_known.dart; androidSha256 is comma-separated.
+deepLink:
+  host: my.pipze.com
+  # hostAlt: www.example.com
+  iosTeamId: 8WXRXCSTK2
+  iosAppStoreId: "<PIPPRO_APP_STORE_ID>"
+  androidSha256: "<PIPPRO_UPLOAD_SHA256>,<PIPPRO_PLAY_SIGNING_SHA256>"

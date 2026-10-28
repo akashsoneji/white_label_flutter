@@ -104,5 +104,30 @@ elif [ "$TYPE" == "child" ]; then
     echo "  5. Later: to give this brand its own design, create files in lib/screens/*/brands/$NAME/"
 fi
 
+# Deep linking starts disabled. The template is appended to brand.yaml when it
+# exists; otherwise it is printed so it can be pasted into the new brand.yaml.
+DEEPLINK_TEMPLATE='
+# Universal links / App Links (disabled). To enable, uncomment and fill in,
+# then follow "Deep linking" in docs/ADD_FLAVOR.md. Keys stay flat because the
+# brand parsers are line-based; androidSha256 is comma-separated
+# (upload key, Play App Signing key).
+# deepLink:
+#   host: my.example.com
+#   # hostAlt: www.example.com
+#   iosTeamId: "<APPLE_TEAM_ID>"
+#   iosAppStoreId: "<APP_STORE_ID>"
+#   androidSha256: "<UPLOAD_SHA256>,<PLAY_SIGNING_SHA256>"'
+BRAND_YAML="assets/brands/$NAME/brand.yaml"
+if [ -f "$BRAND_YAML" ]; then
+    if ! grep -q "deepLink:" "$BRAND_YAML"; then
+        printf '%s\n' "$DEEPLINK_TEMPLATE" >> "$BRAND_YAML"
+        echo "Added a disabled deepLink template to $BRAND_YAML"
+    fi
+else
+    echo ""
+    echo "Deep linking (optional) — paste into $BRAND_YAML when you create it:"
+    printf '%s\n' "$DEEPLINK_TEMPLATE"
+fi
+
 echo ""
 echo "Brand '$NAME' scaffold created successfully."

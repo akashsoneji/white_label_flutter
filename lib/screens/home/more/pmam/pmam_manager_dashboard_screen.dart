@@ -2,6 +2,7 @@ import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/widgets/responsive_layout.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
@@ -168,7 +169,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
       physics: const NeverScrollableScrollPhysics(),
       crossAxisSpacing: 12.w,
       mainAxisSpacing: 12.h,
-      childAspectRatio: 1.35,
+      childAspectRatio: ResponsiveGrid.aspectRatio(1.35),
       children: [
         _HeroCard(
           title: TranslationUtils.tr('pmam_manager_dashboard_screen_total_aum'),

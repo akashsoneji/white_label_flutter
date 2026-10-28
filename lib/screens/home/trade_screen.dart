@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/widgets/responsive_layout.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
@@ -3965,7 +3966,8 @@ class _TradeScreenState extends State<TradeScreen> {
         padding: EdgeInsets.symmetric(vertical: 2.h),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          childAspectRatio: isCompactScreen ? 1.75 : 1.95,
+          childAspectRatio:
+              ResponsiveGrid.aspectRatio(isCompactScreen ? 1.75 : 1.95),
           crossAxisSpacing: 4.w,
           mainAxisSpacing: 4.h,
         ),

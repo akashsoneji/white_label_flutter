@@ -103,6 +103,8 @@ ext.brandFlavors = [
         launcherBackground: "#5F259E",
         type: "child",
         inheritsFrom: "vantage",
+        deepLinkHost: "my.pipze.com",
+        deepLinkHostAlt: "my.pipze.com",
     ],
     [
         name: "pipze",

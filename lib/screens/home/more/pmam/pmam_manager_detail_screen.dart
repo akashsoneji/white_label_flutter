@@ -2,6 +2,7 @@ import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/widgets/responsive_layout.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
@@ -542,7 +543,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
               physics: const NeverScrollableScrollPhysics(),
               mainAxisSpacing: 6.h,
               crossAxisSpacing: 6.w,
-              childAspectRatio: 2.5,
+              childAspectRatio: ResponsiveGrid.aspectRatio(2.5),
               children: [
                 _DetailStatCard(
                   label: TranslationUtils.tr('pmam_gain_caps'),

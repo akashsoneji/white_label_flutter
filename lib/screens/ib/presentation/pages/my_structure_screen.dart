@@ -3,6 +3,7 @@ import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/widgets/responsive_layout.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
@@ -177,7 +178,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
       mainAxisSpacing: 10.h,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 2.2,
+      childAspectRatio: ResponsiveGrid.aspectRatio(2.2),
       children: [
         _buildMetricCard(
           TranslationUtils.tr('ib_active_clients').toUpperCase(),

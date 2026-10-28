@@ -15,34 +15,27 @@ NC='\033[0m'
 if [ $# -lt 1 ]; then
     echo -e "${RED}❌ Error: Flavor not specified${NC}"
     echo "Usage: bash scripts/run_ios_flavor.sh <flavor>"
-    echo "  Available flavors: tenax, vantage, celestial, pipze"
+    echo "  Available flavors: $(ls assets/brands | tr '\n' ' ')"
     exit 1
 fi
 
 FLAVOR=$1
 
-VALID_FLAVORS=("tenax" "vantage" "celestial" "pipze")
-if [[ ! " ${VALID_FLAVORS[@]} " =~ " ${FLAVOR} " ]]; then
-    echo -e "${RED}❌ Invalid flavor: $FLAVOR${NC}"
-    echo "  Available flavors: ${VALID_FLAVORS[*]}"
+# Any flavor with a brand.yaml is valid — no hardcoded list.
+if [ ! -f "assets/brands/$FLAVOR/brand.yaml" ]; then
+    echo -e "${RED}❌ Invalid flavor: $FLAVOR (assets/brands/$FLAVOR/brand.yaml not found)${NC}"
+    echo "  Available flavors: $(ls assets/brands | tr '\n' ' ')"
     exit 1
 fi
 
 echo -e "${GREEN}🎨 Using flavor: $FLAVOR${NC}"
 echo ""
 
-# Step 1: Update iOS flavor configuration (app name, icon, etc.)
-echo -e "${YELLOW}📱 Step 1: Updating iOS flavor configuration...${NC}"
-echo -e "${BLUE}   This will update:${NC}"
-echo -e "${BLUE}   - App name in Info.plist${NC}"
-echo -e "${BLUE}   - App icon in Xcode project${NC}"
-echo -e "${BLUE}   - Bundle configuration${NC}"
-echo ""
-
-# Pass flavor as parameter to update script
-bash scripts/update_ios_flavor.sh "$FLAVOR"
-if [ $? -ne 0 ]; then
-    echo -e "${RED}❌ Failed to update iOS flavor configuration${NC}"
+# Step 1: Prepare the flavor. Writes ios/Flutter/Brand.xcconfig (bundle id,
+# display name, dart-defines, deep-link host + entitlements) and app icons.
+echo -e "${YELLOW}📱 Step 1: Preparing iOS flavor configuration...${NC}"
+if ! dart run scripts/prepare_flavor.dart "$FLAVOR"; then
+    echo -e "${RED}❌ Failed to prepare flavor $FLAVOR${NC}"
     exit 1
 fi
 echo ""

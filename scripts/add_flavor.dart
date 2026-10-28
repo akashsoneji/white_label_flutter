@@ -300,6 +300,17 @@ assets:
 
 features:
   useNewChart: false
+
+# Universal links / App Links (disabled). To enable, uncomment and fill in,
+# then follow "Deep linking" in docs/ADD_FLAVOR.md. Keys stay flat because the
+# brand parsers are line-based; androidSha256 is comma-separated
+# (upload key, Play App Signing key).
+# deepLink:
+#   host: my.example.com
+#   # hostAlt: www.example.com
+#   iosTeamId: "<APPLE_TEAM_ID>"
+#   iosAppStoreId: "<APP_STORE_ID>"
+#   androidSha256: "<UPLOAD_SHA256>,<PLAY_SIGNING_SHA256>"
 ''';
 
   final file = File('$brandRoot/${args.name}/brand.yaml');

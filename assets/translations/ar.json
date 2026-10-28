@@ -2482,6 +2482,7 @@
   "auth_search_hint": "ابدأ الكتابة للبحث",
   "auth_search_btn": "بحث",
   "auth_referrer_code": "رمز الإحالة",
+  "deeplink_referral_already_registered": "لديك حساب بالفعل، لذا لا يمكن تطبيق رابط الإحالة هذا.",
   "auth_create_password_title": "إنشاء كلمة مرور جديدة",
   "auth_create_password_instruction": "يجب أن تكون كلمة المرور الجديدة مختلفة عن السابقة.",
   "auth_enter_new_password": "أدخل كلمة المرور الجديدة",

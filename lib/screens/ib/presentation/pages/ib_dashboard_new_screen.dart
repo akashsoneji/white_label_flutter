@@ -4,6 +4,7 @@ import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/widgets/responsive_layout.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
@@ -197,7 +198,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
                       crossAxisCount: 3,
                       crossAxisSpacing: 8.w,
                       mainAxisSpacing: 8.h,
-                      childAspectRatio: 1.39,
+                      childAspectRatio: ResponsiveGrid.aspectRatio(1.39),
                     ),
                     delegate: SliverChildListDelegate(
                       _buildStatGridChildren(stats),

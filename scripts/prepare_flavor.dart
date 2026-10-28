@@ -813,7 +813,8 @@ Future<void> prepareIos(
   print('\n🍎 Preparing iOS for $flavor...');
 
   final iosMeta = await loadIosMeta(flavor);
-  await generateBrandXcconfig(flavor, iosMeta);
+  final deepLink = await loadDeepLinkMeta(flavor);
+  await generateBrandXcconfig(flavor, iosMeta, deepLink);
   await wireXcconfigIncludes();
   await generateIosLauncherIcons(flavor);
   await writeIosSplashColor(flavor, brandColors: brandColors);
@@ -869,12 +870,54 @@ Future<Map<String, String>> loadIosMeta(String flavor) async {
   return meta;
 }
 
+/// Reads `deepLink.host` / `deepLink.hostAlt` from the brand.yaml. Returns an
+/// empty map when the flavor has no `deepLink` block (deep linking disabled).
+Future<Map<String, String>> loadDeepLinkMeta(String flavor) async {
+  final meta = <String, String>{};
+  final brandYaml = File(path.join('assets', 'brands', flavor, 'brand.yaml'));
+  if (!await brandYaml.exists()) return meta;
+
+  var inDeepLink = false;
+  for (final line in (await brandYaml.readAsString()).split('\n')) {
+    final trimmed = line.trim();
+    if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
+
+    if (trimmed == 'deepLink:') {
+      inDeepLink = true;
+      continue;
+    }
+    // Any non-indented line ends the deepLink block.
+    if (inDeepLink && !line.startsWith(' ') && !line.startsWith('\t')) {
+      inDeepLink = false;
+    }
+    if (!inDeepLink) continue;
+
+    for (final key in ['host', 'hostAlt']) {
+      if (trimmed.startsWith('$key:')) {
+        final value = _yamlValue(trimmed);
+        if (value.isNotEmpty) meta[key] = value;
+      }
+    }
+  }
+  return meta;
+}
+
 /// Writes ios/Flutter/Brand.xcconfig with the active flavor's bundle id,
 /// display name, dart-defines (so Xcode-direct runs select the right flavor),
-/// and the Flutter target. Overwritten on every prepare run.
-Future<void> generateBrandXcconfig(String flavor, Map<String, String> iosMeta) async {
+/// the Flutter target and the deep-link settings. Overwritten on every
+/// prepare run.
+Future<void> generateBrandXcconfig(
+  String flavor,
+  Map<String, String> iosMeta,
+  Map<String, String> deepLink,
+) async {
   final bundleId = iosMeta['bundleId'] ?? 'com.$flavor.app';
   final displayName = iosMeta['appName'] ?? flavor;
+  final deepLinkHost = deepLink['host'] ?? '';
+  final deepLinkHostAlt = deepLink['hostAlt'] ?? deepLinkHost;
+  final entitlements = deepLinkHost.isEmpty
+      ? 'Runner/Runner.entitlements'
+      : 'Runner/RunnerDeepLink.entitlements';
 
   final dartDefines = <String>[
     base64.encode(utf8.encode('CLIENT=$flavor')),
@@ -888,18 +931,27 @@ PRODUCT_BUNDLE_IDENTIFIER=$bundleId
 BRAND_DISPLAY_NAME=$displayName
 FLUTTER_TARGET=lib/main.dart
 DART_DEFINES=$dartDefines
+DEEP_LINK_HOST=$deepLinkHost
+DEEP_LINK_HOST_ALT=$deepLinkHostAlt
+BRAND_ENTITLEMENTS=$entitlements
 ''';
 
   final file = File(path.join('ios', 'Flutter', 'Brand.xcconfig'));
   await file.parent.create(recursive: true);
   await file.writeAsString(content);
   print('  ✓ ios/Flutter/Brand.xcconfig (bundle: $bundleId, name: $displayName)');
+  print(deepLinkHost.isEmpty
+      ? '  🔗 Deep link: disabled'
+      : '  🔗 Deep link: $deepLinkHost${deepLinkHostAlt != deepLinkHost ? ', $deepLinkHostAlt' : ''}');
 }
 
-/// Ensures Debug.xcconfig and Release.xcconfig include Brand.xcconfig.
-/// Idempotent: only appends the include line once.
+/// Ensures Debug.xcconfig and Release.xcconfig include Brand.xcconfig, with a
+/// safe `BRAND_ENTITLEMENTS` default before the include so an Xcode run that
+/// never went through prepare still signs (APNs only, no deep links).
+/// Idempotent: each line is added once.
 Future<void> wireXcconfigIncludes() async {
   const includeLine = '#include? "Brand.xcconfig"';
+  const entitlementsDefault = 'BRAND_ENTITLEMENTS=Runner/Runner.entitlements';
   for (final name in ['Debug.xcconfig', 'Release.xcconfig']) {
     final file = File(path.join('ios', 'Flutter', name));
     if (!await file.exists()) {
@@ -907,8 +959,12 @@ Future<void> wireXcconfigIncludes() async {
       continue;
     }
     var content = await file.readAsString();
-    if (content.contains(includeLine)) continue;
+    if (content.contains(includeLine) && content.contains(entitlementsDefault)) {
+      continue;
+    }
+    content = content.replaceAll('$includeLine\n', '').replaceAll(includeLine, '');
     if (!content.endsWith('\n')) content += '\n';
+    if (!content.contains(entitlementsDefault)) content += '$entitlementsDefault\n';
     content += '$includeLine\n';
     await file.writeAsString(content);
     print('  ✓ Wired Brand.xcconfig into $name');
