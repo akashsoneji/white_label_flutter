@@ -4,6 +4,7 @@ import 'package:crm_app/controllers/demo_contest_controller.dart';
 import 'package:crm_app/models/demo_contest/demo_contest_model.dart';
 import 'package:crm_app/models/demo_contest/demo_contest_my_stats_model.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/screens/demo_contest/presentation/pages/widgets/contest_activity_card.dart';
 import 'package:crm_app/services/demo_contest_service.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
@@ -33,6 +34,17 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
   void initState() {
     super.initState();
     _loadStats();
+  }
+
+  /// Ended contest, still qualified, and no claim submitted yet.
+  bool get _canClaim {
+    final contest = _contest;
+    final participant = _stats?.participant;
+    if (contest == null || participant == null) return false;
+    return contest.hasEnded &&
+        participant.id > 0 &&
+        !participant.isDisqualified &&
+        participant.claim == null;
   }
 
   Future<void> _loadStats() async {
@@ -174,6 +186,21 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
                           stats: _stats!,
                           cardBg: cardBg,
                           isDark: isDark,
+                        ),
+                        SizedBox(height: 14.h),
+
+                        if (_canClaim) ...[
+                          ClaimPrizeCard(
+                            contestId: widget.contestId,
+                            cardBg: cardBg,
+                            onClaimed: _loadStats,
+                          ),
+                          SizedBox(height: 14.h),
+                        ],
+
+                        ContestActivityCard(
+                          contestId: widget.contestId,
+                          cardBg: cardBg,
                         ),
                         SizedBox(height: 14.h),
 

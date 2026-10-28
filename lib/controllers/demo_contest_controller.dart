@@ -1,11 +1,13 @@
 import 'package:get/get.dart';
 
 import '../models/demo_contest/contest_winner_model.dart';
+import '../models/demo_contest/demo_contest_enrollment_model.dart';
 import '../models/demo_contest/demo_contest_model.dart';
 import '../models/demo_contest/leaderboard_entry_model.dart';
 import '../models/demo_contest/my_contest_entry_model.dart';
 import '../models/demo_contest/demo_contest_my_stats_model.dart';
 import '../services/demo_contest_service.dart';
+import '../services/language_service.dart';
 
 /// Reactive controller for the Demo Contest module.
 ///
@@ -111,67 +113,105 @@ class DemoContestController extends GetxController {
   Future<void> loadLeaderboard(String contestId) async {
     if (leaderboards.containsKey(contestId)) return;
     leaderboards[contestId] = <LeaderboardEntry>[].obs;
-    isLoadingLeaderboard.value = true;
-    try {
-      final list = await _service.fetchLeaderboard(contestId);
-      // Place the user entry highlight in front of the cached entry.
-      final my = entriesByContestId[contestId];
-      final decorated = list
-          .map(
-            (e) => e.copyWithFlag(
-              flagEmoji: countryToFlagEmoji(e.countryCode),
-              isCurrentUser: my != null && e.rank == my.rank,
-              isTop3: e.rank <= 3,
-            ),
-          )
-          .toList();
-      leaderboards[contestId]!.assignAll(decorated);
-    } catch (e) {
-      errorMessage.value = e.toString();
-    } finally {
-      isLoadingLeaderboard.value = false;
-    }
+    await refreshLeaderboard(contestId);
   }
 
   Future<void> refreshLeaderboard(String contestId) async {
     isLoadingLeaderboard.value = true;
     try {
       final list = await _service.fetchLeaderboard(contestId);
-      final my = entriesByContestId[contestId];
+      // `is_me` from the API marks the current user's row.
       final decorated = list
           .map(
             (e) => e.copyWithFlag(
               flagEmoji: countryToFlagEmoji(e.countryCode),
-              isCurrentUser: my != null && e.rank == my.rank,
               isTop3: e.rank <= 3,
             ),
           )
           .toList();
-      leaderboards[contestId]!.assignAll(decorated);
+      (leaderboards[contestId] ??= <LeaderboardEntry>[].obs)
+          .assignAll(decorated);
     } catch (e) {
-      errorMessage.value = e.toString();
+      errorMessage.value = _cleanError(e);
     } finally {
       isLoadingLeaderboard.value = false;
     }
   }
 
-  /// Idempotent join — if already joined, returns the existing entry.
-  Future<MyContestEntry?> joinContest(String contestId) async {
-    if (isJoined(contestId)) return entriesByContestId[contestId];
+  /// Enrollment steps (tasks) for a contest; empty when steps are disabled.
+  Future<List<DemoContestStep>> fetchSteps(String contestId) async {
+    try {
+      return await _service.fetchSteps(contestId);
+    } catch (e) {
+      errorMessage.value = _cleanError(e);
+      return const [];
+    }
+  }
+
+  Future<bool> completeStep(String stepId) async {
+    try {
+      await _service.clickStep(stepId);
+      return true;
+    } catch (e) {
+      errorMessage.value = _cleanError(e);
+      return false;
+    }
+  }
+
+  /// Web flow: `enroll-preview` (eligibility + fee) → `enroll`. The backend
+  /// rejects missing terms / unfinished steps with a message we surface.
+  /// Returns the success message, or null on failure ([errorMessage] set).
+  Future<String?> joinContest(
+    String contestId, {
+    bool termsAccepted = true,
+  }) async {
+    if (isJoined(contestId)) return '';
     isJoining.value = true;
     errorMessage.value = '';
     try {
-      final entry = await _service.joinContest(contestId);
-      myEntries.insert(0, entry);
-      entriesByContestId[contestId] = entry;
-      return entry;
+      final preview = await _service.enrollPreview(contestId);
+      if (!preview.canEnroll) {
+        errorMessage.value = preview.maxParticipations > 0 &&
+                preview.currentParticipations >= preview.maxParticipations
+            ? TranslationUtils.tr('dc_max_participations_reached')
+            : TranslationUtils.tr('dc_cannot_enroll');
+        return null;
+      }
+      final message = await _service.enroll(
+        contestId,
+        termsAccepted: termsAccepted,
+      );
+      await refreshAll();
+      return message;
     } catch (e) {
-      errorMessage.value = e.toString();
+      errorMessage.value = _cleanError(e);
       return null;
     } finally {
       isJoining.value = false;
     }
   }
+
+  Future<String?> claimPrize(String contestId, {String? realAccountNumber}) async {
+    errorMessage.value = '';
+    try {
+      return await _service.claim(
+        contestId,
+        realAccountNumber: realAccountNumber,
+      );
+    } catch (e) {
+      errorMessage.value = _cleanError(e);
+      return null;
+    }
+  }
+
+  Future<List<DemoContestTrade>> fetchTradingHistory(String contestId) =>
+      _service.fetchTradingHistory(contestId);
+
+  Future<DemoContestRuleViolations> fetchRuleViolations(String contestId) =>
+      _service.fetchRuleViolations(contestId);
+
+  String _cleanError(Object e) =>
+      e.toString().replaceFirst(RegExp(r'^Exception:\s*'), '');
 
   Future<DemoContestMyStats?> fetchMyStats(String contestId) async {
     try {

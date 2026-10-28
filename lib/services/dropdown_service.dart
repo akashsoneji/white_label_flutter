@@ -74,9 +74,8 @@ class DropdownService extends GetxService {
       cities.clear(); // Clear cities when country changes
       selectedCity.value = null; // Clear selected city
 
-      final response = await Get.find<ApiClient>().post(
-        endpoint: ApiConstants.getStateDropdown,
-        data: {'country_id': countryId},
+      final response = await Get.find<ApiClient>().get(
+        endpoint: ApiConstants.kycStates(countryId),
       );
 
       if (response.success && response.data != null) {
@@ -113,9 +112,8 @@ class DropdownService extends GetxService {
       cities.clear(); // Clear previous cities
       selectedCity.value = null; // Clear selected city
 
-      final response = await Get.find<ApiClient>().post(
-        endpoint: ApiConstants.getCityDropdown,
-        data: {'state_id': stateId},
+      final response = await Get.find<ApiClient>().get(
+        endpoint: ApiConstants.kycCities(stateId),
       );
 
       if (response.success && response.data != null) {

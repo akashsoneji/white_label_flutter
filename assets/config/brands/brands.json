@@ -1,15 +1,15 @@
 {
-  "default": "tenax",
+  "default": "riyadex",
   "brands": [
-    "tenax",
+    "riyadex",
     "vantage"
   ],
   "brandDetails": [
     {
-      "name": "tenax",
+      "name": "riyadex",
       "type": "child",
       "inheritsFrom": "vantage",
-      "label": "Tenax",
+      "label": "Riyadex",
       "themeMode": "both"
     },
     {

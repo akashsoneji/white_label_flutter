@@ -41,6 +41,7 @@ import 'package:crm_app/screens/home/search_instruments_screen.dart';
 import 'package:crm_app/screens/home/chart_screen.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
+import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
@@ -131,11 +132,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
   String _rawSymbol() {
     final s = Get.find<SymbolSelectionService>().currentSymbol;
     if (s.isNotEmpty) return s;
-    if (Get.isRegistered<InstrumentsController>()) {
-      final inst = Get.find<InstrumentsController>();
-      if (inst.instruments.isNotEmpty) return inst.instruments.first.symbol;
-    }
-    return 'XAUUSD';
+    return SymbolSelectionService.fallbackSymbol();
   }
 
   String _displaySymbol() {
@@ -474,6 +471,10 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
   }
 
   // ── Price alert bottom sheet (reuses the legacy PriceAlertDialog) ──────
+  bool get _priceAlertEnabled =>
+      !Get.isRegistered<EnabledModulesService>() ||
+      Get.find<EnabledModulesService>().current.priceAlert;
+
   void _openPriceAlertSheet() {
     final symbol = _rawSymbol();
     final marketPrice = _socket.getMarketPrice() ?? 0.0;
@@ -559,7 +560,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
               onPending: _openPendingOrderScreen,
               onSell: () => _placeOrder('sell'),
               onBuy: () => _placeOrder('buy'),
-              onBell: _openPriceAlertSheet,
+              onBell: _priceAlertEnabled ? _openPriceAlertSheet : null,
             ),
           ],
         ),
@@ -948,13 +949,7 @@ class _ChartAreaState extends State<_ChartArea> {
 
   static String _stripDot(String s) {
     if (s.isNotEmpty) return s;
-    if (Get.isRegistered<InstrumentsController>()) {
-      final inst = Get.find<InstrumentsController>();
-      if (inst.instruments.isNotEmpty) {
-        return inst.instruments.first.symbol;
-      }
-    }
-    return 'XAUUSD';
+    return SymbolSelectionService.fallbackSymbol();
   }
 
   @override
@@ -972,10 +967,16 @@ class _ChartAreaState extends State<_ChartArea> {
       }
       final effective = SymbolDetailsCacheService.resolveDatafeedSymbolSync(raw, acc);
 
+      // No saved choice, no favourite and no broker instrument yet: loading a
+      // WebView with an empty symbol shows a blank chart, so show a state
+      // instead. This Obx re-runs once instruments or a selection arrive.
+      if (effective.isEmpty) return _buildNoSymbolState();
+
       if (useNew) {
+        final initial = _initialSymbol ?? '';
         return TenaxChartWebView(
           key: _tenaxKey,
-          symbol: _initialSymbol ?? effective,
+          symbol: initial.isNotEmpty ? initial : effective,
           isDark: widget.isDark,
         );
       }
@@ -988,6 +989,31 @@ class _ChartAreaState extends State<_ChartArea> {
         url: url,
       );
       }),
+    );
+  }
+
+  Widget _buildNoSymbolState() {
+    final lang = Get.find<LanguageService>();
+    final instrumentsLoaded =
+        Get.isRegistered<InstrumentsController>() &&
+        Get.find<InstrumentsController>().hasAttemptedInitialLoad.value;
+    if (!instrumentsLoaded) {
+      return Center(
+        child: SizedBox(
+          width: 24.w,
+          height: 24.w,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: AppColors.primary,
+          ),
+        ),
+      );
+    }
+    return Center(
+      child: Text(
+        lang.tr('history_filter_no_symbols_available'),
+        style: AppTextStyles.bodyText.copyWith(color: AppColors.textSecondary),
+      ),
     );
   }
 }
@@ -1008,7 +1034,7 @@ class _BottomDock extends StatelessWidget {
   final VoidCallback onPending;
   final VoidCallback onSell;
   final VoidCallback onBuy;
-  final VoidCallback onBell;
+  final VoidCallback? onBell;
 
   const _BottomDock({
     required this.primary,
@@ -1217,7 +1243,8 @@ class _QuantityBar extends StatelessWidget {
   final VoidCallback onMinus;
   final VoidCallback onPlus;
   final VoidCallback onPending;
-  final VoidCallback onBell;
+  /// Null when `enabled-modules.price_alert` is off — the bell is hidden.
+  final VoidCallback? onBell;
 
   const _QuantityBar({
     required this.primary,
@@ -1304,11 +1331,12 @@ class _QuantityBar extends StatelessWidget {
           _QtyBtn(icon: Icons.add, color: primary, onTap: onPlus),
           // Pending order (pen + note) icon — opens the pending screen
           _QtyBtn(icon: Icons.edit_note, color: primary, onTap: onPending),
-          _QtyBtn(
-            icon: Icons.notifications_none,
-            color: primary,
-            onTap: onBell,
-          ),
+          if (onBell != null)
+            _QtyBtn(
+              icon: Icons.notifications_none,
+              color: primary,
+              onTap: onBell!,
+            ),
         ],
       ),
     );

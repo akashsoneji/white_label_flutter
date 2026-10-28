@@ -24,6 +24,7 @@ import 'package:crm_app/services/one_click_trading_service.dart';
 import 'package:crm_app/screens/home/more/one_click_trading_disclaimer_screen.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
+import 'package:crm_app/utils/demo_contest_menu.dart';
 import 'package:crm_app/widgets/theme_bottom_sheet.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
@@ -1012,11 +1013,12 @@ Obx(() {
                       if (mounted) _refreshDataIfNeeded();
                     },
                   ),
-                  _ServiceTile(
-                    icon: 'dashboard',
-                    label: languageService.tr('more_dashboard'),
-                    onTap: () async => await _handleSwitchToIB(),
-                  ),
+                  if (EnabledModulesService.flags.ib)
+                    _ServiceTile(
+                      icon: 'dashboard',
+                      label: languageService.tr('more_dashboard'),
+                      onTap: () async => await _handleSwitchToIB(),
+                    ),
                 ]);
 
                 if (showPromotional) {
@@ -1064,13 +1066,15 @@ Obx(() {
                 //   ),
                 // );
 
-                items.add(
-                  _ServiceTile(
-                    icon: 'democontest-icon',
-                    label: languageService.tr('more_demo_contest'),
-                    onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
-                  ),
-                );
+                if (DemoContestMenu.showStandalone) {
+                  items.add(
+                    _ServiceTile(
+                      icon: 'democontest-icon',
+                      label: DemoContestMenu.label,
+                      onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
+                    ),
+                  );
+                }
 
                 return Wrap(
                   spacing: 10.w,
@@ -1112,11 +1116,12 @@ Obx(() {
               ),
               _CardGroup(
                 children: [
-                  _MenuItem(
-                    icon: 'support',
-                    label: languageService.tr('ticket_title'),
-                    onTap: () => Get.toNamed(AppPages.TICKET_LIST),
-                  ),
+                  if (EnabledModulesService.flags.helpdesk)
+                    _MenuItem(
+                      icon: 'support',
+                      label: languageService.tr('ticket_title'),
+                      onTap: () => Get.toNamed(AppPages.TICKET_LIST),
+                    ),
                   const _BiometricLoginMenuItem(),
                   _MenuItem(
                     icon: 'two_factor_auth',
@@ -1160,6 +1165,7 @@ Obx(() {
                   );
                 },
               ),
+              SizedBox(height: 10.h),
               SizedBox(height: 42.h),
             ],
           ),

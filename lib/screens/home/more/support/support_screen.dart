@@ -4,10 +4,14 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../constants/color.dart';
 import '../../../../constants/text_styles.dart';
 import '../../../../routes/app_pages.dart';
+import '../../../../services/app_settings_service.dart';
+import '../../../../services/enabled_modules_service.dart';
 import '../../../../services/language_service.dart';
 import '../../../../services/live_chat_service.dart';
 
@@ -46,31 +50,25 @@ class SupportScreen extends StatelessWidget {
                 showTopBorder: true,
                 color: AppColors.textPrimary,
               ),
-              _MenuItem(
-                icon: 'contact-us',
-                label: languageService.tr('ticket_title'),
-                onTap: () {
-                  Get.toNamed(AppPages.TICKET_LIST);
-                },
-                color: AppColors.textPrimary,
-              ),
-              _MenuItem(
-                icon: 'help-center',
-                label: languageService.tr('ticket_title'),
-                onTap: () {
-                  Get.toNamed(AppPages.TICKET_LIST);
-                },
-                color: AppColors.textPrimary,
-              ),
-              _MenuItem(
-                icon: 'contact-us',
-                label: languageService.tr('contact_us'),
-                onTap: () {
-                  // Get.toNamed(AppPages.INTERNAL_TRANSFER);
-                },
-                color: AppColors.textPrimary,
-              ),
-
+              if (EnabledModulesService.flags.helpdesk) ...[
+                _MenuItem(
+                  icon: 'contact-us',
+                  label: languageService.tr('ticket_title'),
+                  onTap: () {
+                    Get.toNamed(AppPages.TICKET_LIST);
+                  },
+                  color: AppColors.textPrimary,
+                ),
+                _MenuItem(
+                  icon: 'help-center',
+                  label: languageService.tr('ticket_title'),
+                  onTap: () {
+                    Get.toNamed(AppPages.TICKET_LIST);
+                  },
+                  color: AppColors.textPrimary,
+                ),
+              ],
+              ..._contactItems(languageService),
             ],
           ),
         ),
@@ -78,12 +76,59 @@ class SupportScreen extends StatelessWidget {
     );
   }
 
+  /// WhatsApp / Call / Email rows from `app-settings` support_* values;
+  /// a row is hidden when the admin left its value empty.
+  List<Widget> _contactItems(LanguageService languageService) {
+    if (!Get.isRegistered<AppSettingsService>()) return const [];
+    final settings = Get.find<AppSettingsService>().current;
+    final whatsappDigits = settings.supportWhatsapp.replaceAll(
+      RegExp(r'[^0-9]'),
+      '',
+    );
+    final phone = settings.supportPhone.replaceAll(RegExp(r'[^0-9+]'), '');
+    final email = settings.supportEmail.trim();
+    return [
+      if (whatsappDigits.isNotEmpty)
+        _MenuItem(
+          icon: 'contact-us',
+          iconData: Icons.chat_outlined,
+          label: languageService.tr('support_contact_whatsapp'),
+          onTap: () => _open(Uri.parse('https://wa.me/$whatsappDigits')),
+          color: AppColors.textPrimary,
+        ),
+      if (phone.isNotEmpty)
+        _MenuItem(
+          icon: 'contact-us',
+          iconData: Icons.call_outlined,
+          label: languageService.tr('support_contact_call'),
+          onTap: () => _open(Uri(scheme: 'tel', path: phone)),
+          color: AppColors.textPrimary,
+        ),
+      if (email.isNotEmpty)
+        _MenuItem(
+          icon: 'contact-us',
+          iconData: Icons.email_outlined,
+          label: languageService.tr('support_contact_email'),
+          onTap: () => _open(Uri(scheme: 'mailto', path: email)),
+          color: AppColors.textPrimary,
+        ),
+    ];
+  }
 
+  Future<void> _open(Uri uri) async {
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened) {
+      CustomToastService.showError(
+        message: TranslationUtils.tr('support_contact_open_failed'),
+      );
+    }
+  }
 }
 
 
 class _MenuItem extends StatelessWidget {
   final String icon;
+  final IconData? iconData;
   final String label;
   final VoidCallback onTap;
   final bool showTopBorder;
@@ -94,6 +139,7 @@ class _MenuItem extends StatelessWidget {
     required this.label,
     required this.onTap,
     required this.color,
+    this.iconData,
     this.showTopBorder = false,
   });
 
@@ -119,12 +165,14 @@ class _MenuItem extends StatelessWidget {
           child: ListTile(
             contentPadding: EdgeInsets.zero,
             minVerticalPadding: 0,
-            leading: SvgPicture.asset(
-              'assets/svg/more/support/$icon.svg',
-              height: 24.h,
-              width: 24.w,
-              color: AppColors.primary,
-            ),
+            leading: iconData != null
+                ? Icon(iconData, size: 24.h, color: AppColors.primary)
+                : SvgPicture.asset(
+                    'assets/svg/more/support/$icon.svg',
+                    height: 24.h,
+                    width: 24.w,
+                    color: AppColors.primary,
+                  ),
             title: Text(
               label,
               style: AppTextStyles.bodyText.copyWith(

@@ -7,6 +7,7 @@ import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ibm/presentation/widgets/verification_status_dialog.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
+import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/services/language_service.dart';
 
 class IbmController extends GetxController {
@@ -88,6 +89,13 @@ class IbmController extends GetxController {
 
   /// Check system status and navigate to the appropriate screen
   Future<void> checkSystemAndNavigate() async {
+    // `enabled-modules.ib` off: no IB status/system API calls, no navigation.
+    if (!EnabledModulesService.flags.ib) {
+      CustomToastService.showError(
+        message: TranslationUtils.tr('ib_unavailable'),
+      );
+      return;
+    }
     try {
       Get.dialog(
         Center(

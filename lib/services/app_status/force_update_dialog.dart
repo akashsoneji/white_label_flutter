@@ -36,6 +36,11 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
 
   Future<void> _handleUpdateTap() async {
     final controller = Get.find<AppStatusController>();
+    // iOS has no APK path: open `update_url_ios` in the App Store.
+    if (Platform.isIOS) {
+      await controller.openAppStore();
+      return;
+    }
     final updateUrl = controller.statusData.value?.updateUrlAndroid;
 
     if (updateUrl == null || updateUrl.isEmpty) {

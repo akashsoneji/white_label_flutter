@@ -701,10 +701,10 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                                 .updateIBStatusRequest(
                                   requestId: request.id!,
                                   payload: {
-                                    "status": "approve",
+                                    "status": "approved",
                                     "reason": reasonController.text.trim(),
                                     "structure_type": structureType,
-                                    "group_id": selectedGroup!.id.toString(),
+                                    "standard_group_id": selectedGroup!.id,
                                   },
                                 );
 

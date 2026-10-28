@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/services/theme_service.dart';
 import 'package:crm_app/widgets/theme_bottom_sheet.dart';
 
@@ -60,6 +61,27 @@ class SettingScreen extends StatelessWidget {
                 label: languageService.tr('active_sessions_title'),
                 onTap: () => Get.toNamed(AppPages.ACTIVE_SESSIONS),
               ),
+              _MenuItem(
+                icon: Icon(
+                  Icons.history_rounded,
+                  size: 17.sp,
+                  color: AppColors.primary,
+                ),
+                label: languageService.tr('login_activity_title'),
+                onTap: () => Get.toNamed(AppPages.LOGIN_ACTIVITY),
+              ),
+              // `enabled-modules.platform` off → admin hid the Platforms page.
+              if (!Get.isRegistered<EnabledModulesService>() ||
+                  Get.find<EnabledModulesService>().current.platform)
+                _MenuItem(
+                  icon: Icon(
+                    Icons.download_for_offline_outlined,
+                    size: 17.sp,
+                    color: AppColors.primary,
+                  ),
+                  label: languageService.tr('platforms_title'),
+                  onTap: () => Get.toNamed(AppPages.PLATFORMS),
+                ),
             ],
           ),
         ),

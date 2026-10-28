@@ -5,7 +5,9 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/more/view_models/more_controller.dart';
+import 'package:crm_app/services/app_settings_service.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/mobile_verification_sheet.dart';
 
 /// Status of a verification step.
 enum _StepState { completed, active, locked }
@@ -33,13 +35,19 @@ class KycIntroScreen extends StatelessWidget {
 
   bool get _step3Done => stageCompletion?.addressProofVerified == true;
 
-  void _handleNavigate() {
+  Future<void> _handleNavigate() async {
     if (stageCompletion?.mobileVerified == null ||
         stageCompletion?.emailVerified == null ||
         stageCompletion?.personalDetails == false) {
       Get.toNamed(AppPages.KYC_DETAILS);
     } else if (stageCompletion?.identityVerified == false ||
         stageCompletion?.addressProofVerified == false) {
+      // `otp_policy.kyc_require_mobile_verified`: documents are only
+      // accepted once the mobile number is verified.
+      final mustVerifyMobile =
+          Get.isRegistered<AppSettingsService>() &&
+          Get.find<AppSettingsService>().kycRequiresMobileVerified;
+      if (mustVerifyMobile && !await ensureMobileVerified()) return;
       Get.toNamed(AppPages.KYC_DOCS);
     } else {
       Get.toNamed(
@@ -114,6 +122,9 @@ class KycIntroScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+                    if (stageCompletion != null &&
+                        stageCompletion!.mobileVerified == null)
+                      const _VerifyMobileAction(),
                     _buildTimelineStep(
                       stepNumber: 2,
                       title: TranslationUtils.tr(
@@ -629,6 +640,55 @@ class KycIntroScreen extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Inline "Verify mobile number" action for step 1; hides itself once the
+/// OTP flow reports the number verified.
+class _VerifyMobileAction extends StatefulWidget {
+  const _VerifyMobileAction();
+
+  @override
+  State<_VerifyMobileAction> createState() => _VerifyMobileActionState();
+}
+
+class _VerifyMobileActionState extends State<_VerifyMobileAction> {
+  bool _busy = false;
+  bool _verified = false;
+
+  Future<void> _start() async {
+    setState(() => _busy = true);
+    final ok = await ensureMobileVerified();
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _verified = ok;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_verified || isMobileOtpOff) return const SizedBox.shrink();
+    return Padding(
+      padding: EdgeInsetsDirectional.only(start: 44.w, bottom: 16.h),
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: OutlinedButton.icon(
+          onPressed: _busy ? null : _start,
+          icon: _busy
+              ? SizedBox(
+                  width: 14.w,
+                  height: 14.w,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primary,
+                  ),
+                )
+              : Icon(Icons.phone_iphone_rounded, size: 16.sp),
+          label: Text(TranslationUtils.tr('mobile_otp_verify_action')),
+        ),
       ),
     );
   }

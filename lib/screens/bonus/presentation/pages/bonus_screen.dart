@@ -368,6 +368,37 @@ class BonusController extends GetxController {
       return false;
     }
   }
+
+  /// `POST bonus/bonusClaimCancel` — backend allows this only for pending or
+  /// claimed bonuses that were not yet converted to balance.
+  Future<bool> cancelBonusClaim({required int id, String? reason}) async {
+    try {
+      final response = await ApiService.post(
+        endpoint: ApiConstants.bonusClaimCancel,
+        data: {
+          'id': id,
+          if (reason != null && reason.isNotEmpty) 'reason': reason,
+        },
+      );
+      if (response.success) {
+        CustomToastService.showSuccess(
+          message:
+              response.message ?? TranslationUtils.tr('bonus_cancel_success'),
+        );
+        fetchClaimHistory();
+        return true;
+      }
+      CustomToastService.showError(
+        message: response.message ?? TranslationUtils.tr('bonus_cancel_failed'),
+      );
+      return false;
+    } catch (_) {
+      CustomToastService.showError(
+        message: TranslationUtils.tr('bonus_cancel_failed'),
+      );
+      return false;
+    }
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1248,6 +1279,87 @@ class BonusScreen extends StatelessWidget {
   // ───────────────────────────────────────────────────────────────────────────
   // CLAIM HISTORY TAB VIEW
   // ───────────────────────────────────────────────────────────────────────────
+  void _showCancelBonusDialog(BonusController controller, BonusClaim claim) {
+    final reasonCtrl = TextEditingController();
+    var submitting = false;
+    Get.dialog<void>(
+      StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          backgroundColor: AppColors.card,
+          title: Text(
+            TranslationUtils.tr('bonus_cancel_title'),
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                TranslationUtils.tr('bonus_cancel_message'),
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 13.sp,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              TextField(
+                controller: reasonCtrl,
+                maxLines: 3,
+                maxLength: 500,
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 13.sp,
+                  color: AppColors.textPrimary,
+                ),
+                decoration: InputDecoration(
+                  hintText: TranslationUtils.tr('bonus_cancel_reason_hint'),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: submitting ? null : Get.back,
+              child: Text(TranslationUtils.tr('common_close')),
+            ),
+            TextButton(
+              onPressed: submitting
+                  ? null
+                  : () async {
+                      setState(() => submitting = true);
+                      final ok = await controller.cancelBonusClaim(
+                        id: claim.id,
+                        reason: reasonCtrl.text.trim(),
+                      );
+                      if (ok) {
+                        Get.back();
+                      } else if (context.mounted) {
+                        setState(() => submitting = false);
+                      }
+                    },
+              child: submitting
+                  ? SizedBox(
+                      width: 16.w,
+                      height: 16.w,
+                      child: const CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      TranslationUtils.tr('bonus_cancel_confirm'),
+                      style: TextStyle(color: AppColors.error),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    ).whenComplete(reasonCtrl.dispose);
+  }
+
   Widget _buildHistoryTab(
     BonusController controller,
     LanguageService languageService,
@@ -1379,6 +1491,28 @@ class BonusScreen extends StatelessWidget {
                                 color: AppColors.textSecondary,
                               ),
                             ),
+                            if (const ['pending', 'claimed']
+                                .contains(claim.status.toLowerCase()))
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: Size(0, 28.h),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                onPressed: () => _showCancelBonusDialog(
+                                  controller,
+                                  claim,
+                                ),
+                                child: Text(
+                                  TranslationUtils.tr('bonus_cancel_action'),
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.error,
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       ],

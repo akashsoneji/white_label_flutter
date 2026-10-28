@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:crm_app/models/banner_model.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/bonus/presentation/pages/scratch_card_screen.dart';
 import 'package:crm_app/screens/home/more/promotional/promotional_screen.dart';
@@ -83,7 +84,9 @@ class BannerController extends GetxController {
     if (urlLower.contains('/contest') ||
         urlLower.contains('/demo-contest') ||
         title.contains('contest')) {
-      Get.toNamed(AppPages.DEMO_CONTEST);
+      if (EnabledModulesService.flags.democontest) {
+        Get.toNamed(AppPages.DEMO_CONTEST);
+      }
       return;
     }
 
@@ -95,6 +98,8 @@ class BannerController extends GetxController {
     if (urlLower.contains('/ib') ||
         urlLower.contains('/partnership') ||
         title.contains('refer')) {
+      // Module off: the banner must not open IB (in-app or via its web URL).
+      if (!EnabledModulesService.flags.ib) return;
       if (FlavorConfig.usesIquoteUi()) {
         Get.toNamed(AppPages.IB_DASHBOARD);
       } else {

@@ -14,4 +14,6 @@ abstract class BonusRepository {
     String? token,
     required int accountId,
   });
+
+  Future<ApiResponse> claimScratchReward({String? token});
 }

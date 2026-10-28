@@ -40,6 +40,7 @@ class ApiService {
     required String endpoint,
     Map<String, dynamic>? queryParameters,
     String? token,
+    Map<String, String>? extraHeaders,
     bool isRetry = false,
   }) async {
     _initializeLogging();
@@ -69,6 +70,7 @@ class ApiService {
           ...httpClient.keepAliveHeaders, // Add Keep-Alive headers
         if (authToken != null && authToken.isNotEmpty)
           'Authorization': 'Bearer $authToken',
+        ...?extraHeaders,
       };
 
       _logRequest(
@@ -125,6 +127,7 @@ class ApiService {
             endpoint: endpoint,
             queryParameters: queryParameters,
             token: token,
+            extraHeaders: extraHeaders,
             isRetry: true,
           );
         }

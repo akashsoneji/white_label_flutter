@@ -562,4 +562,152 @@ class DepositInstructionController extends GetxController {
     );
   }
 
+  /// Bank details returned by a dynamic gateway that pays by bank transfer
+  /// (`data.account_number` present). Null until such a response arrives.
+  final dynamicBankResult = Rxn<Map<String, dynamic>>();
+
+  /// `POST deposit/dynamic/{gatewaySlug}` — same branching as the web
+  /// `DepositRequest` submit: hosted payment page, bank details, or a push
+  /// prompt sent to the payer's phone.
+  /// `POST deposit/unipayment` → opens the hosted `invoice_url` in the same
+  /// checkout screen Cregis uses.
+  Future<void> submitUniPaymentDeposit({
+    required String gatewayMethodId,
+    required String mt5AccountId,
+    required String amount,
+  }) async {
+    if (isLoading.value) return;
+    try {
+      isLoading.value = true;
+      final token = await SecureStorageService.getAuthToken();
+      final response = await ApiService.post(
+        endpoint: ApiConstants.uniPaymentDeposit,
+        token: token,
+        data: {
+          'gateway_method_id': gatewayMethodId,
+          'mt5_account_id': mt5AccountId,
+          'amount': amount,
+        },
+      );
+      final body = response.data is Map ? response.data as Map : const {};
+      final data = body['data'] is Map ? body['data'] as Map : const {};
+      final invoiceUrl = data['invoice_url']?.toString() ?? '';
+      if (!response.success || invoiceUrl.isEmpty) {
+        CustomToastService.showError(
+          message: response.message?.isNotEmpty == true
+              ? response.message!
+              : TranslationUtils.tr('deposit_unipayment_failed'),
+        );
+        return;
+      }
+      _markDashboardAccountsStale();
+      Get.toNamed(
+        AppPages.CREGIS_SUCCESS,
+        arguments: {
+          'checkoutUrl': invoiceUrl,
+          'referenceNumber': data['reference_number']?.toString() ?? '',
+          'amount': amount,
+          'tapTimeIso': DateTime.now().toIso8601String(),
+        },
+      );
+    } catch (_) {
+      CustomToastService.showError(
+        message: TranslationUtils.tr('deposit_unipayment_failed'),
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> submitDynamicDeposit({
+    required String gatewaySlug,
+    required String gatewayMethodId,
+    required String amount,
+    required String mt5AccountId,
+    Map<String, String> extraFields = const {},
+  }) async {
+    if (isLoading.value) return;
+    try {
+      isLoading.value = true;
+      final token = await SecureStorageService.getAuthToken();
+      final response = await ApiService.post(
+        endpoint: ApiConstants.dynamicDeposit(gatewaySlug),
+        token: token,
+        data: {
+          'gateway_method_id': gatewayMethodId,
+          'mt5_account_id': mt5AccountId,
+          'amount': amount,
+          ...extraFields,
+        },
+      );
+
+      final body = response.data is Map
+          ? Map<String, dynamic>.from(response.data as Map)
+          : <String, dynamic>{};
+      final rawData = body['data'];
+      final data = rawData is Map
+          ? Map<String, dynamic>.from(rawData)
+          : <String, dynamic>{};
+      final message = response.message ?? body['message']?.toString();
+
+      if (!response.success) {
+        CustomToastService.showError(
+          message: message ?? TranslationUtils.tr('deposit_dynamic_failed'),
+        );
+        return;
+      }
+
+      final reference = data['reference_number']?.toString() ?? '';
+      final redirectUrl = data['redirect_url']?.toString() ?? '';
+      final accountNumber = data['account_number']?.toString() ?? '';
+
+      if (accountNumber.isNotEmpty) {
+        dynamicBankResult.value = data;
+        _markDashboardAccountsStale();
+        return;
+      }
+
+      if (redirectUrl.isNotEmpty) {
+        _markDashboardAccountsStale();
+        Get.toNamed(
+          AppPages.CREGIS_SUCCESS,
+          arguments: {
+            'checkoutUrl': redirectUrl,
+            'referenceNumber': reference,
+            'amount': amount,
+            'tapTimeIso': DateTime.now().toIso8601String(),
+          },
+        );
+        return;
+      }
+
+      if (data['async_ack'] == true || data['async_ack'] == 1) {
+        _markDashboardAccountsStale();
+        CustomToastService.showSuccess(
+          message: message ?? TranslationUtils.tr('deposit_dynamic_prompt_sent'),
+        );
+        Get.toNamed(
+          AppPages.TRANSACTION_HISTORY,
+          arguments: {'from': 'finance'},
+        );
+        return;
+      }
+
+      CustomToastService.showError(
+        message: message ?? TranslationUtils.tr('deposit_dynamic_no_action'),
+      );
+    } catch (e) {
+      CustomToastService.showError(
+        message: TranslationUtils.tr('deposit_dynamic_failed'),
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void _markDashboardAccountsStale() {
+    if (Get.isRegistered<DashboardController>()) {
+      Get.find<DashboardController>().markMT5AccountsAsStale();
+    }
+  }
 }

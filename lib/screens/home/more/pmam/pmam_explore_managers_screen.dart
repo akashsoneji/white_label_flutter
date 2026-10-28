@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../../../../constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -26,9 +28,63 @@ class PmamExploreManagersScreen extends StatefulWidget {
       _PmamExploreManagersScreenState();
 }
 
+class _SearchOptionTile extends StatelessWidget {
+  final PmamSearchOption option;
+  final VoidCallback onTap;
+
+  const _SearchOptionTile({required this.option, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 11.h),
+        child: Row(
+          children: [
+            Icon(
+              option.isPlan ? Icons.layers_outlined : Icons.person_outline,
+              size: 16.sp,
+              color: AppColors.textGrey,
+            ),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                option.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            if (option.subtitle.isNotEmpty) ...[
+              SizedBox(width: 8.w),
+              Flexible(
+                child: Text(
+                  option.subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 11.sp,
+                    color: AppColors.textGrey,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
   final PmamController _c = Get.find<PmamController>();
   final TextEditingController _searchCtrl = TextEditingController();
+  Timer? _searchDebounce;
 
   String _sortKey = 'gain'; // gain | aum | investors | commission
   bool _sortDesc = true;
@@ -45,8 +101,25 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
+    _c.clearSearchOptions();
     _searchCtrl.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {});
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(
+      const Duration(milliseconds: 400),
+      () => _c.searchExploreOptions(value),
+    );
+  }
+
+  void _openSearchOption(PmamSearchOption option) {
+    FocusScope.of(context).unfocus();
+    _c.clearSearchOptions();
+    Get.toNamed(AppPages.PMAM_FUND_MANAGER_VIEW, arguments: option.managerCode);
   }
 
   // ── Derived data ──────────────────────────────────────────────────────────
@@ -292,9 +365,42 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
   Widget _buildSearch() {
     return Padding(
       padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 6.h),
-      child: TextField(
+      child: Column(
+        children: [
+          _buildSearchField(),
+          Obx(() {
+            final options = _c.searchOptions.toList();
+            if (options.isEmpty || _searchCtrl.text.trim().isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return Container(
+              margin: EdgeInsets.only(top: 6.h),
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: AppColors.border),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  for (final option in options)
+                    _SearchOptionTile(
+                      option: option,
+                      onTap: () => _openSearchOption(option),
+                    ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return TextField(
         controller: _searchCtrl,
-        onChanged: (_) => setState(() {}),
+        onChanged: _onSearchChanged,
         style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 13.sp),
         decoration: InputDecoration(
           isDense: true,
@@ -322,7 +428,6 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
             borderSide: BorderSide(color: AppColors.primary),
           ),
         ),
-      ),
     );
   }
 

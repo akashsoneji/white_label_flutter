@@ -496,7 +496,10 @@ class _SearchBarSectionState extends State<_SearchBarSection> {
         ),
         Obx(() {
           final suggestions = controller.masterSuggestions.toList();
-          if (suggestions.isEmpty) return const SizedBox.shrink();
+          final planSuggestions = controller.planSuggestions.toList();
+          if (suggestions.isEmpty && planSuggestions.isEmpty) {
+            return const SizedBox.shrink();
+          }
           return Container(
             margin: EdgeInsets.only(top: 6.h),
             decoration: BoxDecoration(
@@ -513,6 +516,14 @@ class _SearchBarSectionState extends State<_SearchBarSection> {
                     onTap: () {
                       FocusScope.of(context).unfocus();
                       controller.selectMasterSuggestion(s);
+                    },
+                  ),
+                for (final p in planSuggestions)
+                  _PlanSuggestionTile(
+                    suggestion: p,
+                    onTap: () {
+                      FocusScope.of(context).unfocus();
+                      controller.selectPlanSuggestion(p);
                     },
                   ),
               ],
@@ -562,6 +573,54 @@ class _MasterSuggestionTile extends StatelessWidget {
                 color: AppColors.textGrey,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlanSuggestionTile extends StatelessWidget {
+  final PlanSearchSuggestion suggestion;
+  final VoidCallback onTap;
+  const _PlanSuggestionTile({required this.suggestion, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+        child: Row(
+          children: [
+            Icon(Icons.layers_outlined, size: 16.sp, color: AppColors.textGrey),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                suggestion.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            if (suggestion.masterName.isNotEmpty) ...[
+              SizedBox(width: 8.w),
+              Flexible(
+                child: Text(
+                  suggestion.masterName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 11.sp,
+                    color: AppColors.textGrey,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

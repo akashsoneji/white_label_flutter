@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 
+import 'package:crm_app/services/crm_settings_service.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
@@ -26,6 +27,14 @@ class DepositController extends GetxController {
   // Transfer-to accounts list (depends on deposit_slug)
   final transferAccounts = <Map<String, dynamic>>[].obs;
   final selectedTransferAccount = Rxn<Map<String, dynamic>>();
+
+  bool get _depositCreditToWalletOnly =>
+      Get.isRegistered<CrmSettingsService>() &&
+      (Get.find<CrmSettingsService>()
+              .current
+              ?.financialSettings
+              .depositCreditToWalletOnly ??
+          false);
 
   @override
   void onInit() {
@@ -147,6 +156,9 @@ class DepositController extends GetxController {
             "balance": wallet['wallet_balance'],
             "currency": "USD",
           };
+          // `deposit_credit_to_wallet_only`: deposits can only credit the
+          // wallet, so the MT5 accounts are not offered as a target.
+          if (_depositCreditToWalletOnly) mt5Accounts.clear();
           mt5Accounts.add(walletAccount);
         }
 

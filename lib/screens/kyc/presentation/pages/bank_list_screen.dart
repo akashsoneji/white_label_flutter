@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/kyc/view_models/kyc_bank_controller.dart';
@@ -396,7 +397,12 @@ class _BankListScreenState extends State<BankListScreen> {
     }
 
     // Proof image — fetched with auth header, tap to open full-screen view.
+    // Stored proof paths are not publicly reachable, so load it through
+    // `image-proxy/{id}` like the web portal does.
     if (_hasValue(method.proofImg)) {
+      final proofUrl = method.id != null
+          ? '${ApiConstants.baseUrl}${ApiConstants.withdrawalImageProxy(method.id!)}'
+          : method.proofImg!;
       detailRows.add(
         Padding(
           padding: EdgeInsets.only(top: 8.h, bottom: 4.h),
@@ -413,9 +419,9 @@ class _BankListScreenState extends State<BankListScreen> {
               ),
               SizedBox(height: 8.h),
               GestureDetector(
-                onTap: () => _openProofViewer(method.proofImg!),
+                onTap: () => _openProofViewer(proofUrl),
                 child: AuthenticatedNetworkImage(
-                  url: method.proofImg!,
+                  url: proofUrl,
                   width: double.infinity,
                   height: 180.h,
                   fit: BoxFit.cover,
@@ -424,6 +430,39 @@ class _BankListScreenState extends State<BankListScreen> {
               ),
             ],
           ),
+        ),
+      );
+    }
+
+    if (method.id != null) {
+      final id = method.id!;
+      detailRows.add(
+        Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: Obx(() {
+            final deleting = controller.deletingIds.contains(id);
+            return TextButton.icon(
+              onPressed: deleting ? null : () => _confirmDelete(id),
+              icon: deleting
+                  ? SizedBox(
+                      width: 14.w,
+                      height: 14.w,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.error,
+                      ),
+                    )
+                  : Icon(Icons.delete_outline, size: 18.sp, color: AppColors.error),
+              label: Text(
+                languageService.tr('bank_list_delete'),
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.error,
+                ),
+              ),
+            );
+          }),
         ),
       );
     }
@@ -438,6 +477,45 @@ class _BankListScreenState extends State<BankListScreen> {
         ),
       ),
       child: Column(children: detailRows),
+    );
+  }
+
+  void _confirmDelete(int id) {
+    Get.dialog<void>(
+      AlertDialog(
+        backgroundColor: AppColors.card,
+        title: Text(
+          languageService.tr('bank_list_delete_title'),
+          style: AppTextStyles.bodyText.copyWith(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        content: Text(
+          languageService.tr('bank_list_delete_message'),
+          style: AppTextStyles.bodyText.copyWith(
+            fontSize: 13.sp,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: Get.back,
+            child: Text(languageService.tr('bank_list_delete_cancel')),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              controller.deleteWithdrawalMethod(id);
+            },
+            child: Text(
+              languageService.tr('bank_list_delete'),
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/screens/finance/view_models/payment_method_controller.dart';
 import 'package:crm_app/screens/finance/presentation/pages/deposit_real_screen.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/widgets/feature_maintenance_gate.dart';
 
 import '../../../../constants/color.dart';
 import '../../../../constants/text_styles.dart';
@@ -44,6 +45,14 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Every real deposit (all brands) starts on this screen.
+    return FeatureMaintenanceGate(
+      feature: MaintenanceFeature.deposit,
+      child: Builder(builder: _buildScreen),
+    );
+  }
+
+  Widget _buildScreen(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       resizeToAvoidBottomInset: true,

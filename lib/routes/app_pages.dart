@@ -19,6 +19,7 @@ import 'package:crm_app/screens/demo_contest/presentation/pages/demo_contest_my_
 import 'package:crm_app/screens/demo_contest/presentation/pages/winners_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/finance_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
+import 'package:crm_app/widgets/kyc_lock_gate.dart';
 import 'package:crm_app/screens/ib/presentation/pages/ib_dashboard_screen.dart';
 import 'package:crm_app/screens/ib/presentation/pages/ib_main_screen.dart';
 import 'package:crm_app/screens/home/more/setting/setting_screen.dart';
@@ -44,6 +45,8 @@ import '../screens/auth/presentation/pages/account_created_screen.dart';
 import '../screens/home/change_password_screen.dart';
 import '../screens/home/more/two_factor_auth_screen.dart';
 import '../screens/home/more/active_sessions_screen.dart';
+import '../screens/home/more/platforms_screen.dart';
+import '../screens/home/more/login_activity_screen.dart';
 import '../screens/auth/presentation/pages/google_login_otp_screen.dart';
 import '../screens/home/more/chat_with_us_screen.dart';
 import '../screens/home/more/edit_profile_screen.dart';
@@ -176,6 +179,8 @@ class AppPages {
   static const CHANGE_PASSWORD = _Paths.CHANGE_PASSWORD;
   static const TWO_FACTOR_AUTH = _Paths.TWO_FACTOR_AUTH;
   static const ACTIVE_SESSIONS = _Paths.ACTIVE_SESSIONS;
+  static const PLATFORMS = _Paths.PLATFORMS;
+  static const LOGIN_ACTIVITY = _Paths.LOGIN_ACTIVITY;
   static const GOOGLE_LOGIN_OTP = _Paths.GOOGLE_LOGIN_OTP;
   static const TENAX_BROKER_SELECTION = _Paths.TENAX_BROKER_SELECTION;
   static const TENAX_BROKER_INFO = _Paths.TENAX_BROKER_INFO;
@@ -228,6 +233,14 @@ class AppPages {
     GetPage(
       name: _Paths.ACTIVE_SESSIONS,
       page: () => const ActiveSessionsScreen(),
+    ),
+    GetPage(
+      name: _Paths.PLATFORMS,
+      page: () => const PlatformsScreen(),
+    ),
+    GetPage(
+      name: _Paths.LOGIN_ACTIVITY,
+      page: () => const LoginActivityScreen(),
     ),
     GetPage(
       name: _Paths.PAYMENT_METHOD,
@@ -288,7 +301,7 @@ class AppPages {
     GetPage(
       name: _Paths.TRADING,
       // Route through UiRegistry so the correct parent UI renders.
-      page: () => UiRegistry.instance.tradingMain(),
+      page: () => KycLockGate(child: UiRegistry.instance.tradingMain()),
       binding: TradingBinding(),
     ),
     GetPage(

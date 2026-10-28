@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
@@ -507,9 +508,16 @@ class KycDocsController extends GetxController {
     return existingDocuments[subdocumentType];
   }
 
+  /// Preview URL for an uploaded document. Uses `kyc-image-proxy/{id}` on the
+  /// app's own API host — the `image_url` the server returns is built from
+  /// its configured APP_URL, which may not match this brand's API domain.
   String? getExistingDocUrl(String subdocumentType) {
     final doc = existingDocuments[subdocumentType];
     if (doc == null) return null;
+    final id = int.tryParse('${doc['id'] ?? ''}');
+    if (id != null && id > 0) {
+      return '${ApiConstants.baseUrl}${ApiConstants.kycImageProxy(id)}';
+    }
     final url = doc['image_url']?.toString();
     if (url == null || url.isEmpty) return null;
     return url;

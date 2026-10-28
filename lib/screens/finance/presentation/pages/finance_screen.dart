@@ -8,6 +8,7 @@ import '../../../../constants/color.dart';
 import '../../../../constants/text_styles.dart';
 import '../../../../routes/app_pages.dart';
 import '../finance_ui_scope.dart';
+import '../../../../services/enabled_modules_service.dart';
 import '../../../../services/language_service.dart';
 
 class FinanceScreen extends StatelessWidget {
@@ -16,6 +17,9 @@ class FinanceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final languageService = Get.find<LanguageService>();
+    final isTraderTransferEnabled =
+        Get.isRegistered<EnabledModulesService>() &&
+            Get.find<EnabledModulesService>().isTraderTransferEnabled;
 
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
@@ -66,14 +70,15 @@ class FinanceScreen extends StatelessWidget {
                     },
                     textColor: AppColors.textPrimary,
                   ),
-                  MoreMenuTile(
-                    iconName: 'internal-transfer',
-                    label: languageService.tr('trader_transfer_title'),
-                    onTap: () {
-                      Get.toNamed(AppPages.TRADER_TRANSFER);
-                    },
-                    textColor: AppColors.textPrimary,
-                  ),
+                  if (isTraderTransferEnabled)
+                    MoreMenuTile(
+                      iconName: 'internal-transfer',
+                      label: languageService.tr('trader_transfer_title'),
+                      onTap: () {
+                        Get.toNamed(AppPages.TRADER_TRANSFER);
+                      },
+                      textColor: AppColors.textPrimary,
+                    ),
                   // MoreMenuTile(
                   //   iconName: 'transaction_history',
                   //   label: languageService.tr('internal_transfer_history'),

@@ -30,14 +30,22 @@ class LeaderboardEntry {
     return LeaderboardEntry(
       rank: (json['rank'] as num?)?.toInt() ?? 0,
       userId: json['user_id']?.toString() ?? '',
-      displayName: json['display_name']?.toString() ?? 'Trader',
+      displayName: json['display_name']?.toString() ??
+          json['name']?.toString() ??
+          'Trader',
       countryCode: json['country_code']?.toString() ?? '',
       equity: (json['equity'] as num?)?.toDouble() ?? 0,
-      pnl: (json['pnl'] as num?)?.toDouble() ?? 0,
-      pnlPercent: (json['pnl_percent'] as num?)?.toDouble() ?? 0,
+      pnl: (json['pnl'] as num?)?.toDouble() ??
+          (json['profit'] as num?)?.toDouble() ??
+          0,
+      pnlPercent: (json['pnl_percent'] as num?)?.toDouble() ??
+          (json['return_percent'] as num?)?.toDouble() ??
+          0,
       tradesCount: (json['trades_count'] as num?)?.toInt() ?? 0,
       winRate: (json['win_rate'] as num?)?.toDouble() ?? 0,
-      isCurrentUser: json['is_current_user'] as bool? ?? false,
+      isCurrentUser: json['is_current_user'] as bool? ??
+          json['is_me'] as bool? ??
+          false,
       isTop3: json['is_top3'] as bool? ?? false,
     );
   }

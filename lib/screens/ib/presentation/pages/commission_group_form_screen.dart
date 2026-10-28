@@ -28,6 +28,8 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
   final Map<int, bool> _expandedGroups =
       {}; // Track expanded state for each group
   bool _isLoading = false;
+  int? _selectedTemplateId;
+  bool _isApplyingTemplate = false;
   /// True while this screen is waiting for its first structure fetch (avoids error flash).
   bool _isPageLoading = true;
 
@@ -111,6 +113,104 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
     } else {
       _initializeEmptyForm();
     }
+  }
+
+  /// Admin-assigned templates (`{id, template_name}`) offered on create only.
+  List<({int id, String name})> get _templates {
+    if (widget.group != null) return const [];
+    final raw = ibController.ibStructureData.value?.adminAssignedTemplates;
+    if (raw == null) return const [];
+    return [
+      for (final t in raw.whereType<Map>())
+        if (int.tryParse('${t['id']}') != null)
+          (id: int.parse('${t['id']}'), name: '${t['template_name'] ?? ''}'),
+    ];
+  }
+
+  /// Prefills the rate fields from `GET ib/get-template-rates/{id}`.
+  Future<void> _applyTemplate(int templateId) async {
+    setState(() {
+      _selectedTemplateId = templateId;
+      _isApplyingTemplate = true;
+    });
+    final rates = await ibController.loadTemplateRates(templateId);
+    if (!mounted) return;
+    setState(() {
+      _isApplyingTemplate = false;
+      if (rates == null) return;
+      rates.forEach((masterId, byCategory) {
+        byCategory.forEach((categoryId, rate) {
+          final key = '${masterId}_$categoryId';
+          final existing = _commissionControllers[key];
+          if (existing != null) {
+            existing.text = rate;
+          } else {
+            _commissionControllers[key] = TextEditingController(text: rate);
+          }
+        });
+      });
+    });
+  }
+
+  Widget _buildTemplatePicker() {
+    final templates = _templates;
+    if (templates.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: EdgeInsets.only(top: 14.h),
+      child: Row(
+        children: [
+          Expanded(
+            child: DropdownButtonFormField<int>(
+              initialValue: _selectedTemplateId,
+              isExpanded: true,
+              dropdownColor: AppColors.card,
+              decoration: InputDecoration(
+                isDense: true,
+                labelText: TranslationUtils.tr('ib_apply_template'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 14.w,
+                  vertical: 10.h,
+                ),
+              ),
+              items: [
+                for (final t in templates)
+                  DropdownMenuItem(
+                    value: t.id,
+                    child: Text(
+                      t.name,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontSize: 13.sp,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+              ],
+              onChanged: _isApplyingTemplate
+                  ? null
+                  : (id) {
+                      if (id != null) _applyTemplate(id);
+                    },
+            ),
+          ),
+          if (_isApplyingTemplate) ...[
+            SizedBox(width: 10.w),
+            SizedBox(
+              width: 18.w,
+              height: 18.w,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   double? _getMaxValue(int masterId, int categoryId) {
@@ -361,6 +461,7 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
                             ),
                           ),
                         ),
+                        _buildTemplatePicker(),
                       ],
                     ),
                   ),

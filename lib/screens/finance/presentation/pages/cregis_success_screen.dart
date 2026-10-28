@@ -5,10 +5,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/services/api_service.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
-import 'package:crm_app/screens/finance/view_models/transaction_history_controller.dart';
+
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 
@@ -94,21 +96,60 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
               '${TranslationUtils.tr('cregis_success_screen_checking_payment_details')} (${remaining}s)';
         });
 
-        // Poll Transaction History and look for a row whose
-        // `referenceNumber` matches the Cregis ref AND whose status is one
-        // of {approved, success, completed} → success.
         final ref = widget.referenceNumber;
-        if (ref.trim().isEmpty) return; // can't match without a ref
+        if (ref.trim().isEmpty) return; // can't look up without a ref
 
-        final res = await Get.find<TransactionHistoryController>()
-            .fetchLatestTransactionForRef(ref, statusFilter: true);
-
-        if (!mounted || _resolved) return;
-        if (res.row != null) {
+        final status = await _fetchDepositStatus(ref);
+        if (!mounted || _resolved || status == null) return;
+        if (_successStatuses.contains(status)) {
           _onSuccess();
-          return;
+        } else if (_failedStatuses.contains(status)) {
+          _onFailed();
         }
       },
+    );
+  }
+
+  static const _successStatuses = {'approved', 'success', 'completed'};
+  static const _failedStatuses = {
+    'rejected',
+    'failed',
+    'cancelled',
+    'canceled',
+    'declined',
+    'expired',
+  };
+
+  /// `data.status` of GET deposit/by-reference, lowercased; null when the
+  /// deposit is not found yet or the call failed (keep polling).
+  Future<String?> _fetchDepositStatus(String reference) async {
+    try {
+      final response = await ApiService.get(
+        endpoint: ApiConstants.depositByReference,
+        queryParameters: {'reference': reference},
+      );
+      final body = response.data;
+      if (!response.success || body is! Map) return null;
+      final data = body['data'];
+      if (data is! Map) return null;
+      return data['status']?.toString().trim().toLowerCase();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _onFailed() {
+    if (_resolved) return;
+    _resolved = true;
+    _pollingTimer?.cancel();
+    if (mounted) {
+      setState(() {
+        _isPolling = false;
+        _statusText = TranslationUtils.tr('deposit_deposit_failed');
+      });
+    }
+    CustomToastService.showError(
+      message: TranslationUtils.tr('deposit_deposit_failed'),
     );
   }
 

@@ -420,10 +420,8 @@ class _ContestCard extends StatelessWidget {
                       if (contest.isEnrolled) {
                         Get.toNamed(AppPages.DEMO_CONTEST_MY_STATS, arguments: contest.id);
                       } else {
-                        // In real app, this should join or go to join screen
-                        Get.find<DemoContestController>().joinContest(contest.id).then((_) {
-                           Get.toNamed(AppPages.DEMO_CONTEST_MY_STATS, arguments: contest.id);
-                        });
+                        // Enrollment (terms, steps, eligibility) lives on details.
+                        Get.toNamed(AppPages.DEMO_CONTEST_DETAILS, arguments: contest.id);
                       }
                     },
                     style: ElevatedButton.styleFrom(

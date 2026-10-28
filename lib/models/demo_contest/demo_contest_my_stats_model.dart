@@ -91,7 +91,10 @@ class DemoContestParticipant {
       termsAcceptedAt: json['terms_accepted_at'] as String?,
       createdAt: json['created_at']?.toString() ?? '',
       updatedAt: json['updated_at']?.toString() ?? '',
-      claim: json['claim'] as String?,
+      // Backend sends the claim as an object once submitted; keep its status.
+      claim: json['claim'] is Map
+          ? ((json['claim'] as Map)['status']?.toString() ?? 'pending')
+          : json['claim']?.toString(),
     );
   }
 

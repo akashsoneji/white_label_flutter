@@ -1,9 +1,11 @@
 import 'package:get/get.dart';
+import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/services/market_watch_v2_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 
 /// Maintains the last selected trading symbol.
-/// - Defaults to XAUUSD on first use.
+/// - With no saved choice, defaults to [fallbackSymbol] (user's watchlist /
+///   broker instrument list — never a hardcoded symbol).
 /// - Persisted across app restarts. A restored symbol that is no longer a
 ///   favourite is replaced once by the chart screen on startup.
 class SymbolSelectionService extends GetxService {
@@ -53,6 +55,20 @@ class SymbolSelectionService extends GetxService {
     _lastSymbol.value = '';
     _hasUserSelection.value = false;
     SecureStorageService.saveSelectedSymbol('');
+  }
+
+  /// Default symbol when nothing is selected: the user's first favourite,
+  /// else the first instrument the broker sent, else '' (not loaded yet —
+  /// callers re-check once instruments arrive).
+  static String fallbackSymbol() {
+    if (!Get.isRegistered<InstrumentsController>()) return '';
+    final inst = Get.find<InstrumentsController>();
+    if (inst.favoriteInstruments.isNotEmpty) {
+      return inst.favoriteInstruments.first;
+    }
+    if (inst.allInstruments.isNotEmpty) return inst.allInstruments.first.symbol;
+    if (inst.instruments.isNotEmpty) return inst.instruments.first.symbol;
+    return '';
   }
 
   /// Suffix-agnostic check (`XAUUSD` == `XAUUSD.c` == `XAUUSD.r`).

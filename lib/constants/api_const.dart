@@ -7,11 +7,6 @@ class ApiConstants {
   static const String ajax = 'user/';
 
   static const String login = '${ajax}login';
-  static const String forgotPassword = '${ajax}password/email';
-  static const String sendOTP = '${ajax}send-otp';
-  static const String verifyOTP = '${ajax}verify-otp';
-  static const String resetPassword = '${ajax}reset-password';
-
   // Password reset OTP flow endpoints
   static const String requestPasswordResetOTP = '${ajax}password/forgot';
   static const String verifyPasswordResetOTP = '${ajax}password/verify-otp';
@@ -28,12 +23,25 @@ class ApiConstants {
   static const String googleOtpStatus = '${ajax}settings/google-otp/status';
   static const String userSessions = '${ajax}sessions';
   static String userSession(int id) => '${ajax}sessions/$id';
+  static const String platformLinks = '${ajax}platform-links';
+  static const String settingsActivityLog = '${ajax}settings/activitylog';
+  static const String utilityIfscCode = '${ajax}utility/ifsc-code';
+  static const String uniPaymentDeposit = '${ajax}deposit/unipayment';
+
+  static const String mobileVerificationSend = '${ajax}mobile-verification/send';
+  static const String mobileVerificationVerify =
+      '${ajax}mobile-verification/verify';
   static const String googleOtpVerifyLogin = '${ajax}auth/google/verify-login-otp';
   static const String register = '${ajax}register';
   static const String registerFcmToken = '${ajax}register-fcm-token';
   static const String marketWatch = '${ajax}trade/marketwatch';
   static const String dashboard = '${ajax}dashboard';
+  static const String setMt5Nickname = '${ajax}mt5accounts/setnickname';
+  static const String sessionCheck = '${ajax}session/check';
   static const String getNotifications = '${ajax}notifications';
+  static const String allNotifications = '${ajax}notifications/all';
+  static String dynamicDeposit(String gatewaySlug) =>
+      '${ajax}deposit/dynamic/$gatewaySlug';
   static const String activeNotices = '${ajax}notices/active';
   static const String liveChatConfig = '${ajax}live-chat';
   static const String markAllNotificationsRead =
@@ -45,35 +53,33 @@ class ApiConstants {
   static String mt5CredentialsAck(int id) =>
       '${ajax}notifications/mt5-credentials/$id/ack';
   static const String priceAlerts = '${ajax}price-alerts';
+  static const String priceAlertsUpdateFcmToken =
+      '${ajax}price-alerts/update-fcm-token';
+  static const String depositByReference = '${ajax}deposit/by-reference';
   static const String profile = '${ajax}settings/profile';
   static const String getMT5Accounts = '${ajax}mt5accounts/get';
   static const String createMT5Account = '${ajax}mt5accounts/create';
   static const String topupDemoAccount = '${ajax}mt5accounts/setbalance';
-  static const String syncMT5Accounts = '${ajax}mt5accounts/mt5AccountSync';
+  static const String syncMT5Accounts = '${ajax}tradingaccounts/sync';
   static const String placeOrder = '${ajax}trade/new-order';
   static const String closePositionByPositionId =
       '${ajax}trade/closePositionByPositionId';
-  static const String cancelPendingOrder = '${ajax}trade/cancel-pending-order';
   static const String closePendingOrder = '${ajax}trade/closePendingOrder';
-  static const String modifyPendingOrder = '${ajax}trade/modify-pending-order';
-  static const String closePositions = '${ajax}trade/closePositions';
   static const String updateTPSL = '${ajax}trade/update-tp-sl';
   static const String updatePendingOrderTPSL = '${ajax}trade/update-pending-order-tp-sl';
   static const String tradeHistory = '${ajax}trade/tradehistory';
-  static const String getInstruments = '${ajax}instruments';
   static const String logout = '${ajax}logout';
   static const String depositList = '${ajax}deposit';
   static const String depositRequest = '${ajax}deposit/depositrequest';
   static const String cregisDepositCreate = '${ajax}deposit/cregis';
-  static const String cregisDepositStatus = '${ajax}deposit/by-reference';
   static const String realPlanDetails = '${ajax}mt5accounts/plandetails';
-  static const String getTransactions = '${ajax}transactions';
   static const String getFinanceActivity = '${ajax}finance-activity';
   static const String depositProofProxy = '${ajax}deposit-proof-proxy/';
   // Bonus APIs
   static const String bonusList = '${ajax}bonus';
   static const String bonusClaimList = '${ajax}bonus/bonusClaimList';
   static const String bonusClaim = '${ajax}bonus/bonusClaim';
+  static const String bonusClaimCancel = '${ajax}bonus/bonusClaimCancel';
   static const String changePrimaryAccount =
       '${ajax}mt5accounts/changePrimaryAccount';
   static String getInstrumentsByAccount(String accountNumber) =>
@@ -81,11 +87,13 @@ class ApiConstants {
 
   // Dropdown APIs
   static const String getCountryDropdown = '${ajax}settings/getCountryDropdown';
-  static const String getStateDropdown = '${ajax}settings/getStateDropdown';
-  static const String getCityDropdown = '${ajax}settings/getCityDropdown';
+  static String kycStates(int countryId) => '${ajax}kyc/states/$countryId';
+  static String kycCities(int stateId) => '${ajax}kyc/cities/$stateId';
 
   // KYC APIs
   static const String kycUpload = '${ajax}kyc/documents/upload';
+  static String kycImageProxy(int documentId) =>
+      '${ajax}kyc-image-proxy/$documentId';
   static const String kycStatus = '${ajax}kyc';
   static const String regulation = '${ajax}regulation';
   static const String kycProfileUpdate = '${ajax}kyc/profile';
@@ -96,6 +104,8 @@ class ApiConstants {
 
   static const String currencyList = '${ajax}utility/currency-list';
   static const String withdrawalRequest = '${ajax}withdrawal';
+  static String withdrawalMethodDelete(int id) => '${ajax}withdrawal/delete/$id';
+  static String withdrawalImageProxy(int id) => '${ajax}image-proxy/$id';
   static const String withdrawalSendOTPRequest = '${ajax}withdrawal/sendOTP';
   static const String withdrawalSubmitRequest =
       '${ajax}withdrawal/withdrawalrequest';
@@ -138,14 +148,18 @@ class ApiConstants {
 
   // Web-style IB requests list (datatable)
   static const String ibRequestList = '${ajax}ib/ib-request-list';
-  static const String ibTrackVisit = '${ajax}ib/track-visit';
   static const String ibCommissionGroups = '${ajax}ib/commission-groups';
   static const String ibManage = '${ajax}ib/manage';
   static const String ibUpdateStatus = '${ajax}ib/update-status/';
+  static const String ibActivities = '${ajax}ib/activities';
+  static const String ibTreeStructure = '${ajax}ib/tree-structure';
+  static const String ibGetIbDetails = '${ajax}ib/get-ib-details/'; // + {userSlug}
+  static const String ibTemplateRates = '${ajax}ib/get-template-rates/'; // + {templateId}
 
   // Scratch Card APIs
   static const String getScratchCards   = 'v1/user/scratch-cards';
   static const String revealScratchCard = 'v1/user/scratch-cards/reveal';
+  static const String claimScratchReward = 'v1/user/scratch-cards/claim';
   static const String getScratchLeaderboard = 'v1/user/scratch-cards/leaderboard';
   static const String convertScratchCreditToBalance =
       'v1/user/scratch-cards/convert-credit-to-balance';
@@ -153,6 +167,7 @@ class ApiConstants {
   // App Status APIs (public; used before login for version / maintenance)
   static const String mobileAppDetails = '${ajax}mobile-app-details';
   static const String crmSettings = '${ajax}crm-settings';
+  static const String appSettings = '${ajax}app-settings';
 
   // Enabled modules (per-user feature flags)
   static const String enabledModules = '${ajax}enabled-modules';
@@ -168,16 +183,34 @@ class ApiConstants {
   // Demo Contest APIs
   static const String demoContestContests = '${ajax}demo-contest/contests';
   static const String demoContestMyStats = '${ajax}demo-contest/my-stats';
-  static String demoContestEnrollPreview(String contestId) => '${ajax}demo-contest/$contestId/enroll-preview';
-  static String demoContestSteps(String contestId) => '${ajax}demo-contest/$contestId/steps';
-  static String demoContestStepClick(String stepId) => '${ajax}demo-contest/step/$stepId/click';
-  static String demoContestTerms(String contestId) => '${ajax}demo-contest/$contestId/terms';
-  static String demoContestEnroll(String contestId) => '${ajax}demo-contest/$contestId/enroll';
-  static const String demoContestMyEnrollments = '${ajax}demo-contest/my-enrollments';
-  static String demoContestLeaderboard(String id) => '${ajax}demo-contest/$id/leaderboard';
-  static String demoContestTradingHistory(String contestId) => '${ajax}demo-contest/$contestId/trading-history';
-  static String demoContestRuleViolations(String contestId) => '${ajax}demo-contest/$contestId/rule-violations';
   static const String demoContestClaim = '${ajax}demo-contest/claim';
+  static String demoContestLeaderboard(String id) =>
+      '${ajax}demo-contest/$id/leaderboard';
+  static String demoContestEnrollPreview(String id) =>
+      '${ajax}demo-contest/$id/enroll-preview';
+  static String demoContestEnroll(String id) => '${ajax}demo-contest/$id/enroll';
+  static String demoContestSteps(String id) => '${ajax}demo-contest/$id/steps';
+  static String demoContestStepClick(String stepId) =>
+      '${ajax}demo-contest/step/$stepId/click';
+  static String demoContestTerms(String id) => '${ajax}demo-contest/$id/terms';
+  static String demoContestTradingHistory(String id) =>
+      '${ajax}demo-contest/$id/trading-history';
+  static String demoContestRuleViolations(String id) =>
+      '${ajax}demo-contest/$id/rule-violations';
+  // IB-side contest management (no `user/` prefix).
+  static const String ibDemoContestMyContests = 'ib/demo-contest/my-contests';
+  static const String ibDemoContestInstruments = 'ib/demo-contest/instruments';
+  static const String ibDemoContestStore = 'ib/demo-contest/store';
+  static String ibDemoContestUpdate(int id) => 'ib/demo-contest/$id/update';
+  static String ibDemoContestCancel(int id) => 'ib/demo-contest/$id/cancel';
+  static String ibDemoContestAddPrizeFund(int id) =>
+      'ib/demo-contest/$id/add-prize-fund';
+  static String ibDemoContestEnrollments(int id) =>
+      'ib/demo-contest/$id/enrollments';
+  static String ibDemoContestEnrollmentApprove(int id) =>
+      'ib/demo-contest/enrollment/$id/approve';
+  static String ibDemoContestEnrollmentReject(int id) =>
+      'ib/demo-contest/enrollment/$id/reject';
 
   // Trade & Win APIs
   static const String tradeWinProducts = 'v1/user/trade-win/products';
@@ -194,47 +227,23 @@ class ApiConstants {
       '${ajax}copytrading/master/dashboard-stats';
 
   /// Master dashboard overview (range + hero + main chart + copier_health
-  /// + plans + payouts + recent_trades + alerts).
-  /// Example: copytrading/master/dashboard-overview?range=30d
-  ///
-  /// PREFERRED: use [copyTradingMasterDashboardOverviewPath] and pass the
-  /// `range` via `queryParameters` instead — `ApiService.get` uses
-  /// `Uri.replace(queryParameters: …)` which strips any query string
-  /// already in the endpoint, so inlining `?range=…` here gets silently
-  /// dropped when callers also pass other query params (e.g. cache-buster).
-  static String copyTradingMasterDashboardOverview({String range = '30d'}) =>
-      '$copyTradingMasterDashboardOverviewPath?range=$range';
-
-  /// Path-only form (no query string) of [copyTradingMasterDashboardOverview].
-  /// Combine with `queryParameters: {'range': '7d', ...}` when calling
-  /// `ApiService.get`.
+  /// + plans + payouts + recent_trades + alerts). Pass `range` (e.g. `30d`)
+  /// via `queryParameters` — `ApiService.get` replaces any inline query string.
   static const String copyTradingMasterDashboardOverviewPath =
       '${ajax}copytrading/master/dashboard-overview';
 
   static const String copyTradingMasterPlans = '${ajax}copytrading/master/plans';
-  static String copyTradingMasterPlanOpenPositions(int planId) =>
-      '$copyTradingMasterPlans/$planId/open-positions';
   static String copyTradingMasterOpenPositions(int planId) =>
       '$copyTradingMasterPlans/$planId/open-positions';
-  static String copyTradingMasterPlanPause(int planId) =>
-      '$copyTradingMasterPlans/$planId/pause';
-  static String copyTradingMasterPlanResume(int planId) =>
-      '$copyTradingMasterPlans/$planId/resume';
-  static String copyTradingMasterPlanUpdate(int planId) =>
-      '$copyTradingMasterPlans/$planId';
   static const String copyTradingCopierEligibleAccounts =
       '${ajax}copytrading/copier/eligible-accounts';
   static const String copyTradingCopierSubscribe =
       '${ajax}copytrading/copier/subscribe';
-  static const String copyTradingCopierSubscriptions =
-      '${ajax}copytrading/copier/subscriptions';
   static String copyTradingCopierSubscriptionsList({
     int page = 1,
     int perPage = 20,
   }) =>
       '${ajax}copytrading/copier/subscriptions?page=$page&per_page=$perPage';
-  static String copyTradingMasterCopiers({int page = 1, int perPage = 20}) =>
-      '${ajax}copytrading/master/copiers?page=$page&per_page=$perPage';
   static String copyTradingMasterCopierSubscriptionHistory(int copierId) =>
       '${ajax}copytrading/master/copiers/$copierId/subscription-history';
   static const String copyTradingMasterSettlements =
@@ -248,8 +257,6 @@ class ApiConstants {
     int? t,
   }) =>
       '${ajax}copytrading/copier/subscriptions/$id/trades?page=$page&limit=$limit${t != null ? '&_t=$t' : ''}';
-  static String copyTradingCopierSubscriptionPnlHistory(int id) =>
-      '${ajax}copytrading/copier/subscriptions/$id/pnl-history';
   static String copyTradingCopierSubscriptionAddCapital(int id) =>
       '${ajax}copytrading/copier/subscriptions/$id/add-capital';
   static String copyTradingCopierSubscriptionPause(int id) =>
@@ -262,9 +269,9 @@ class ApiConstants {
       '${ajax}copytrading/copier/subscriptions/$id/update';
 
   // Public endpoints
-  static const String copyTradingMasters = 'copytrading/masters';
   static const String copyTradingPlans = 'copytrading/plans';
   static const String copyTradingMastersSearch = 'copytrading/masters/search';
+  static const String copyTradingPlansSearch = 'copytrading/plans/search';
   static String copyTradingMasterProfile(
     String masterCode, {
     String? timeframe,
@@ -301,13 +308,6 @@ class ApiConstants {
     params.add('per_page=$perPage');
     return '$base?${params.join('&')}';
   }
-
-  static String copyTradingCopierMasterProfile(String masterCode) =>
-      '${ajax}copytrading/copier/masters/$masterCode';
-
-  // // Profile APIs
-  // static const String profileUpdate = '${ajax}profile_update.php';
-  // static const String getProfile = '${ajax}profile';
 }
 
 // struct APIConstant {

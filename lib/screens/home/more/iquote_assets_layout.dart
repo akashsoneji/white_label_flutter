@@ -8,6 +8,7 @@ import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/utils/demo_contest_menu.dart';
 import 'package:crm_app/widgets/theme_bottom_sheet.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
 import 'package:crm_app/screens/home/more/promotional/promotional_screen.dart';
@@ -1119,7 +1120,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
       );
 
       // IB Dashboard
-      items.add(
+      if (EnabledModulesService.flags.ib) items.add(
         _buildModernOptionTile(
           icon: Icons.handshake_rounded,
           iconColor: const Color(0xFFF97316),
@@ -1180,19 +1181,20 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
         ),
       );
 
-      // Demo Contest
-      items.add(
-        _buildModernOptionTile(
-          icon: Icons.emoji_events_rounded,
-          iconColor: const Color(0xFFEAB308),
-          title: languageService?.tr('more_demo_contest') ?? 'Trading Contests',
-          subtitle: languageService?.tr('iquote_assets_contests_subtitle') ?? 'Compete risk-free for real cash prizes',
-          badgeText: languageService?.tr('iquote_assets_badge_win') ?? 'Win',
-          badgeColor: const Color(0xFFEAB308),
-          textPrimary: textPrimary,
-          onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
-        ),
-      );
+      if (DemoContestMenu.showStandalone) {
+        items.add(
+          _buildModernOptionTile(
+            icon: Icons.emoji_events_rounded,
+            iconColor: const Color(0xFFEAB308),
+            title: DemoContestMenu.label,
+            subtitle: languageService?.tr('iquote_assets_contests_subtitle') ?? 'Compete risk-free for real cash prizes',
+            badgeText: languageService?.tr('iquote_assets_badge_win') ?? 'Win',
+            badgeColor: const Color(0xFFEAB308),
+            textPrimary: textPrimary,
+            onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
+          ),
+        );
+      }
 
       return Container(
         decoration: BoxDecoration(
@@ -1255,17 +1257,19 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
       child: Column(
         children: [
           // 1. Support / Customer Service
-          _buildModernOptionTile(
-            icon: Icons.support_agent_rounded,
-            iconColor: const Color(0xFF10B981),
-            title: languageService?.tr('ticket_title') ??
-                languageService?.tr('support') ??
-                '24/7 Support & Helpdesk',
-            subtitle: languageService?.tr('iquote_assets_support_subtitle') ?? 'Submit tickets & live assistance',
-            textPrimary: textPrimary,
-            onTap: () => Get.toNamed(AppPages.TICKET_LIST),
-          ),
-          _buildDivider(),
+          if (EnabledModulesService.flags.helpdesk) ...[
+            _buildModernOptionTile(
+              icon: Icons.support_agent_rounded,
+              iconColor: const Color(0xFF10B981),
+              title: languageService?.tr('ticket_title') ??
+                  languageService?.tr('support') ??
+                  '24/7 Support & Helpdesk',
+              subtitle: languageService?.tr('iquote_assets_support_subtitle') ?? 'Submit tickets & live assistance',
+              textPrimary: textPrimary,
+              onTap: () => Get.toNamed(AppPages.TICKET_LIST),
+            ),
+            _buildDivider(),
+          ],
 
           // 2. Theme Switcher
           _buildModernOptionTile(

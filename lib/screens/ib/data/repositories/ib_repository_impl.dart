@@ -8,6 +8,20 @@ class IbRepositoryImpl implements IbRepository {
   IbRepositoryImpl(this._remote);
 
   @override
+  Future<ApiResponse> getIbActivities() => _remote.getIbActivities();
+
+  @override
+  Future<ApiResponse> getIbTreeStructure() => _remote.getIbTreeStructure();
+
+  @override
+  Future<ApiResponse> getIbDetails({required String userSlug}) =>
+      _remote.getIbDetails(userSlug: userSlug);
+
+  @override
+  Future<ApiResponse> getTemplateRates({required int templateId}) =>
+      _remote.getTemplateRates(templateId: templateId);
+
+  @override
   Future<ApiResponse> deleteCommissionGroup({required int groupId}) {
     return _remote.deleteCommissionGroup(groupId: groupId);
   }

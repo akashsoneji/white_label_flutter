@@ -699,6 +699,83 @@ class IBStatsData {
   }
 }
 
+/// One row of `GET ib/activities` (commission earned, approval, …).
+class IbActivity {
+  final String id;
+  final String type;
+  final String title;
+  final String description;
+  final String time;
+  final String amount;
+
+  const IbActivity({
+    required this.id,
+    required this.type,
+    required this.title,
+    required this.description,
+    required this.time,
+    required this.amount,
+  });
+
+  factory IbActivity.fromJson(Map<String, dynamic> json) => IbActivity(
+        id: '${json['id'] ?? ''}',
+        type: '${json['type'] ?? ''}',
+        title: '${json['title'] ?? ''}',
+        description: '${json['description'] ?? ''}',
+        time: '${json['time'] ?? ''}',
+        amount: '${json['amount'] ?? ''}',
+      );
+}
+
+/// Node of `GET ib/tree-structure` → `data.tree[]`: `{user: {...}, children: [...]}`.
+class IbTreeNode {
+  final String userSlug;
+  final String fullname;
+  final String email;
+  final String role;
+  final int totalDescendants;
+  final List<IbTreeNode> children;
+
+  const IbTreeNode({
+    required this.userSlug,
+    required this.fullname,
+    required this.email,
+    required this.role,
+    required this.totalDescendants,
+    required this.children,
+  });
+
+  factory IbTreeNode.fromJson(Map<String, dynamic> json) {
+    final user = json['user'] is Map
+        ? (json['user'] as Map).cast<String, dynamic>()
+        : const <String, dynamic>{};
+    final rawChildren = json['children'];
+    return IbTreeNode(
+      userSlug: '${user['user_slug'] ?? ''}',
+      fullname: '${user['fullname'] ?? ''}'.trim(),
+      email: '${user['email'] ?? ''}',
+      role: '${user['role'] ?? ''}',
+      totalDescendants: int.tryParse('${user['total_descendants']}') ?? 0,
+      children: rawChildren is List
+          ? rawChildren
+              .whereType<Map>()
+              .map((e) => IbTreeNode.fromJson(e.cast<String, dynamic>()))
+              .toList()
+          : const [],
+    );
+  }
+
+  /// True if this node or any descendant matches [query] (name/email).
+  bool matches(String query) {
+    if (query.isEmpty) return true;
+    final q = query.toLowerCase();
+    if (fullname.toLowerCase().contains(q) || email.toLowerCase().contains(q)) {
+      return true;
+    }
+    return children.any((c) => c.matches(query));
+  }
+}
+
 // IB Structure Response Model
 class IBStructureResponse {
   bool? status;
