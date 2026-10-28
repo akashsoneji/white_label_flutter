@@ -13,6 +13,7 @@ import '../../../../widgets/common_loading_widget.dart';
 import '../../../../widgets/custom_toast.dart';
 import '../../../../routes/app_pages.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/feature_maintenance_gate.dart';
 import 'package:crm_app/utils/currency_format.dart';
 import 'package:crm_app/models/mt5_account.dart' as mt5m;
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
@@ -192,6 +193,14 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Vantage's WithdrawalScreen delegates here, so this covers all brands.
+    return FeatureMaintenanceGate(
+      feature: MaintenanceFeature.withdrawal,
+      child: Builder(builder: _buildScreen),
+    );
+  }
+
+  Widget _buildScreen(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
       resizeToAvoidBottomInset: true,

@@ -1,9 +1,45 @@
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
+import 'package:crm_app/core/network/api_response.dart';
 import 'package:crm_app/services/pmam_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/models/pmam_model.dart';
 import 'package:crm_app/services/language_service.dart';
+
+/// One row of `GET pmam/managers/search` or `GET pmam/plans/search`.
+/// Both resolve to a manager profile, so [managerCode] is what a tap opens.
+class PmamSearchOption {
+  final String title;
+  final String subtitle;
+  final String managerCode;
+  final bool isPlan;
+
+  const PmamSearchOption({
+    required this.title,
+    required this.subtitle,
+    required this.managerCode,
+    required this.isPlan,
+  });
+
+  factory PmamSearchOption.manager(Map<String, dynamic> json) {
+    final code = (json['manager_code'] ?? json['code'] ?? '').toString();
+    return PmamSearchOption(
+      title: (json['manager_name'] ?? json['name'] ?? code).toString(),
+      subtitle: code,
+      managerCode: code,
+      isPlan: false,
+    );
+  }
+
+  factory PmamSearchOption.plan(Map<String, dynamic> json) {
+    return PmamSearchOption(
+      title: (json['plan_name'] ?? json['name'] ?? '').toString(),
+      subtitle: (json['manager_name'] ?? json['meta'] ?? '').toString(),
+      managerCode: (json['manager_code'] ?? json['master_code'] ?? '').toString(),
+      isPlan: true,
+    );
+  }
+}
 
 class PmamController extends GetxController {
   // ── Loading / Error ──
@@ -72,6 +108,18 @@ class PmamController extends GetxController {
   final RxDouble tradesNetPnl = 0.0.obs;
   final RxDouble tradesCommission = 0.0.obs;
   final RxDouble tradesSettledPnl = 0.0.obs;
+
+  // ── Explore search suggestions ──
+  final RxList<PmamSearchOption> searchOptions = <PmamSearchOption>[].obs;
+  String _lastSearchQuery = '';
+
+  // ── Manager commissions ──
+  final RxList<Map<String, dynamic>> commissions = <Map<String, dynamic>>[].obs;
+  final RxBool isCommissionsLoading = false.obs;
+  final RxString commissionsError = ''.obs;
+  final RxInt commissionsPage = 1.obs;
+  final RxInt commissionsLastPage = 1.obs;
+  final RxInt commissionsTotal = 0.obs;
 
   // ── Selected plan for investor requests ──
   final RxInt selectedPlanId = 0.obs;
@@ -610,6 +658,99 @@ class PmamController extends GetxController {
       errorMessage.value = e.toString();
     } finally {
       isManagersLoading.value = false;
+    }
+  }
+
+  /// Server suggestions for the Explore search box: managers and plans
+  /// matching [rawQuery], fetched together. Stale replies are dropped.
+  Future<void> searchExploreOptions(String rawQuery) async {
+    final query = rawQuery.trim();
+    if (query == _lastSearchQuery) return;
+    _lastSearchQuery = query;
+    if (query.isEmpty) {
+      searchOptions.clear();
+      return;
+    }
+    final responses = await Future.wait([
+      PmamService.searchManagers(query),
+      PmamService.searchPlans(query),
+    ]);
+    if (query != _lastSearchQuery) return;
+
+    List<Map<String, dynamic>> rows(ApiResponse res) {
+      final body = res.data is Map ? (res.data as Map)['data'] : null;
+      if (!res.success || body is! List) return const [];
+      return body.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList();
+    }
+
+    searchOptions.assignAll([
+      ...rows(responses[0]).map(PmamSearchOption.manager),
+      ...rows(responses[1]).map(PmamSearchOption.plan),
+    ].where((o) => o.managerCode.isNotEmpty && o.title.isNotEmpty));
+  }
+
+  void clearSearchOptions() {
+    _lastSearchQuery = '';
+    searchOptions.clear();
+  }
+
+  /// Manager's own accounts for the Create Plan picker
+  /// (`GET manager/eligible-accounts`, not the investor variant).
+  Future<void> loadManagerEligibleAccounts() async {
+    try {
+      final response = await PmamService.getManagerEligibleAccounts();
+      final list = response.data is Map ? (response.data as Map)['data'] : null;
+      if (response.success && list is List) {
+        eligibleAccounts.assignAll(
+          list.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList(),
+        );
+      }
+    } catch (e) {
+      errorMessage.value = e.toString();
+    }
+  }
+
+  /// Settled commissions (`GET manager/commissions`). [loadMore] appends the
+  /// next page; otherwise page 1 replaces the list.
+  Future<void> loadManagerCommissions({bool loadMore = false}) async {
+    if (isCommissionsLoading.value) return;
+    if (loadMore && commissionsPage.value >= commissionsLastPage.value) return;
+    final page = loadMore ? commissionsPage.value + 1 : 1;
+    isCommissionsLoading.value = true;
+    if (!loadMore) commissionsError.value = '';
+    try {
+      final response = await PmamService.getManagerCommissions(page: page);
+      final root = response.data is Map ? (response.data as Map)['data'] : null;
+      if (!response.success || root is! Map) {
+        if (!loadMore) {
+          commissionsError.value = response.message ??
+              TranslationUtils.tr('pmam_commissions_load_failed');
+        }
+        return;
+      }
+      final rows = root['data'] is List
+          ? (root['data'] as List)
+              .whereType<Map>()
+              .map((e) => e.cast<String, dynamic>())
+              .toList()
+          : <Map<String, dynamic>>[];
+      if (loadMore) {
+        commissions.addAll(rows);
+      } else {
+        commissions.assignAll(rows);
+      }
+      commissionsPage.value = int.tryParse('${root['current_page']}') ?? page;
+      commissionsLastPage.value = int.tryParse('${root['last_page']}') ?? page;
+      commissionsTotal.value =
+          int.tryParse('${root['total']}') ?? commissions.length;
+    } catch (e) {
+      if (!loadMore) {
+        commissionsError.value =
+            TranslationUtils.tr('pmam_commissions_load_failed');
+      }
+      if (kDebugMode) debugPrint('[PMAM] loadManagerCommissions error: $e');
+    } finally {
+      isCommissionsLoading.value = false;
     }
   }
 

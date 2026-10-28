@@ -21,6 +21,7 @@ import 'package:crm_app/screens/trading/view_models/instruments_controller.dart'
 import 'package:crm_app/screens/trading/view_models/banner_controller.dart';
 import 'package:crm_app/screens/home/search_instruments_screen.dart';
 import 'package:crm_app/utils/precision_helper.dart';
+import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/symbol_details_cache_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
@@ -206,7 +207,9 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                           12.w,
                           12.h,
                         ),
-                        child: GridView.count(
+                        // Obx: enabled-modules arrive after this landing screen
+                        // builds, so the IB / Tickets shortcuts must rebuild.
+                        child: Obx(() => GridView.count(
                           padding: EdgeInsets.zero,
                           crossAxisCount: 4,
                           shrinkWrap: true,
@@ -236,14 +239,15 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                               onTap: () => Get.toNamed(AppPages.CHOOSE_ACCOUNT),
                             ),
                             // 3. IB
-                            _buildShortcutItem(
-                              icon: Icons.business_center_outlined,
-                              label: 'IB',
-                              color: Colors.purpleAccent,
-                              textColor: textPrimary,
-                              isHot: true,
-                              onTap: IquoteHomeScreen.handleSwitchToIB,
-                            ),
+                            if (EnabledModulesService.flags.ib)
+                              _buildShortcutItem(
+                                icon: Icons.business_center_outlined,
+                                label: 'IB',
+                                color: Colors.purpleAccent,
+                                textColor: textPrimary,
+                                isHot: true,
+                                onTap: IquoteHomeScreen.handleSwitchToIB,
+                              ),
                             // 4. PAMM
                             _buildShortcutItem(
                               icon: Icons.pie_chart_outline,
@@ -263,13 +267,14 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                                   () => Get.to(() => const PromotionalScreen()),
                             ),
                             // 6. Support Ticket
-                            _buildShortcutItem(
-                              icon: Icons.support_agent_outlined,
-                              label: Get.find<LanguageService>().tr('iquote_support_ticket'),
-                              color: Colors.tealAccent,
-                              textColor: textPrimary,
-                              onTap: () => Get.toNamed(AppPages.TICKET_LIST),
-                            ),
+                            if (EnabledModulesService.flags.helpdesk)
+                              _buildShortcutItem(
+                                icon: Icons.support_agent_outlined,
+                                label: Get.find<LanguageService>().tr('iquote_support_ticket'),
+                                color: Colors.tealAccent,
+                                textColor: textPrimary,
+                                onTap: () => Get.toNamed(AppPages.TICKET_LIST),
+                              ),
                             // 7. Deposit
                             _buildShortcutItem(
                               icon: Icons.add_circle_outline,
@@ -290,7 +295,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                               onTap: () => Get.toNamed(AppPages.WITHDRAWAL),
                             ),
                           ],
-                        ),
+                        )),
                       ),
                     ],
                   ),

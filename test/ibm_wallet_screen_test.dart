@@ -4,12 +4,14 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/screens/ibm/presentation/pages/ibm_wallet_screen.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
+import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/services/language_service.dart';
 
 void main() {
   testWidgets('IbmWalletScreen renders without exception', (WidgetTester tester) async {
     Get.put(IbmController());
     Get.put(LanguageService());
+    Get.put(EnabledModulesService());
 
     await tester.pumpWidget(
       ScreenUtilInit(
@@ -20,7 +22,9 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    // The screen shows an indeterminate loader while IB data loads (no
+    // backend in tests), so it never settles; a fixed pump is enough here.
+    await tester.pump(const Duration(seconds: 1));
     expect(find.byType(IbmWalletScreen), findsOneWidget);
   });
 }

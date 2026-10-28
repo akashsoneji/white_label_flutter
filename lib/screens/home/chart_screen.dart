@@ -12,6 +12,7 @@ import 'package:crm_app/widgets/app_switch_tile.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 import 'package:crm_app/widgets/tenax_chart_webview.dart';
 import 'package:crm_app/services/chart_webview_prewarmer.dart';
+import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'dart:convert';
@@ -71,8 +72,10 @@ class ChartScreen extends StatefulWidget {
   }
 
   // Static ValueNotifier to handle symbol changes
+  // Starts empty: the real symbol comes from the saved choice or the user's
+  // watchlist, never a hardcoded default.
   static final ValueNotifier<String> _selectedSymbolNotifier = ValueNotifier(
-    'XAUUSD',
+    '',
   );
 
   @override
@@ -317,7 +320,7 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
       selectedSymbol =
           symbolSelectionService.currentSymbol.isNotEmpty
               ? symbolSelectionService.currentSymbol
-              : 'XAUUSD';
+              : SymbolSelectionService.fallbackSymbol();
       ChartScreen._selectedSymbolNotifier.value = selectedSymbol;
       _loadPersistedSymbol();
 
@@ -1073,6 +1076,10 @@ Placing Order:
       isLoading = false;
     });
   }
+
+  bool get _priceAlertEnabled =>
+      !Get.isRegistered<EnabledModulesService>() ||
+      Get.find<EnabledModulesService>().current.priceAlert;
 
   void _showPriceAlertDialog() {
     final currentPrice = chartSocketController.getMarketPrice() ?? 1.14252;
@@ -1975,7 +1982,8 @@ Placing Order:
     return const SizedBox.shrink();
   }
 
-  // Helper method to find XAUUSD or fallback to first instrument
+  // The user's first watchlist symbol that the broker offers, else the first
+  // broker instrument. Suffix-agnostic (AUDGBP == AUDGBP.c).
   ListElement _findPreferredInstrument(List<ListElement> instruments) {
     if (instruments.isEmpty) {
       throw StateError(
@@ -1983,28 +1991,18 @@ Placing Order:
       );
     }
 
-    // First, try to find XAUUSD with suffix (.c, .r, etc.)
-    var xauusd = instruments.firstWhere((instrument) {
-      final symbol = instrument.symbol.toUpperCase();
-      return symbol == 'XAUUSD.C' ||
-          symbol == 'XAUUSD.R' ||
-          symbol.startsWith('XAUUSD.');
-    }, orElse: () => instruments.first);
-
-    // If found XAUUSD (not the first instrument), return it
-    if (xauusd.symbol.toUpperCase().contains('XAUUSD')) {
-      return xauusd;
+    final favorites =
+        Get.find<InstrumentsController>().favoriteInstruments.toList();
+    for (final fav in favorites) {
+      final match = instruments.firstWhereOrNull(
+        (instrument) =>
+            SymbolSelectionService.isInFavorites(instrument.symbol, [fav]),
+      );
+      if (match != null) return match;
     }
-
-    // If not found, try XAUUSD without suffix
-    xauusd = instruments.firstWhere(
-      (instrument) => instrument.symbol.toUpperCase() == 'XAUUSD',
-      orElse: () => instruments.first,
-    );
-
-    // Return XAUUSD if found, otherwise first instrument
-    return xauusd.symbol.toUpperCase() == 'XAUUSD' ? xauusd : instruments.first;
+    return instruments.first;
   }
+
 
   /// Once per screen: if the symbol restored from the previous session is no
   /// longer a favourite, switch to the preferred instrument. Goes through
@@ -2025,9 +2023,7 @@ Placing Order:
     if (favorites.isEmpty || instruments.isEmpty) return;
     _staleRestoredSymbolChecked = true;
 
-    final isStale =
-        !SymbolSelectionService.isInFavorites(current, favorites) &&
-        !SymbolSelectionService.isInFavorites(current, const ['XAUUSD']);
+    final isStale = !SymbolSelectionService.isInFavorites(current, favorites);
     if (!isStale) return;
     _handleSymbolChange(_findPreferredInstrument(instruments).symbol);
   }
@@ -2273,42 +2269,43 @@ Placing Order:
           ),
           Spacer(),
 
-          GestureDetector(
-            onTap: () {
-              _showPriceAlertDialog();
-            },
-            child: Container(
-              height: 45.h,
-              width: 45.w,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(7.r),
-                color: AppColors.cardBackGround,
+          if (_priceAlertEnabled) ...[
+            GestureDetector(
+              onTap: () {
+                _showPriceAlertDialog();
+              },
+              child: Container(
+                height: 45.h,
+                width: 45.w,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(7.r),
+                  color: AppColors.cardBackGround,
+                ),
+                child: Icon(
+                  Icons.notifications_active,
+                  color: AppColors.primary,
+                ),
               ),
-              child: Icon(Icons.notifications_active, color: AppColors.primary),
             ),
-          ),
-          SizedBox(width: 8.w),
+            SizedBox(width: 8.w),
 
-          GestureDetector(
-            onTap: () {
-              _showPriceAlertDialog();
-            },
-            child: Container(
-              height: 45.h,
-              width: 45.w,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(7.r),
-                color: AppColors.cardBackGround,
+            GestureDetector(
+              onTap: () {
+                _showPriceAlertDialog();
+              },
+              child: Container(
+                height: 45.h,
+                width: 45.w,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(7.r),
+                  color: AppColors.cardBackGround,
+                ),
+                child: Icon(Icons.notifications, color: AppColors.primary),
               ),
-              child: Icon(Icons.notifications, color: AppColors.primary),
-              // child: SvgPicture.asset(
-              //   "assets/svg/chart_screen_icon/bell_icon.svg",
-              //   color: AppColors.primary,
-              // ),
             ),
-          ),
+          ],
           // SizedBox(width: 8.w),
 
           // Debug info button

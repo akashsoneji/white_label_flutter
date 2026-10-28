@@ -1,10 +1,7 @@
 // GENERATED — Do not edit manually. Regenerate with:
-//   dart run scripts/prepare_flavor.dart tenax
-// Active flavor: tenax
-PRODUCT_BUNDLE_IDENTIFIER=com.tenax.app
-BRAND_DISPLAY_NAME=Tenax
+//   dart run scripts/prepare_flavor.dart riyadex
+// Active flavor: riyadex
+PRODUCT_BUNDLE_IDENTIFIER=com.riyadex.app
+BRAND_DISPLAY_NAME=Riyadex
 FLUTTER_TARGET=lib/main.dart
-DART_DEFINES=Q0xJRU5UPXRlbmF4,RkxBVk9SPXRlbmF4
-DEEP_LINK_HOST=
-DEEP_LINK_HOST_ALT=
-BRAND_ENTITLEMENTS=Runner/Runner.entitlements
+DART_DEFINES=Q0xJRU5UPXJpeWFkZXg=,RkxBVk9SPXJpeWFkZXg=

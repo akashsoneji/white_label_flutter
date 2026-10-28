@@ -19,6 +19,7 @@ import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/widgets/feature_maintenance_gate.dart';
 
 class IbmWalletScreen extends StatefulWidget {
   const IbmWalletScreen({super.key});
@@ -607,7 +608,14 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
                       onPressed: 
                       canRequest
                           ?
-                           () => Get.toNamed(AppPages.WITHDRAWAL)
+                           () {
+                              if (FeatureMaintenance.blockIfActive(
+                                MaintenanceFeature.ibWithdrawal,
+                              )) {
+                                return;
+                              }
+                              Get.toNamed(AppPages.WITHDRAWAL);
+                            }
                           : null,
                       style: ElevatedButton.styleFrom(
                         minimumSize: Size.zero,

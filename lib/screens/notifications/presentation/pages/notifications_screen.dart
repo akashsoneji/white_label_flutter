@@ -72,28 +72,11 @@ class NotificationsScreen extends GetView<NotificationController> {
           onRefresh: controller.fetchNotifications,
           color: AppColors.primary,
           child: ListView.separated(
-            controller: controller.scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            itemCount: controller.notifications.length + 1,
+            itemCount: controller.notifications.length,
             separatorBuilder: (context, index) => SizedBox(height: 12.h),
             itemBuilder: (context, index) {
-              if (index == controller.notifications.length) {
-                return Obx(() {
-                  if (controller.isPaginating.value) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                      child: Center(
-                        child: SizedBox(
-                          height: 24.w,
-                          width: 24.w,
-                          child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
-                        ),
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                });
-              }
               final item = controller.notifications[index];
               final isUnread = item.readAt == null;
               return GestureDetector(

@@ -51,5 +51,10 @@ abstract class IbRepository {
   Future<ApiResponse> storeIbTransfer({required Map<String, dynamic> payload});
   Future<ApiResponse> getIbTransferHistory({Map<String, dynamic>? queryParameters});
   Future<ApiResponse> cancelIbTransfer({required int transferId});
+
+  Future<ApiResponse> getIbActivities();
+  Future<ApiResponse> getIbTreeStructure();
+  Future<ApiResponse> getIbDetails({required String userSlug});
+  Future<ApiResponse> getTemplateRates({required int templateId});
 }
 

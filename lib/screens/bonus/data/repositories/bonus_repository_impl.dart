@@ -41,4 +41,9 @@ class BonusRepositoryImpl implements BonusRepository {
       data: {'account_id': accountId},
     );
   }
+
+  @override
+  Future<ApiResponse> claimScratchReward({String? token}) {
+    return _api.post(endpoint: ApiConstants.claimScratchReward, token: token);
+  }
 }

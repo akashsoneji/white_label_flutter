@@ -24,6 +24,8 @@ abstract class Routes {
   static const TRANSACTION_HISTORY = _Paths.TRANSACTION_HISTORY;
   static const TWO_FACTOR_AUTH = _Paths.TWO_FACTOR_AUTH;
   static const ACTIVE_SESSIONS = _Paths.ACTIVE_SESSIONS;
+  static const PLATFORMS = _Paths.PLATFORMS;
+  static const LOGIN_ACTIVITY = _Paths.LOGIN_ACTIVITY;
   static const KYC_VERIFICATION = _Paths.KYC_VERIFICATION;
   static const KYC_INTRO = _Paths.KYC_INTRO;
   static const KYC_DETAILS = _Paths.KYC_DETAILS;
@@ -176,6 +178,8 @@ abstract class _Paths {
   static const CHANGE_PASSWORD = '/change-password';
   static const TWO_FACTOR_AUTH = '/two-factor-auth';
   static const ACTIVE_SESSIONS = '/active-sessions';
+  static const PLATFORMS = '/platforms';
+  static const LOGIN_ACTIVITY = '/login-activity';
   static const GOOGLE_LOGIN_OTP = '/google-login-otp';
   static const TENAX_BROKER_SELECTION = '/tenax-broker-selection';
   static const TENAX_BROKER_INFO = '/tenax-broker-info';

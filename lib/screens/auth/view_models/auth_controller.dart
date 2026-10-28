@@ -27,14 +27,11 @@ import 'package:crm_app/services/account_websocket_service.dart';
 import 'dart:io' show Platform;
 import 'package:crm_app/services/biometric_service.dart';
 import 'package:crm_app/screens/auth/data/repositories/auth_repository.dart';
-import 'package:crm_app/screens/auth/data/usecases/forgot_password.dart';
 import 'package:crm_app/screens/auth/data/usecases/login_user.dart';
 import 'package:crm_app/screens/auth/data/usecases/register_user.dart';
 import 'package:crm_app/screens/auth/data/usecases/register_with_otp_verification.dart';
 import 'package:crm_app/screens/auth/data/usecases/request_password_reset_otp.dart';
-import 'package:crm_app/screens/auth/data/usecases/reset_password.dart';
 import 'package:crm_app/screens/auth/data/usecases/reset_password_with_otp.dart';
-import 'package:crm_app/screens/auth/data/usecases/send_otp.dart';
 import 'package:crm_app/screens/auth/data/usecases/verify_password_reset_otp.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:crm_app/services/chart_webview_prewarmer.dart';
@@ -48,12 +45,9 @@ class AuthController extends GetxController {
   GoogleOtpService get _googleOtpService => Get.find<GoogleOtpService>();
   final AuthRepository _authRepo = Get.find<AuthRepository>();
   final LoginUser _loginUser = Get.find<LoginUser>();
-  final ForgotPassword _forgotPassword = Get.find<ForgotPassword>();
   final RegisterUser _registerUser = Get.find<RegisterUser>();
   final RegisterWithOtpVerification _registerWithOtpVerification =
       Get.find<RegisterWithOtpVerification>();
-  final SendOtp _sendOtp = Get.find<SendOtp>();
-  final ResetPassword _resetPassword = Get.find<ResetPassword>();
   final RequestPasswordResetOtp _requestPasswordResetOtp =
       Get.find<RequestPasswordResetOtp>();
   final VerifyPasswordResetOtp _verifyPasswordResetOtp =
@@ -67,8 +61,6 @@ class AuthController extends GetxController {
   final _isAuthenticated = false.obs;
   final _loginResponse = Rxn<LoginResponseModel>();
   final _userData = Rxn<UserModel>();
-  final _otpSentEmail = ''.obs;
-  final _otpSentMessage = ''.obs;
   final _verifiedEmail = ''.obs;
   final _verifiedOtp = ''.obs;
   final _registerData = Rxn<Map<String, dynamic>>();
@@ -85,8 +77,6 @@ class AuthController extends GetxController {
   RxBool get isAuthenticatedRx => _isAuthenticated;
   LoginResponseModel? get loginResponse => _loginResponse.value;
   UserModel? get userData => _userData.value;
-  String get otpSentEmail => _otpSentEmail.value;
-  String get otpSentMessage => _otpSentMessage.value;
   String get verifiedEmail => _verifiedEmail.value;
   String get verifiedOtp => _verifiedOtp.value;
   Map<String, dynamic>? get registerData => _registerData.value;
@@ -974,134 +964,6 @@ class AuthController extends GetxController {
     }
   }
 
-  // ==================== OTP METHODS ====================
-  Future<bool> sendOTP({required String email}) async {
-    try {
-      _setLoading(true);
-      _clearError();
-
-      final response = await _sendOtp(email: email);
-
-      if (response.success && response.data != null) {
-        _otpSentEmail.value = email;
-        _otpSentMessage.value =
-            response.data!['message'] ?? TranslationUtils.tr('auth_controller_otp_sent_successfully');
-
-        CustomToastService.showSuccess(
-          message: _otpSentMessage.value,
-          title: TranslationUtils.tr('general_success'),
-        );
-
-        return true;
-      } else {
-        _setError(response.message ?? TranslationUtils.tr('auth_controller_failed_to_send_otp'));
-        return false;
-      }
-    } catch (e) {
-      _setError('${TranslationUtils.tr('auth_controller_send_otp_error')}: $e');
-      return false;
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  // Future<bool> verifyOTP({required Map<String, dynamic> data}) async {
-  //   try {
-  //     _setLoading(true);
-  //     _clearError();
-  //
-  //     final response = await _authService.register(data: data);
-  //
-  //     if (response.success && response.data != null) {
-  //       _registerData.value = response.data;
-  //
-  //       CustomToastService.showSuccess(
-  //         message: 'OTP verified successfully',
-  //         title: 'Success',
-  //       );
-  //
-  //       return true; // Return success for OTP flow
-  //     } else {
-  //       _setError(response.message ?? 'Registration failed');
-  //       return false;
-  //     }
-  //   } catch (e) {
-  //     _setError('Verify OTP error: $e');
-  //     return false;
-  //   } finally {
-  //     _setLoading(false);
-  //   }
-  // }
-
-  // Future<bool> verifyOTP({required String email, required String otp}) async {
-  //   try {
-  //     _setLoading(true);
-  //     _clearError();
-  //
-  //     final response = await _authService.verifyOTP(email: email, otp: otp);
-  //
-  //     if (response.success && response.data != null) {
-  //       _verifiedEmail.value = email;
-  //       _verifiedOtp.value = otp;
-  //
-  //       CustomToastService.showSuccess(
-  //         message: 'OTP verified successfully',
-  //         title: 'Success',
-  //       );
-  //
-  //       return true;
-  //     } else {
-  //       _setError(response.message ?? 'OTP verification failed');
-  //       return false;
-  //     }
-  //   } catch (e) {
-  //     _setError('Verify OTP error: $e');
-  //     return false;
-  //   } finally {
-  //     _setLoading(false);
-  //   }
-  // }
-
-  Future<void> resendOTP({required String email}) async {
-    await sendOTP(email: email);
-  }
-
-  // ==================== PASSWORD RESET METHODS ====================
-  Future<void> resetPassword({
-    required String email,
-    required String otp,
-    required String newPassword,
-  }) async {
-    try {
-      _setLoading(true);
-      _clearError();
-
-      final response = await _resetPassword(
-        email: email,
-        otp: otp,
-        newPassword: newPassword,
-      );
-
-      if (response.success && response.data != null) {
-        CustomToastService.showSuccess(
-          message: TranslationUtils.tr(
-            'auth_controller_password_reset_successfully',
-          ),
-          title: TranslationUtils.tr('general_success'),
-        );
-
-        // Navigate to login screen
-        Get.offAllNamed(AppPages.LOGIN);
-      } else {
-        _setError(response.message ?? TranslationUtils.tr('auth_controller_password_reset_failed'));
-      }
-    } catch (e) {
-      _setError('${TranslationUtils.tr('auth_controller_reset_password_error')}: $e');
-    } finally {
-      _setLoading(false);
-    }
-  }
-
   // ==================== LOGOUT & UTILITY METHODS ====================
 
   /// Centralized method to clear all user data, disconnect sockets, and reset controllers
@@ -1450,8 +1312,6 @@ class AuthController extends GetxController {
     _loginResponse.value = null;
     _userData.value = null;
     _isAuthenticated.value = false;
-    _otpSentEmail.value = '';
-    _otpSentMessage.value = '';
     _verifiedEmail.value = '';
     _verifiedOtp.value = '';
     _registerData.value = null;
@@ -1660,41 +1520,6 @@ class AuthController extends GetxController {
       );
     } finally {
       _isLoading.value = false;
-    }
-  }
-
-  // ==================== FORGOT PASSWORD METHODS ====================
-  Future<void> forgotPassword({required Map<String, dynamic> data}) async {
-    try {
-      _setLoading(true); // show activity indicator
-      _clearError();
-
-      final response = await _forgotPassword(data: data);
-
-      print('FORGOT PASSWORD DATA');
-      print(response.data);
-      final responseData = response.data;
-      final map = responseData is Map<String, dynamic> ? responseData : null;
-      final status = map?['status'];
-      final message = map?['message'] ?? 'Something went wrong';
-      if (status == true) {
-        CustomToastService.showSuccess(
-          message: message,
-          title: TranslationUtils.tr('general_success'),
-        );
-
-        // Go back to previous screen
-        Get.toNamed(AppPages.LOGIN);
-      } else {
-        print("ELSE FORGOT PASSOWRD STATUS ${status}");
-        CustomToastService.showError(message: message);
-      }
-    } catch (e, t) {
-      print("CATCH FORGOT PASSOWRD STATUS ${e}");
-      print("CATCH TT FORGOT PASSOWRD STATUS ${t}");
-      _setError('${TranslationUtils.tr('auth_controller_forgot_password_error')}: $e');
-    } finally {
-      _setLoading(false); // hide activity indicator
     }
   }
 

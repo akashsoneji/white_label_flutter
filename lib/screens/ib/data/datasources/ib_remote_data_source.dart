@@ -166,4 +166,20 @@ class IbRemoteDataSource {
       endpoint: '${ApiConstants.ibTransferCancel}$transferId/cancel',
     );
   }
+
+  Future<ApiResponse> getIbActivities() {
+    return _api.get(endpoint: ApiConstants.ibActivities);
+  }
+
+  Future<ApiResponse> getIbTreeStructure() {
+    return _api.get(endpoint: ApiConstants.ibTreeStructure);
+  }
+
+  Future<ApiResponse> getIbDetails({required String userSlug}) {
+    return _api.get(endpoint: '${ApiConstants.ibGetIbDetails}$userSlug');
+  }
+
+  Future<ApiResponse> getTemplateRates({required int templateId}) {
+    return _api.get(endpoint: '${ApiConstants.ibTemplateRates}$templateId');
+  }
 }

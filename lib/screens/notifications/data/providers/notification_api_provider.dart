@@ -16,23 +16,31 @@ class NotificationApiProvider {
     }
   }
 
-  Future<NotificationResponse?> getAllNotifications(int page) async {
+  /// Full list for the Notifications screen (`GET user/notifications/all`,
+  /// web `loadNotifications`). Falls back to `user/notifications` when the
+  /// `/all` route fails or its body has no list, since its response shape is
+  /// not confirmed in the API docs.
+  Future<NotificationResponse?> getAllNotifications() async {
     try {
       final response = await ApiService.get(
-        endpoint: ApiConstants.getNotifications,
+        endpoint: ApiConstants.allNotifications,
         queryParameters: {
-          'page': page.toString(),
           '_t': DateTime.now().millisecondsSinceEpoch.toString(),
         },
+        // NotificationController@all only returns JSON for ajax requests;
+        // without this header it renders the admin HTML view and 500s.
+        extraHeaders: const {'X-Requested-With': 'XMLHttpRequest'},
       );
-      if (response.success && response.data != null) {
-        return NotificationResponse.fromJson(response.data);
+      if (response.success && response.data is Map) {
+        final parsed = NotificationResponse.fromJson(
+          Map<String, dynamic>.from(response.data as Map),
+        );
+        if (parsed.notifications != null) return parsed;
       }
-      return null;
     } catch (e) {
       print('Error fetching all notifications: $e');
-      return null;
     }
+    return getNotifications();
   }
 
   Future<bool> markAllAsRead() async {

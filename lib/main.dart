@@ -55,13 +55,10 @@ import 'package:crm_app/screens/bonus/domain/repositories/bonus_repository.dart'
 import 'package:crm_app/screens/auth/data/repositories/auth_repository_impl.dart';
 import 'package:crm_app/screens/auth/data/repositories/auth_repository.dart';
 import 'package:crm_app/screens/auth/data/usecases/login_user.dart';
-import 'package:crm_app/screens/auth/data/usecases/forgot_password.dart';
 import 'package:crm_app/screens/auth/data/usecases/register_user.dart';
 import 'package:crm_app/screens/auth/data/usecases/register_with_otp_verification.dart';
 import 'package:crm_app/screens/auth/data/usecases/request_password_reset_otp.dart';
-import 'package:crm_app/screens/auth/data/usecases/reset_password.dart';
 import 'package:crm_app/screens/auth/data/usecases/reset_password_with_otp.dart';
-import 'package:crm_app/screens/auth/data/usecases/send_otp.dart';
 import 'package:crm_app/screens/auth/data/usecases/verify_password_reset_otp.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
@@ -72,7 +69,9 @@ import 'package:crm_app/services/account_websocket_service.dart';
 import 'services/auth_service.dart';
 import 'services/google_otp_service.dart';
 import 'services/enabled_modules_service.dart';
+import 'services/session_check_service.dart';
 import 'services/crm_settings_service.dart';
+import 'services/app_settings_service.dart';
 import 'package:crm_app/services/market_watch_v2_service.dart';
 import 'services/account_service.dart';
 import 'services/websocket_endpoint_helper.dart';
@@ -295,27 +294,20 @@ Future<void> initServices() async {
   Get.put<AuthService>(AuthServiceImpl(Get.find<ApiClient>()), permanent: true);
   Get.put<GoogleOtpService>(GoogleOtpService(), permanent: true);
   Get.put<EnabledModulesService>(EnabledModulesService(), permanent: true);
+  Get.put<SessionCheckService>(SessionCheckService(), permanent: true);
   Get.put<CrmSettingsService>(CrmSettingsService(), permanent: true);
+  Get.put<AppSettingsService>(AppSettingsService(), permanent: true);
   Get.put<AuthRepository>(
     AuthRepositoryImpl(Get.find<AuthService>(), Get.find<ApiClient>()),
     permanent: true,
   );
   Get.put<LoginUser>(LoginUser(Get.find<AuthRepository>()), permanent: true);
-  Get.put<ForgotPassword>(
-    ForgotPassword(Get.find<AuthRepository>()),
-    permanent: true,
-  );
   Get.put<RegisterUser>(
     RegisterUser(Get.find<AuthRepository>()),
     permanent: true,
   );
   Get.put<RegisterWithOtpVerification>(
     RegisterWithOtpVerification(Get.find<AuthRepository>()),
-    permanent: true,
-  );
-  Get.put<SendOtp>(SendOtp(Get.find<AuthRepository>()), permanent: true);
-  Get.put<ResetPassword>(
-    ResetPassword(Get.find<AuthRepository>()),
     permanent: true,
   );
   Get.put<RequestPasswordResetOtp>(

@@ -41,6 +41,10 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
 
   // Symbol & data
   final RxString currentSymbol = ''.obs;
+
+  /// Symbols whose switch was requested by [SymbolSelectionService]; their
+  /// arrival in [currentSymbol] is not pushed back to the service.
+  final Set<String> _serviceDrivenSymbols = <String>{};
   final RxMap<String, dynamic> realTimePrice = <String, dynamic>{}.obs;
 
   final StreamController<Map<String, dynamic>> _priceStreamController =
@@ -65,13 +69,27 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
     // Listen to changes from SymbolSelectionService to update currentSymbol
     ever(symService.lastSymbolRx, (String sym) {
       if (sym.isNotEmpty && currentSymbol.value != sym) {
+        _serviceDrivenSymbols.add(sym);
         changeSymbol(sym);
       }
     });
 
-    // Listen to changes from currentSymbol (watchlist, selector) to update SymbolSelectionService
+    // Listen to changes from currentSymbol (watchlist, selector) to update SymbolSelectionService.
+    // Changes that originated from the service must not be echoed back: with
+    // two switches in flight, a late completion would reset the service to the
+    // older symbol and the two would ping-pong forever (blank, reloading chart).
     ever(currentSymbol, (String sym) {
-      if (sym.isNotEmpty && symService.currentSymbol != sym) {
+      if (sym.isEmpty) return;
+      if (_serviceDrivenSymbols.remove(sym)) {
+        final wanted = symService.currentSymbol;
+        if (wanted.isNotEmpty && wanted != sym) {
+          // A stale switch finished after a newer one; re-apply the latest.
+          _serviceDrivenSymbols.add(wanted);
+          changeSymbol(wanted);
+        }
+        return;
+      }
+      if (symService.currentSymbol != sym) {
         symService.setSymbol(sym);
       }
     });

@@ -19,6 +19,7 @@ import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/one_click_trading_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
+import 'package:crm_app/utils/demo_contest_menu.dart';
 import 'package:crm_app/services/theme_service.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
@@ -660,12 +661,14 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
       ));
     }
 
-    items.add(_CelMenuItem(
-      icon: Icons.dashboard_rounded,
-      label: languageService.tr('settings_ib_dashboard'),
-      color: MetaTheme.buy(c),
-      onTap: () async => await _handleSwitchToIB(),
-    ));
+    if (EnabledModulesService.flags.ib) {
+      items.add(_CelMenuItem(
+        icon: Icons.dashboard_rounded,
+        label: languageService.tr('settings_ib_dashboard'),
+        color: MetaTheme.buy(c),
+        onTap: () async => await _handleSwitchToIB(),
+      ));
+    }
 
     if (showCopyTrading) {
       items.add(_CelMenuItem(
@@ -751,18 +754,20 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
         color: const Color(0xFFE91E63),
         onTap: () => Get.toNamed(AppPages.NOTIFICATIONS),
       ),
-      _CelMenuItem(
-        icon: Icons.emoji_events_outlined,
-        label: languageService.tr('more_demo_contest'),
-        color: const Color(0xFFFFC107),
-        onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
-      ),
-      _CelMenuItem(
-        icon: Icons.support_agent_rounded,
-        label: languageService.tr('settings_support_tickets'),
-        color: const Color(0xFFE91E63),
-        onTap: () => Get.toNamed(Routes.TICKET_LIST),
-      ),
+      if (DemoContestMenu.showStandalone)
+        _CelMenuItem(
+          icon: Icons.emoji_events_outlined,
+          label: DemoContestMenu.label,
+          color: const Color(0xFFFFC107),
+          onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
+        ),
+      if (EnabledModulesService.flags.helpdesk)
+        _CelMenuItem(
+          icon: Icons.support_agent_rounded,
+          label: languageService.tr('settings_support_tickets'),
+          color: const Color(0xFFE91E63),
+          onTap: () => Get.toNamed(Routes.TICKET_LIST),
+        ),
       _CelMenuItem(
         icon: Icons.delete_forever_rounded,
         label: languageService.tr('settings_delete_account'),

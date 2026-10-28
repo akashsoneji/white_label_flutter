@@ -4,7 +4,6 @@ import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/core/network/api_client.dart';
 import 'package:crm_app/core/network/api_response.dart';
 import 'package:crm_app/services/auth_service.dart';
-import 'package:crm_app/services/language_service.dart';
 
 import 'auth_repository.dart';
 
@@ -44,20 +43,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<ApiResponse<Map<String, dynamic>>> sendOTP({required String email}) {
-    return _service.sendOTP(email: email);
-  }
-
-  @override
-  Future<ApiResponse<Map<String, dynamic>>> resetPassword({
-    required String email,
-    required String otp,
-    required String newPassword,
-  }) {
-    return _service.resetPassword(email: email, otp: otp, newPassword: newPassword);
-  }
-
-  @override
   Future<ApiResponse<Map<String, dynamic>>> requestPasswordResetOTP({
     required String email,
   }) {
@@ -84,26 +69,6 @@ class AuthRepositoryImpl implements AuthRepository {
       otp: otp,
       password: password,
       passwordConfirmation: passwordConfirmation,
-    );
-  }
-
-  @override
-  Future<ApiResponse<Map<String, dynamic>>> forgotPassword({
-    required Map<String, dynamic> data,
-  }) async {
-    final response = await _api.post(
-      endpoint: ApiConstants.forgotPassword,
-      data: data,
-    );
-
-    final payload = response.data;
-    if (payload is Map<String, dynamic>) {
-      return ApiResponse.success(payload);
-    }
-
-    return ApiResponse.error(
-      response.message ?? TranslationUtils.tr('tw_invalid_response'),
-      data: payload is Map<String, dynamic> ? payload : null,
     );
   }
 

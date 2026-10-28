@@ -9,71 +9,31 @@ import '../pages/widgets/mt5_credentials_sheet.dart';
 class NotificationController extends GetxController {
   final NotificationApiProvider _apiProvider = NotificationApiProvider();
   
-  final ScrollController scrollController = ScrollController();
   var isLoading = true.obs;
-  var isPaginating = false.obs;
   var notifications = <NotificationItem>[].obs;
   var unreadTotal = 0.obs;
   var isMarkingAllRead = false.obs;
   var isOpeningCredentials = false.obs;
 
-  var currentPage = 1;
-  var hasMoreData = true;
-
   @override
   void onInit() {
     super.onInit();
-    scrollController.addListener(_scrollListener);
     fetchNotifications();
   }
 
-  void _scrollListener() {
-    if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 50) {
-      fetchMoreNotifications();
-    }
-  }
-
+  /// `GET user/notifications/all` returns the full list in one call (no
+  /// paging params), so there is no load-more.
   Future<void> fetchNotifications() async {
     isLoading(true);
-    currentPage = 1;
-    hasMoreData = true;
     try {
-      final response = await _apiProvider.getAllNotifications(currentPage);
-      if (response != null && response.notifications != null) {
-        notifications.assignAll(response.notifications!);
-        unreadTotal.value = response.unreadTotal ??
-            response.notifications!.where((n) => n.readAt == null).length;
-        if (response.notifications!.isEmpty) {
-          hasMoreData = false;
-        }
-      } else {
-        hasMoreData = false;
-      }
+      final response = await _apiProvider.getAllNotifications();
+      final items = response?.notifications;
+      if (items == null) return;
+      notifications.assignAll(items);
+      unreadTotal.value =
+          response?.unreadTotal ?? items.where((n) => n.readAt == null).length;
     } finally {
       isLoading(false);
-    }
-  }
-
-  Future<void> fetchMoreNotifications() async {
-    if (!hasMoreData || isPaginating.value) return;
-    
-    isPaginating(true);
-    currentPage++;
-    try {
-      final response = await _apiProvider.getAllNotifications(currentPage);
-      // GET user/notifications has no `page` param (per the API spec) and
-      // returns the same list for every page, so stop once nothing new comes.
-      final knownIds = notifications.map((n) => n.id).toSet();
-      final newItems = (response?.notifications ?? const <NotificationItem>[])
-          .where((n) => n.id == null || !knownIds.contains(n.id))
-          .toList();
-      if (newItems.isEmpty) {
-        hasMoreData = false;
-      } else {
-        notifications.addAll(newItems);
-      }
-    } finally {
-      isPaginating(false);
     }
   }
 
@@ -145,11 +105,5 @@ class NotificationController extends GetxController {
     );
     // Acknowledge on close (any dismissal), same as the web `ackAndClose`.
     await _apiProvider.ackMt5Credentials(id);
-  }
-
-  @override
-  void onClose() {
-    scrollController.dispose();
-    super.onClose();
   }
 }

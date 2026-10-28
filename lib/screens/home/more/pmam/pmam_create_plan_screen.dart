@@ -43,10 +43,9 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
   }
 
   Future<void> _loadAccounts() async {
-    // Only load eligible accounts (lightweight — avoids full portal reload)
-    if (_ctrl.eligibleAccounts.isEmpty) {
-      await _ctrl.loadEligibleAccounts();
-    }
+    // Always refetch: [eligibleAccounts] is shared with the investor join
+    // sheet, which fills it from the investor endpoint.
+    await _ctrl.loadManagerEligibleAccounts();
   }
 
   @override

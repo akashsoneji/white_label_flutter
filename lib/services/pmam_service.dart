@@ -130,6 +130,21 @@ class PmamService {
   static Future<ApiResponse> getManagerInvestorDetail(int investorId) =>
       _api.get(endpoint: 'user/pmam/manager/investors/$investorId/detail');
 
+  /// Manager's own trading accounts that can back a new plan
+  /// (web `loadTradingAccounts`).
+  static Future<ApiResponse> getManagerEligibleAccounts() =>
+      _api.get(endpoint: 'user/pmam/manager/eligible-accounts');
+
+  /// Settled commission rows, paginated:
+  /// `data: {data: [...], current_page, last_page, per_page, total}`.
+  static Future<ApiResponse> getManagerCommissions({
+    int page = 1,
+    int perPage = 25,
+  }) =>
+      _api.get(
+        endpoint: 'user/pmam/manager/commissions?page=$page&per_page=$perPage',
+      );
+
   // ──── Investor APIs ────
 
   static Future<ApiResponse> getAvailablePlans() =>
@@ -167,6 +182,16 @@ class PmamService {
       'columns[7][data]': 'member_since',
     },
   );
+
+  /// Search-box suggestions on Explore (web `searchManagerOptions`).
+  static Future<ApiResponse> searchManagers(String query) => _api.get(
+        endpoint: 'user/pmam/managers/search?q=${Uri.encodeQueryComponent(query)}',
+      );
+
+  /// Search-box plan suggestions on Explore (web `searchPlanOptions`).
+  static Future<ApiResponse> searchPlans(String query) => _api.get(
+        endpoint: 'user/pmam/plans/search?q=${Uri.encodeQueryComponent(query)}',
+      );
 
   static Future<ApiResponse> requestJoin(Map<String, dynamic> body) =>
       _api.post(endpoint: 'user/pmam/investor/request-join', data: body);

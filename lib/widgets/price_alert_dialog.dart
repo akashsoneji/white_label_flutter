@@ -6,6 +6,7 @@ import '../services/language_service.dart';
 import '../services/notification_service.dart';
 import '../services/price_alert_monitor_service.dart';
 import '../utils/precision_helper.dart';
+import 'package:crm_app/screens/home/price_alerts_screen.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import 'package:get/get.dart';
 
@@ -130,6 +131,14 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
                       fontWeight: FontWeight.w600,
                       color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
                     ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Get.to(() => const PriceAlertsScreen());
+                    },
+                    icon: Icon(Icons.list_alt_rounded, size: 18.sp),
+                    label: Text(TranslationUtils.tr('price_alerts_my_alerts')),
                   ),
                 ],
               ),

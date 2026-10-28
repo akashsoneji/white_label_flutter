@@ -2,6 +2,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/demo_contest_controller.dart';
 import 'package:crm_app/screens/demo_contest/presentation/pages/widgets/contest_countdown_timer.dart';
+import 'package:crm_app/screens/demo_contest/presentation/pages/widgets/enrollment_steps_card.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
@@ -138,6 +139,10 @@ class _ContestDetailsScreenState extends State<ContestDetailsScreen> {
                     SizedBox(height: 8.h),
                     _RequirementsList(contest: contest),
                     SizedBox(height: 22.h),
+                    if (!joined && !ended && contest.enrollmentStepsEnabled) ...[
+                      EnrollmentStepsCard(contestId: contest.id),
+                      SizedBox(height: 18.h),
+                    ],
                   ],
                 ),
               ),
@@ -259,12 +264,15 @@ class _ContestDetailsScreenState extends State<ContestDetailsScreen> {
       );
       return;
     }
-    final entry = await controller.joinContest(contest.id);
-    if (entry != null) {
+    final message = await controller.joinContest(
+      contest.id,
+      termsAccepted: _acceptedTerms,
+    );
+    if (message != null) {
       CustomToastService.showSuccess(
-        message: TranslationUtils.tr(
-          'contest_details_screen_successfully_joined',
-        ),
+        message: message.isNotEmpty
+            ? message
+            : TranslationUtils.tr('contest_details_screen_successfully_joined'),
       );
       Get.toNamed(
         AppPages.DEMO_CONTEST_DETAILS,

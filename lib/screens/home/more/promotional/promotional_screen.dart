@@ -9,6 +9,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
+import 'package:crm_app/utils/demo_contest_menu.dart';
 import 'package:crm_app/widgets/trade_win_bottom_navigation.dart';
 
 class PromotionalScreen extends StatelessWidget {
@@ -69,16 +70,17 @@ class PromotionalScreen extends StatelessWidget {
               );
             }
 
-            // Demo Contest is always visible under the Promotion section.
-            // tiles.add(
-            //   MoreMenuTile(
-            //     iconAssetPath:
-            //         'assets/svg/more/demo_contest/join-contest.svg',
-            //     label: languageService.tr('more_demo_contest'),
-            //     onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
-            //     textColor: AppColors.textPrimary,
-            //   ),
-            // );
+            if (DemoContestMenu.showInPromotion) {
+              tiles.add(
+                MoreMenuTile(
+                  iconAssetPath:
+                      'assets/svg/more/demo_contest/join-contest.svg',
+                  label: DemoContestMenu.label,
+                  onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
+                  textColor: AppColors.textPrimary,
+                ),
+              );
+            }
 
             // Always show Bonus section
             tiles.add(

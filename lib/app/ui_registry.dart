@@ -38,6 +38,7 @@ import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/login_scr
 import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/verify_code_screen.dart'
     as vantage;
 
+import 'package:crm_app/widgets/feature_maintenance_gate.dart';
 import 'ui_slots.dart';
 
 /// Build-time selected client (no runtime switching).
@@ -171,6 +172,14 @@ class UiRegistry implements UiSlots {
 
   @override
   Widget createAccount() {
+    // One gate for every brand's register screen.
+    return FeatureMaintenanceGate(
+      feature: MaintenanceFeature.registration,
+      child: _brandCreateAccount(),
+    );
+  }
+
+  Widget _brandCreateAccount() {
     final flavorName = FlavorConfig.instance.flavor.name.toLowerCase();
     if (flavorName == 'riyadex') {
       return const riyadex.RiyadexCreateAccountScreen();

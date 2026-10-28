@@ -24,6 +24,7 @@ import '../../widgets/custom_toast.dart';
 import '../../utils/trl_helper.dart';
 import 'package:crm_app/utils/svg_color_helper.dart';
 import 'change_leverage_screen.dart';
+import 'widgets/rename_account_dialog.dart';
 import 'package:crm_app/screens/finance/presentation/pages/internal_transfer_screen.dart';
 import 'package:crm_app/screens/finance/presentation/finance_ui_scope.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_dashboard_layout.dart';
@@ -615,12 +616,19 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(
-                      '#${account.metaAccountNumber}',
-                      style: AppTextStyles.bodyText.copyWith(
-                        color: textPrimary,
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w700,
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: 150.w),
+                      child: Text(
+                        account.mt5NickName.trim().isEmpty
+                            ? '#${account.metaAccountNumber}'
+                            : '${account.mt5NickName.trim()} · #${account.metaAccountNumber}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bodyText.copyWith(
+                          color: textPrimary,
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     SizedBox(width: 6.w),
@@ -4210,6 +4218,15 @@ class AccountMenuBottomSheet extends StatelessWidget {
                     Get.back();
                     // Get.back(closeOverlays: true);
                     _showMT5PasswordOptionsSheet();
+                  },
+                ),
+                SizedBox(height: 16),
+                _buildMenuItem(
+                  icon: Icons.edit_outlined,
+                  label: languageService.tr('account_rename_title'),
+                  onTap: () {
+                    Get.back();
+                    Get.dialog(RenameAccountDialog(account: account));
                   },
                 ),
                 if (account.leverageChangeAllowed) ...[

@@ -6,6 +6,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/feature_maintenance_gate.dart';
 
 import 'package:crm_app/screens/ibm/presentation/widgets/ibm_top_header.dart';
 import 'package:crm_app/routes/app_pages.dart';
@@ -845,7 +846,16 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
       return SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: canRequest ? () => Get.toNamed(AppPages.WITHDRAWAL) : null,
+          onPressed: canRequest
+              ? () {
+                  if (FeatureMaintenance.blockIfActive(
+                    MaintenanceFeature.ibWithdrawal,
+                  )) {
+                    return;
+                  }
+                  Get.toNamed(AppPages.WITHDRAWAL);
+                }
+              : null,
           style: ElevatedButton.styleFrom(
             minimumSize: Size.zero,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,

@@ -18,14 +18,6 @@ abstract class AuthRepository {
     required Map<String, dynamic> data,
   });
 
-  Future<ApiResponse<Map<String, dynamic>>> sendOTP({required String email});
-
-  Future<ApiResponse<Map<String, dynamic>>> resetPassword({
-    required String email,
-    required String otp,
-    required String newPassword,
-  });
-
   Future<ApiResponse<Map<String, dynamic>>> requestPasswordResetOTP({
     required String email,
   });
@@ -40,10 +32,6 @@ abstract class AuthRepository {
     required String otp,
     required String password,
     required String passwordConfirmation,
-  });
-
-  Future<ApiResponse<Map<String, dynamic>>> forgotPassword({
-    required Map<String, dynamic> data,
   });
 
   Future<ApiResponse> logout({String? token, String? fcmToken});

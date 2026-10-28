@@ -5,6 +5,8 @@ class CrmSettingsModel {
   final List<CrmDisclaimer> disclaimers;
   final CrmMobileAppDetails? mobileAppDetails;
   final CrmFinancialSettings financialSettings;
+  final CrmTradingSettings tradingSettings;
+  final bool allowDuplicateMobileRegistration;
 
   const CrmSettingsModel({
     this.meta,
@@ -13,6 +15,8 @@ class CrmSettingsModel {
     this.disclaimers = const [],
     this.mobileAppDetails,
     this.financialSettings = const CrmFinancialSettings(),
+    this.tradingSettings = const CrmTradingSettings(),
+    this.allowDuplicateMobileRegistration = false,
   });
 
   factory CrmSettingsModel.fromJson(Map<String, dynamic> json) {
@@ -55,6 +59,48 @@ class CrmSettingsModel {
                 Map<String, dynamic>.from(json['financial_settings'] as Map),
               )
               : const CrmFinancialSettings(),
+      tradingSettings:
+          json['trading_settings'] is Map
+              ? CrmTradingSettings.fromJson(
+                Map<String, dynamic>.from(json['trading_settings'] as Map),
+              )
+              : const CrmTradingSettings(),
+      allowDuplicateMobileRegistration:
+          json['registration_settings'] is Map &&
+          (json['registration_settings']
+                  as Map)['allow_duplicate_mobile_registration'] ==
+              true,
+    );
+  }
+}
+
+/// Admin "Trading Settings". `web_trading_url_mode == "app"` means the app's
+/// own terminal; any other mode opens `web_trading_custom_url`.
+class CrmTradingSettings {
+  final String mt5ServerTimezone;
+  final bool webTradingEnabled;
+  final String webTradingUrlMode;
+  final String webTradingCustomUrl;
+
+  const CrmTradingSettings({
+    this.mt5ServerTimezone = 'UTC',
+    this.webTradingEnabled = true,
+    this.webTradingUrlMode = 'app',
+    this.webTradingCustomUrl = '',
+  });
+
+  bool get usesInAppTerminal => webTradingUrlMode == 'app';
+
+  factory CrmTradingSettings.fromJson(Map<String, dynamic> json) {
+    final timezone = json['mt5_server_timezone']?.toString().trim() ?? '';
+    final mode = json['web_trading_url_mode']?.toString().trim() ?? '';
+    return CrmTradingSettings(
+      mt5ServerTimezone: timezone.isEmpty ? 'UTC' : timezone,
+      // Missing key keeps trading visible; only an explicit false hides it.
+      webTradingEnabled: json['web_trading_enabled'] != false,
+      webTradingUrlMode: mode.isEmpty ? 'app' : mode,
+      webTradingCustomUrl:
+          json['web_trading_custom_url']?.toString().trim() ?? '',
     );
   }
 }
@@ -243,6 +289,9 @@ class CrmMobileAppDetails {
   final bool isForceUpdate;
   final String updateUrlIos;
   final String updateUrlAndroid;
+  final String laterDate;
+  final String releaseNotes;
+  final List<CrmPlatformItem> platforms;
 
   const CrmMobileAppDetails({
     this.appName = '',
@@ -251,7 +300,17 @@ class CrmMobileAppDetails {
     this.isForceUpdate = false,
     this.updateUrlIos = '',
     this.updateUrlAndroid = '',
+    this.laterDate = '',
+    this.releaseNotes = '',
+    this.platforms = const [],
   });
+
+  /// Platforms with a link, in admin `sort_order`.
+  List<CrmPlatformItem> get visiblePlatforms {
+    final items = platforms.where((p) => p.url.isNotEmpty).toList()
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    return items;
+  }
 
   factory CrmMobileAppDetails.fromJson(Map<String, dynamic> json) {
     return CrmMobileAppDetails(
@@ -261,6 +320,46 @@ class CrmMobileAppDetails {
       isForceUpdate: json['is_force_update'] == true,
       updateUrlIos: json['update_url_ios']?.toString() ?? '',
       updateUrlAndroid: json['update_url_android']?.toString() ?? '',
+      laterDate: json['later_date']?.toString().trim() ?? '',
+      releaseNotes: json['release_notes']?.toString().trim() ?? '',
+      platforms:
+          (json['platforms'] as List?)
+              ?.whereType<Map>()
+              .map(
+                (e) => CrmPlatformItem.fromJson(Map<String, dynamic>.from(e)),
+              )
+              .toList() ??
+          const [],
+    );
+  }
+}
+
+class CrmPlatformItem {
+  final String slug;
+  final String name;
+  final String description;
+  final String imageUrl;
+  final String url;
+  final int sortOrder;
+
+  const CrmPlatformItem({
+    this.slug = '',
+    this.name = '',
+    this.description = '',
+    this.imageUrl = '',
+    this.url = '',
+    this.sortOrder = 0,
+  });
+
+  factory CrmPlatformItem.fromJson(Map<String, dynamic> json) {
+    final order = json['sort_order'];
+    return CrmPlatformItem(
+      slug: json['slug']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      imageUrl: json['image_url']?.toString().trim() ?? '',
+      url: json['url']?.toString().trim() ?? '',
+      sortOrder: order is num ? order.toInt() : int.tryParse('$order') ?? 0,
     );
   }
 }

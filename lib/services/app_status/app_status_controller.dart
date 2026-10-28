@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:crm_app/services/app_status/app_status_model.dart';
 import 'package:crm_app/services/app_status/app_status_service.dart';
+import 'package:crm_app/services/app_settings_service.dart';
 import 'package:crm_app/services/app_version_service.dart';
 import 'package:crm_app/utils/app_logger.dart';
 import 'package:crm_app/services/app_status/force_update_dialog.dart'
@@ -29,6 +30,9 @@ class AppStatusController extends GetxController {
   final RxBool isForceUpdate = true.obs;
   final Rx<AppStatusModel?> statusData = Rx<AppStatusModel?>(null);
 
+  /// Admin's `portal_maintenance_message`; empty → screen shows default text.
+  final RxString maintenanceMessage = ''.obs;
+
   bool _forceUpdateDialogShown = false;
   bool _maintenanceScreenShown = false;
 
@@ -47,6 +51,39 @@ class AppStatusController extends GetxController {
   void onInit() {
     super.onInit();
     AppLogger.debug('AppStatusController: Initialized');
+    if (Get.isRegistered<AppSettingsService>()) {
+      // app-settings may land after mobile-app-details; re-check then.
+      ever(Get.find<AppSettingsService>().settings, (_) {
+        _reevaluateMaintenance();
+      });
+    }
+  }
+
+  /// Mobile switch (`mobile_app_details.is_under_maintenance`) OR the whole
+  /// client portal switch (`app-settings.portal_maintenance_mode`).
+  bool _isUnderMaintenance(bool mobileAppMaintenance) {
+    final portal = Get.isRegistered<AppSettingsService>()
+        ? Get.find<AppSettingsService>().current.portalMaintenance
+        : null;
+    final portalOn = portal?.isOn ?? false;
+    maintenanceMessage.value = portalOn ? portal!.message : '';
+    return mobileAppMaintenance || portalOn;
+  }
+
+  void _reevaluateMaintenance() {
+    final status = statusData.value;
+    if (status != null) {
+      handleStatusUpdate(status);
+      return;
+    }
+    // mobile-app-details not loaded (yet): portal switch alone decides.
+    if (_isUnderMaintenance(false)) {
+      isMaintenanceMode.value = true;
+      showMaintenanceScreen();
+    } else if (isMaintenanceMode.value) {
+      isMaintenanceMode.value = false;
+      hideMaintenanceScreen();
+    }
   }
 
   /// Handle status update from service
@@ -76,7 +113,7 @@ class AppStatusController extends GetxController {
       statusData.value = status;
 
       // Check maintenance mode first (takes priority)
-      if (status.isUnderMaintenance) {
+      if (_isUnderMaintenance(status.isUnderMaintenance)) {
         isMaintenanceMode.value = true;
         if (!_maintenanceScreenShown) {
           showMaintenanceScreen();
@@ -253,6 +290,9 @@ class AppStatusController extends GetxController {
 
   /// Check status manually (for retry button)
   Future<void> checkStatus() async {
+    if (Get.isRegistered<AppSettingsService>()) {
+      await Get.find<AppSettingsService>().fetchAppSettings(force: true);
+    }
     await _service.checkAppStatus();
   }
 

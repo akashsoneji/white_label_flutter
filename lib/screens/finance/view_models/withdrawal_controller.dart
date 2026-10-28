@@ -9,6 +9,7 @@ import 'package:crm_app/models/bank_withdralList_model.dart'
     show AllowedCryptoNetwork;
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/core/network/api_response.dart';
+import 'package:crm_app/services/crm_settings_service.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
@@ -381,6 +382,14 @@ class WithdrawalController extends GetxController {
   var ibmWallet = Rxn<IbmWallet>();
   var withdrawalMethodDetail = Rxn<WithdrawalMethodDetailResponse>();
 
+  bool get _withdrawalDeductFromWalletOnly =>
+      Get.isRegistered<CrmSettingsService>() &&
+      (Get.find<CrmSettingsService>()
+              .current
+              ?.financialSettings
+              .withdrawalDeductFromWalletOnly ??
+          false);
+
   // Flag to show "no data" view when API returns status: false with message
   final showNoDataView = false.obs;
   final noDataMessage = ''.obs;
@@ -613,8 +622,15 @@ class WithdrawalController extends GetxController {
             noDataMsg = '';
 
             withdrawalMethodDetail.value = data;
-            userMT5Accounts.assignAll(data.data?.userMT5Accounts ?? []);
             wallet.value = data.data?.wallet;
+            // `withdrawal_deduct_from_wallet_only`: only the wallet can be
+            // debited, so MT5 accounts are not offered as a source.
+            final walletOnly =
+                _withdrawalDeductFromWalletOnly &&
+                (wallet.value?.walletId?.isNotEmpty ?? false);
+            userMT5Accounts.assignAll(
+              walletOnly ? [] : (data.data?.userMT5Accounts ?? []),
+            );
             ibAccount.value = data.data?.ibaccount;
             ibmWallet.value = data.data?.ibmWallet;
 

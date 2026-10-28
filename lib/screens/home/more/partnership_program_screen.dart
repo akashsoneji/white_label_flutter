@@ -9,7 +9,9 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
+import 'package:crm_app/services/crm_settings_service.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/utils/agreement_launcher.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
@@ -299,6 +301,14 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
     );
   }
 
+  bool get _canOpenIbTerms {
+    if (!Get.isRegistered<CrmSettingsService>()) return false;
+    final agreement = Get.find<CrmSettingsService>().agreementFor(
+      AgreementLauncher.ibTermsKey,
+    );
+    return agreement != null && (agreement.canOpen || agreement.hasUrl);
+  }
+
   Widget _buildTermsCheckbox(
     LanguageService languageService,
     dynamic stageCompletion,
@@ -349,13 +359,23 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
           ),
           SizedBox(width: 8.w),
           Expanded(
-            child: Text(
-              languageService.tr('ibm_accept_ib_terms_and_conditions'),
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w400,
-                height: 1.58,
-                color: AppColors.textPrimary,
+            child: GestureDetector(
+              // `crm-settings.agreements.ib_terms`: link only when the admin
+              // published a document the app can open.
+              onTap: _canOpenIbTerms ? AgreementLauncher.openIbTerms : null,
+              child: Text(
+                languageService.tr('ibm_accept_ib_terms_and_conditions'),
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w400,
+                  height: 1.58,
+                  color: _canOpenIbTerms
+                      ? AppColors.primary
+                      : AppColors.textPrimary,
+                  decoration: _canOpenIbTerms
+                      ? TextDecoration.underline
+                      : TextDecoration.none,
+                ),
               ),
             ),
           ),

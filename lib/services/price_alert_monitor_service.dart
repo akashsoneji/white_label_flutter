@@ -319,6 +319,73 @@ class PriceAlertMonitorService extends GetxController {
     }
   }
 
+  /// `POST price-alerts` answers `{data: {alert: {id}}}`; the client may hand
+  /// back either the whole body or just its `data`.
+  int? _extractServerAlertId(dynamic body) {
+    if (body is! Map) return null;
+    final data = body['data'] is Map ? body['data'] as Map : body;
+    final alert = data['alert'];
+    if (alert is! Map) return null;
+    return int.tryParse('${alert['id']}');
+  }
+
+  Future<void> _updateStoredAlert(
+    bool Function(Map<String, dynamic> alert) matches,
+    void Function(Map<String, dynamic> alert) apply,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final alerts = prefs.getStringList('price_alerts') ?? [];
+    for (int i = 0; i < alerts.length; i++) {
+      try {
+        final Map<String, dynamic> alert = json.decode(alerts[i]);
+        if (!matches(alert)) continue;
+        apply(alert);
+        alerts[i] = json.encode(alert);
+      } catch (e) {
+        debugPrint('Error parsing alert: $e');
+      }
+    }
+    await prefs.setStringList('price_alerts', alerts);
+  }
+
+  /// Mirrors a server-side edit / pause / delete (`PUT`/`DELETE
+  /// price-alerts/{id}`) onto the locally monitored alert, so a deleted or
+  /// paused alert stops firing on this device. Pass `isActive: false` for
+  /// delete.
+  Future<void> syncLocalAlertFromServer({
+    required int serverId,
+    double? targetPrice,
+    String? condition,
+    bool? isActive,
+  }) async {
+    void apply(Map<String, dynamic> alert) {
+      if (targetPrice != null) alert['targetPrice'] = targetPrice;
+      if (condition != null) alert['condition'] = condition;
+      if (isActive != null) alert['isActive'] = isActive;
+    }
+
+    bool matches(Map<String, dynamic> alert) => alert['serverId'] == serverId;
+
+    try {
+      await _updateStoredAlert(matches, apply);
+
+      final inMemory = _activeAlerts.where(matches).toList();
+      if (isActive == false) {
+        _activeAlerts.removeWhere(matches);
+      } else if (inMemory.isNotEmpty) {
+        inMemory.forEach(apply);
+      } else if (isActive == true) {
+        final prefs = await SharedPreferences.getInstance();
+        for (final raw in prefs.getStringList('price_alerts') ?? <String>[]) {
+          final Map<String, dynamic> alert = json.decode(raw);
+          if (matches(alert)) _activeAlerts.add(alert);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error syncing local alert $serverId: $e');
+    }
+  }
+
   // Add new alert to monitoring
   Future<void> addPriceAlert({
     required String symbol,
@@ -462,11 +529,21 @@ class PriceAlertMonitorService extends GetxController {
             'device_type': deviceType,
           };
 
-          await Get.find<ApiClient>().post(
+          final response = await Get.find<ApiClient>().post(
             endpoint: ApiConstants.priceAlerts,
             token: token,
             data: apiPayload,
           );
+          final serverId = _extractServerAlertId(response.data);
+          if (response.success && serverId != null) {
+            // The server id is what PUT/DELETE price-alerts/{id} need, and it
+            // links this local monitor entry to the "My Price Alerts" list.
+            alert['serverId'] = serverId;
+            await _updateStoredAlert(
+              (stored) => stored['id'] == alertId,
+              (stored) => stored['serverId'] = serverId,
+            );
+          }
           debugPrint('✅ Price alert sent to backend successfully');
         }
       } catch (apiError) {
