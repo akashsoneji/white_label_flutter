@@ -74,7 +74,8 @@ class VantageChartLayout extends StatefulWidget {
 }
 
 class _VantageChartLayoutState extends State<VantageChartLayout> {
-  final GlobalKey<ChartInAppWebViewState> _webViewKey = GlobalKey<ChartInAppWebViewState>();
+  final GlobalKey<ChartInAppWebViewState> _webViewKey =
+      GlobalKey<ChartInAppWebViewState>();
   double _volume = 0.01;
 
   /// Editable backing field for the quantity TextField. Keeps the
@@ -145,12 +146,16 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     final bid = _socket.getBidPrice();
     final ask = _socket.getAskPrice();
     if (bid == null || ask == null) {
-      CustomToastService.showWarning(message: _lang.tr('vantage_waiting_live_price'));
+      CustomToastService.showWarning(
+        message: _lang.tr('vantage_waiting_live_price'),
+      );
       return;
     }
     final active = _account.activeMT5Account;
     if (active == null) {
-      CustomToastService.showWarning(message: _lang.tr('vantage_no_active_account'));
+      CustomToastService.showWarning(
+        message: _lang.tr('vantage_no_active_account'),
+      );
       return;
     }
 
@@ -175,7 +180,9 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
       // with the actual API message + account number
     } catch (e) {
       if (!mounted) return;
-      CustomToastService.showError(message: '${_lang.tr('vantage_trade_error')}: $e');
+      CustomToastService.showError(
+        message: '${_lang.tr('vantage_trade_error')}: $e',
+      );
     }
   }
 
@@ -479,7 +486,9 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     final symbol = _rawSymbol();
     final marketPrice = _socket.getMarketPrice() ?? 0.0;
     if (marketPrice == 0.0) {
-      CustomToastService.showWarning(message: _lang.tr('vantage_waiting_live_price'));
+      CustomToastService.showWarning(
+        message: _lang.tr('vantage_waiting_live_price'),
+      );
       return;
     }
     showModalBottomSheet(
@@ -545,7 +554,9 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
             ),
             // hairline divider exactly as in the TRADYN reference
             Container(height: 1, color: const Color(0x14000000)),
-            Expanded(child: _ChartArea(isDark: isDark, webViewKey: _webViewKey)),
+            Expanded(
+              child: _ChartArea(isDark: isDark, webViewKey: _webViewKey),
+            ),
             Container(height: 1, color: const Color(0x14000000)),
             _BottomDock(
               primary: primary,
@@ -634,135 +645,151 @@ class _Header extends StatelessWidget {
           // badge. Tapping opens the SAME dropdown the Prices tab uses
           // (anchored popup menu) so both tabs stay in sync via AccountController.
           Builder(
-            builder: (pillContext) => GestureDetector(
-              onTap: () {
-                final accCtrl = Get.find<AccountController>();
-                accCtrl.resetToDefaultAccounts();
-                _showAccountPopup(pillContext, accCtrl);
-              },
-              child: Obx(() {
-                final active = Get.find<AccountController>().activeMT5Account;
-                final accNumber = active?.metaAccountNumber ?? '------';
-                final isDemo =
-                    (active?.accountType ?? 'REAL').toUpperCase() == 'DEMO';
-                final typeText = isDemo ? 'DEMO' : 'LIVE';
-                final typeColor = isDemo ? AppColors.primary : AppColors.accent;
+            builder: (pillContext) {
+              if (!Get.isRegistered<AccountController>()) {
+                return const SizedBox.shrink();
+              }
+              // Captured once: on logout the controller is deleted while this
+              // Obx can still rebuild for a frame, so Get.find inside it throws.
+              final accCtrl = Get.find<AccountController>();
+              return GestureDetector(
+                onTap: () {
+                  accCtrl.resetToDefaultAccounts();
+                  _showAccountPopup(pillContext, accCtrl);
+                },
+                child: Obx(() {
+                  final active = accCtrl.activeMT5Account;
+                  final accNumber = active?.metaAccountNumber ?? '------';
+                  final isDemo =
+                      (active?.accountType ?? 'REAL').toUpperCase() == 'DEMO';
+                  final typeText = isDemo ? 'DEMO' : 'LIVE';
+                  final typeColor =
+                      isDemo ? AppColors.primary : AppColors.accent;
 
-                final tcInfo = Get.isRegistered<TradingController>()
-                    ? Get.find<TradingController>().accountInfoRx.value
-                    : null;
-                final double? equity = tcInfo?.equity;
-                final double? profit = tcInfo?.profit;
-                // Show live P&L when non-zero (|P&L| >= 0.005 to avoid showing
-                // a flickering +0.00), otherwise fall back to equity.
-                final bool showProfit = profit != null && profit.abs() >= 0.005;
-                final String? equityText = showProfit
-                    ? CurrencyFormat.signedAmount(profit, active)
-                    : (equity != null
-                        ? CurrencyFormat.amount(equity, active)
-                        : null);
-                // P&L is folded into equityText above; coloring handled via style.
-                final bool isProfitNegative =
-                    showProfit && profit < 0;
+                  final tcInfo =
+                      Get.isRegistered<TradingController>()
+                          ? Get.find<TradingController>().accountInfoRx.value
+                          : null;
+                  final double? equity = tcInfo?.equity;
+                  final double? profit = tcInfo?.profit;
+                  // Show live P&L when non-zero (|P&L| >= 0.005 to avoid showing
+                  // a flickering +0.00), otherwise fall back to equity.
+                  final bool showProfit =
+                      profit != null && profit.abs() >= 0.005;
+                  final String? equityText =
+                      showProfit
+                          ? CurrencyFormat.signedAmount(profit, active)
+                          : (equity != null
+                              ? CurrencyFormat.amount(equity, active)
+                              : null);
+                  // P&L is folded into equityText above; coloring handled via style.
+                  final bool isProfitNegative = showProfit && profit < 0;
 
-                return Container(
-                  height: 28.h,
-                  padding: EdgeInsets.symmetric(horizontal: 10.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.isDarkMode
-                        ? AppColors.surfaceSecondary
-                        : AppColors.card.withOpacity(0.06),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: AppColors.border.withOpacity(0.18),
-                      width: 0.5,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 20.w,
-                        height: 20.w,
-                        decoration: BoxDecoration(
-                          color: AppColors.isDarkMode
+                  return Container(
+                    height: 28.h,
+                    padding: EdgeInsets.symmetric(horizontal: 10.w),
+                    decoration: BoxDecoration(
+                      color:
+                          AppColors.isDarkMode
                               ? AppColors.surfaceSecondary
-                              : typeColor.withOpacity(0.16),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.account_balance_wallet_outlined,
-                          size: 12.sp,
-                          color: AppColors.isDarkMode
-                              ? AppColors.whiteColor
-                              : typeColor,
-                        ),
+                              : AppColors.card.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: AppColors.border.withOpacity(0.18),
+                        width: 0.5,
                       ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        accNumber,
-                        style: AppTextStyles.label.copyWith(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 20.w,
+                          height: 20.w,
+                          decoration: BoxDecoration(
+                            color:
+                                AppColors.isDarkMode
+                                    ? AppColors.surfaceSecondary
+                                    : typeColor.withOpacity(0.16),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.account_balance_wallet_outlined,
+                            size: 12.sp,
+                            color:
+                                AppColors.isDarkMode
+                                    ? AppColors.whiteColor
+                                    : typeColor,
+                          ),
                         ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                      if (equityText != null) ...[
-                        SizedBox(width: 6.w),
+                        SizedBox(width: 8.w),
                         Text(
-                          equityText,
+                          accNumber,
                           style: AppTextStyles.label.copyWith(
                             fontSize: 12.sp,
-                            fontWeight: FontWeight.w700,
-                            color: showProfit
-                                ? (isProfitNegative
-                                    ? AppColors.error
-                                    : AppColors.success)
-                                : AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                        if (equityText != null) ...[
+                          SizedBox(width: 6.w),
+                          Text(
+                            equityText,
+                            style: AppTextStyles.label.copyWith(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w700,
+                              color:
+                                  showProfit
+                                      ? (isProfitNegative
+                                          ? AppColors.error
+                                          : AppColors.success)
+                                      : AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                        // if (profitText != null) ...[
+                        //   SizedBox(width: 4.w),
+                        //   Text(
+                        //     profitText,
+                        //     style: AppTextStyles.bodyText.copyWith(
+                        //       fontSize: 11.sp,
+                        //       fontWeight: FontWeight.w500,
+                        //       color: AppColors.textGrey,
+                        //     ),
+                        //   ),
+                        // ],
+                        SizedBox(width: 6.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 3.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color:
+                                AppColors.isDarkMode
+                                    ? AppColors.surfaceSecondary
+                                    : typeColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            typeText,
+                            style: AppTextStyles.bodyText.copyWith(
+                              color:
+                                  AppColors.isDarkMode
+                                      ? AppColors.whiteColor
+                                      : typeColor,
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
-                      // if (profitText != null) ...[
-                      //   SizedBox(width: 4.w),
-                      //   Text(
-                      //     profitText,
-                      //     style: AppTextStyles.bodyText.copyWith(
-                      //       fontSize: 11.sp,
-                      //       fontWeight: FontWeight.w500,
-                      //       color: AppColors.textGrey,
-                      //     ),
-                      //   ),
-                      // ],
-                      SizedBox(width: 6.w),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8.w,
-                          vertical: 3.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.isDarkMode
-                              ? AppColors.surfaceSecondary
-                              : typeColor.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          typeText,
-                          style: AppTextStyles.bodyText.copyWith(
-                            color: AppColors.isDarkMode
-                                ? AppColors.whiteColor
-                                : typeColor,
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-            ),
+                    ),
+                  );
+                }),
+              );
+            },
           ),
         ],
       ),
@@ -796,75 +823,84 @@ class _Header extends StatelessWidget {
         Rect.fromLTWH(rect.left, rect.bottom + 6.h, rect.width, rect.height),
         Offset.zero & overlay.size,
       ),
-      items: accountController.mt5Accounts.map((account) {
-        final isActive =
-            accountController.activeMT5Account?.metaAccountNumber ==
-            account.metaAccountNumber;
-        final type = account.accountType.toUpperCase();
-        final typeColor = type == 'LIVE' ? AppColors.accent : AppColors.primary;
+      items:
+          accountController.mt5Accounts.map((account) {
+            final isActive =
+                accountController.activeMT5Account?.metaAccountNumber ==
+                account.metaAccountNumber;
+            final type = account.accountType.toUpperCase();
+            final typeColor =
+                type == 'LIVE' ? AppColors.accent : AppColors.primary;
 
-        return PopupMenuItem<String>(
-          value: account.metaAccountNumber,
-          height: 42.h,
-          child: Row(
-            children: [
-              Container(
-                width: 18.w,
-                height: 18.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.isDarkMode
-                      ? AppColors.surfaceSecondary
-                      : typeColor.withOpacity(0.16),
-                ),
-                child: Icon(
-                  Icons.account_balance_wallet_outlined,
-                  size: 12.sp,
-                  color: AppColors.isDarkMode
-                      ? AppColors.whiteColor
-                      : typeColor,
-                ),
-              ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: Text(
-                  account.metaAccountNumber,
-                  style: AppTextStyles.label.copyWith(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+            return PopupMenuItem<String>(
+              value: account.metaAccountNumber,
+              height: 42.h,
+              child: Row(
+                children: [
+                  Container(
+                    width: 18.w,
+                    height: 18.w,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color:
+                          AppColors.isDarkMode
+                              ? AppColors.surfaceSecondary
+                              : typeColor.withOpacity(0.16),
+                    ),
+                    child: Icon(
+                      Icons.account_balance_wallet_outlined,
+                      size: 12.sp,
+                      color:
+                          AppColors.isDarkMode
+                              ? AppColors.whiteColor
+                              : typeColor,
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              SizedBox(width: 10.w),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                decoration: BoxDecoration(
-                  color: AppColors.isDarkMode
-                      ? AppColors.surfaceSecondary
-                      : typeColor.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  type,
-                  style: AppTextStyles.bodyText.copyWith(
-                    color: AppColors.isDarkMode
-                        ? AppColors.whiteColor
-                        : typeColor,
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w700,
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Text(
+                      account.metaAccountNumber,
+                      style: AppTextStyles.label.copyWith(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
+                  SizedBox(width: 10.w),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 3.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          AppColors.isDarkMode
+                              ? AppColors.surfaceSecondary
+                              : typeColor.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      type,
+                      style: AppTextStyles.bodyText.copyWith(
+                        color:
+                            AppColors.isDarkMode
+                                ? AppColors.whiteColor
+                                : typeColor,
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  if (isActive) ...[
+                    SizedBox(width: 8.w),
+                    Icon(Icons.check, size: 16.sp, color: AppColors.success),
+                  ],
+                ],
               ),
-              if (isActive) ...[
-                SizedBox(width: 8.w),
-                Icon(Icons.check, size: 16.sp, color: AppColors.success),
-              ],
-            ],
-          ),
-        );
-      }).toList(),
+            );
+          }).toList(),
     );
 
     if (selected == null) return;
@@ -895,10 +931,7 @@ class _ChartArea extends StatefulWidget {
   final bool isDark;
   final GlobalKey<ChartInAppWebViewState> webViewKey;
 
-  const _ChartArea({
-    required this.isDark,
-    required this.webViewKey,
-  });
+  const _ChartArea({required this.isDark, required this.webViewKey});
 
   @override
   State<_ChartArea> createState() => _ChartAreaState();
@@ -938,9 +971,14 @@ class _ChartAreaState extends State<_ChartArea> {
     final raw = _stripDot(newSym);
     String? acc;
     if (Get.isRegistered<AccountController>()) {
-      acc = Get.find<AccountController>().activeMT5Account?.metaAccountNumber.toString();
+      acc =
+          Get.find<AccountController>().activeMT5Account?.metaAccountNumber
+              .toString();
     }
-    final effective = SymbolDetailsCacheService.resolveDatafeedSymbolSync(raw, acc);
+    final effective = SymbolDetailsCacheService.resolveDatafeedSymbolSync(
+      raw,
+      acc,
+    );
     _initialSymbol = effective;
     // Push the new symbol into the running WebView without rebuilding.
     _tenaxKey.currentState?.updateSymbol(effective);
@@ -959,35 +997,40 @@ class _ChartAreaState extends State<_ChartArea> {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Obx(() {
-      final useNew = FlavorConfig.instance.useNewChart;
-      final raw = _stripDot(Get.find<SymbolSelectionService>().currentSymbol);
-      String? acc;
-      if (Get.isRegistered<AccountController>()) {
-        acc = Get.find<AccountController>().activeMT5Account?.metaAccountNumber.toString();
-      }
-      final effective = SymbolDetailsCacheService.resolveDatafeedSymbolSync(raw, acc);
-
-      // No saved choice, no favourite and no broker instrument yet: loading a
-      // WebView with an empty symbol shows a blank chart, so show a state
-      // instead. This Obx re-runs once instruments or a selection arrive.
-      if (effective.isEmpty) return _buildNoSymbolState();
-
-      if (useNew) {
-        final initial = _initialSymbol ?? '';
-        return TenaxChartWebView(
-          key: _tenaxKey,
-          symbol: initial.isNotEmpty ? initial : effective,
-          isDark: widget.isDark,
+        final useNew = FlavorConfig.instance.useNewChart;
+        final raw = _stripDot(Get.find<SymbolSelectionService>().currentSymbol);
+        String? acc;
+        if (Get.isRegistered<AccountController>()) {
+          acc =
+              Get.find<AccountController>().activeMT5Account?.metaAccountNumber
+                  .toString();
+        }
+        final effective = SymbolDetailsCacheService.resolveDatafeedSymbolSync(
+          raw,
+          acc,
         );
-      }
-      
-      final url =
-          '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${widget.isDark ? 'dark' : 'light'}';
-      return ChartInAppWebView(
-        key: widget.webViewKey,
-        symbol: effective,
-        url: url,
-      );
+
+        // No saved choice, no favourite and no broker instrument yet: loading a
+        // WebView with an empty symbol shows a blank chart, so show a state
+        // instead. This Obx re-runs once instruments or a selection arrive.
+        if (effective.isEmpty) return _buildNoSymbolState();
+
+        if (useNew) {
+          final initial = _initialSymbol ?? '';
+          return TenaxChartWebView(
+            key: _tenaxKey,
+            symbol: initial.isNotEmpty ? initial : effective,
+            isDark: widget.isDark,
+          );
+        }
+
+        final url =
+            '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${widget.isDark ? 'dark' : 'light'}';
+        return ChartInAppWebView(
+          key: widget.webViewKey,
+          symbol: effective,
+          url: url,
+        );
       }),
     );
   }
@@ -1100,25 +1143,30 @@ class _BottomDock extends StatelessWidget {
         // spreadDiff comes from the WS pre-converted to *points*
         // (the controller's // spread_points comment). Display
         // it as-is - no extra /pip math.
-        final sym = socket.currentSymbol.value.isNotEmpty
-            ? socket.currentSymbol.value
-            : Get.find<SymbolSelectionService>().currentSymbol;
+        final sym =
+            socket.currentSymbol.value.isNotEmpty
+                ? socket.currentSymbol.value
+                : Get.find<SymbolSelectionService>().currentSymbol;
 
         final priceSymbol = priceMap['symbol']?.toString();
-        final bool isMatch = priceSymbol != null &&
+        final bool isMatch =
+            priceSymbol != null &&
             (priceSymbol == sym ||
                 _VantageChartLayoutState._stripSuffix(priceSymbol) ==
                     _VantageChartLayoutState._stripSuffix(sym));
 
-        var bid = isMatch && priceMap['bid'] is num
-            ? (priceMap['bid'] as num).toDouble()
-            : null;
-        var ask = isMatch && priceMap['ask'] is num
-            ? (priceMap['ask'] as num).toDouble()
-            : null;
-        var spreadDiff = isMatch && priceMap['spreadDiff'] is num
-            ? (priceMap['spreadDiff'] as num).toDouble()
-            : null;
+        var bid =
+            isMatch && priceMap['bid'] is num
+                ? (priceMap['bid'] as num).toDouble()
+                : null;
+        var ask =
+            isMatch && priceMap['ask'] is num
+                ? (priceMap['ask'] as num).toDouble()
+                : null;
+        var spreadDiff =
+            isMatch && priceMap['spreadDiff'] is num
+                ? (priceMap['spreadDiff'] as num).toDouble()
+                : null;
 
         if ((bid == null || bid == 0.0 || ask == null || ask == 0.0) &&
             Get.isRegistered<InstrumentsController>()) {
@@ -1143,12 +1191,14 @@ class _BottomDock extends StatelessWidget {
             priceMap['bid'] is num &&
             (priceMap['bid'] as num) > 0) {
           bid = (priceMap['bid'] as num).toDouble();
-          ask = priceMap['ask'] is num
-              ? (priceMap['ask'] as num).toDouble()
-              : bid;
-          spreadDiff = priceMap['spreadDiff'] is num
-              ? (priceMap['spreadDiff'] as num).toDouble()
-              : 0.0;
+          ask =
+              priceMap['ask'] is num
+                  ? (priceMap['ask'] as num).toDouble()
+                  : bid;
+          spreadDiff =
+              priceMap['spreadDiff'] is num
+                  ? (priceMap['spreadDiff'] as num).toDouble()
+                  : 0.0;
         }
 
         final bidStr =
@@ -1181,45 +1231,49 @@ class _BottomDock extends StatelessWidget {
               child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: Row(
-                children: [
-                  Expanded(
-                    child: _SideButton(
-                      label: Get.find<LanguageService>().tr('meta_neworder_sell'),
-                      sub: bidStr,
-                      color: AppColors.error,
-                      onTap: onSell,
-                    ),
-                  ),
-                  Container(
-                    width: 56.w,
-                    height: 56.h,
-                    margin: EdgeInsets.symmetric(horizontal: 6.w),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color:
-                          isDark
-                              ? const Color(0xFF1A1A20)
-                              : const Color(0xFFF6F4F8),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Text(
-                      spreadStr,
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.white : Colors.black87,
+                  children: [
+                    Expanded(
+                      child: _SideButton(
+                        label: Get.find<LanguageService>().tr(
+                          'meta_neworder_sell',
+                        ),
+                        sub: bidStr,
+                        color: AppColors.error,
+                        onTap: onSell,
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: _SideButton(
-                      label: Get.find<LanguageService>().tr('meta_neworder_buy'),
-                      sub: askStr,
-                      color: primary,
-                      onTap: onBuy,
+                    Container(
+                      width: 56.w,
+                      height: 56.h,
+                      margin: EdgeInsets.symmetric(horizontal: 6.w),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color:
+                            isDark
+                                ? const Color(0xFF1A1A20)
+                                : const Color(0xFFF6F4F8),
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Text(
+                        spreadStr,
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: _SideButton(
+                        label: Get.find<LanguageService>().tr(
+                          'meta_neworder_buy',
+                        ),
+                        sub: askStr,
+                        color: primary,
+                        onTap: onBuy,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -1243,6 +1297,7 @@ class _QuantityBar extends StatelessWidget {
   final VoidCallback onMinus;
   final VoidCallback onPlus;
   final VoidCallback onPending;
+
   /// Null when `enabled-modules.price_alert` is off — the bell is hidden.
   final VoidCallback? onBell;
 
@@ -1279,7 +1334,9 @@ class _QuantityBar extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    Get.find<LanguageService>().tr('vantage_chart_layout_quantity_lots'),
+                    Get.find<LanguageService>().tr(
+                      'vantage_chart_layout_quantity_lots',
+                    ),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 10.sp,
                       color: muted,
