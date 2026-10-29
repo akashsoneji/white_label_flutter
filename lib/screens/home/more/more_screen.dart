@@ -30,6 +30,7 @@ import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
 import 'package:crm_app/services/biometric_service.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
+import 'package:crm_app/services/live_chat_service.dart';
 
 class MoreScreen extends StatefulWidget {
   const MoreScreen({super.key});
@@ -62,6 +63,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     if (Get.isRegistered<EnabledModulesService>()) {
       Get.find<EnabledModulesService>().fetchEnabledModules(force: true);
     }
+    LiveChatService.load();
     _hasLoadedInitialData = true;
     _lastRefreshTime = DateTime.now();
   }
@@ -1121,6 +1123,21 @@ Obx(() {
                       label: languageService.tr('ticket_title'),
                       onTap: () => Get.toNamed(AppPages.TICKET_LIST),
                     ),
+                  // Shown only when `GET user/live-chat` says enabled; label
+                  // comes from the broker's admin setting.
+                  Obx(() {
+                    final liveChat = LiveChatService.config.value;
+                    if (liveChat == null || !liveChat.enabled) {
+                      return const SizedBox.shrink();
+                    }
+                    return _MenuItem(
+                      icon: 'support/live-chat',
+                      label: liveChat.label.isNotEmpty
+                          ? liveChat.label
+                          : languageService.tr('live_chat'),
+                      onTap: LiveChatService.open,
+                    );
+                  }),
                   const _BiometricLoginMenuItem(),
                   _MenuItem(
                     icon: 'two_factor_auth',

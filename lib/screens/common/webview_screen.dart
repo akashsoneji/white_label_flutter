@@ -9,7 +9,16 @@ class WebViewScreen extends StatefulWidget {
   final String url;
   final String title;
 
-  const WebViewScreen({super.key, required this.url, required this.title});
+  /// Sends the user's API token as a Bearer header. Turn off for third-party
+  /// pages (e.g. the live chat provider) so the token never leaves our backend.
+  final bool attachAuthToken;
+
+  const WebViewScreen({
+    super.key,
+    required this.url,
+    required this.title,
+    this.attachAuthToken = true,
+  });
 
   @override
   State<WebViewScreen> createState() => _WebViewScreenState();
@@ -26,7 +35,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
   }
 
   Future<void> _initializeWebView() async {
-    final token = await SecureStorageService.getAuthToken();
+    final token = widget.attachAuthToken
+        ? await SecureStorageService.getAuthToken()
+        : null;
 
     final controller =
         WebViewController()
@@ -83,12 +94,17 @@ class _WebViewScreenState extends State<WebViewScreen> {
         elevation: 0,
         iconTheme: IconThemeData(color: AppColors.textPrimary),
       ),
-      body: Stack(
-        children: [
-          if (_controller != null) WebViewWidget(controller: _controller!),
-          if (_isLoading || _controller == null)
-            Center(child: CircularProgressIndicator(color: AppColors.primary)),
-        ],
+      // Keep page content (e.g. the chat provider's bottom bar) above the
+      // system navigation bar on edge-to-edge devices.
+      body: SafeArea(
+        top: false,
+        child: Stack(
+          children: [
+            if (_controller != null) WebViewWidget(controller: _controller!),
+            if (_isLoading || _controller == null)
+              Center(child: CircularProgressIndicator(color: AppColors.primary)),
+          ],
+        ),
       ),
     );
   }
