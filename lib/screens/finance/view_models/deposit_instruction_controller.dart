@@ -312,11 +312,17 @@ class DepositInstructionController extends GetxController {
       isLoading.value = true;
       final token = await SecureStorageService.getAuthToken();
 
+      debugPrint(
+        '[DepositInstruction] REQUEST → ${ApiConstants.depositRequest} formData=$requestData file=${selectedImage.value!.path}',
+      );
       final response = await _repo.submitDepositRequestWithProof(
         endpoint: ApiConstants.depositRequest,
         file: selectedImage.value!,
         token: token ?? '',
         formData: requestData,
+      );
+      debugPrint(
+        '[DepositInstruction] RESPONSE ← success=${response.success} message=${response.message} data=${response.data}',
       );
 
       if (response.success) {
@@ -386,11 +392,17 @@ class DepositInstructionController extends GetxController {
       isLoading.value = true;
       final token = await SecureStorageService.getAuthToken();
 
+      debugPrint(
+        '[DepositInstructionCrypto] REQUEST → ${ApiConstants.depositRequest} formData=$requestData file=${selectedImage.value!.path}',
+      );
       final response = await _repo.submitDepositRequestWithProof(
         endpoint: ApiConstants.depositRequest,
         file: selectedImage.value!,
         token: token ?? '',
         formData: requestData,
+      );
+      debugPrint(
+        '[DepositInstructionCrypto] RESPONSE ← success=${response.success} message=${response.message} data=${response.data}',
       );
 
       if (response.success) {
@@ -458,16 +470,22 @@ class DepositInstructionController extends GetxController {
     try {
       isAddressLoading.value = true;
       final token = await SecureStorageService.getAuthToken();
-
+      final requestBody = {
+        'gateway_method_id': gatewayMethodId,
+        'amount': amount,
+        'mt5_account_id': mt5AccountId,
+        'crypto_network': selectedCregisNetwork.value,
+      };
+      debugPrint(
+        '[CregisDeposit] REQUEST → ${ApiConstants.cregisDepositCreate} body=$requestBody',
+      );
       final response = await ApiService.post(
         endpoint: ApiConstants.cregisDepositCreate,
         token: token,
-        data: {
-          'gateway_method_id': gatewayMethodId,
-          'amount': amount,
-          'mt5_account_id': mt5AccountId,
-          'crypto_network': selectedCregisNetwork.value,
-        },
+        data: requestBody,
+      );
+      debugPrint(
+        '[CregisDeposit] RESPONSE ← success=${response.success} message=${response.message} data=${response.data}',
       );
 
       if (response.success && response.data != null) {
@@ -580,14 +598,21 @@ class DepositInstructionController extends GetxController {
     try {
       isLoading.value = true;
       final token = await SecureStorageService.getAuthToken();
+      final requestBody = {
+        'gateway_method_id': gatewayMethodId,
+        'mt5_account_id': mt5AccountId,
+        'amount': amount,
+      };
+      debugPrint(
+        '[UniPaymentDeposit] REQUEST → ${ApiConstants.uniPaymentDeposit} body=$requestBody',
+      );
       final response = await ApiService.post(
         endpoint: ApiConstants.uniPaymentDeposit,
         token: token,
-        data: {
-          'gateway_method_id': gatewayMethodId,
-          'mt5_account_id': mt5AccountId,
-          'amount': amount,
-        },
+        data: requestBody,
+      );
+      debugPrint(
+        '[UniPaymentDeposit] RESPONSE ← success=${response.success} message=${response.message} data=${response.data}',
       );
       final body = response.data is Map ? response.data as Map : const {};
       final data = body['data'] is Map ? body['data'] as Map : const {};
@@ -630,15 +655,21 @@ class DepositInstructionController extends GetxController {
     try {
       isLoading.value = true;
       final token = await SecureStorageService.getAuthToken();
+      final endpoint = ApiConstants.dynamicDeposit(gatewaySlug);
+      final requestBody = {
+        'gateway_method_id': gatewayMethodId,
+        'mt5_account_id': mt5AccountId,
+        'amount': amount,
+        ...extraFields,
+      };
+      debugPrint('[DynamicDeposit] REQUEST → $endpoint body=$requestBody');
       final response = await ApiService.post(
-        endpoint: ApiConstants.dynamicDeposit(gatewaySlug),
+        endpoint: endpoint,
         token: token,
-        data: {
-          'gateway_method_id': gatewayMethodId,
-          'mt5_account_id': mt5AccountId,
-          'amount': amount,
-          ...extraFields,
-        },
+        data: requestBody,
+      );
+      debugPrint(
+        '[DynamicDeposit] RESPONSE ← success=${response.success} message=${response.message} data=${response.data}',
       );
 
       final body = response.data is Map
