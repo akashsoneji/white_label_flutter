@@ -1257,7 +1257,6 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
       child: Column(
         children: [
           // 1. Support / Customer Service
-          if (EnabledModulesService.flags.helpdesk) ...[
             _buildModernOptionTile(
               icon: Icons.support_agent_rounded,
               iconColor: const Color(0xFF10B981),
@@ -1269,7 +1268,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
               onTap: () => Get.toNamed(AppPages.TICKET_LIST),
             ),
             _buildDivider(),
-          ],
+          
 
           // 2. Theme Switcher
           _buildModernOptionTile(

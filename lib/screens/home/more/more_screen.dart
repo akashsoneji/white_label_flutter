@@ -1116,7 +1116,6 @@ Obx(() {
               ),
               _CardGroup(
                 children: [
-                  if (EnabledModulesService.flags.helpdesk)
                     _MenuItem(
                       icon: 'support',
                       label: languageService.tr('ticket_title'),
