@@ -25,6 +25,10 @@ class DepositInstructionScreen extends StatefulWidget {
   final String selectedMT5AccountID;
   final String? currency;
   final bool fromBonus;
+
+  /// "You will receive" amount (USD after conversion). Redirect gateways are
+  /// charged this value; falls back to [amountString] when not provided.
+  final String? receiveAmountString;
   const DepositInstructionScreen({
     super.key,
     required this.object,
@@ -32,6 +36,7 @@ class DepositInstructionScreen extends StatefulWidget {
     required this.selectedMT5AccountID,
     this.currency,
     this.fromBonus = false,
+    this.receiveAmountString,
   });
 
   @override
@@ -43,14 +48,45 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
   late final String titleString;
 
   static const _builtInGatewayTypes = {
-    'cregis', 'unipayment', 'local', 'bank', 'upi', 'crypto', '',
+    'unipayment', 'local', 'bank', 'upi', 'crypto', '',
   };
+
+  /// API flag (`is_redirect`) that sends the user through the external
+  /// (Cregis) payment flow, whatever the method's gateway type is.
+  late final bool _isRedirect = _resolveIsRedirect();
+
+  bool _resolveIsRedirect() {
+    final value = widget.object['is_redirect'];
+    return value == true || value == 1 || value?.toString() == 'true';
+  }
+
+  String get _redirectAmount =>
+      widget.receiveAmountString ?? widget.amountString;
+
+  /// Methods with `has_conversion` take the amount in another currency (e.g.
+  /// INR); the entered value is sent as-is alongside the USD `amount`.
+  bool get _hasConversion => widget.object['has_conversion'] == true;
+
+  String get _userInputCurrency =>
+      widget.object['currency_name']?.toString().trim() ?? '';
+
+  /// Only Cregis sends `payment_gateway.cregis_network_map`; other redirect
+  /// gateways have no network to pick, so the user confirms directly.
+  late final bool _hasNetworkMap = _resolveHasNetworkMap();
+
+  bool _resolveHasNetworkMap() {
+    final paymentGateway = widget.object['payment_gateway'];
+    final networkMap =
+        paymentGateway is Map ? paymentGateway['cregis_network_map'] : null;
+    return networkMap is Map && networkMap.isNotEmpty;
+  }
 
   /// Admin-configured gateway slug (web `dynamicGatewaySlug`): the method's
   /// gateway type when it is not one of the built-in flows, else empty.
   late final String _dynamicGatewaySlug = _resolveDynamicGatewaySlug();
 
   String _resolveDynamicGatewaySlug() {
+    if (_isRedirect) return '';
     final paymentGateway = widget.object['payment_gateway'];
     final gatewayType = [
       widget.object['gateway_type'],
@@ -108,16 +144,16 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
     languageService = Get.find<LanguageService>();
 
     bankDetail = widget.object['payment_gateway'];
-    if (_dynamicGatewaySlug.isNotEmpty) {
+    if (_isRedirect) {
+      titleString = widget.object['display_name']?.toString() ?? 'Cregis';
+      _initCregisNetworks();
+    } else if (_dynamicGatewaySlug.isNotEmpty) {
       titleString = widget.object['display_name']?.toString() ??
           TranslationUtils.tr('general_deposit');
     } else if (widget.object['type'].toString().toLowerCase() == 'bank') {
       titleString = TranslationUtils.tr('deposit_instr_bank_transfer');
     } else if (widget.object['type'].toString().toLowerCase() == 'local') {
       titleString = TranslationUtils.tr('deposit_instr_local_transfer');
-    } else if (widget.object['type'].toString().toLowerCase() == 'cregis') {
-      titleString = widget.object['display_name']?.toString() ?? 'Cregis';
-      _initCregisNetworks();
     } else if (widget.object['type'].toString().toLowerCase() == 'crypto') {
       titleString = widget.object['title']?.toString() ?? 'Crypto';
     } else {
@@ -334,7 +370,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
   Widget build(BuildContext context) {
     final type = widget.object['type'].toString().toLowerCase();
     Widget body;
-    if (_dynamicGatewaySlug.isNotEmpty) {
+    if (_isRedirect) {
+      body = _buildCregisUI();
+    } else if (_dynamicGatewaySlug.isNotEmpty) {
       body = DynamicGatewayDepositForm(
         gatewaySlug: _dynamicGatewaySlug,
         gatewayMethodId: widget.object['deposit_slug']?.toString() ?? '',
@@ -347,8 +385,6 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
       body = _buildCryptoUI();
     } else if (type == 'local') {
       body = _buildLocalUI();
-    } else if (type == 'cregis') {
-      body = _buildCregisUI();
     } else if (type == 'unipayment') {
       body = _buildUniPaymentUI();
     } else {
@@ -1273,12 +1309,14 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               ),
               childrenPadding: EdgeInsets.all(16),
               children: [
-            _buildInstructionItem(
-              languageService.tr(
-                'deposit_instruction_screen_choose_a_network_and_amount',
-              ),
-            ),
-                SizedBox(height: 8),
+                if (_hasNetworkMap) ...[
+                  _buildInstructionItem(
+                    languageService.tr(
+                      'deposit_instruction_screen_choose_a_network_and_amount',
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                ],
                 _buildInstructionItem(
               languageService.tr(
                 'deposit_instruction_screen_we_will_generate_a_unique_deposit',
@@ -1287,6 +1325,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               ],
             ),
           ),
+          if (_hasNetworkMap) ...[
           SizedBox(height: 24),
           Text(
               languageService.tr('deposit_instruction_screen_network'),
@@ -1354,6 +1393,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               ),
             );
           }),
+          ],
           SizedBox(height: 24),
           Obx(() {
             if (controller.cregisDepositAddress.value.isEmpty) {
@@ -1740,14 +1780,22 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                     if (hasAddress || hasCheckoutUrl) {
                       controller.submitCregisDeposit(
                         gatewayMethodId: widget.object['deposit_slug'],
-                        amount: widget.amountString,
+                        amount: _redirectAmount,
                         mt5AccountId: widget.selectedMT5AccountID,
                       );
                     } else {
                       controller.createCregisDepositAddress(
                         gatewayMethodId: widget.object['deposit_slug'],
-                        amount: widget.amountString,
+                        amount: _redirectAmount,
                         mt5AccountId: widget.selectedMT5AccountID,
+                        requireNetwork: _hasNetworkMap,
+                        depositApi:
+                            widget.object['deposit_api']?.toString() ?? '',
+                        userInputNetAmount: _hasConversion
+                            ? widget.amountString.trim()
+                            : '',
+                        userInputCurrency:
+                            _hasConversion ? _userInputCurrency : '',
                       );
                     }
                   },
@@ -1770,7 +1818,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         ? languageService.tr(
                           'deposit_instruction_screen_open_link_to_payment',
                         )
-                        : hasAddress
+                        : hasAddress || !_hasNetworkMap
                         ? languageService.tr('deposit_confirm_deposit')
                         : languageService.tr(
                           'deposit_instruction_screen_generate_address',

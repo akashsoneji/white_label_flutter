@@ -457,8 +457,12 @@ class DepositInstructionController extends GetxController {
     required String gatewayMethodId,
     required String amount,
     required String mt5AccountId,
+    bool requireNetwork = true,
+    String depositApi = '',
+    String userInputNetAmount = '',
+    String userInputCurrency = '',
   }) async {
-    if (selectedCregisNetwork.value.isEmpty) {
+    if (requireNetwork && selectedCregisNetwork.value.isEmpty) {
       CustomToastService.showError(
         message: TranslationUtils.tr(
           'deposit_instruction_controller_please_select_network',
@@ -474,13 +478,22 @@ class DepositInstructionController extends GetxController {
         'gateway_method_id': gatewayMethodId,
         'amount': amount,
         'mt5_account_id': mt5AccountId,
-        'crypto_network': selectedCregisNetwork.value,
+        if (requireNetwork) 'crypto_network': selectedCregisNetwork.value,
+        // Exact amount the user typed in the method currency, so the backend
+        // charges it as-is instead of re-converting the USD `amount`.
+        if (userInputNetAmount.isNotEmpty)
+          'user_input_net_amount': userInputNetAmount,
+        if (userInputCurrency.isNotEmpty)
+          'user_input_currency': userInputCurrency,
       };
+      final endpoint = depositApi.trim().isNotEmpty
+          ? _relativeDepositEndpoint(depositApi)
+          : ApiConstants.cregisDepositCreate;
       debugPrint(
-        '[CregisDeposit] REQUEST → ${ApiConstants.cregisDepositCreate} body=$requestBody',
+        '[CregisDeposit] REQUEST → $endpoint body=$requestBody',
       );
       final response = await ApiService.post(
-        endpoint: ApiConstants.cregisDepositCreate,
+        endpoint: endpoint,
         token: token,
         data: requestBody,
       );
@@ -493,7 +506,10 @@ class DepositInstructionController extends GetxController {
 
         cregisReferenceNumber.value = data['reference_number']?.toString() ?? '';
         cregisChainId.value = data['chain_id']?.toString() ?? '';
-        cregisCheckoutUrl.value = data['checkout_url']?.toString() ?? '';
+        final redirectUrl = data['redirect_url']?.toString() ?? '';
+        cregisCheckoutUrl.value = redirectUrl.isNotEmpty
+            ? redirectUrl
+            : data['checkout_url']?.toString() ?? '';
         cregisDepositAddress.value = data['cregis_address']?.toString() ?? '';
         cregisQrPath.value = data['qr_path']?.toString() ?? '';
 
@@ -537,6 +553,15 @@ class DepositInstructionController extends GetxController {
     } finally {
       isAddressLoading.value = false;
     }
+  }
+
+  /// `deposit_api` is a site path (`/api/user/deposit/cregis`) while
+  /// `ApiService` prefixes `baseUrl`, which already ends in `/api/`.
+  String _relativeDepositEndpoint(String depositApi) {
+    var path = depositApi.trim();
+    if (path.startsWith('/')) path = path.substring(1);
+    if (path.startsWith('api/')) path = path.substring(4);
+    return path;
   }
 
   Future<void> submitCregisDeposit({
