@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart' show NumberFormat;
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
@@ -501,7 +502,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
           if (_hasConversion && _conversionRate > 0) ...[
             SizedBox(height: 4.h),
             Text(
-              '${TranslationUtils.tr('withdrawal_exchange_rate')}: 1 USD = ${_conversionRate.toStringAsFixed(2)} $sourceCurrency',
+              '${TranslationUtils.tr('withdrawal_exchange_rate')}: 1 USD = ${NumberFormat('#,##0.00', 'en_US').format(_conversionRate)} $sourceCurrency',
               style: helperStyle,
             ),
           ],
@@ -598,13 +599,23 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
     return '$usd (${(usdLimit * 100).toStringAsFixed(2)} USC)';
   }
 
-  /// Converts the entered source-currency amount into USD, which is what
-  /// min/max limits are expressed in.
+  /// Converts the entered source-currency amount into USD the same way the
+  /// web does: the method fee is taken out of the entered amount and the rest
+  /// is converted at the rate rounded to 2 decimals (100 INR, 1% fee,
+  /// 95.14 → 1.040676 USD). Once the gateway adds its fee back and rounds up,
+  /// the payer is charged exactly what was entered.
   double _convertedAmount(double entered) {
     if (_hasConversion && _conversionRate > 0) {
-      return entered / _conversionRate;
+      final netAmount = entered / (1 + _feePercent / 100);
+      final displayRate = double.parse(_conversionRate.toStringAsFixed(2));
+      return netAmount / displayRate;
     }
     return entered;
+  }
+
+  double get _feePercent {
+    final raw = controller.depositMethod.value?['fees'];
+    return double.tryParse(raw?.toString() ?? '') ?? 0;
   }
 
   /// Amount credited to the account, in [_targetCurrency] (100 USC = 1 USD).
@@ -613,10 +624,16 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
     return _isCentAccount ? usd * 100 : usd;
   }
 
+  /// USD sent to redirect gateways, 6 decimals like the web.
+  String _redirectUsdAmount(double entered) {
+    if (!(_hasConversion && _conversionRate > 0)) return entered.toString();
+    return _convertedAmount(entered).toStringAsFixed(6);
+  }
+
   void _syncTargetAmount() {
     if (!mounted) return;
     final entered = double.tryParse(amountController.text.trim()) ?? 0;
-    targetAmountController.text = _convertedAmount(entered).toStringAsFixed(2);
+    targetAmountController.text = _convertedAmount(entered).toStringAsFixed(6);
   }
 
   Widget _buildFeeDisplay() {
@@ -748,15 +765,26 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
     // Get.toNamed(AppPages.DEPOSIT_INSTRUCTION_SCREEN,arguments: controller.depositMethod.value);
    
    /// it workin proper
+    // `is_redirect` and `deposit_api` come on the methods list item; the
+    // detail object does not carry them, so fall back to the list values.
+    final methodDetail = controller.depositMethod.value!;
+    final instructionObject = {
+      ...methodDetail,
+      if (!methodDetail.containsKey('is_redirect'))
+        'is_redirect': widget.object['is_redirect'],
+      if (!methodDetail.containsKey('deposit_api'))
+        'deposit_api': widget.object['deposit_api'],
+    };
     Get.to(
       () => DepositInstructionScreen(
-        object: controller.depositMethod.value!,
+        object: instructionObject,
         amountString: amountController.text,
         selectedMT5AccountID:
             controller.selectedTransferAccount.value!['meta_account_number']
                 as String,
         currency: selectedCurrency,
         fromBonus: Get.arguments != null && Get.arguments is Map && Get.arguments['from'] == 'bonus',
+        receiveAmountString: _redirectUsdAmount(entered),
       ),
     );
 
