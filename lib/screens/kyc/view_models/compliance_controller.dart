@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/core/network/api_client.dart';
+import 'package:crm_app/core/network/api_response.dart';
+import 'package:crm_app/screens/kyc/data/models/kyc_document_config.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
@@ -40,6 +42,25 @@ class ComplianceController extends GetxController {
   final Rx<File?> idProofBack = Rx<File?>(null);
   final Rx<File?> addressProofFront = Rx<File?>(null);
   final Rx<File?> addressProofBack = Rx<File?>(null);
+
+  // Document options from `GET user/kyc` (admin toggles).
+  static const KycDocumentConfig _emptyDocumentConfig = KycDocumentConfig(
+    kycMode: 'manual',
+    idProofOptions: [],
+    addressProofOptions: [],
+    requiredBackSides: [],
+    documents: [],
+    documentsSubmitted: false,
+    hasRejectedDocuments: false,
+  );
+  final Rxn<KycDocumentConfig> documentConfig = Rxn<KycDocumentConfig>();
+  final RxBool isDocumentConfigLoading = false.obs;
+  final RxString documentConfigError = ''.obs;
+  final Rxn<KycDocumentOption> selectedIdOption = Rxn<KycDocumentOption>();
+  final Rxn<KycDocumentOption> selectedAddressOption = Rxn<KycDocumentOption>();
+
+  /// Inline error per category (`id_proof` / `address_proof`).
+  final RxMap<String, String> documentErrors = <String, String>{}.obs;
 
   late final DropdownService dropdownService;
 
@@ -88,6 +109,7 @@ class ComplianceController extends GetxController {
     });
 
     _prepopulateFromProfile();
+    fetchDocumentConfig();
   }
 
   Future<void> _prepopulateFromProfile() async {
@@ -443,22 +465,153 @@ class ComplianceController extends GetxController {
     }
   }
 
+  /// Loads `GET user/kyc`: admin document options, the default-flow back-side
+  /// rule, kyc_mode and already submitted sides (for re-upload after reject).
+  Future<void> fetchDocumentConfig() async {
+    try {
+      isDocumentConfigLoading.value = true;
+      documentConfigError.value = '';
+      final token = await SecureStorageService.getAuthToken();
+      if (token == null || token.isEmpty) return;
+
+      final response = await _repo.getKycStatus(token: token);
+      final body = response.data;
+      if (!response.success || body is! Map<String, dynamic>) {
+        documentConfigError.value =
+            response.message ?? TranslationUtils.tr('kyc_doc_options_load_failed');
+        return;
+      }
+
+      final config = KycDocumentConfig.fromKycResponse(body);
+      documentConfig.value = config;
+      selectedIdOption.value =
+          config.resolvePick(kycIdProof, selectedIdOption.value);
+      selectedAddressOption.value =
+          config.resolvePick(kycAddressProof, selectedAddressOption.value);
+      _clearHiddenSides(config);
+    } catch (e) {
+      print('ComplianceController: Error fetching KYC document options: $e');
+      documentConfigError.value = TranslationUtils.tr('kyc_doc_options_load_failed');
+    } finally {
+      isDocumentConfigLoading.value = false;
+    }
+  }
+
+
+  KycDocumentConfig get effectiveDocumentConfig =>
+      documentConfig.value ?? _emptyDocumentConfig;
+
+  KycDocumentOption? pickedOptionFor(String category) =>
+      category == kycIdProof ? selectedIdOption.value : selectedAddressOption.value;
+
+  void selectDocumentOption(String category, KycDocumentOption? option) {
+    if (category == kycIdProof) {
+      selectedIdOption.value = option;
+    } else {
+      selectedAddressOption.value = option;
+    }
+    documentErrors.remove(category);
+    _clearHiddenSides(effectiveDocumentConfig);
+  }
+
+  /// Upload key used by [pickDocument] / [clearDocument] and the multipart body.
+  static String uploadKeyFor(String category, String side) =>
+      '${category == kycIdProof ? 'identity' : 'address'}_$side';
+
+  Rx<File?> fileFor(String category, String side) {
+    if (category == kycIdProof) {
+      return side == kycSideFront ? idProofFront : idProofBack;
+    }
+    return side == kycSideFront ? addressProofFront : addressProofBack;
+  }
+
+  /// Whether the client has to (or may) attach a file for this side now.
+  bool sideAcceptsUpload(String category, String side) {
+    final config = effectiveDocumentConfig;
+    if (config.isReupload) {
+      return config.documentFor(category, side)?.isRejected ?? false;
+    }
+    return config.isSideVisible(category, side, pickedOptionFor(category));
+  }
+
+  bool isSideRequired(String category, String side) {
+    final config = effectiveDocumentConfig;
+    if (config.isReupload) return sideAcceptsUpload(category, side);
+    return config.isSideRequired(category, side, pickedOptionFor(category));
+  }
+
+  void _clearHiddenSides(KycDocumentConfig config) {
+    for (final category in const [kycIdProof, kycAddressProof]) {
+      for (final side in const [kycSideFront, kycSideBack]) {
+        if (!sideAcceptsUpload(category, side)) fileFor(category, side).value = null;
+      }
+    }
+  }
+
+  String _categoryTitle(String category) => category == kycIdProof
+      ? TranslationUtils.tr('unified_compliance_wizard_identity_document')
+      : TranslationUtils.tr('kyc_address_proof');
+
+  String _sideRequiredMessage(String documentName, String side) {
+    final sideLabel = TranslationUtils.tr(
+      side == kycSideFront ? 'kyc_doc_side_front' : 'kyc_doc_side_back',
+    );
+    return TranslationUtils.tr('kyc_doc_side_required')
+        .replaceAll('{document}', documentName)
+        .replaceAll('{side}', sideLabel);
+  }
+
+  /// Mirrors the server's 422 rules so most errors are caught before upload.
+  /// Sets an inline error per category and returns the first message.
+  String? _validateDocuments(KycDocumentConfig config) {
+    documentErrors.clear();
+    for (final category in const [kycIdProof, kycAddressProof]) {
+      final picked = pickedOptionFor(category);
+      if (!config.isReupload &&
+          config.optionsFor(category).isNotEmpty &&
+          picked == null) {
+        documentErrors[category] = TranslationUtils.tr(
+          category == kycIdProof
+              ? 'kyc_doc_select_identity_option'
+              : 'kyc_doc_select_address_option',
+        );
+        continue;
+      }
+      for (final side in const [kycSideFront, kycSideBack]) {
+        if (!isSideRequired(category, side) || fileFor(category, side).value != null) {
+          continue;
+        }
+        final submittedName =
+            config.documentFor(category, side)?.documentOptionName ?? '';
+        final name = picked?.name ??
+            (submittedName.isNotEmpty ? submittedName : _categoryTitle(category));
+        documentErrors[category] = _sideRequiredMessage(name, side);
+        break;
+      }
+    }
+    return documentErrors.isEmpty ? null : documentErrors.values.first;
+  }
+
+  File? _fileToSend(KycDocumentConfig config, String category, String side) =>
+      sideAcceptsUpload(category, side) ? fileFor(category, side).value : null;
+
+  static String _idOrOthers(Object? value) {
+    final text = value?.toString().trim() ?? '';
+    return text.isEmpty ? '0' : text;
+  }
+
   // Upload Documents (Step 2 - Unified KYC)
   Future<bool> submitDocuments() async {
-    if (idProofFront.value == null) {
+    final config = effectiveDocumentConfig;
+    if (config.isProviderMode) {
       CustomToastService.showWarning(
-        message: TranslationUtils.tr(
-          'compliance_controller_identity_document_front_is_mandatory',
-        ),
+        message: TranslationUtils.tr('kyc_doc_provider_mode'),
       );
       return false;
     }
-    if (addressProofFront.value == null) {
-      CustomToastService.showWarning(
-        message: TranslationUtils.tr(
-          'compliance_controller_address_proof_front_is_mandatory',
-        ),
-      );
+    final validationError = _validateDocuments(config);
+    if (validationError != null) {
+      CustomToastService.showWarning(message: validationError);
       return false;
     }
 
@@ -486,36 +639,39 @@ class ComplianceController extends GetxController {
         return false;
       }
 
-      final user = profile.data.user;
-      final details = user.userDetails;
+      final details = profile.data.user.userDetails;
+      final idOption = selectedIdOption.value;
+      final addressOption = selectedAddressOption.value;
 
-      // Prepare request fields from form answers
-      final fields = {
-        'email': formAnswers['email'] ?? user.email,
-        'firstName': formAnswers['first_name'] ?? user.firstName,
-        'lastName': formAnswers['last_name'] ?? user.lastName,
-        'mobile': formAnswers['mobile'] ?? user.mobile,
-        'title': formAnswers['title'] ?? details.title,
-        'gender': formAnswers['gender'] ?? details.gender,
-        'dateOfBirth': formAnswers['dob'] ?? details.dob.toIso8601String().split('T')[0],
-        'nationality': formAnswers['nationality'] ?? details.nationality,
-        'country': formAnswers['country']?.toString() ?? details.country.toString(),
-        'state': formAnswers['state']?.toString() ?? details.state.toString(),
-        'city': formAnswers['city']?.toString() ?? details.city.toString(),
-        'addressLine1': formAnswers['address_1'] ?? 'N/A',
-        'addressLine2': formAnswers['address_2'] ?? '',
-        'postcode': formAnswers['postcode'] ?? '',
-        'is_reupload': '1',
-        'profile_complete': '1',
-      };
+      // Re-upload: the server remembers the earlier pick and profile, so only
+      // the flags and the rejected side(s) are sent.
+      final Map<String, dynamic> fields = config.isReupload
+          ? {'is_reupload': '1', 'profile_complete': '1'}
+          : {
+              'title': formAnswers['title'] ?? details.title,
+              'gender': formAnswers['gender'] ?? details.gender,
+              'date_of_birth':
+                  formAnswers['dob'] ?? details.dob.toIso8601String().split('T')[0],
+              'country': _idOrOthers(formAnswers['country'] ?? details.country),
+              'state': _idOrOthers(formAnswers['state'] ?? details.state),
+              'city': _idOrOthers(formAnswers['city'] ?? details.city),
+              'address_line1': formAnswers['address_1'] ?? details.address1,
+              'address_line2': formAnswers['address_2'] ?? '',
+              'postcode': formAnswers['postcode'] ?? '',
+              'nationality': formAnswers['nationality'] ?? details.nationality,
+              if (config.idProofOptions.isNotEmpty && idOption != null)
+                'id_proof_option': idOption.id,
+              if (config.addressProofOptions.isNotEmpty && addressOption != null)
+                'address_proof_option': addressOption.id,
+            };
 
       final response = await _repo.submitUnifiedKyc(
         token: token,
         fields: fields,
-        identityFront: idProofFront.value!,
-        addressFront: addressProofFront.value!,
-        identityBack: idProofBack.value,
-        addressBack: addressProofBack.value,
+        identityFront: _fileToSend(config, kycIdProof, kycSideFront),
+        identityBack: _fileToSend(config, kycIdProof, kycSideBack),
+        addressFront: _fileToSend(config, kycAddressProof, kycSideFront),
+        addressBack: _fileToSend(config, kycAddressProof, kycSideBack),
       );
 
       if (response.success) {
@@ -527,18 +683,12 @@ class ComplianceController extends GetxController {
         
         // Refresh profile settings locally so that documents_submitted becomes true
         await _authController.getProfile();
+        await fetchDocumentConfig();
         
         return true;
-      } else {
-        CustomToastService.showError(
-          message:
-              response.message ??
-              TranslationUtils.tr(
-                'compliance_controller_kyc_document_submission_failed',
-              ),
-        );
-        return false;
       }
+      _handleSubmitError(response);
+      return false;
     } catch (e) {
       print('ComplianceController: Error submitting documents: $e');
       CustomToastService.showError(message: 'KYC submission error: $e');
@@ -546,6 +696,53 @@ class ComplianceController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  static const Set<String> _profileFieldKeys = {
+    'title',
+    'gender',
+    'date_of_birth',
+    'country',
+    'state',
+    'city',
+    'address_line1',
+    'address_line2',
+    'postcode',
+    'nationality',
+  };
+
+  void _handleSubmitError(ApiResponse response) {
+    final body = response.data;
+    final fieldErrors =
+        body is Map && body['errors'] is Map ? body['errors'] as Map : null;
+
+    // Laravel validation shape: a profile field is missing or invalid, so send
+    // the client back to the profile step with every message listed.
+    if (fieldErrors != null && fieldErrors.isNotEmpty) {
+      final messages = fieldErrors.values
+          .expand((v) => v is List ? v : [v])
+          .map((e) => e.toString())
+          .where((e) => e.isNotEmpty)
+          .toList();
+      CustomToastService.showError(
+        message: messages.isNotEmpty
+            ? messages.join('\n')
+            : (response.message ?? ''),
+      );
+      if (fieldErrors.keys.any((k) => _profileFieldKeys.contains(k.toString()))) {
+        currentStep.value = 0;
+      }
+      return;
+    }
+
+    CustomToastService.showError(
+      message: response.message ??
+          TranslationUtils.tr('compliance_controller_kyc_document_submission_failed'),
+    );
+    // Document-rule 422s (no option picked, option removed by the admin, a
+    // required side missing): re-read GET kyc so a removed option drops out of
+    // the dropdown and the required sides are recalculated.
+    if (body is Map) fetchDocumentConfig();
   }
 
   // Picking Files

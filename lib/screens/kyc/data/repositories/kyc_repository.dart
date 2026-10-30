@@ -38,8 +38,8 @@ abstract class KycRepository {
   Future<ApiResponse> submitUnifiedKyc({
     required String token,
     required Map<String, dynamic> fields,
-    required File identityFront,
-    required File addressFront,
+    File? identityFront,
+    File? addressFront,
     File? identityBack,
     File? addressBack,
   });

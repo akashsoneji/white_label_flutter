@@ -4955,5 +4955,18 @@
   "support_contact_open_failed": "تعذر فتح خيار الاتصال هذا",
   "company_footer_disclaimer_title": "إخلاء المسؤولية عن المخاطر",
   "platforms_web_trading": "التداول عبر الويب",
-  "ibm_person_commission_by_symbol": "العمولة حسب الرمز"
+  "ibm_person_commission_by_symbol": "العمولة حسب الرمز",
+  "kyc_doc_options_load_failed": "تعذّر تحميل إعدادات المستندات.",
+  "kyc_doc_retry": "إعادة المحاولة",
+  "kyc_doc_side_front": "الوجه الأمامي",
+  "kyc_doc_side_back": "الوجه الخلفي",
+  "kyc_doc_side_required": "{document} ({side}) مطلوب.",
+  "kyc_doc_select_identity_option": "يرجى اختيار نوع مستند الهوية الذي تقوم بتحميله.",
+  "kyc_doc_select_address_option": "يرجى اختيار نوع مستند إثبات العنوان الذي تقوم بتحميله.",
+  "kyc_doc_select_document_type": "اختر نوع المستند",
+  "kyc_doc_pick_document_first": "اختر نوع المستند لمعرفة الأوجه المطلوب تحميلها.",
+  "kyc_doc_provider_mode": "تتم عملية التحقق لديك عبر شريك التحقق، لذا لا يمكن تحميل المستندات هنا.",
+  "kyc_doc_reupload_hint": "تم رفض بعض المستندات. قم بتحميل الأوجه المرفوضة فقط مرة أخرى.",
+  "kyc_doc_status_approved": "مقبول",
+  "kyc_doc_status_pending": "قيد المراجعة"
 }

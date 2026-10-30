@@ -79,14 +79,14 @@ class KycRepositoryImpl implements KycRepository {
   Future<ApiResponse> submitUnifiedKyc({
     required String token,
     required Map<String, dynamic> fields,
-    required File identityFront,
-    required File addressFront,
+    File? identityFront,
+    File? addressFront,
     File? identityBack,
     File? addressBack,
   }) {
     final Map<String, File> files = {
-      'identity_front': identityFront,
-      'address_front': addressFront,
+      if (identityFront != null) 'identity_front': identityFront,
+      if (addressFront != null) 'address_front': addressFront,
       if (identityBack != null) 'identity_back': identityBack,
       if (addressBack != null) 'address_back': addressBack,
     };

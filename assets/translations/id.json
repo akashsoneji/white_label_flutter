@@ -4955,5 +4955,18 @@
   "support_contact_open_failed": "Tidak dapat membuka opsi kontak ini",
   "company_footer_disclaimer_title": "Pernyataan risiko",
   "platforms_web_trading": "Trading Web",
-  "ibm_person_commission_by_symbol": "KOMISI PER SIMBOL"
+  "ibm_person_commission_by_symbol": "KOMISI PER SIMBOL",
+  "kyc_doc_options_load_failed": "Gagal memuat pengaturan dokumen.",
+  "kyc_doc_retry": "Coba lagi",
+  "kyc_doc_side_front": "depan",
+  "kyc_doc_side_back": "belakang",
+  "kyc_doc_side_required": "{document} ({side}) wajib diunggah.",
+  "kyc_doc_select_identity_option": "Pilih dokumen identitas yang Anda unggah.",
+  "kyc_doc_select_address_option": "Pilih dokumen bukti alamat yang Anda unggah.",
+  "kyc_doc_select_document_type": "Pilih jenis dokumen",
+  "kyc_doc_pick_document_first": "Pilih jenis dokumen untuk melihat sisi yang perlu diunggah.",
+  "kyc_doc_provider_mode": "Verifikasi Anda ditangani oleh mitra verifikasi kami, jadi dokumen tidak dapat diunggah di sini.",
+  "kyc_doc_reupload_hint": "Beberapa dokumen ditolak. Unggah ulang hanya sisi yang ditolak.",
+  "kyc_doc_status_approved": "Disetujui",
+  "kyc_doc_status_pending": "Sedang ditinjau"
 }

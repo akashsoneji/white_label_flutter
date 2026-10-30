@@ -4955,5 +4955,18 @@
   "support_contact_open_failed": "无法打开此联系方式",
   "company_footer_disclaimer_title": "风险免责声明",
   "platforms_web_trading": "网页交易",
-  "ibm_person_commission_by_symbol": "按品种佣金"
+  "ibm_person_commission_by_symbol": "按品种佣金",
+  "kyc_doc_options_load_failed": "无法加载证件设置。",
+  "kyc_doc_retry": "重试",
+  "kyc_doc_side_front": "正面",
+  "kyc_doc_side_back": "背面",
+  "kyc_doc_side_required": "{document}（{side}）为必填项。",
+  "kyc_doc_select_identity_option": "请选择您要上传的身份证件类型。",
+  "kyc_doc_select_address_option": "请选择您要上传的地址证明类型。",
+  "kyc_doc_select_document_type": "选择证件类型",
+  "kyc_doc_pick_document_first": "请先选择证件类型，以查看需要上传哪些面。",
+  "kyc_doc_provider_mode": "您的认证由我们的认证合作方处理，因此无法在此上传证件。",
+  "kyc_doc_reupload_hint": "部分证件被拒绝。请仅重新上传被拒绝的面。",
+  "kyc_doc_status_approved": "已通过",
+  "kyc_doc_status_pending": "审核中"
 }

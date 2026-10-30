@@ -12,6 +12,7 @@ import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/kyc/presentation/pages/kyc_camera_screen.dart';
+import 'package:crm_app/screens/kyc/data/models/kyc_document_config.dart';
 import 'package:crm_app/screens/kyc/data/repositories/kyc_repository.dart';
 import 'package:crm_app/utils/camera_permission_helper.dart';
 
@@ -87,6 +88,11 @@ class KycDocsController extends GetxController {
   // Existing server documents map: subdocument_type -> {status, image_url, id}
   final RxMap<String, Map<String, dynamic>> existingDocuments =
       <String, Map<String, dynamic>>{}.obs;
+
+  // Admin document options from `GET user/kyc`.
+  final Rxn<KycDocumentConfig> documentConfig = Rxn<KycDocumentConfig>();
+  final Rxn<KycDocumentOption> selectedIdOption = Rxn<KycDocumentOption>();
+  final Rxn<KycDocumentOption> selectedAddressOption = Rxn<KycDocumentOption>();
 
   // Upload states
   final RxBool isIdProofFrontUploaded = false.obs;
@@ -459,6 +465,14 @@ class KycDocsController extends GetxController {
       }
 
       final data = response.data;
+      if (data is Map<String, dynamic>) {
+        final config = KycDocumentConfig.fromKycResponse(data);
+        documentConfig.value = config;
+        selectedIdOption.value =
+            config.resolvePick(kycIdProof, selectedIdOption.value);
+        selectedAddressOption.value =
+            config.resolvePick(kycAddressProof, selectedAddressOption.value);
+      }
       if (data is Map &&
           data['data'] != null &&
           data['data']['documents'] != null) {
@@ -530,17 +544,64 @@ class KycDocsController extends GetxController {
   };
 
   // ===== Requirement & gating helpers =====
-  bool isBackRequired(String group) {
-    final front = getExistingDoc('${group}_front');
-    final requireVal = (front?['back_side_required'] ?? 0).toString();
-    return requireVal == '1';
+  static String _categoryOf(String documentType) =>
+      documentType.startsWith(kycIdProof) ? kycIdProof : kycAddressProof;
+
+  static String _sideOf(String documentType) =>
+      documentType.endsWith('_$kycSideBack') ? kycSideBack : kycSideFront;
+
+  KycDocumentOption? pickedOptionFor(String category) =>
+      category == kycIdProof ? selectedIdOption.value : selectedAddressOption.value;
+
+  bool hasServerDocs(String category) =>
+      existingDocuments.keys.any((type) => type.startsWith('${category}_'));
+
+  /// A category with an admin option list needs a pick before its first upload.
+  bool needsOptionPick(String category) {
+    final options = documentConfig.value?.optionsFor(category) ?? const [];
+    return options.isNotEmpty &&
+        pickedOptionFor(category) == null &&
+        !hasServerDocs(category);
   }
 
+  bool isBackRequired(String group) => isRequired('${group}_$kycSideBack');
+
+  /// Required sides come from the picked option, or from
+  /// `required_back_sides` when there is no option list. The per-document
+  /// `back_side_required` field is legacy and not used.
   bool isRequired(String documentType) {
-    if (documentType.endsWith('_front')) return true;
-    final group =
-        documentType.startsWith('id_proof') ? 'id_proof' : 'address_proof';
-    return isBackRequired(group);
+    final config = documentConfig.value;
+    if (config == null) return documentType.endsWith('_$kycSideFront');
+    final category = _categoryOf(documentType);
+    return config.isSideRequired(
+      category,
+      _sideOf(documentType),
+      pickedOptionFor(category),
+    );
+  }
+
+  bool isSideVisible(String documentType) {
+    if (getExistingDoc(documentType) != null) return true;
+    final config = documentConfig.value;
+    if (config == null) return true;
+    final category = _categoryOf(documentType);
+    return config.isSideVisible(
+      category,
+      _sideOf(documentType),
+      pickedOptionFor(category),
+    );
+  }
+
+  void selectDocumentOption(String category, KycDocumentOption? option) {
+    if (category == kycIdProof) {
+      selectedIdOption.value = option;
+    } else {
+      selectedAddressOption.value = option;
+    }
+    for (final side in const [kycSideFront, kycSideBack]) {
+      final type = '${category}_$side';
+      if (!isSideVisible(type)) _clearSelectedFor(type);
+    }
   }
 
   String statusFor(String documentType) {
@@ -584,14 +645,15 @@ class KycDocsController extends GetxController {
 
   // Check if all required documents are uploaded
   bool get areAllDocumentsUploaded {
-    // Determine required types dynamically (backs depend on requirement)
-    final List<String> requiredTypes = [
+    if (needsOptionPick(kycIdProof) || needsOptionPick(kycAddressProof)) {
+      return false;
+    }
+    final requiredTypes = const [
       'id_proof_front',
+      'id_proof_back',
       'address_proof_front',
-    ];
-    if (isBackRequired('id_proof')) requiredTypes.add('id_proof_back');
-    if (isBackRequired('address_proof'))
-      requiredTypes.add('address_proof_back');
+      'address_proof_back',
+    ].where(isRequired);
 
     bool isTypeSatisfied(String t) {
       final status = statusFor(t);
@@ -643,6 +705,23 @@ class KycDocsController extends GetxController {
     try {
       isLoading.value = true;
       errorMessage.value = '';
+
+      // The server refuses the first upload in a category that has an
+      // option list unless the picked option is sent with it.
+      for (final category in const [kycIdProof, kycAddressProof]) {
+        final hasLocalFile = [kycSideFront, kycSideBack]
+            .any((side) => getImageFile('${category}_$side') != null);
+        if (hasLocalFile && needsOptionPick(category)) {
+          CustomToastService.showWarning(
+            message: TranslationUtils.tr(
+              category == kycIdProof
+                  ? 'kyc_doc_select_identity_option'
+                  : 'kyc_doc_select_address_option',
+            ),
+          );
+          return;
+        }
+      }
 
       final token = await SecureStorageService.getAuthToken();
 
@@ -700,9 +779,11 @@ class KycDocsController extends GetxController {
         );
       } else {
         CustomToastService.showError(
-          message: TranslationUtils.tr(
-            'kyc_docs_controller_some_documents_failed_to_upload_please',
-          ),
+          message: errorMessage.value.isNotEmpty
+              ? errorMessage.value
+              : TranslationUtils.tr(
+                  'kyc_docs_controller_some_documents_failed_to_upload_please',
+                ),
         );
       }
     } catch (e) {
@@ -726,8 +807,14 @@ class KycDocsController extends GetxController {
       final Map<String, dynamic> formData = {
         'document_type': 'kyc',
         'subdocument_type': subdocumentType,
-        // 'back_side_required': false,
       };
+      final category = _categoryOf(subdocumentType);
+      final picked = pickedOptionFor(category);
+      final hasOptionList =
+          documentConfig.value?.optionsFor(category).isNotEmpty ?? false;
+      if (hasOptionList && picked != null) {
+        formData['document_option'] = picked.id;
+      }
 
       // Upload single file
       final response = await _repo.uploadKycDocument(
@@ -764,6 +851,7 @@ class KycDocsController extends GetxController {
         return true;
       } else {
         print('❌ $documentName upload failed: ${response.message}');
+        errorMessage.value = response.message ?? '';
         // Server requires the compliance questionnaire before any KYC upload.
         final reason = response.data is Map
             ? (response.data['data'] is Map ? response.data['data']['reason'] : null)

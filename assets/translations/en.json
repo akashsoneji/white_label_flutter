@@ -4955,5 +4955,18 @@
   "support_contact_open_failed": "Could not open this contact option",
   "company_footer_disclaimer_title": "Risk disclaimer",
   "platforms_web_trading": "Web Trading",
-  "ibm_person_commission_by_symbol": "COMMISSION BY SYMBOL"
+  "ibm_person_commission_by_symbol": "COMMISSION BY SYMBOL",
+  "kyc_doc_options_load_failed": "Couldn't load the document settings.",
+  "kyc_doc_retry": "Retry",
+  "kyc_doc_side_front": "front",
+  "kyc_doc_side_back": "back",
+  "kyc_doc_side_required": "{document} ({side}) is required.",
+  "kyc_doc_select_identity_option": "Please select which identity document you are uploading.",
+  "kyc_doc_select_address_option": "Please select which address proof document you are uploading.",
+  "kyc_doc_select_document_type": "Select document type",
+  "kyc_doc_pick_document_first": "Select a document type to see which sides to upload.",
+  "kyc_doc_provider_mode": "Your verification is handled by our verification partner, so documents can't be uploaded here.",
+  "kyc_doc_reupload_hint": "Some documents were rejected. Upload only the rejected sides again.",
+  "kyc_doc_status_approved": "Approved",
+  "kyc_doc_status_pending": "Under review"
 }

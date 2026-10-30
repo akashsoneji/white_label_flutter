@@ -12,6 +12,7 @@ import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/models/dropdown_models.dart';
+import 'package:crm_app/screens/kyc/data/models/kyc_document_config.dart';
 import 'package:crm_app/screens/kyc/view_models/compliance_controller.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 
@@ -1187,32 +1188,53 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         ),
         SizedBox(height: 16.h),
 
-        // Upload Card 1: Identity Proof
-        _buildUploadCard(
-          title: TranslationUtils.tr(
-            'unified_compliance_wizard_identity_document',
-          ),
-          subtitle: TranslationUtils.tr(
-            'unified_compliance_wizard_passport_national_id_or_driver_license',
-          ),
-          frontKey: 'identity_front',
-          backKey: 'identity_back',
-          frontFile: controller.idProofFront.value,
-          backFile: controller.idProofBack.value,
-        ),
-        SizedBox(height: 16.h),
-
-        // Upload Card 2: Address Proof
-        _buildUploadCard(
-          title: TranslationUtils.tr('kyc_address_proof'),
-          subtitle: TranslationUtils.tr(
-            'unified_compliance_wizard_utility_bill_bank_statement_or_official',
-          ),
-          frontKey: 'address_front',
-          backKey: 'address_back',
-          frontFile: controller.addressProofFront.value,
-          backFile: controller.addressProofBack.value,
-        ),
+        Obx(() {
+          final config = controller.documentConfig.value;
+          if (controller.isDocumentConfigLoading.value && config == null) {
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 24.h),
+              child: const Center(child: CircularProgressIndicator()),
+            );
+          }
+          if (config == null && controller.documentConfigError.value.isNotEmpty) {
+            return _buildDocumentNotice(
+              message: controller.documentConfigError.value,
+              onRetry: controller.fetchDocumentConfig,
+            );
+          }
+          if (config?.isProviderMode ?? false) {
+            return _buildDocumentNotice(
+              message: TranslationUtils.tr('kyc_doc_provider_mode'),
+            );
+          }
+          return Column(
+            children: [
+              if (config?.isReupload ?? false) ...[
+                _buildDocumentNotice(
+                  message: TranslationUtils.tr('kyc_doc_reupload_hint'),
+                ),
+                SizedBox(height: 16.h),
+              ],
+              _buildUploadCard(
+                category: kycIdProof,
+                title: TranslationUtils.tr(
+                  'unified_compliance_wizard_identity_document',
+                ),
+                subtitle: TranslationUtils.tr(
+                  'unified_compliance_wizard_passport_national_id_or_driver_license',
+                ),
+              ),
+              SizedBox(height: 16.h),
+              _buildUploadCard(
+                category: kycAddressProof,
+                title: TranslationUtils.tr('kyc_address_proof'),
+                subtitle: TranslationUtils.tr(
+                  'unified_compliance_wizard_utility_bill_bank_statement_or_official',
+                ),
+              ),
+            ],
+          );
+        }),
         SizedBox(height: 16.h),
 
         // Summary
@@ -1222,14 +1244,63 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
     );
   }
 
+  Widget _buildDocumentNotice({required String message, VoidCallback? onRetry}) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline, color: AppColors.primary, size: 18.w),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 12.sp,
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          if (onRetry != null)
+            TextButton(
+              onPressed: onRetry,
+              child: Text(TranslationUtils.tr('kyc_doc_retry')),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// One category (ID or address proof). With admin options it shows a
+  /// dropdown and only the sides the picked option needs; on re-upload it
+  /// shows each submitted side's status and asks only for the rejected ones.
   Widget _buildUploadCard({
+    required String category,
     required String title,
     required String subtitle,
-    required String frontKey,
-    required String backKey,
-    required File? frontFile,
-    required File? backFile,
   }) {
+    final config = controller.effectiveDocumentConfig;
+    final options = config.isReupload
+        ? const <KycDocumentOption>[]
+        : config.optionsFor(category);
+    final picked = controller.pickedOptionFor(category);
+    final error = controller.documentErrors[category];
+
+    final submittedName = [kycSideFront, kycSideBack]
+        .map((side) => config.documentFor(category, side)?.documentOptionName ?? '')
+        .firstWhere((name) => name.isNotEmpty, orElse: () => '');
+
+    final visibleSides = [kycSideFront, kycSideBack].where((side) {
+      if (config.isReupload) return config.documentFor(category, side) != null;
+      return controller.sideAcceptsUpload(category, side);
+    }).toList();
+
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -1255,43 +1326,194 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 size: 18.w,
               ),
               SizedBox(width: 8.w),
-              Text(
-                title,
-                style: AppTextStyles.bodyText.copyWith(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+              Expanded(
+                child: Text(
+                  title,
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
             ],
           ),
           SizedBox(height: 2.h),
           Text(
-            subtitle,
+            config.isReupload && submittedName.isNotEmpty ? submittedName : subtitle,
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 11.sp,
               color: AppColors.textGrey,
               fontWeight: FontWeight.w500,
             ),
           ),
+          if (options.isNotEmpty) ...[
+            SizedBox(height: 12.h),
+            _buildDocumentOptionDropdown(category, options, picked),
+          ],
           SizedBox(height: 16.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildUploadBox(
-                  label: TranslationUtils.tr('id_upload_front_side'),
-                  key: frontKey,
-                  file: frontFile,
-                  isRequired: true,
+          if (options.isNotEmpty && picked == null)
+            Text(
+              TranslationUtils.tr('kyc_doc_pick_document_first'),
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 11.sp,
+                color: AppColors.textGrey,
+              ),
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var i = 0; i < visibleSides.length; i++) ...[
+                  if (i > 0) SizedBox(width: 12.w),
+                  Expanded(child: _buildDocumentSide(category, visibleSides[i])),
+                ],
+                if (visibleSides.length == 1) ...[
+                  SizedBox(width: 12.w),
+                  const Expanded(child: SizedBox.shrink()),
+                ],
+              ],
+            ),
+          if (error != null) ...[
+            SizedBox(height: 8.h),
+            Text(
+              error,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 11.sp,
+                color: Theme.of(context).colorScheme.error,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDocumentOptionDropdown(
+    String category,
+    List<KycDocumentOption> options,
+    KycDocumentOption? picked,
+  ) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isExpanded: true,
+          value: picked?.id,
+          hint: Text(
+            TranslationUtils.tr('kyc_doc_select_document_type'),
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 13.sp,
+              color: AppColors.textGrey,
+            ),
+          ),
+          items: [
+            for (final option in options)
+              DropdownMenuItem<String>(
+                value: option.id,
+                child: Text(
+                  option.name,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 13.sp,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: _buildUploadBox(
-                  label: TranslationUtils.tr('id_upload_back_side'),
-                  key: backKey,
-                  file: backFile,
-                  isRequired: false,
+          ],
+          onChanged: (id) => controller.selectDocumentOption(
+            category,
+            options.firstWhereOrNull((option) => option.id == id),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDocumentSide(String category, String side) {
+    final config = controller.effectiveDocumentConfig;
+    final label = TranslationUtils.tr(
+      side == kycSideFront ? 'id_upload_front_side' : 'id_upload_back_side',
+    );
+    final submitted = config.documentFor(category, side);
+
+    if (config.isReupload && submitted != null && !submitted.isRejected) {
+      return _buildSideStatusTile(label, submitted.status);
+    }
+
+    final upload = _buildUploadBox(
+      label: label,
+      key: ComplianceController.uploadKeyFor(category, side),
+      file: controller.fileFor(category, side).value,
+      isRequired: controller.isSideRequired(category, side),
+    );
+    if (submitted == null || !submitted.isRejected || submitted.remark.isEmpty) {
+      return upload;
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        upload,
+        SizedBox(height: 6.h),
+        Text(
+          submitted.remark,
+          style: AppTextStyles.bodyText.copyWith(
+            fontSize: 11.sp,
+            color: Theme.of(context).colorScheme.error,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSideStatusTile(String label, String status) {
+    final isApproved = status == 'approved';
+    final color = isApproved ? Colors.green.shade700 : Colors.orange.shade700;
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 11.sp,
+              color: AppColors.textGrey,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Row(
+            children: [
+              Icon(
+                isApproved ? Icons.check_circle : Icons.schedule,
+                color: color,
+                size: 14.w,
+              ),
+              SizedBox(width: 4.w),
+              Flexible(
+                child: Text(
+                  TranslationUtils.tr(
+                    isApproved ? 'kyc_doc_status_approved' : 'kyc_doc_status_pending',
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 12.sp,
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],

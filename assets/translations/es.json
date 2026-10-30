@@ -4955,5 +4955,18 @@
   "support_contact_open_failed": "No se pudo abrir esta opción de contacto",
   "company_footer_disclaimer_title": "Aviso de riesgo",
   "platforms_web_trading": "Trading web",
-  "ibm_person_commission_by_symbol": "COMISIÓN POR SÍMBOLO"
+  "ibm_person_commission_by_symbol": "COMISIÓN POR SÍMBOLO",
+  "kyc_doc_options_load_failed": "No se pudo cargar la configuración de documentos.",
+  "kyc_doc_retry": "Reintentar",
+  "kyc_doc_side_front": "anverso",
+  "kyc_doc_side_back": "reverso",
+  "kyc_doc_side_required": "{document} ({side}) es obligatorio.",
+  "kyc_doc_select_identity_option": "Selecciona qué documento de identidad estás subiendo.",
+  "kyc_doc_select_address_option": "Selecciona qué comprobante de domicilio estás subiendo.",
+  "kyc_doc_select_document_type": "Selecciona el tipo de documento",
+  "kyc_doc_pick_document_first": "Selecciona un tipo de documento para ver qué caras subir.",
+  "kyc_doc_provider_mode": "Tu verificación la gestiona nuestro socio de verificación, por lo que no puedes subir documentos aquí.",
+  "kyc_doc_reupload_hint": "Algunos documentos fueron rechazados. Vuelve a subir solo las caras rechazadas.",
+  "kyc_doc_status_approved": "Aprobado",
+  "kyc_doc_status_pending": "En revisión"
 }

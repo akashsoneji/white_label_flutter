@@ -4955,5 +4955,18 @@
   "support_contact_open_failed": "Không thể mở tùy chọn liên hệ này",
   "company_footer_disclaimer_title": "Tuyên bố miễn trừ rủi ro",
   "platforms_web_trading": "Giao dịch trên web",
-  "ibm_person_commission_by_symbol": "HOA HỒNG THEO MÃ"
+  "ibm_person_commission_by_symbol": "HOA HỒNG THEO MÃ",
+  "kyc_doc_options_load_failed": "Không thể tải cài đặt tài liệu.",
+  "kyc_doc_retry": "Thử lại",
+  "kyc_doc_side_front": "mặt trước",
+  "kyc_doc_side_back": "mặt sau",
+  "kyc_doc_side_required": "{document} ({side}) là bắt buộc.",
+  "kyc_doc_select_identity_option": "Vui lòng chọn loại giấy tờ tùy thân bạn đang tải lên.",
+  "kyc_doc_select_address_option": "Vui lòng chọn loại giấy tờ chứng minh địa chỉ bạn đang tải lên.",
+  "kyc_doc_select_document_type": "Chọn loại giấy tờ",
+  "kyc_doc_pick_document_first": "Chọn loại giấy tờ để xem cần tải lên mặt nào.",
+  "kyc_doc_provider_mode": "Việc xác minh của bạn do đối tác xác minh xử lý, nên không thể tải giấy tờ lên tại đây.",
+  "kyc_doc_reupload_hint": "Một số giấy tờ đã bị từ chối. Chỉ tải lại các mặt bị từ chối.",
+  "kyc_doc_status_approved": "Đã duyệt",
+  "kyc_doc_status_pending": "Đang xem xét"
 }

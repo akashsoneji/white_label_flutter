@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/screens/kyc/data/models/kyc_document_config.dart';
 import 'package:crm_app/screens/kyc/view_models/kyc_docs_controller.dart';
 import 'package:crm_app/widgets/kyc_scaffold.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
@@ -29,70 +30,33 @@ class KycDocsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: 24.h),
-
-                  // ID Proof Section
-                  Text(
-                    languageService.tr('kyc_id_proof'),
-                    style: AppTextStyles.black16400h1_5,
-                  ),
-                  SizedBox(height: 10.h),
-
-                  // ID Proof Upload Tiles (Row 1)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildUploadTile(
-                          controller: controller,
-                          documentType: 'id_proof_front',
-                          title: languageService.tr('kyc_id_proof_front'),
-                          isActive: true,
-                        ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildDocumentSection(
+                            controller: controller,
+                            category: kycIdProof,
+                            title: languageService.tr('kyc_id_proof'),
+                            frontTitle: languageService.tr('kyc_id_proof_front'),
+                            backTitle: languageService.tr('kyc_id_proof_back'),
+                          ),
+                          SizedBox(height: 24.h),
+                          _buildDocumentSection(
+                            controller: controller,
+                            category: kycAddressProof,
+                            title: languageService.tr('kyc_address_proof'),
+                            frontTitle:
+                                languageService.tr('kyc_address_proof_front'),
+                            backTitle:
+                                languageService.tr('kyc_address_proof_back'),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 16.w),
-                      Expanded(
-                        child: _buildUploadTile(
-                          controller: controller,
-                          documentType: 'id_proof_back',
-                          title: languageService.tr('kyc_id_proof_back'),
-                          isActive: controller.isRequired('id_proof_back'),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-
-                  SizedBox(height: 24.h),
-
-                  // Address Proof Section
-                  Text(
-                    languageService.tr('kyc_address_proof'),
-                    style: AppTextStyles.black16400h1_5,
-                  ),
-                  SizedBox(height: 10.h),
-
-                  // Address Proof Upload Tiles (Row 2)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildUploadTile(
-                          controller: controller,
-                          documentType: 'address_proof_front',
-                          title: languageService.tr('kyc_address_proof_front'),
-                          isActive: true,
-                        ),
-                      ),
-                      SizedBox(width: 16.w),
-                      Expanded(
-                        child: _buildUploadTile(
-                          controller: controller,
-                          documentType: 'address_proof_back',
-                          title: languageService.tr('kyc_address_proof_back'),
-                          isActive: controller.isRequired('address_proof_back'),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const Spacer(),
+                  SizedBox(height: 16.h),
 
                   // Save Button
                   Obx(() {
@@ -186,6 +150,121 @@ class KycDocsScreen extends StatelessWidget {
         ),
       );
     }
+  }
+
+  /// One category: an option dropdown when the admin defined a list, then
+  /// only the sides that option (or the default rule) needs.
+  Widget _buildDocumentSection({
+    required KycDocsController controller,
+    required String category,
+    required String title,
+    required String frontTitle,
+    required String backTitle,
+  }) {
+    return Obx(() {
+      final options = controller.documentConfig.value?.optionsFor(category) ??
+          const <KycDocumentOption>[];
+      final frontType = '${category}_$kycSideFront';
+      final backType = '${category}_$kycSideBack';
+      final showFront = controller.isSideVisible(frontType);
+      final showBack = controller.isSideVisible(backType);
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: AppTextStyles.black16400h1_5),
+          SizedBox(height: 10.h),
+          if (options.isNotEmpty) ...[
+            _buildOptionDropdown(controller, category, options),
+            SizedBox(height: 10.h),
+          ],
+          if (!showFront && !showBack)
+            Text(
+              TranslationUtils.tr('kyc_doc_pick_document_first'),
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 12.sp,
+                color: AppColors.textGrey,
+              ),
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: showFront
+                      ? _buildUploadTile(
+                          controller: controller,
+                          documentType: frontType,
+                          title: frontTitle,
+                          isActive: true,
+                        )
+                      : const SizedBox.shrink(),
+                ),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: showBack
+                      ? _buildUploadTile(
+                          controller: controller,
+                          documentType: backType,
+                          title: backTitle,
+                          isActive: controller.isRequired(backType),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+        ],
+      );
+    });
+  }
+
+  /// Locked once the category has documents on the server: the server keeps
+  /// the earlier pick for re-uploads.
+  Widget _buildOptionDropdown(
+    KycDocsController controller,
+    String category,
+    List<KycDocumentOption> options,
+  ) {
+    final isLocked = controller.hasServerDocs(category);
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isExpanded: true,
+          value: controller.pickedOptionFor(category)?.id,
+          hint: Text(
+            TranslationUtils.tr('kyc_doc_select_document_type'),
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 13.sp,
+              color: AppColors.textGrey,
+            ),
+          ),
+          items: [
+            for (final option in options)
+              DropdownMenuItem<String>(
+                value: option.id,
+                child: Text(
+                  option.name,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 13.sp,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+          ],
+          onChanged: isLocked
+              ? null
+              : (id) => controller.selectDocumentOption(
+                    category,
+                    options.firstWhereOrNull((option) => option.id == id),
+                  ),
+        ),
+      ),
+    );
   }
 
   Widget _buildUploadTile({
