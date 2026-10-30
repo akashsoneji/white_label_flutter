@@ -1,9 +1,10 @@
 import 'package:crm_app/routes/app_pages.dart';
-import 'package:crm_app/screens/home/trading_main_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_master_dashboard_controller.dart';
@@ -25,6 +26,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _sortBy = 'Newest first';
+  String _statusFilter = 'all';
 
   @override
   void initState() {
@@ -66,6 +68,13 @@ class _MyPlansTabState extends State<MyPlansTab> {
   ) {
     try {
       List<CopyTradingMasterPlanItem> result = List.from(plans);
+
+      if (_statusFilter != 'all') {
+        result =
+            result
+                .where((plan) => _statusBucket(plan.status) == _statusFilter)
+                .toList();
+      }
 
       if (_searchQuery.isNotEmpty) {
         result =
@@ -200,6 +209,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                       ),
                       child: TextField(
                         controller: _searchController,
+                        textAlignVertical: TextAlignVertical.center,
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           color: AppColors.textPrimary,
@@ -217,8 +227,15 @@ class _MyPlansTabState extends State<MyPlansTab> {
                             size: 18.r,
                             color: AppColors.textGrey,
                           ),
+                          // The app theme sets enabled/focused borders, so
+                          // `border` alone still drew a second outline inside
+                          // this container.
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          filled: false,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
                         ),
                       ),
                     ),
@@ -395,14 +412,23 @@ class _MyPlansTabState extends State<MyPlansTab> {
                     allPlans,
                   );
 
-                  if (filteredSortedPlans.isEmpty) {
-                    listChild = ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [
-                        SizedBox(height: 80.h),
-                        Center(
+                  listChild = ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 100.h),
+                    children: [
+                      _PlansSummaryStrip(plans: allPlans),
+                      SizedBox(height: 10.h),
+                      _StatusFilterChips(
+                        plans: allPlans,
+                        selected: _statusFilter,
+                        onSelected: (bucket) =>
+                            setState(() => _statusFilter = bucket),
+                      ),
+                      SizedBox(height: 12.h),
+                      if (filteredSortedPlans.isEmpty)
+                        Padding(
+                          padding: EdgeInsets.only(top: 60.h),
                           child: Column(
-                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 Icons.search_off_rounded,
@@ -424,24 +450,18 @@ class _MyPlansTabState extends State<MyPlansTab> {
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    );
-                  } else {
-                    listChild = ListView.separated(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: EdgeInsetsDirectional.fromSTEB(16.w, 4.h, 16.w, 100.h),
-                      itemCount: filteredSortedPlans.length,
-                      separatorBuilder: (_, index) => SizedBox(height: 14.h),
-                      itemBuilder: (context, index) {
-                        final plan = filteredSortedPlans[index];
-                        return _PlanCardItem(
-                          plan: plan,
-                          controller: controller,
-                        );
-                      },
-                    );
-                  }
+                        )
+                      else
+                        for (final plan in filteredSortedPlans)
+                          Padding(
+                            padding: EdgeInsets.only(bottom: 14.h),
+                            child: _PlanCardItem(
+                              plan: plan,
+                              controller: controller,
+                            ),
+                          ),
+                    ],
+                  );
                 }
 
                 return RefreshIndicator(
@@ -611,6 +631,33 @@ class _PlanCardItem extends StatelessWidget {
     return s == 'approved' || s == 'active';
   }
 
+  /// "15% · HWM" — short enough for the tile; falls back to the API label.
+  String get _commissionText {
+    final type = plan.commissionType.toUpperCase();
+    if (plan.commissionPercentage > 0) {
+      final pct = '${_trimDecimals(plan.commissionPercentage)}%';
+      return type.isEmpty ? pct : '$pct · $type';
+    }
+    return plan.commissionLabel.isNotEmpty ? plan.commissionLabel : '—';
+  }
+
+  /// Web shows "—" when there is no subscription fee.
+  String get _subscriptionText {
+    if (plan.subscriptionFee <= 0) return '—';
+    final fee = _formatUsd(plan.subscriptionFee);
+    return plan.subscriptionPeriodDays > 0
+        ? '$fee / ${plan.subscriptionPeriodDays}D'
+        : fee;
+  }
+
+  /// "Tenax · selfHosted" (LP provider + trading server), like the web column.
+  String get _serverText {
+    final parts = [plan.lpProviderName, plan.tradingServer]
+        .where((p) => p.isNotEmpty)
+        .toList();
+    return parts.isEmpty ? '—' : parts.join(' · ');
+  }
+
   // ── Build ────────────────────────────────────────────────────────────────
 
   @override
@@ -648,47 +695,49 @@ class _PlanCardItem extends StatelessWidget {
               ),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Plan icon
+                // Name takes all the free width and only ellipsizes when it
+                // really doesn't fit; a Spacer here would split the width 50/50.
                 Expanded(
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        plan.planName.isEmpty
-                            ? TranslationUtils.tr('my_plans_tab_unnamed_plan')
-                            : plan.planName,
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.whiteColor,
-                          letterSpacing: 0.1,
+                      Flexible(
+                        child: Text(
+                          plan.planName.isEmpty
+                              ? TranslationUtils.tr('my_plans_tab_unnamed_plan')
+                              : plan.planName,
+                          style: AppTextStyles.bodyText.copyWith(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.onColoredBackground,
+                            letterSpacing: 0.1,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(width: 6.h),
-                      Row(
-                        children: [
-                          Text(
-                            plan.tradingAccountNumber,
-                            style: AppTextStyles.bodyText.copyWith(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.whiteColor,
-                              letterSpacing: 0.1,
+                      if (plan.tradingAccountNumber.isNotEmpty) ...[
+                        SizedBox(width: 6.w),
+                        Text(
+                          plan.tradingAccountNumber,
+                          style: AppTextStyles.bodyText.copyWith(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.onColoredBackground.withValues(
+                              alpha: 0.75,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
-                // Plan ID chip
+                SizedBox(width: 8.w),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                   decoration: BoxDecoration(
-                    // color: AppColors.cardBackGround.withValues(alpha: 0.15),
+                    color: AppColors.onColoredBackground.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(5.r),
                   ),
                   child: Text(
@@ -696,7 +745,7 @@ class _PlanCardItem extends StatelessWidget {
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.whiteColor,
+                      color: AppColors.onColoredBackground,
                     ),
                   ),
                 ),
@@ -834,10 +883,9 @@ class _PlanCardItem extends StatelessWidget {
                       child: _MetricTile(
                         icon: Icons.people_alt_outlined,
                         label: TranslationUtils.tr('my_plans_tab_copiers'),
+                        // Empty max_copiers = no limit, shown as ∞ like web.
                         value:
-                            plan.maxCopiers != null
-                                ? '${plan.activeCopiersCount} / ${plan.maxCopiers}'
-                                : '${plan.activeCopiersCount}',
+                            '${plan.activeCopiersCount} / ${plan.maxCopiers ?? '∞'}',
                         iconColor: AppColors.primary,
                       ),
                     ),
@@ -848,7 +896,7 @@ class _PlanCardItem extends StatelessWidget {
                         label: TranslationUtils.tr(
                           'pmam_manager_dashboard_screen_total_aum',
                         ),
-                        value: '\$${plan.totalCapital.toStringAsFixed(2)}',
+                        value: _formatUsd(plan.totalCapital),
                         iconColor: AppColors.success,
                       ),
                     ),
@@ -861,10 +909,7 @@ class _PlanCardItem extends StatelessWidget {
                       child: _MetricTile(
                         icon: Icons.payments_outlined,
                         label: TranslationUtils.tr('general_commission'),
-                        value:
-                            plan.commissionLabel.isNotEmpty
-                                ? plan.commissionLabel
-                                : '—',
+                        value: _commissionText,
                         iconColor: AppColors.warningText,
                       ),
                     ),
@@ -873,11 +918,24 @@ class _PlanCardItem extends StatelessWidget {
                       child: _MetricTile(
                         icon: Icons.savings_outlined,
                         label: TranslationUtils.tr('my_plans_tab_min_capital'),
-                        value: '\$${plan.minimumCapital.toStringAsFixed(2)}',
+                        value: _formatUsd(plan.minimumCapital),
                         iconColor: AppColors.blue,
                       ),
                     ),
                   ],
+                ),
+                SizedBox(height: 8.h),
+                _PlanInfoRow(
+                  label: TranslationUtils.tr('my_plans_tab_subscription_fee'),
+                  value: _subscriptionText,
+                ),
+                _PlanInfoRow(
+                  label: TranslationUtils.tr('copy_trading_server'),
+                  value: _serverText,
+                ),
+                _PlanInfoRow(
+                  label: TranslationUtils.tr('ticket_created'),
+                  value: _formatCreatedDate(plan.createdAt),
                 ),
               ],
             ),
@@ -891,8 +949,13 @@ class _PlanCardItem extends StatelessWidget {
                 // View Details
                 Expanded(
                   child: TextButton.icon(
-                    onPressed: () {
-                      Get.to(() => MasterPlanDetailScreen(planId: plan.id));
+                    onPressed: () async {
+                      await Get.to(
+                        () => MasterPlanDetailScreen(planId: plan.id),
+                      );
+                      // Detail can pause/resume/inactivate the plan; reload so
+                      // the card doesn't show the pre-change state.
+                      controller.refreshAll(showLoading: false);
                     },
                     icon: Icon(
                       Icons.visibility_outlined,
@@ -1161,6 +1224,369 @@ class _MetricTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers shared by the summary, filters and plan card (mirrors web My Plans)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Web tab bucket for a plan `status`: active / pending / rejected / inactive.
+String _statusBucket(String status) {
+  switch (status.toLowerCase()) {
+    case 'approved':
+    case 'active':
+      return 'active';
+    case 'pending':
+    case 'pending_admin':
+    case 'pending_review':
+      return 'pending';
+    case 'rejected':
+      return 'rejected';
+    case 'inactive':
+      return 'inactive';
+    default:
+      return 'other';
+  }
+}
+
+String _formatUsd(num value) =>
+    NumberFormat.currency(symbol: '\$', decimalDigits: 2).format(value);
+
+/// API numbers can be int (15) or float (12.5); keep decimals only when present.
+String _trimDecimals(num value) {
+  final isWhole = value == value.truncate();
+  return value.toStringAsFixed(isWhole ? 0 : 2);
+}
+
+String _formatCreatedDate(String raw) {
+  final parsed = DateTime.tryParse(raw);
+  if (parsed == null) return '—';
+  return DateFormat('dd MMM yyyy').format(parsed.toLocal());
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Summary strip — Total Plans / Active / Pending review / Total AUM / Copiers
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PlansSummaryStrip extends StatelessWidget {
+  final List<CopyTradingMasterPlanItem> plans;
+
+  const _PlansSummaryStrip({required this.plans});
+
+  @override
+  Widget build(BuildContext context) {
+    final activeCount =
+        plans.where((p) => _statusBucket(p.status) == 'active').length;
+    final pendingCount =
+        plans.where((p) => _statusBucket(p.status) == 'pending').length;
+    final totalAum = plans.fold<num>(0, (sum, p) => sum + p.totalCapital);
+    final totalCopiers =
+        plans.fold<int>(0, (sum, p) => sum + p.activeCopiersCount);
+
+    final counts = [
+      _SummaryTile(
+        icon: Icons.grid_view_rounded,
+        label: TranslationUtils.tr('my_plans_tab_total_plans'),
+        value: '${plans.length}',
+      ),
+      _SummaryTile(
+        icon: Icons.check_circle_outline_rounded,
+        label: TranslationUtils.tr('pmam_active_plans'),
+        value: '$activeCount',
+      ),
+      _SummaryTile(
+        icon: Icons.schedule_rounded,
+        label: TranslationUtils.tr('copy_trading_hub_screen_pending_review'),
+        value: '$pendingCount',
+      ),
+    ];
+    final totals = [
+      _SummaryTile(
+        icon: Icons.account_balance_wallet_outlined,
+        label: TranslationUtils.tr('pmam_manager_dashboard_screen_total_aum'),
+        value: _formatUsd(totalAum),
+      ),
+      _SummaryTile(
+        icon: Icons.people_alt_outlined,
+        label: TranslationUtils.tr('my_plans_tab_total_copiers'),
+        value: '$totalCopiers',
+        valueColor: AppColors.green,
+      ),
+    ];
+
+    // Everything visible at once (no hidden horizontal scroll): one row of 5
+    // on tablets/unfolded foldables, 3 counts + 2 totals on phones.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= 560;
+        if (isWide) return _SummaryRow(tiles: [...counts, ...totals]);
+        return Column(
+          children: [
+            _SummaryRow(tiles: counts),
+            SizedBox(height: 8.h),
+            _SummaryRow(tiles: totals),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Equal-width, equal-height tiles with a fixed gap.
+class _SummaryRow extends StatelessWidget {
+  final List<Widget> tiles;
+
+  const _SummaryRow({required this.tiles});
+
+  @override
+  Widget build(BuildContext context) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < tiles.length; i++) ...[
+            if (i > 0) SizedBox(width: 8.w),
+            Expanded(child: tiles[i]),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color? valueColor;
+
+  const _SummaryTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 9.h),
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 24.r,
+            height: 24.r,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(7.r),
+            ),
+            child: Icon(icon, size: 13.r, color: AppColors.onColoredBackground),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 9.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textGrey,
+            ),
+          ),
+          const Spacer(),
+          SizedBox(height: 2.h),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              value,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: valueColor ?? AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Status filter chips — All / Active / Pending review / Rejected / Inactive
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _StatusFilterChips extends StatelessWidget {
+  final List<CopyTradingMasterPlanItem> plans;
+  final String selected;
+  final ValueChanged<String> onSelected;
+
+  const _StatusFilterChips({
+    required this.plans,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  static const _filters = <(String, String)>[
+    ('all', 'common_all'),
+    ('active', 'wallet_active'),
+    ('pending', 'copy_trading_hub_screen_pending_review'),
+    ('rejected', 'kyc_verification_rejected'),
+    ('inactive', 'wallet_inactive'),
+  ];
+
+  int _countFor(String bucket) => bucket == 'all'
+      ? plans.length
+      : plans.where((p) => _statusBucket(p.status) == bucket).length;
+
+  @override
+  Widget build(BuildContext context) {
+    // Single-row segmented track; scrolls horizontally on narrow screens and
+    // the tapped chip scrolls itself into view so no status is hidden.
+    return Container(
+      padding: EdgeInsets.all(3.r),
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.2)),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          children: [
+            for (final (bucket, labelKey) in _filters)
+              _FilterChip(
+                label: TranslationUtils.tr(labelKey),
+                count: _countFor(bucket),
+                isSelected: selected == bucket,
+                onTap: () => onSelected(bucket),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final int count;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _FilterChip({
+    required this.label,
+    required this.count,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = isSelected ? AppColors.onColoredBackground : AppColors.textGrey;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        onTap();
+        Scrollable.ensureVisible(
+          context,
+          alignment: 0.5,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 11.sp,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                color: isSelected ? fg : AppColors.textPrimary,
+              ),
+            ),
+            SizedBox(width: 5.w),
+            Container(
+              constraints: BoxConstraints(minWidth: 16.w),
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+              decoration: BoxDecoration(
+                color: fg.withValues(alpha: isSelected ? 0.2 : 0.12),
+                borderRadius: BorderRadius.circular(6.r),
+              ),
+              child: Text(
+                '$count',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w700,
+                  color: fg,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Plan info row — label on the start side, value on the end side
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PlanInfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _PlanInfoRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 3.h),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 11.sp,
+              color: AppColors.textGrey,
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
         ],

@@ -7,6 +7,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../widgets/app_back_button.dart';
+
 /// Commission actually credited to the Master's wallet
 /// (`GET master/settlements`, spec 9.1).
 class MasterSettlementsScreen extends StatefulWidget {
@@ -46,6 +48,7 @@ class _MasterSettlementsScreenState extends State<MasterSettlementsScreen> {
       backgroundColor: AppColors.tradeBackgroundCenterColor,
       appBar: AppBar(
         scrolledUnderElevation: 0,
+        leading:  const AppBackButton(),
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
         centerTitle: true,

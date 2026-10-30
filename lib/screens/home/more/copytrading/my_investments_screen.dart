@@ -151,6 +151,10 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
         }
 
         return RefreshIndicator(
+          // The lists live inside TabBarView's PageView (depth 1), so the
+          // default depth-0 predicate never fires; accept any vertical scroll.
+          notificationPredicate: (notification) =>
+              notification.metrics.axis == Axis.vertical,
           onRefresh: () async {
             await Future.wait([
               controller.load(showLoading: false),
@@ -620,6 +624,9 @@ class _SubscriptionsTab extends StatelessWidget {
       return _EmptyInvestmentsState();
     }
     return ListView.builder(
+      // Short lists don't scroll, so without this the parent
+      // RefreshIndicator never sees an overscroll and pull-to-refresh is dead.
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 90.h),
       itemCount: items.length,
       itemBuilder: (context, i) {
@@ -667,7 +674,11 @@ class _InvestmentRow extends StatelessWidget {
     return '${s[0].toUpperCase()}${s.substring(1).toLowerCase()}';
   }
 
+  bool get _isPausedByMaster =>
+      item.status.toLowerCase() == 'active' && item.isPausedByMaster;
+
   Color get _statusColor {
+    if (_isPausedByMaster) return AppColors.warning;
     switch (item.status.toLowerCase()) {
       case 'active':
         return AppColors.green;
@@ -683,6 +694,9 @@ class _InvestmentRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final status = item.status.toLowerCase();
+    final statusLabel = _isPausedByMaster
+        ? TranslationUtils.tr('master_plan_detail_screen_copying_paused')
+        : _formatStatus(status);
     final canPause = status == 'active';
     final canResume = status == 'paused';
     final canStop = status == 'active' || status == 'paused';
@@ -751,36 +765,50 @@ class _InvestmentRow extends StatelessWidget {
                           children: [
                             Row(
                               children: [
-                                Text(
-                                  item.masterName.isNotEmpty
-                                      ? item.masterName
-                                      : item.masterCode,
-                                  style: AppTextStyles.black16600.copyWith(
-                                    fontWeight: FontWeight.w600,
+                                // Name takes all free space and ellipsizes, so
+                                // a long name or the "Copying paused" pill
+                                // never overflows into the P&L.
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          item.masterName.isNotEmpty
+                                              ? item.masterName
+                                              : item.masterCode,
+                                          style: AppTextStyles.black16600
+                                              .copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      SizedBox(width: 8.w),
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 8.w,
+                                          vertical: 3.h,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: _statusColor.withOpacity(0.12),
+                                          borderRadius:
+                                              BorderRadius.circular(999),
+                                        ),
+                                        child: Text(
+                                          statusLabel,
+                                          style: AppTextStyles.bodyText
+                                              .copyWith(
+                                                fontSize: 11.sp,
+                                                fontWeight: FontWeight.w600,
+                                                color: _statusColor,
+                                              ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 SizedBox(width: 8.w),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 8.w,
-                                    vertical: 3.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: _statusColor.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: Text(
-                                    _formatStatus(status),
-                                    style: AppTextStyles.bodyText.copyWith(
-                                      fontSize: 11.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: _statusColor,
-                                    ),
-                                  ),
-                                ),
-                                Spacer(), // Expanded(child: _FieldChip(label: 'P&L', value: '\$${item.totalPnl.toStringAsFixed(2)}', valueColor: item.totalPnl >= 0 ? AppColors.green : AppColors.error)),
                                 Text(
                                   '\$${item.totalPnl.toStringAsFixed(2)}',
                                   style: AppTextStyles.black16600.copyWith(

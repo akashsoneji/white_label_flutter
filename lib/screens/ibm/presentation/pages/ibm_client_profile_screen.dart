@@ -704,8 +704,13 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
                   ? client['history'] as List
                   : const []);
 
+      // ---- per-symbol commission — GET /portal/clients/{id} ----
+      final List<dynamic> symbols =
+          client['symbols'] is List ? client['symbols'] as List : const [];
+
       return _buildOverviewBody(
         isIb: _isIb,
+        symbols: symbols,
         clientsOwn: clientsOwn,
         clientsTotal: clientsTotal,
         subIbs: subIbs,
@@ -751,6 +756,7 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
 
   Widget _buildOverviewBody({
     required bool isIb,
+    required List<dynamic> symbols,
     required int clientsOwn,
     required int clientsTotal,
     required int subIbs,
@@ -1134,6 +1140,15 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
               ),
             ),
 
+          if (symbols.isNotEmpty) ...[
+            SizedBox(height: 8.h),
+            _buildSectionLabel(
+              TranslationUtils.tr('ibm_person_commission_by_symbol'),
+            ),
+            SizedBox(height: 8.h),
+            _buildSymbolCommissionCard(symbols),
+          ],
+
           if (accounts.isNotEmpty) ...[
             SizedBox(height: 24.h),
             Text(
@@ -1229,6 +1244,7 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
             }).toList(),
           ],
 
+
           if (history.isNotEmpty) ...[
             SizedBox(height: 24.h),
             Text(
@@ -1300,6 +1316,79 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
                         ),
                       );
                     }).toList(),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionLabel(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        color: AppColors.textGrey,
+        fontSize: 10.sp,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1.2,
+      ),
+    );
+  }
+
+  BoxDecoration get _cardDecoration => BoxDecoration(
+    color: AppColors.card,
+    borderRadius: BorderRadius.circular(12.r),
+    border: Border.all(color: AppColors.divider),
+  );
+
+  /// One row per symbol: name, trades · lots, and the commission earned on it.
+  Widget _buildSymbolCommissionCard(List<dynamic> symbols) {
+    final rows = symbols.whereType<Map>().toList();
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+      decoration: _cardDecoration,
+      child: Column(
+        children: [
+          for (var i = 0; i < rows.length; i++) ...[
+            if (i > 0) Divider(height: 1, color: AppColors.divider),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.h),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          rows[i]['symbol']?.toString() ?? '--',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          '${_parseInt(rows[i]['trades'])} ${TranslationUtils.tr('tw_trades')} · '
+                          '${_parseDouble(rows[i]['lots']).toStringAsFixed(2)} ${TranslationUtils.tr('chart_label_lots')}',
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            color: AppColors.textGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    '${rows[i]['currency'] ?? 'USD'} ${_parseDouble(rows[i]['commission']).toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

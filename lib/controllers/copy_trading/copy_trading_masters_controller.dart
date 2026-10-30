@@ -30,6 +30,8 @@ class CopyTradingMasterListItem {
   final num minInvestment;
   final num minimumCapital;
   final num? commissionPercentage;
+  /// Master chose to hide copier counts (`hide_copiers`).
+  final bool hideCopiers;
 
   const CopyTradingMasterListItem({
     required this.planId,
@@ -54,6 +56,7 @@ class CopyTradingMasterListItem {
     required this.minInvestment,
     required this.minimumCapital,
     required this.commissionPercentage,
+    this.hideCopiers = false,
   });
 
   /// Copy is possible only for a real plan that still has copier slots.
@@ -96,6 +99,7 @@ class CopyTradingMasterListItem {
       minInvestment: _numOrNull(json['min_investment']) ?? minimumCapital,
       minimumCapital: minimumCapital,
       commissionPercentage: _numOrNull(json['commission_percentage']),
+      hideCopiers: json['hide_copiers'] == true,
     );
   }
 }

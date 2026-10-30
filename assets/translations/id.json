@@ -2909,6 +2909,9 @@
   "my_plans_tab_confirm_pause_copying": "Anda yakin ingin menjeda penyalinan untuk \"{plan}\"? Penyalinan akan ditangguhkan sampai Anda melanjutkan.",
   "my_plans_tab_state_updated_successfully": "Provinsi berhasil diperbarui",
   "my_plans_tab_failed_to_update_copying_state": "Gagal memperbarui status penyalinan paket",
+  "my_plans_tab_total_plans": "Total Paket",
+  "my_plans_tab_subscription_fee": "Biaya Langganan",
+  "my_plans_tab_total_copiers": "Total Penyalin",
   "trader_details_screen_floating_profit": "Profit Mengambang",
   "trader_details_screen_master_traders_bonus": "Bonus Master Trader",
   "trader_details_screen_maximum_unrealised_loss": "Kerugian Belum Terealisasi Maksimum",
@@ -3965,6 +3968,7 @@
   "auth_controller_reset_password_error": "Kesalahan reset kata sandi",
   "auth_controller_send_otp_error": "Kesalahan pengiriman OTP",
   "copy_trading_master": "Master",
+  "copy_trading_by_master": "oleh",
   "copy_trading_minimum_investment_value": "Investasi minimum {amount}",
   "copy_trading_no_strategy_description_provided": "Tidak ada deskripsi strategi.",
   "copy_trading_risk_value": "Risiko {score}",
@@ -4950,5 +4954,6 @@
   "support_contact_email": "Kirim email",
   "support_contact_open_failed": "Tidak dapat membuka opsi kontak ini",
   "company_footer_disclaimer_title": "Pernyataan risiko",
-  "platforms_web_trading": "Trading Web"
+  "platforms_web_trading": "Trading Web",
+  "ibm_person_commission_by_symbol": "KOMISI PER SIMBOL"
 }

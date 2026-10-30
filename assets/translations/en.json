@@ -1360,7 +1360,7 @@
   "my_plans_tab_create_plan": "Create Plan",
   "my_plans_tab_edit_plan": "Edit Plan",
   "my_plans_tab_loading_plans": "Loading plans...",
-  "my_plans_tab_my_copy_plans": "My Copy Plans",
+  "my_plans_tab_my_copy_plans": "My Plans",
   "my_plans_tab_no_copy_plans_yet": "No Copy Plans Yet",
   "my_plans_tab_no_plans_match_your_search": "No plans match your search",
   "my_plans_tab_search_plan_name_id": "Search plan name, ID...",
@@ -2909,6 +2909,9 @@
   "my_plans_tab_confirm_pause_copying": "Are you sure you want to pause copying for \"{plan}\"? Copying will be suspended until you resume.",
   "my_plans_tab_state_updated_successfully": "State updated successfully",
   "my_plans_tab_failed_to_update_copying_state": "Failed to update plan copying state",
+  "my_plans_tab_total_plans": "Total Plans",
+  "my_plans_tab_subscription_fee": "Subscription Fee",
+  "my_plans_tab_total_copiers": "Total Copiers",
   "trader_details_screen_floating_profit": "Floating Profit",
   "trader_details_screen_master_traders_bonus": "Master Trader's Bonus",
   "trader_details_screen_maximum_unrealised_loss": "Maximum Unrealised Loss",
@@ -3965,6 +3968,7 @@
   "auth_controller_reset_password_error": "Reset password error",
   "auth_controller_send_otp_error": "Send OTP error",
   "copy_trading_master": "Master",
+  "copy_trading_by_master": "by",
   "copy_trading_minimum_investment_value": "Minimum investment {amount}",
   "copy_trading_no_strategy_description_provided": "No strategy description provided.",
   "copy_trading_risk_value": "Risk {score}",
@@ -4950,5 +4954,6 @@
   "support_contact_email": "Email us",
   "support_contact_open_failed": "Could not open this contact option",
   "company_footer_disclaimer_title": "Risk disclaimer",
-  "platforms_web_trading": "Web Trading"
+  "platforms_web_trading": "Web Trading",
+  "ibm_person_commission_by_symbol": "COMMISSION BY SYMBOL"
 }

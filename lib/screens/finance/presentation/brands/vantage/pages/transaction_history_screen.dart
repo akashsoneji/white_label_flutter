@@ -801,6 +801,7 @@ class _VantageTransactionHistoryScreenState
     }
 
     final hasReceipt =
+        controller.showProofColumn.value &&
         (transaction.id ?? '').isNotEmpty &&
         !(transaction.amount?.trim().startsWith('-') ?? false) &&
         (transaction.transactionType?.toLowerCase() ?? '') != 'withdrawal';

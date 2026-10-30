@@ -8,6 +8,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../widgets/app_back_button.dart';
+
 /// Master view of one copier's subscribe/unsubscribe periods and the trades
 /// copied in each (`GET master/copiers/{copierId}/subscription-history`).
 class CopierSubscriptionHistoryScreen extends StatefulWidget {
@@ -45,6 +47,7 @@ class _CopierSubscriptionHistoryScreenState
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
       appBar: AppBar(
+        leading: const AppBackButton(),
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,

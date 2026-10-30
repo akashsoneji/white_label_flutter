@@ -782,7 +782,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                   ],
 
                   // Logic Update: Show for ANY transaction with valid ID that is NOT a withdrawal
-                  if ((transaction.id ?? '').isNotEmpty &&
+                  if (controller.showProofColumn.value &&
+                      (transaction.id ?? '').isNotEmpty &&
                       !(transaction.amount?.trim().startsWith('-') ?? false) &&
                       (transaction.transactionType?.toLowerCase() ?? '') !=
                           'withdrawal') ...[

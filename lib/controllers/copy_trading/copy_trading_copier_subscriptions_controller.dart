@@ -137,6 +137,10 @@ class CopierSubscriptionItem {
   final String slTpMode;
   final String tradingServer;
   final num accountBalance;
+  // Master paused copying on the plan (or the master went inactive); the
+  // subscription itself stays `active`, so `status` alone can't show it.
+  final bool planCopyingPaused;
+  final bool pausedByMasterInactive;
 
   const CopierSubscriptionItem({
     required this.id,
@@ -182,6 +186,8 @@ class CopierSubscriptionItem {
     this.slTpMode = '',
     this.tradingServer = '',
     this.accountBalance = 0,
+    this.planCopyingPaused = false,
+    this.pausedByMasterInactive = false,
   });
 
   factory CopierSubscriptionItem.fromJson(Map<String, dynamic> json) {
@@ -242,10 +248,14 @@ class CopierSubscriptionItem {
       slTpMode: (json['sl_tp_mode'] ?? '').toString(),
       tradingServer: (json['trading_server'] ?? '').toString(),
       accountBalance: _n(json['account_balance']),
+      planCopyingPaused: json['plan_copying_paused'] == true,
+      pausedByMasterInactive: json['paused_by_master_inactive'] == true,
     );
   }
 
   bool get isActive => status.toLowerCase() == 'active';
+
+  bool get isPausedByMaster => planCopyingPaused || pausedByMasterInactive;
 
   String get formattedActiveSince {
     if (activeSince.isEmpty) return '-';

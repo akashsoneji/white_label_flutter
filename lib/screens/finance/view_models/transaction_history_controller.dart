@@ -21,7 +21,12 @@ class Transaction {
 
   Transaction({this.message, this.success, this.data, this.pagination});
 
+  /// Admin toggle "Show the Proof column in client Transaction History";
+  /// top-level `show_proof_column` on the list response, OFF by default.
+  bool showProofColumn = false;
+
   Transaction.fromJson(Map<String, dynamic> json) {
+    showProofColumn = json['show_proof_column'] == true;
     message = json['message'];
     success = json['success'];
     if (json['data'] != null) {
@@ -233,6 +238,8 @@ class TransactionHistoryController extends GetxController {
 
   // Transactions list from /api/user/transactions
   var userTransactions = <Data>[].obs;
+
+  final showProofColumn = false.obs;
 
   bool get isLoadingMore => _isLoading.value;
 
@@ -498,6 +505,7 @@ class TransactionHistoryController extends GetxController {
         // update pagination info
         currentPage = transactionResponse.pagination?.currentPage ?? 1;
         lastPage = transactionResponse.pagination?.lastPage ?? 1;
+        showProofColumn.value = transactionResponse.showProofColumn;
 
         dev.log(
           '═══════════════════════════════════════════════════════════',

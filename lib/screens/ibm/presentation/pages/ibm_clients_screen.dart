@@ -1376,22 +1376,31 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
         (youData['name'] ??
                 youData['partner_name'] ??
                 youData['username'] ??
+                summary['name'] ??
                 'You · ibm master chain')
             .toString();
     final role = youData['type']?.toString() ?? 'Master IB';
-    final direct = youData['direct'] ?? summary['direct'] ?? 3;
+    final direct = youData['direct'] ?? summary['direct'] ?? 0;
     final totalSubs =
-        youData['sub_ibs'] ?? summary['total'] ?? summary['sub_ibs'] ?? 3;
+        youData['sub_ibs'] ?? summary['total'] ?? summary['sub_ibs'] ?? 0;
     final earned = (double.tryParse(
               (youData['earned'] ??
                       summary['earned'] ??
                       summary['you_earned'] ??
-                      0.09)
+                      0)
                   .toString(),
             ) ??
-            0.09)
+            0)
         .toStringAsFixed(2);
-    final myId = youData['partner_user_id'] ?? youData['user_id'] ?? 38;
+    // network-tree has no `you` block; the logged-in IB's id comes from
+    // GET /portal/network/tree-summary → data.ib_user_id.
+    final myId = int.tryParse(
+      (youData['partner_user_id'] ??
+              youData['user_id'] ??
+              summary['ib_user_id'] ??
+              '')
+          .toString(),
+    );
 
     return Container(
       margin: EdgeInsets.only(bottom: 8.h),
@@ -1493,10 +1502,10 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                     SizedBox(width: 8.w),
                     GestureDetector(
                       onTap: () {
-                        final id = int.tryParse(myId.toString()) ?? 38;
+                        if (myId == null) return;
                         Get.to(
                           () => IbmClientProfileScreen(
-                            clientId: id,
+                            clientId: myId,
                             clientName: name,
                             isYou: true,
                           ),

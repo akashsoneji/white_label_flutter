@@ -997,11 +997,11 @@ class _ProMasterCardWrapper extends StatelessWidget {
           item: m,
           onTap: () {
             HapticFeedback.selectionClick();
-            Get.to(() => MasterDetailsScreen(masterCode: m.masterCode));
+            Get.to(() => MasterDetailsScreen(masterCode: m.masterCode, planId: m.planId));
           },
           onCopy: () {
             HapticFeedback.selectionClick();
-            Get.to(() => MasterDetailsScreen(masterCode: m.masterCode));
+            Get.to(() => MasterDetailsScreen(masterCode: m.masterCode, planId: m.planId));
           },
         ),
       );
@@ -1035,19 +1035,24 @@ class _ProMasterCard extends StatelessWidget {
     final riskScore = item.riskScore ?? 0;
     final hasPlan = item.canCopy;
     final serverType = item.serverType.isNotEmpty ? item.serverType : 'mt5';
+    // API numbers can be int (4) or float (4.45); keep decimals only when present.
+    String trimDecimals(num value) {
+      final isWhole = value == value.truncate();
+      return value.toStringAsFixed(isWhole ? 0 : 2);
+    }
+
     final commission = item.commissionPercentage;
     final commissionPct =
-        commission == null ? '—' : '${commission.toStringAsFixed(0)}%';
+        commission == null ? '—' : '${trimDecimals(commission)}%';
     final displayName = item.nickname.isNotEmpty ? item.nickname : item.name;
     final planLabel = item.planName.isNotEmpty && item.planName != displayName
         ? item.planName
         : null;
 
     final gainText = '${gain >= 0 ? '+' : ''}${gain.toStringAsFixed(2)}%';
-    final drawdownText = '-${drawdown.toStringAsFixed(0)}%';
+    final drawdownText = '-${trimDecimals(drawdown)}%';
     final pnlText = _formatPnl(pnl);
-    final minInvestText =
-        minInvest == 0 ? '\$0' : '\$${minInvest.toStringAsFixed(0)}';
+    final minInvestText = '\$${trimDecimals(minInvest)}';
     final pnlColor = pnl >= 0 ? const Color(0xFF10B981) : const Color(0xFFEF4444);
     final isGainPositive = gain >= 0;
 
@@ -1169,7 +1174,7 @@ class _ProMasterCard extends StatelessWidget {
                                       ? TranslationUtils.trArgs('copy_trading_days_active', {
                                           'days': '$activeDays',
                                         })
-                                      : '$planLabel • ${TranslationUtils.trArgs('copy_trading_days_active', {
+                                      : '$planLabel ${TranslationUtils.trArgs('copy_trading_days_active', {
                                           'days': '$activeDays',
                                         })}',
                                   maxLines: 1,
@@ -1316,23 +1321,26 @@ class _ProMasterCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(width: 8.w),
-                    Icon(
-                      Icons.people_alt_rounded,
-                      size: 14.sp,
-                      color: AppColors.textGrey,
-                    ),
-                    SizedBox(width: 3.w),
-                    Text(
-                      TranslationUtils.trArgs('copy_trading_count_copiers', {
-                        'count': '$totalCopiers',
-                      }),
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 11.sp,
+                    // Master can hide copier counts (`hide_copiers`).
+                    if (!item.hideCopiers) ...[
+                      SizedBox(width: 8.w),
+                      Icon(
+                        Icons.people_alt_rounded,
+                        size: 14.sp,
                         color: AppColors.textGrey,
-                        fontWeight: FontWeight.w600,
                       ),
-                    ),
+                      SizedBox(width: 3.w),
+                      Text(
+                        TranslationUtils.trArgs('copy_trading_count_copiers', {
+                          'count': '$totalCopiers',
+                        }),
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 11.sp,
+                          color: AppColors.textGrey,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                     const Spacer(),
                     ElevatedButton(
                       onPressed: hasPlan ? onCopy : null,

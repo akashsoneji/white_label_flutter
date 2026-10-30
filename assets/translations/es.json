@@ -2909,6 +2909,9 @@
   "my_plans_tab_confirm_pause_copying": "¿Seguro que deseas pausar la copia de \"{plan}\"? La copia quedará suspendida hasta que la reanudes.",
   "my_plans_tab_state_updated_successfully": "Estado actualizado correctamente",
   "my_plans_tab_failed_to_update_copying_state": "No se pudo actualizar el estado de copia del plan",
+  "my_plans_tab_total_plans": "Planes totales",
+  "my_plans_tab_subscription_fee": "Cuota de suscripción",
+  "my_plans_tab_total_copiers": "Copiadores totales",
   "trader_details_screen_floating_profit": "Beneficio flotante",
   "trader_details_screen_master_traders_bonus": "Bono del Master Trader",
   "trader_details_screen_maximum_unrealised_loss": "Pérdida máxima no realizada",
@@ -3965,6 +3968,7 @@
   "auth_controller_reset_password_error": "Error al restablecer la contraseña",
   "auth_controller_send_otp_error": "Error al enviar el OTP",
   "copy_trading_master": "Master",
+  "copy_trading_by_master": "por",
   "copy_trading_minimum_investment_value": "Inversión mínima {amount}",
   "copy_trading_no_strategy_description_provided": "No se proporcionó descripción de la estrategia.",
   "copy_trading_risk_value": "Riesgo {score}",
@@ -4950,5 +4954,6 @@
   "support_contact_email": "Escríbenos",
   "support_contact_open_failed": "No se pudo abrir esta opción de contacto",
   "company_footer_disclaimer_title": "Aviso de riesgo",
-  "platforms_web_trading": "Trading web"
+  "platforms_web_trading": "Trading web",
+  "ibm_person_commission_by_symbol": "COMISIÓN POR SÍMBOLO"
 }

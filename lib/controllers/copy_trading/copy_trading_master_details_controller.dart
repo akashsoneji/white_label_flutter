@@ -158,6 +158,8 @@ class CopyTradingMasterProfile {
   final int? riskScore;
   final String selectedPlanId;
   final String profileScope;
+  /// Master chose to hide copier counts (`hide_copiers`).
+  final bool hideCopiers;
   final List<CopyTradingPlan> plans;
   final List<CopyTradingTradeItem> tradeHistory;
   final List<CopyTradingTradeItem> openPositions;
@@ -184,6 +186,7 @@ class CopyTradingMasterProfile {
     required this.riskScore,
     required this.selectedPlanId,
     required this.profileScope,
+    this.hideCopiers = false,
     required this.plans,
     required this.tradeHistory,
     required this.openPositions,
@@ -230,6 +233,7 @@ class CopyTradingMasterProfile {
       riskScore: _parseInt(json['risk_score'], 0),
       selectedPlanId: (json['selected_plan_id']?.toString() ?? ''),
       profileScope: (json['profile_scope'] ?? 'all').toString(),
+      hideCopiers: json['hide_copiers'] == true,
       plans: plansList,
       tradeHistory: tradeHistoryList,
       openPositions: openPositionsList,
@@ -240,7 +244,12 @@ class CopyTradingMasterProfile {
 
 class CopyTradingMasterDetailsController extends GetxController {
   final String masterCode;
-  CopyTradingMasterDetailsController({required this.masterCode});
+  /// [initialPlanId] opens the profile scoped to one plan (`plan_id`), as the
+  /// web does when a plan card is tapped on Explore. Empty = all plans.
+  CopyTradingMasterDetailsController({
+    required this.masterCode,
+    String initialPlanId = '',
+  }) : selectedPlanId = initialPlanId.obs;
 
   final RxBool isLoading = false.obs;
   final RxBool isTimeframeLoading = false.obs;
@@ -255,7 +264,7 @@ class CopyTradingMasterDetailsController extends GetxController {
   final Rxn<CopyTradingMasterProfile> profile = Rxn<CopyTradingMasterProfile>();
   final RxList<CopyTradingTradeItem> tradeHistory = <CopyTradingTradeItem>[].obs;
   final RxString selectedTimeframe = '3m'.obs;
-  final RxString selectedPlanId = ''.obs;
+  final RxString selectedPlanId;
 
   int tradeHistoryPage = 1;
   final RxBool hasMoreTradeHistory = true.obs;

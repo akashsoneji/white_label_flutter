@@ -2909,6 +2909,9 @@
   "my_plans_tab_confirm_pause_copying": "确定要暂停“{plan}”的跟单吗？在您恢复之前跟单将被中止。",
   "my_plans_tab_state_updated_successfully": "状态更新成功",
   "my_plans_tab_failed_to_update_copying_state": "更新方案跟单状态失败",
+  "my_plans_tab_total_plans": "方案总数",
+  "my_plans_tab_subscription_fee": "订阅费",
+  "my_plans_tab_total_copiers": "跟单者总数",
   "trader_details_screen_floating_profit": "浮动盈亏",
   "trader_details_screen_master_traders_bonus": "带单交易员赠金",
   "trader_details_screen_maximum_unrealised_loss": "最大未实现亏损",
@@ -3965,6 +3968,7 @@
   "auth_controller_reset_password_error": "重置密码出错",
   "auth_controller_send_otp_error": "发送验证码出错",
   "copy_trading_master": "带单交易员",
+  "copy_trading_by_master": "来自",
   "copy_trading_minimum_investment_value": "最低投资额 {amount}",
   "copy_trading_no_strategy_description_provided": "未提供策略说明。",
   "copy_trading_risk_value": "风险 {score}",
@@ -4950,5 +4954,6 @@
   "support_contact_email": "发送邮件",
   "support_contact_open_failed": "无法打开此联系方式",
   "company_footer_disclaimer_title": "风险免责声明",
-  "platforms_web_trading": "网页交易"
+  "platforms_web_trading": "网页交易",
+  "ibm_person_commission_by_symbol": "按品种佣金"
 }

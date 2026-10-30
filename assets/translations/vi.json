@@ -2909,6 +2909,9 @@
   "my_plans_tab_confirm_pause_copying": "Bạn có chắc chắn muốn tạm dừng sao chép cho \"{plan}\" không? Việc sao chép sẽ bị tạm ngưng cho đến khi bạn tiếp tục.",
   "my_plans_tab_state_updated_successfully": "Cập nhật trạng thái thành công",
   "my_plans_tab_failed_to_update_copying_state": "Cập nhật trạng thái sao chép của gói thất bại",
+  "my_plans_tab_total_plans": "Tổng số gói",
+  "my_plans_tab_subscription_fee": "Phí đăng ký",
+  "my_plans_tab_total_copiers": "Tổng người sao chép",
   "trader_details_screen_floating_profit": "Lợi nhuận tạm tính",
   "trader_details_screen_master_traders_bonus": "Thưởng của Master Trader",
   "trader_details_screen_maximum_unrealised_loss": "Lỗ chưa thực hiện tối đa",
@@ -3965,6 +3968,7 @@
   "auth_controller_reset_password_error": "Lỗi đặt lại mật khẩu",
   "auth_controller_send_otp_error": "Lỗi gửi OTP",
   "copy_trading_master": "Master",
+  "copy_trading_by_master": "bởi",
   "copy_trading_minimum_investment_value": "Đầu tư tối thiểu {amount}",
   "copy_trading_no_strategy_description_provided": "Chưa có mô tả chiến lược.",
   "copy_trading_risk_value": "Rủi ro {score}",
@@ -4950,5 +4954,6 @@
   "support_contact_email": "Gửi email cho chúng tôi",
   "support_contact_open_failed": "Không thể mở tùy chọn liên hệ này",
   "company_footer_disclaimer_title": "Tuyên bố miễn trừ rủi ro",
-  "platforms_web_trading": "Giao dịch trên web"
+  "platforms_web_trading": "Giao dịch trên web",
+  "ibm_person_commission_by_symbol": "HOA HỒNG THEO MÃ"
 }

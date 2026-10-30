@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import 'master_settlements_screen.dart';
+
 /// Mobile-friendly Master Dashboard "Overview" tab.
 ///
 /// Mirrors the latest web design:
@@ -180,7 +182,8 @@ String _fmtMoney(num v) => _money.format(v);
 String _fmtDate(String? iso) {
   if (iso == null || iso.isEmpty) return '—';
   try {
-    return _shortDate.format(DateTime.parse(iso));
+    // API timestamps are UTC (`+00:00`); show them in the device's time zone.
+    return _shortDate.format(DateTime.parse(iso).toLocal());
   } catch (_) {
     return iso;
   }
@@ -843,9 +846,12 @@ class _ChartXAxis extends StatelessWidget {
 
   /// Compact a backend label like "2026-06-01 00:00" → "Jun 01".
   /// Falls back to the original string if parsing fails.
-  String _short(String raw) {
+  String _short(String raw, {required bool intraday}) {
     final dt = DateTime.tryParse(raw);
     if (dt == null) return raw;
+    // "Today" buckets are hourly within one date, so the day would repeat on
+    // every tick; show the bucket time instead.
+    if (intraday) return _time.format(dt);
     const monthKeys = [
       'month_short_jan',
       'month_short_feb',
@@ -878,13 +884,19 @@ class _ChartXAxis extends StatelessWidget {
       picks.add(((labels.length - 1) * i / (tickCount - 1)).round());
     }
     final indices = picks.toList()..sort();
+    final first = DateTime.tryParse(labels.first);
+    final last = DateTime.tryParse(labels.last);
+    final intraday =
+        first != null &&
+        last != null &&
+        DateUtils.isSameDay(first, last);
 
     return Row(
       children: [
         for (var n = 0; n < indices.length; n++)
           Expanded(
             child: Text(
-              _short(labels[indices[n]]),
+              _short(labels[indices[n]], intraday: intraday),
               maxLines: 1,
               overflow: TextOverflow.clip,
               textAlign:
@@ -1154,102 +1166,261 @@ class _PlanPerformanceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            TranslationUtils.tr('master_dashboard_overview_tab_plan_performance'),
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  TranslationUtils.tr('master_dashboard_overview_tab_plan_performance'),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              if (plans.isNotEmpty)
+                _CountBadge(count: plans.length),
+            ],
           ),
-          SizedBox(height: 4),
+          SizedBox(height: 10),
           if (plans.isEmpty)
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
               child: Text(
                 TranslationUtils.tr('master_dashboard_overview_tab_no_plans_yet'),
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.textTheme.bodyMedium?.color?.withValues(
-                    alpha: 0.6,
-                  ),
+                  color: AppColors.textGrey,
                 ),
               ),
             )
           else
-            ...plans.map((p) => _PlanRow(plan: p)),
+            for (var i = 0; i < plans.length; i++) ...[
+              if (i > 0) SizedBox(height: 10),
+              _PlanRow(plan: plans[i]),
+            ],
         ],
       ),
     );
   }
 }
 
+class _CountBadge extends StatelessWidget {
+  const _CountBadge({required this.count});
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        '$count',
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: AppColors.primary,
+        ),
+      ),
+    );
+  }
+}
+
+/// One plan: initial avatar · name + status chip · ROI pill, then AUM and
+/// copiers underneath. Everything flexes so long names ellipsize on narrow
+/// phones and the tile stretches on folds/tablets.
 class _PlanRow extends StatelessWidget {
   const _PlanRow({required this.plan});
   final DashboardPlanRow plan;
 
   Color get _roiColor {
-    if (plan.roiPct > 0) return const Color(0xFF1DB954);
-    if (plan.roiPct < 0) return const Color(0xFFE5484D);
-    return const Color(0xFF6B7280);
+    if (plan.roiPct > 0) return AppColors.green;
+    if (plan.roiPct < 0) return AppColors.error;
+    return AppColors.textGrey;
   }
+
+  Color get _statusColor {
+    switch (plan.status.toLowerCase()) {
+      case 'approved':
+      case 'active':
+        return AppColors.green;
+      case 'rejected':
+      case 'inactive':
+        return AppColors.error;
+      default:
+        return AppColors.warning;
+    }
+  }
+
+  String get _statusLabel => plan.status.isEmpty
+      ? '—'
+      : plan.status[0].toUpperCase() + plan.status.substring(1).toLowerCase();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final positive = plan.roiPct >= 0;
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+    final initial =
+        plan.planName.trim().isEmpty ? '?' : plan.planName.trim()[0].toUpperCase();
+
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.tradeBackgroundCenterColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.12)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  initial,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      plan.planName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 3),
+                    Row(
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: _statusColor,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        SizedBox(width: 5),
+                        Text(
+                          _statusLabel,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: _statusColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 8),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _roiColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Directionality(
+                  textDirection: ui.TextDirection.ltr,
+                  child: Text(
+                    '${positive ? '+' : ''}${plan.roiPct.toStringAsFixed(2)}%',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: _roiColor,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _PlanMiniStat(
+                  icon: Icons.account_balance_wallet_outlined,
+                  label: TranslationUtils.tr('pmam_manager_dashboard_screen_total_aum'),
+                  value: _fmtMoney(plan.totalCapital),
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: _PlanMiniStat(
+                  icon: Icons.people_alt_outlined,
+                  label: TranslationUtils.tr('my_plans_tab_copiers'),
+                  value: '${plan.activeCopiersCount}',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlanMiniStat extends StatelessWidget {
+  const _PlanMiniStat({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Row(
         children: [
+          Icon(icon, size: 16, color: AppColors.textGrey),
+          SizedBox(width: 6),
           Expanded(
-            flex: 3,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  plan.planName,
+                  label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: AppColors.textGrey,
                   ),
                 ),
-                SizedBox(height: 2),
                 Text(
-                  plan.status,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: AppColors.textGreyDark,
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                    fontFeatures: [FontFeature.tabularFigures()],
                   ),
                 ),
               ],
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              _fmtMoney(plan.totalCapital),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontFeatures: [FontFeature.tabularFigures()],
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              '${plan.activeCopiersCount}',
-              style: theme.textTheme.bodyMedium,
-            ),
-          ),
-          Expanded(
-            child: Directionality(
-              textDirection: ui.TextDirection.ltr,
-              child: Text(
-                '${positive ? '+' : ''}${plan.roiPct.toStringAsFixed(2)}%',
-                textAlign: TextAlign.end,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: _roiColor,
-                  fontFeatures: [FontFeature.tabularFigures()],
-                ),
-              ),
             ),
           ),
         ],
@@ -1275,18 +1446,50 @@ class _PayoutsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            TranslationUtils.tr('ibm_payouts'),
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  TranslationUtils.tr('ibm_payouts'),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () => Get.to(() => const MasterSettlementsScreen()),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        TranslationUtils.tr('pmam_fund_manager_view_view_all'),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 18,
+                        color: AppColors.primary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 12),
           Row(
             children: [
               Expanded(
                 child: _PayoutStat(
+                  icon: Icons.trending_up_rounded,
+                  color: AppColors.green,
                   label: TranslationUtils.tr('copy_trading_earned_window_upper'),
                   value: _fmtMoney(payouts.earnedInWindow),
                 ),
@@ -1294,58 +1497,30 @@ class _PayoutsCard extends StatelessWidget {
               SizedBox(width: 10),
               Expanded(
                 child: _PayoutStat(
+                  icon: Icons.hourglass_bottom_rounded,
+                  color: AppColors.warning,
                   label: TranslationUtils.tr('copy_trading_pending_upper'),
                   value: _fmtMoney(payouts.pending),
                 ),
               ),
             ],
           ),
+          SizedBox(height: 16),
+          _PayoutSection(
+            title: TranslationUtils.tr('copy_trading_upcoming_upper'),
+            emptyText: TranslationUtils.tr(
+              'master_dashboard_overview_tab_no_upcoming_payouts',
+            ),
+            items: payouts.upcoming,
+          ),
           SizedBox(height: 14),
-          Text(
-            TranslationUtils.tr('copy_trading_upcoming_upper'),
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.6,
-              color: AppColors.textPrimary,
+          _PayoutSection(
+            title: TranslationUtils.tr('copy_trading_recent_upper'),
+            emptyText: TranslationUtils.tr(
+              'master_dashboard_overview_tab_no_recent_payouts',
             ),
+            items: payouts.recent,
           ),
-          SizedBox(height: 6),
-          if (payouts.upcoming.isEmpty)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 6),
-              child: Text(
-                TranslationUtils.tr('master_dashboard_overview_tab_no_upcoming_payouts'),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            )
-          else
-            ...payouts.upcoming.map((u) => _PayoutRow(item: u)),
-          SizedBox(height: 10),
-          Text(
-            TranslationUtils.tr('copy_trading_recent_upper'),
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.6,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 6),
-          if (payouts.recent.isEmpty)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 6),
-              child: Text(
-                TranslationUtils.tr('master_dashboard_overview_tab_no_recent_payouts'),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.textTheme.bodySmall?.color?.withValues(
-                    alpha: 0.6,
-                  ),
-                ),
-              ),
-            )
-          else
-            ...payouts.recent.map((r) => _PayoutRow(item: r)),
         ],
       ),
     );
@@ -1353,35 +1528,68 @@ class _PayoutsCard extends StatelessWidget {
 }
 
 class _PayoutStat extends StatelessWidget {
-  const _PayoutStat({required this.label, required this.value});
+  const _PayoutStat({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.value,
+  });
+  final IconData icon;
+  final Color color;
   final String label;
   final String value;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.dividerColor.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(10),
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.6,
-              color: AppColors.textPrimary,
-            ),
+          Row(
+            children: [
+              Container(
+                width: 26,
+                height: 26,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 15, color: color),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  // Two lines so "EARNED (WINDOW)" isn't cut on narrow tiles.
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                    color: AppColors.textGrey,
+                  ),
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 4),
-          Text(
-            value,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: AppColors.textGrey,
+          SizedBox(height: 10),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              value,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+                fontFeatures: [FontFeature.tabularFigures()],
+              ),
             ),
           ),
         ],
@@ -1390,48 +1598,132 @@ class _PayoutStat extends StatelessWidget {
   }
 }
 
-class _PayoutRow extends StatelessWidget {
-  const _PayoutRow({required this.item});
-  final DashboardPayoutItem item;
+class _PayoutSection extends StatelessWidget {
+  const _PayoutSection({
+    required this.title,
+    required this.emptyText,
+    required this.items,
+  });
+  final String title;
+  final String emptyText;
+  final List<DashboardPayoutItem> items;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isPaid = item.status.toLowerCase() == 'paid';
-    final accent = isPaid ? AppColors.successText : AppColors.warningText;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: theme.textTheme.labelSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.6,
+            color: AppColors.textGrey,
+          ),
+        ),
+        SizedBox(height: 6),
+        if (items.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppColors.tradeBackgroundCenterColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              emptyText,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppColors.textGrey,
+              ),
+            ),
+          )
+        else
+          for (var i = 0; i < items.length; i++) ...[
+            if (i > 0)
+              Divider(
+                height: 1,
+                color: AppColors.border.withValues(alpha: 0.12),
+              ),
+            _PayoutRow(item: items[i]),
+          ],
+      ],
+    );
+  }
+}
+
+/// Status icon · status + date · amount. Paid = green, pending = amber,
+/// anything else (failed/cancelled) = red.
+class _PayoutRow extends StatelessWidget {
+  const _PayoutRow({required this.item});
+  final DashboardPayoutItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = item.status.toLowerCase();
+    final (Color color, IconData icon, String label) = switch (status) {
+      'paid' || 'settled' || 'completed' => (
+          AppColors.green,
+          Icons.check_circle_rounded,
+          TranslationUtils.tr('ibm_status_paid'),
+        ),
+      'pending' || 'scheduled' || 'upcoming' => (
+          AppColors.warning,
+          Icons.schedule_rounded,
+          TranslationUtils.tr('ibm_status_pending'),
+        ),
+      _ => (
+          AppColors.error,
+          Icons.error_outline_rounded,
+          item.status.isEmpty ? '—' : item.status.toUpperCase(),
+        ),
+    };
+
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
-          ),
-          SizedBox(width: 8),
-          Text(
-            item.status.toUpperCase(),
-            style: AppTextStyles.bodyText.copyWith(
-              fontWeight: FontWeight.w700,
-              color: accent,
-              fontSize: 11,
-              letterSpacing: 0.6,
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
             ),
+            child: Icon(icon, size: 17, color: color),
           ),
           SizedBox(width: 10),
           Expanded(
-            child: Text(
-              _fmtDate(item.date),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.textTheme.bodyMedium?.color?.withValues(
-                  alpha: 0.7,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
                 ),
-              ),
+                SizedBox(height: 1),
+                Text(
+                  _fmtDate(item.date),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: AppColors.textGrey,
+                  ),
+                ),
+              ],
             ),
           ),
+          SizedBox(width: 8),
           Text(
             _fmtMoney(item.amount),
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+              fontFeatures: [FontFeature.tabularFigures()],
             ),
           ),
         ],
@@ -1457,28 +1749,14 @@ class _RecentTradesCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  TranslationUtils.tr('master_dashboard_overview_tab_recent_trades'),
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              Text(
-                TranslationUtils.tr('master_dashboard_overview_tab_auto_refresh_15s'),
-                style: AppTextStyles.bodyText.copyWith(
-                  color: Color(0xFF2C5FFB),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+          Text(
+            TranslationUtils.tr('master_dashboard_overview_tab_recent_trades'),
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 6),
           if (trades.isEmpty)
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
@@ -1492,24 +1770,29 @@ class _RecentTradesCard extends StatelessWidget {
               ),
             )
           else
-            ...trades.map((t) => _TradeRow(trade: t)),
+            for (var i = 0; i < trades.length; i++) ...[
+              if (i > 0)
+                Divider(
+                  height: 1,
+                  color: AppColors.border.withValues(alpha: 0.12),
+                ),
+              _TradeRow(trade: trades[i]),
+            ],
         ],
       ),
     );
   }
 }
 
+/// One recent trade: side icon · symbol + BUY/SELL chip · date/time/lots · P&L.
+/// Only the P&L has an intrinsic width; everything else flexes, so long
+/// symbols ellipsize instead of wrapping on narrow phones.
 class _TradeRow extends StatelessWidget {
   const _TradeRow({required this.trade});
   final DashboardRecentTrade trade;
 
-  String _timeLabel() {
-    try {
-      return _time.format(DateTime.parse(trade.ts));
-    } catch (_) {
-      return trade.ts;
-    }
-  }
+  /// `ts` is UTC (`+00:00`); null when it can't be parsed.
+  DateTime? get _localTs => DateTime.tryParse(trade.ts)?.toLocal();
 
   String _lotsLabel() {
     final lots = trade.lots;
@@ -1525,70 +1808,97 @@ class _TradeRow extends StatelessWidget {
     return '$sign\$${v.abs().toStringAsFixed(2)}';
   }
 
+  String _metaLabel() {
+    final ts = _localTs;
+    final when = ts == null
+        ? trade.ts
+        : '${_shortDate.format(ts)} · ${_time.format(ts)}';
+    return '$when · ${_lotsLabel()} ${TranslationUtils.tr('trading_order_lots')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isBuy = trade.side.toLowerCase() == 'buy';
-    final isProfit = trade.pnl > 0;
-    final isLoss = trade.pnl < 0;
+    final sideColor = isBuy ? AppColors.green : AppColors.error;
+    final pnlColor = trade.pnl > 0
+        ? AppColors.green
+        : trade.pnl < 0
+            ? AppColors.error
+            : AppColors.textPrimary;
+
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          SizedBox(
-            width: 44,
-            child: Text(
-              _timeLabel(),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
-              ),
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: sideColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              isBuy ? Icons.north_east_rounded : Icons.south_east_rounded,
+              size: 18,
+              color: sideColor,
             ),
           ),
+          SizedBox(width: 10),
           Expanded(
-            flex: 3,
-            child: Text(
-              trade.symbol,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        trade.symbol,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 6),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: sideColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        isBuy ? 'BUY' : 'SELL',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.4,
+                          color: sideColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 2),
+                Text(
+                  _metaLabel(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.textGrey,
+                  ),
+                ),
+              ],
             ),
           ),
-          SizedBox(
-            width: 50,
-            child: Text(
-              isBuy ? 'BUY' : 'SELL',
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.6,
-                color:
-                    isBuy ? const Color(0xFF1DB954) : const Color(0xFFE5484D),
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 60,
-            child: Text(
-              _lotsLabel(),
-              textAlign: TextAlign.right,
-              style: theme.textTheme.bodyMedium,
-            ),
-          ),
-          SizedBox(
-            width: 84,
-            child: Text(
-              _pnlLabel(),
-              textAlign: TextAlign.right,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color:
-                    isProfit
-                        ? const Color(0xFF1DB954)
-                        : isLoss
-                        ? const Color(0xFFE5484D)
-                        : theme.textTheme.bodyMedium?.color,
-                fontFeatures: [FontFeature.tabularFigures()],
-              ),
+          SizedBox(width: 8),
+          Text(
+            _pnlLabel(),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: pnlColor,
+              fontFeatures: [FontFeature.tabularFigures()],
             ),
           ),
         ],

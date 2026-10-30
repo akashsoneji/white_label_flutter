@@ -15,16 +15,22 @@ import 'subscribe_to_plan_screen.dart';
 class MasterDetailsScreen extends StatelessWidget {
   final String masterCode;
   final String? masterNickname;
+  /// Plan tapped on Explore; opens the profile scoped to it (`plan_id`).
+  final int? planId;
   const MasterDetailsScreen({
     super.key,
     required this.masterCode,
     this.masterNickname,
+    this.planId,
   });
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(
-      CopyTradingMasterDetailsController(masterCode: masterCode),
+      CopyTradingMasterDetailsController(
+        masterCode: masterCode,
+        initialPlanId: (planId ?? 0) > 0 ? planId.toString() : '',
+      ),
     );
 
     return Scaffold(
@@ -122,6 +128,14 @@ class _MasterHeroCard extends StatelessWidget {
 
     final sinceDays = profile.withUsDays ?? _daysSince(profile.memberSince);
     final withUs = sinceDays == null ? '' : '${sinceDays}d';
+    final masterLabel =
+        profile.nickname.isNotEmpty ? profile.nickname : profile.name;
+    // Plan-scoped profile (web: plan name as title, "by <master>" below).
+    final selectedPlan = profile.profileScope == 'plan'
+        ? profile.plans
+              .where((p) => p.planId.toString() == profile.selectedPlanId)
+              .firstOrNull
+        : null;
 
     return Container(
       padding: EdgeInsets.all(14.r),
@@ -172,9 +186,7 @@ class _MasterHeroCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      profile.nickname.isNotEmpty
-                          ? profile.nickname
-                          : profile.name,
+                      selectedPlan != null ? selectedPlan.planName : masterLabel,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.bodyText.copyWith(
@@ -183,27 +195,39 @@ class _MasterHeroCard extends StatelessWidget {
                         color: AppColors.textPrimary,
                       ),
                     ),
+                    if (selectedPlan != null) ...[
+                      SizedBox(height: 2.h),
+                      Text(
+                        '${TranslationUtils.tr('copy_trading_by_master')} $masterLabel',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 12.sp,
+                          color: AppColors.textGrey,
+                        ),
+                      ),
+                    ],
                     SizedBox(height: 6.h),
-                    Row(
-                      children: [
-                        Container(
-                          width: 7.r,
-                          height: 7.r,
-                          decoration: const BoxDecoration(
-                            color: AppColors.green,
-                            shape: BoxShape.circle,
-                          ),
+                    // Master code chip (web shows the same next to RISK).
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 2.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.border.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: Text(
+                        profile.masterCode.isNotEmpty
+                            ? profile.masterCode
+                            : masterCode,
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 11.sp,
+                          color: AppColors.textGrey,
+                          fontWeight: FontWeight.w600,
                         ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          TranslationUtils.tr('traders_filter_screen_expert'),
-                          style: AppTextStyles.bodyText.copyWith(
-                            fontSize: 12.sp,
-                            color: AppColors.textGrey,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
@@ -593,7 +617,9 @@ class _PerformanceCard extends StatelessWidget {
                 Expanded(
                   child: _PerfStat(
                     label: TranslationUtils.tr('my_plans_tab_copiers'),
-                    value: profile.totalCopiers.toString(),
+                    value: profile.hideCopiers
+                        ? '—'
+                        : profile.totalCopiers.toString(),
                   ),
                 ),
               ],

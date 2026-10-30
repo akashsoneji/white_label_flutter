@@ -371,7 +371,15 @@ class _PlanHeaderCard extends StatelessWidget {
         .toUpperCase();
   }
 
+  /// Pausing only flips `copying_paused`; `status` stays "approved", so the
+  /// header must read the flag to show the plan as paused.
+  bool get _isPausedApproved {
+    final status = plan.status.toLowerCase();
+    return plan.copyingPaused && (status == 'approved' || status == 'active');
+  }
+
   Color _statusColor() {
+    if (_isPausedApproved) return tokens.warning;
     switch (plan.status.toLowerCase()) {
       case 'approved':
       case 'active':
@@ -388,6 +396,7 @@ class _PlanHeaderCard extends StatelessWidget {
 
   String _statusLabel() {
     if (plan.status.isEmpty) return TranslationUtils.tr('ib_status_unknown');
+    if (_isPausedApproved) return TranslationUtils.tr('copy_trading_paused');
     switch (plan.status.toLowerCase()) {
       case 'approved':
       case 'active':
@@ -405,7 +414,9 @@ class _PlanHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isPaused = plan.status.toLowerCase() == 'paused';
+    // Pause/resume sets `copying_paused`; `status` stays "approved".
+    final isPaused =
+        plan.copyingPaused || plan.status.toLowerCase() == 'paused';
     final isInactive = plan.status.toLowerCase() == 'inactive' ||
         plan.status.toLowerCase() == 'inactivated';
     final isCopyingOn = !plan.copyingPaused;
