@@ -102,6 +102,8 @@ class ApiConstants {
   static const String regulation = '${ajax}regulation';
   static const String kycProfileUpdate = '${ajax}kyc/profile';
   static const String submitUnifiedKyc = '${ajax}kyc/submit-unified';
+  static const String sumsubToken = '${ajax}kyc/sumsub/token';
+  static const String sumsubRefresh = '${ajax}kyc/sumsub/refresh';
   static const String checkMobile = '${ajax}auth/google/check-mobile';
   static const String getWalletData = '${ajax}internaltransfer';
   static const String getWalletDetailsNew = '${ajax}wallet';

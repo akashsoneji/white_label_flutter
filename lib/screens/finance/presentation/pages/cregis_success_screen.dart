@@ -25,12 +25,16 @@ class CregisSuccessScreen extends StatefulWidget {
   /// successful deposit.
   final String tapTimeIso;
 
+  /// Name of the payment method the user picked (e.g. "safepay").
+  final String title;
+
   const CregisSuccessScreen({
     super.key,
     required this.referenceNumber,
     required this.amount,
     required this.checkoutUrl,
     required this.tapTimeIso,
+    this.title = '',
   });
 
   @override
@@ -278,7 +282,9 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
           elevation: 0,
           leading: AppSvgBackButton(onPressed: _confirmCancel),
           title: Text(
-                    TranslationUtils.tr('cregis_success_screen_cregis_payment'),
+                    widget.title.isNotEmpty
+                        ? widget.title
+                        : TranslationUtils.tr('general_deposit'),
             style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 16.sp),
           ),
           centerTitle: true,

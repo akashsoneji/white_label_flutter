@@ -145,7 +145,8 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
 
     bankDetail = widget.object['payment_gateway'];
     if (_isRedirect) {
-      titleString = widget.object['display_name']?.toString() ?? 'Cregis';
+      titleString = widget.object['display_name']?.toString() ??
+          TranslationUtils.tr('general_deposit');
       _initCregisNetworks();
     } else if (_dynamicGatewaySlug.isNotEmpty) {
       titleString = widget.object['display_name']?.toString() ??
@@ -1782,6 +1783,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         gatewayMethodId: widget.object['deposit_slug'],
                         amount: _redirectAmount,
                         mt5AccountId: widget.selectedMT5AccountID,
+                        title: titleString,
                       );
                     } else {
                       controller.createCregisDepositAddress(
@@ -1789,6 +1791,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         amount: _redirectAmount,
                         mt5AccountId: widget.selectedMT5AccountID,
                         requireNetwork: _hasNetworkMap,
+                        title: titleString,
                         depositApi:
                             widget.object['deposit_api']?.toString() ?? '',
                         userInputNetAmount: _hasConversion

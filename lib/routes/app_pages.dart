@@ -644,6 +644,7 @@ class AppPages {
           amount: args?['amount'] ?? '',
           checkoutUrl: args?['checkoutUrl'] ?? '',
           tapTimeIso: args?['tapTimeIso'] ?? '',
+          title: args?['title']?.toString() ?? '',
         );
       },
     ),

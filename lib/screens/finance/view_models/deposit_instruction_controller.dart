@@ -461,6 +461,7 @@ class DepositInstructionController extends GetxController {
     String depositApi = '',
     String userInputNetAmount = '',
     String userInputCurrency = '',
+    String title = '',
   }) async {
     if (requireNetwork && selectedCregisNetwork.value.isEmpty) {
       CustomToastService.showError(
@@ -522,6 +523,7 @@ class DepositInstructionController extends GetxController {
               'referenceNumber': cregisReferenceNumber.value,
               'amount': amount,
               'tapTimeIso': _cregisTapTime!.toIso8601String(),
+              'title': title,
             },
           );
         } else if (cregisDepositAddress.value.isNotEmpty) {
@@ -568,6 +570,7 @@ class DepositInstructionController extends GetxController {
     required String gatewayMethodId,
     required String amount,
     required String mt5AccountId,
+    String title = '',
   }) async {
     if (cregisCheckoutUrl.value.isNotEmpty) {
       _cregisTapTime = DateTime.now();
@@ -578,6 +581,7 @@ class DepositInstructionController extends GetxController {
           'referenceNumber': cregisReferenceNumber.value,
           'amount': amount,
           'tapTimeIso': _cregisTapTime!.toIso8601String(),
+          'title': title,
         },
       );
       return;

@@ -63,6 +63,9 @@ dependencies:
 
   permission_handler: ^13.0.2
 
+  # Sumsub KYC SDK
+  flutter_idensic_mobile_sdk_plugin: ^1.46.1
+
   
   # Date Picker
   intl: ^0.20.2
