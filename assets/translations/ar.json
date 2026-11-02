@@ -1931,6 +1931,11 @@
   "transaction_history_cancelled": "ملغى",
   "transaction_history_completed": "مكتمل",
   "transaction_history_controller_downloading_receipt": "جاري تنزيل الإيصال...",
+  "transaction_history_proof_title": "إثبات الإيداع",
+  "transaction_history_proof_load_failed": "تعذر تحميل الإثبات.",
+  "transaction_history_proof_preview_unavailable": "المعاينة غير متاحة لهذا الملف. قم بتنزيله لعرضه.",
+  "transaction_history_proof_retry": "إعادة المحاولة",
+  "transaction_history_view_proof": "الإثبات",
   "transaction_history_controller_proof_not_available": "الإثبات غير متاح",
   "transaction_history_controller_receipt_downloaded_successfully": "تم تنزيل الإيصال بنجاح",
   "transaction_history_date": "التاريخ",
@@ -4968,5 +4973,9 @@
   "kyc_doc_provider_mode": "تتم عملية التحقق لديك عبر شريك التحقق، لذا لا يمكن تحميل المستندات هنا.",
   "kyc_doc_reupload_hint": "تم رفض بعض المستندات. قم بتحميل الأوجه المرفوضة فقط مرة أخرى.",
   "kyc_doc_status_approved": "مقبول",
-  "kyc_doc_status_pending": "قيد المراجعة"
+  "kyc_doc_status_pending": "قيد المراجعة",
+  "transaction_history_source": "المصدر",
+  "transaction_history_destination": "الوجهة",
+  "transaction_history_transaction_id": "معرّف المعاملة",
+  "transaction_history_updated_date": "تاريخ التحديث"
 }

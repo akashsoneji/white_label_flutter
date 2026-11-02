@@ -1931,6 +1931,11 @@
   "transaction_history_cancelled": "Đã hủy",
   "transaction_history_completed": "Đã hoàn tất",
   "transaction_history_controller_downloading_receipt": "Đang tải biên lai...",
+  "transaction_history_proof_title": "Chứng từ nạp tiền",
+  "transaction_history_proof_load_failed": "Không thể tải chứng từ.",
+  "transaction_history_proof_preview_unavailable": "Không thể xem trước tệp này. Hãy tải xuống để xem.",
+  "transaction_history_proof_retry": "Thử lại",
+  "transaction_history_view_proof": "Chứng từ",
   "transaction_history_controller_proof_not_available": "Không có chứng từ",
   "transaction_history_controller_receipt_downloaded_successfully": "Tải biên lai thành công",
   "transaction_history_date": "Ngày",
@@ -4968,5 +4973,9 @@
   "kyc_doc_provider_mode": "Việc xác minh của bạn do đối tác xác minh xử lý, nên không thể tải giấy tờ lên tại đây.",
   "kyc_doc_reupload_hint": "Một số giấy tờ đã bị từ chối. Chỉ tải lại các mặt bị từ chối.",
   "kyc_doc_status_approved": "Đã duyệt",
-  "kyc_doc_status_pending": "Đang xem xét"
+  "kyc_doc_status_pending": "Đang xem xét",
+  "transaction_history_source": "Nguồn",
+  "transaction_history_destination": "Đích đến",
+  "transaction_history_transaction_id": "Mã giao dịch",
+  "transaction_history_updated_date": "Cập nhật"
 }

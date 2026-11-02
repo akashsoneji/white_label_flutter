@@ -1931,6 +1931,11 @@
   "transaction_history_cancelled": "Dibatalkan",
   "transaction_history_completed": "Selesai",
   "transaction_history_controller_downloading_receipt": "Mengunduh tanda terima...",
+  "transaction_history_proof_title": "Bukti setoran",
+  "transaction_history_proof_load_failed": "Gagal memuat bukti.",
+  "transaction_history_proof_preview_unavailable": "Pratinjau tidak tersedia untuk file ini. Unduh untuk melihatnya.",
+  "transaction_history_proof_retry": "Coba lagi",
+  "transaction_history_view_proof": "Bukti",
   "transaction_history_controller_proof_not_available": "Bukti tidak tersedia",
   "transaction_history_controller_receipt_downloaded_successfully": "Tanda terima berhasil diunduh",
   "transaction_history_date": "Tanggal",
@@ -4968,5 +4973,9 @@
   "kyc_doc_provider_mode": "Verifikasi Anda ditangani oleh mitra verifikasi kami, jadi dokumen tidak dapat diunggah di sini.",
   "kyc_doc_reupload_hint": "Beberapa dokumen ditolak. Unggah ulang hanya sisi yang ditolak.",
   "kyc_doc_status_approved": "Disetujui",
-  "kyc_doc_status_pending": "Sedang ditinjau"
+  "kyc_doc_status_pending": "Sedang ditinjau",
+  "transaction_history_source": "Sumber",
+  "transaction_history_destination": "Tujuan",
+  "transaction_history_transaction_id": "ID Transaksi",
+  "transaction_history_updated_date": "Diperbarui"
 }

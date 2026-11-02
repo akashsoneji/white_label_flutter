@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/screens/finance/presentation/pages/proof_viewer_screen.dart';
 
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/routes/app_pages.dart';
@@ -35,6 +38,9 @@ class _VantageTransactionHistoryScreenState
 
   late AnimationController _filterAnimationController;
   bool _filterExpanded = true;
+
+  /// Cards the user has opened; keyed by [_transactionKey].
+  final Set<String> _expandedIds = <String>{};
 
   final List<String> transactionTypes = [
     'All',
@@ -238,6 +244,7 @@ class _VantageTransactionHistoryScreenState
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
+      scrolledUnderElevation: 0,
       leading: Padding(
         padding: EdgeInsetsDirectional.only(start: 8.w),
         child: AppBackButton(
@@ -769,6 +776,43 @@ class _VantageTransactionHistoryScreenState
     );
   }
 
+  String _transactionKey(Data t) =>
+      t.id ?? t.referenceNumber ?? '${t.createdAt}|${t.amount}';
+
+  void _toggleExpanded(String key) {
+    setState(() {
+      if (!_expandedIds.remove(key)) _expandedIds.add(key);
+    });
+  }
+
+  /// Account the money landed in (or left from): `WA#…` / `TA#…` label when
+  /// the API sends one, else the raw account id.
+  String _accountOf(Data t) {
+    final label = (t.accountLabel ?? '').trim();
+    return label.isNotEmpty ? label : (t.mt5AccountId ?? '').trim();
+  }
+
+  /// Same Source / Destination split as the web table: a deposit flows from
+  /// the payment method into the account, a withdrawal the other way round,
+  /// and a transfer between the user's own accounts.
+  ({String source, String destination}) _flowOf(Data t) {
+    final account = _accountOf(t);
+    final method = (t.paymentMethod ?? '').trim();
+    if (t.isInternalTransfer) {
+      final from = (t.fromAccount ?? '').trim();
+      final to = (t.toAccount ?? '').trim();
+      return (
+        source: from.isNotEmpty ? from : account,
+        destination: to,
+      );
+    }
+    final isWithdrawal =
+        (t.transactionType ?? '').toLowerCase().contains('withdraw');
+    return isWithdrawal
+        ? (source: account, destination: method)
+        : (source: method, destination: account);
+  }
+
   Widget _buildModernTransactionCard(Data transaction) {
     final bool isDeposit = (transaction.transactionType?.toLowerCase() ?? '')
         .contains('deposit');
@@ -802,161 +846,434 @@ class _VantageTransactionHistoryScreenState
 
     final hasReceipt =
         controller.showProofColumn.value &&
+        transaction.hasProof &&
         (transaction.id ?? '').isNotEmpty &&
         !(transaction.amount?.trim().startsWith('-') ?? false) &&
         (transaction.transactionType?.toLowerCase() ?? '') != 'withdrawal';
 
+    final key = _transactionKey(transaction);
+    final isExpanded = _expandedIds.contains(key);
+    final account = _accountOf(transaction);
+
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: VantageUiTokens.surface,
         borderRadius: BorderRadius.circular(VantageUiTokens.radiusMd),
-        border: Border.all(color: VantageUiTokens.borderColor),
+        border: Border.all(
+          color: isExpanded
+              ? AppColors.primary.withValues(alpha: 0.35)
+              : VantageUiTokens.borderColor,
+        ),
         boxShadow: VantageUiTokens.cardShadow,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Row 1: Icon | Type + Date | Amount + Download
-          Row(
-            children: [
-              // Icon
-              Container(
-                width: 40.w,
-                height: 40.h,
-                decoration: BoxDecoration(
-                  color: amountColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: Icon(
-                    transactionIcon(),
-                    color: amountColor,
-                    size: 20.sp,
-                  ),
-                ),
-              ),
-              SizedBox(width: 12.w),
-              // Type and Date
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(VantageUiTokens.radiusMd),
+          onTap: () => _toggleExpanded(key),
+          child: Padding(
+            padding: EdgeInsets.all(14.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Row 1: Icon | Type + Date | Amount + Status
+                Row(
                   children: [
-                    Text(
-                      transaction.transactionType ?? 'N/A',
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                    Container(
+                      width: 40.w,
+                      height: 40.h,
+                      decoration: BoxDecoration(
+                        color: amountColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      child: Center(
+                        child: Icon(
+                          transactionIcon(),
+                          color: amountColor,
+                          size: 20.sp,
+                        ),
+                      ),
                     ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      _formatDateTime(transaction.createdAt ?? ''),
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 11.sp,
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            transaction.transactionType ?? 'N/A',
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 2.h),
+                          Text(
+                            _formatDateTime(transaction.createdAt ?? ''),
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 11.sp,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '$amountPrefix${transaction.amount ?? '0.00'}',
+                          style: AppTextStyles.bodyText.copyWith(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
+                            color: amountColor,
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 2.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor().withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            transaction.status ?? '',
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w600,
+                              color: statusColor(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10.h),
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: VantageUiTokens.borderColor,
+                ),
+                SizedBox(height: 10.h),
+                // Row 2: Reference + Account | Proof | expand chevron
+                Row(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.receipt_outlined,
+                            size: 12.sp,
+                            color: AppColors.textSecondary,
+                          ),
+                          SizedBox(width: 4.w),
+                          Flexible(
+                            child: Text(
+                              transaction.referenceNumber ?? 'N/A',
+                              style: AppTextStyles.bodyText.copyWith(
+                                fontSize: 11.sp,
+                                color: AppColors.textSecondary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (account.isNotEmpty) ...[
+                            SizedBox(width: 8.w),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 6.w,
+                                vertical: 2.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.indigo.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                account,
+                                style: AppTextStyles.bodyText.copyWith(
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.indigo,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    if (hasReceipt) ...[
+                      SizedBox(width: 8.w),
+                      _buildProofButton(transaction.id!),
+                    ],
+                    SizedBox(width: 6.w),
+                    AnimatedRotation(
+                      turns: isExpanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 20.sp,
                         color: AppColors.textSecondary,
                       ),
                     ),
                   ],
                 ),
-              ),
-              // Amount
-              Text(
-                '$amountPrefix${transaction.amount ?? '0.00'}',
-                style: AppTextStyles.bodyText.copyWith(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w700,
-                  color: amountColor,
-                ),
-              ),
-              if (hasReceipt) ...[
-                SizedBox(width: 10.w),
-                GestureDetector(
-                  onTap: () => controller.viewReceipt(transaction.id!),
-                  child: Container(
-                    padding: EdgeInsets.all(6.w),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Icon(
-                      Icons.download_rounded,
-                      size: 16.sp,
-                      color: AppColors.primary,
-                    ),
-                  ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeInOut,
+                  alignment: Alignment.topCenter,
+                  child: isExpanded
+                      ? _buildTransactionDetails(transaction)
+                      : const SizedBox(width: double.infinity),
                 ),
               ],
-            ],
+            ),
           ),
-          SizedBox(height: 8.h),
-          // Row 2: Reference + Account | Status
-          Row(
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.receipt_outlined,
-                      size: 12.sp,
-                      color: AppColors.textSecondary,
-                    ),
-                    SizedBox(width: 4.w),
-                    Flexible(
-                      child: Text(
-                        transaction.referenceNumber ?? 'N/A',
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 11.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if ((transaction.mt5AccountId ?? '').isNotEmpty) ...[
-                      SizedBox(width: 8.w),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 6.w,
-                          vertical: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.indigo.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          transaction.mt5AccountId!,
-                          style: AppTextStyles.bodyText.copyWith(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.indigo,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProofButton(String transactionId) {
+    return InkWell(
+      onTap: () => Get.to(() => ProofViewerScreen(transactionId: transactionId)),
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.visibility_outlined,
+              size: 12.sp,
+              color: AppColors.primary,
+            ),
+            SizedBox(width: 4.w),
+            Text(
+              languageService.tr('transaction_history_view_proof'),
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
               ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                decoration: BoxDecoration(
-                  color: statusColor().withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  transaction.status ?? '',
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w600,
-                    color: statusColor(),
-                  ),
-                ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Expanded part: Source → Destination, then every other web-table column
+  /// that has a value. A value identical to one already shown (e.g. payment
+  /// details repeating the method for commission rows) is not repeated.
+  Widget _buildTransactionDetails(Data t) {
+    final flow = _flowOf(t);
+    final method = (t.paymentMethod ?? '').trim();
+    final paymentDetails = (t.paymentDetails ?? '').trim();
+    final transactionId = (t.transactionId ?? '').trim();
+    final updatedAt = (t.updatedAt ?? '').trim();
+    final reason = (t.rejectReason ?? '').trim();
+    final comment = (t.commentForClient ?? '').trim();
+
+    final showMethod = method.isNotEmpty &&
+        method != flow.source &&
+        method != flow.destination;
+    final showPaymentDetails = paymentDetails.isNotEmpty &&
+        paymentDetails != method;
+
+    return Padding(
+      padding: EdgeInsets.only(top: 12.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (flow.source.isNotEmpty || flow.destination.isNotEmpty)
+            _buildFlowBox(flow),
+          if (showMethod)
+            _buildDetailRow(
+              languageService.tr('deposit_screen_payment_method'),
+              method,
+            ),
+          if (transactionId.isNotEmpty)
+            _buildDetailRow(
+              languageService.tr('transaction_history_transaction_id'),
+              transactionId,
+              copyable: true,
+            ),
+          if (showPaymentDetails)
+            _buildDetailRow(
+              languageService.tr('wallet_screen_payment_details'),
+              paymentDetails,
+            ),
+          if (updatedAt.isNotEmpty)
+            _buildDetailRow(
+              languageService.tr('transaction_history_updated_date'),
+              _formatDateTime(updatedAt),
+            ),
+          if (reason.isNotEmpty)
+            _buildNoteBox(
+              icon: Icons.error_outline_rounded,
+              color: Colors.red,
+              text: '${languageService.tr('order_history_screen_reason')}: $reason',
+            ),
+          if (comment.isNotEmpty)
+            _buildNoteBox(
+              icon: Icons.chat_bubble_outline_rounded,
+              color: AppColors.textSecondary,
+              text: comment,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFlowBox(({String source, String destination}) flow) {
+    Widget side(String label, String value, {required bool alignEnd}) {
+      return Expanded(
+        child: Column(
+          crossAxisAlignment:
+              alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 10.sp,
+                color: AppColors.textSecondary,
               ),
-            ],
+            ),
+            SizedBox(height: 2.h),
+            Text(
+              value.isEmpty ? '—' : value,
+              textAlign: alignEnd ? TextAlign.end : TextAlign.start,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: EdgeInsets.all(10.w),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          side(
+            languageService.tr('transaction_history_source'),
+            flow.source,
+            alignEnd: false,
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
+            child: Icon(
+              Icons.arrow_forward_rounded,
+              size: 16.sp,
+              color: AppColors.primary,
+            ),
+          ),
+          side(
+            languageService.tr('transaction_history_destination'),
+            flow.destination,
+            alignEnd: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, {bool copyable = false}) {
+    return Padding(
+      padding: EdgeInsets.only(top: 10.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 11.sp,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          if (copyable) ...[
+            SizedBox(width: 6.w),
+            InkWell(
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: value));
+                CustomToastService.showSuccess(
+                  message: languageService.tr('deposit_instruction_copied'),
+                );
+              },
+              child: Icon(
+                Icons.copy_rounded,
+                size: 14.sp,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoteBox({
+    required IconData icon,
+    required Color color,
+    required String text,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(top: 10.h),
+      padding: EdgeInsets.all(8.w),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 14.sp, color: color),
+          SizedBox(width: 6.w),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 11.sp,
+                color: color,
+              ),
+            ),
           ),
         ],
       ),

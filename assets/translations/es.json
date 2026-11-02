@@ -1931,6 +1931,11 @@
   "transaction_history_cancelled": "Cancelado",
   "transaction_history_completed": "Completado",
   "transaction_history_controller_downloading_receipt": "Descargando recibo...",
+  "transaction_history_proof_title": "Comprobante de depósito",
+  "transaction_history_proof_load_failed": "No se pudo cargar el comprobante.",
+  "transaction_history_proof_preview_unavailable": "La vista previa no está disponible para este archivo. Descárgalo para verlo.",
+  "transaction_history_proof_retry": "Reintentar",
+  "transaction_history_view_proof": "Comprobante",
   "transaction_history_controller_proof_not_available": "Proof no disponible",
   "transaction_history_controller_receipt_downloaded_successfully": "Recibo descargado exitosamente",
   "transaction_history_date": "Fecha",
@@ -4968,5 +4973,9 @@
   "kyc_doc_provider_mode": "Tu verificación la gestiona nuestro socio de verificación, por lo que no puedes subir documentos aquí.",
   "kyc_doc_reupload_hint": "Algunos documentos fueron rechazados. Vuelve a subir solo las caras rechazadas.",
   "kyc_doc_status_approved": "Aprobado",
-  "kyc_doc_status_pending": "En revisión"
+  "kyc_doc_status_pending": "En revisión",
+  "transaction_history_source": "Origen",
+  "transaction_history_destination": "Destino",
+  "transaction_history_transaction_id": "ID de transacción",
+  "transaction_history_updated_date": "Actualizado"
 }

@@ -6,6 +6,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/utils/trl_helper.dart';
 import '../../../../constants/text_styles.dart';
 import 'package:crm_app/screens/finance/view_models/transaction_history_controller.dart';
+import 'package:crm_app/screens/finance/presentation/pages/proof_viewer_screen.dart';
 import '../../../../routes/app_pages.dart';
 import '../../../../services/language_service.dart';
 import '../../../../widgets/common_loading_widget.dart';
@@ -781,19 +782,51 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     ),
                   ],
 
-                  // Logic Update: Show for ANY transaction with valid ID that is NOT a withdrawal
                   if (controller.showProofColumn.value &&
+                      transaction.hasProof &&
                       (transaction.id ?? '').isNotEmpty &&
                       !(transaction.amount?.trim().startsWith('-') ?? false) &&
                       (transaction.transactionType?.toLowerCase() ?? '') !=
                           'withdrawal') ...[
                     SizedBox(width: 6.w),
                     InkWell(
-                      onTap: () => controller.viewReceipt(transaction.id!),
-                      child: Icon(
-                        Icons.download_sharp,
-                        size: 20.sp,
-                        color: AppColors.primary,
+                      onTap: () => Get.to(
+                        () => ProofViewerScreen(transactionId: transaction.id!),
+                      ),
+                      borderRadius: BorderRadius.circular(6),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 3.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.visibility_outlined,
+                              size: 12.sp,
+                              color: AppColors.primary,
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              languageService.tr(
+                                'transaction_history_view_proof',
+                              ),
+                              style: AppTextStyles.bodyText.copyWith(
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

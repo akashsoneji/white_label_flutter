@@ -1931,6 +1931,11 @@
   "transaction_history_cancelled": "Cancelled",
   "transaction_history_completed": "Completed",
   "transaction_history_controller_downloading_receipt": "Downloading receipt...",
+  "transaction_history_proof_title": "Deposit proof",
+  "transaction_history_proof_load_failed": "Could not load the proof.",
+  "transaction_history_proof_preview_unavailable": "Preview isn't available for this file. Download it to view.",
+  "transaction_history_proof_retry": "Retry",
+  "transaction_history_view_proof": "Proof",
   "transaction_history_controller_proof_not_available": "Proof not available",
   "transaction_history_controller_receipt_downloaded_successfully": "Receipt downloaded successfully",
   "transaction_history_date": "Date",
@@ -4968,5 +4973,9 @@
   "kyc_doc_provider_mode": "Your verification is handled by our verification partner, so documents can't be uploaded here.",
   "kyc_doc_reupload_hint": "Some documents were rejected. Upload only the rejected sides again.",
   "kyc_doc_status_approved": "Approved",
-  "kyc_doc_status_pending": "Under review"
+  "kyc_doc_status_pending": "Under review",
+  "transaction_history_source": "Source",
+  "transaction_history_destination": "Destination",
+  "transaction_history_transaction_id": "Transaction ID",
+  "transaction_history_updated_date": "Updated"
 }

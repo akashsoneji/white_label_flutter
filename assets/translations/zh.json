@@ -1931,6 +1931,11 @@
   "transaction_history_cancelled": "已取消",
   "transaction_history_completed": "已完成",
   "transaction_history_controller_downloading_receipt": "正在下载收据...",
+  "transaction_history_proof_title": "存款凭证",
+  "transaction_history_proof_load_failed": "无法加载凭证。",
+  "transaction_history_proof_preview_unavailable": "此文件无法预览，请下载后查看。",
+  "transaction_history_proof_retry": "重试",
+  "transaction_history_view_proof": "凭证",
   "transaction_history_controller_proof_not_available": "暂无凭证",
   "transaction_history_controller_receipt_downloaded_successfully": "收据下载成功",
   "transaction_history_date": "日期",
@@ -4968,5 +4973,9 @@
   "kyc_doc_provider_mode": "您的认证由我们的认证合作方处理，因此无法在此上传证件。",
   "kyc_doc_reupload_hint": "部分证件被拒绝。请仅重新上传被拒绝的面。",
   "kyc_doc_status_approved": "已通过",
-  "kyc_doc_status_pending": "审核中"
+  "kyc_doc_status_pending": "审核中",
+  "transaction_history_source": "来源",
+  "transaction_history_destination": "目标账户",
+  "transaction_history_transaction_id": "交易ID",
+  "transaction_history_updated_date": "更新时间"
 }

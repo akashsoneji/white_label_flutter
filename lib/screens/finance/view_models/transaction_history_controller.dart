@@ -78,6 +78,7 @@ class Data {
   String? walletId;
   String? rejectReason;
   String? commentForClient;
+  String? updatedAt;
 
   Data({
     this.id,
@@ -102,10 +103,15 @@ class Data {
     this.walletId,
     this.rejectReason,
     this.commentForClient,
+    this.updatedAt,
   });
 
   bool get isInternalTransfer =>
       (transactionType ?? '').toLowerCase().contains('transfer');
+
+  /// True only when the client actually uploaded a proof for this row.
+  bool get hasProof =>
+      (proof ?? '').trim().isNotEmpty || (proofUrl ?? '').trim().isNotEmpty;
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id']?.toString();
@@ -133,6 +139,8 @@ class Data {
     walletId = json['wallet_id']?.toString();
     rejectReason = json['reject_reason']?.toString();
     commentForClient = json['comment_for_client']?.toString();
+    updatedAt =
+        json['updated_at_iso']?.toString() ?? json['updated_at']?.toString();
   }
 
   // USC (US Cent) accounts report `amount` in cents (as a display string like
@@ -858,6 +866,16 @@ class TransactionHistoryController extends GetxController {
     selectedTransactionIndex.value = -1;
   }
 
+  /// Raw file of the client's uploaded deposit proof, via the auth proxy.
+  Future<http.Response> fetchProof(String id) async {
+    final url = ApiConstants.baseUrl + ApiConstants.depositProofProxy + id;
+    final token = await SecureStorageService.getAuthToken();
+    final headers = token != null
+        ? <String, String>{'Authorization': 'Bearer $token'}
+        : <String, String>{};
+    return http.get(Uri.parse(url), headers: headers);
+  }
+
   Future<void> viewReceipt(String id) async {
     if (id.isEmpty) return;
 
@@ -872,25 +890,8 @@ class TransactionHistoryController extends GetxController {
         ),
       );
 
-      final token = await SecureStorageService.getAuthToken();
-      final headers = token != null 
-          ? <String, String>{'Authorization': 'Bearer $token'} 
-          : <String, String>{};
-      
-      // Log request
       final timestamp = DateTime.now().toIso8601String();
-      dev.log('═══════════════════════════════════════════════════════════');
-      dev.log('📤 DIRECT HTTP REQUEST [$timestamp]');
-      dev.log('═══════════════════════════════════════════════════════════');
-      dev.log('Method: GET');
-      dev.log('URL: $url');
-      dev.log('Headers: $headers');
-      dev.log('═══════════════════════════════════════════════════════════');
-      
-      final response = await http.get(
-        Uri.parse(url),
-        headers: headers,
-      );
+      final response = await fetchProof(id);
       
       // Log response
       final statusEmoji = response.statusCode >= 200 && response.statusCode < 300 
