@@ -18,8 +18,11 @@ class PmamService {
     data: {'terms_accepted': true},
   );
 
-  static Future<ApiResponse> getManagerPlans() =>
-      _api.get(endpoint: 'user/pmam/manager/plans');
+  /// 3.3 — `_t` so pull-to-refresh never gets a cached list.
+  static Future<ApiResponse> getManagerPlans() {
+    final t = DateTime.now().millisecondsSinceEpoch;
+    return _api.get(endpoint: 'user/pmam/manager/plans?_t=$t');
+  }
 
   static Future<ApiResponse> createPlan(Map<String, dynamic> body) =>
       _api.post(endpoint: 'user/pmam/manager/plans', data: body);

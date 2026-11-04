@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import '../../../../../constants/color.dart';
 import '../../../../../controllers/pmam/pmam_controller.dart';
 
-/// Centered dialog that mirrors the web "Edit plan" modal.
+/// Bottom sheet for the web "Edit plan" modal.
 ///
 /// When the plan has active investors the API only allows editing
 /// `plan_name`, `strategy_description`, and `risk_information`.
@@ -20,9 +20,13 @@ class EditPlanBottomSheet extends StatefulWidget {
     BuildContext context,
     Map<String, dynamic> plan,
   ) {
-    return showDialog<bool>(
+    return showModalBottomSheet<bool>(
       context: context,
-      barrierDismissible: true,
+      isScrollControlled: true,
+      backgroundColor: AppColors.card,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18.r)),
+      ),
       builder: (_) => EditPlanBottomSheet(plan: plan),
     );
   }
@@ -140,172 +144,264 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: AppColors.card,
-      surfaceTintColor: Colors.transparent,
-      insetPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      titlePadding: EdgeInsetsDirectional.fromSTEB(20.w, 16.h, 8.w, 8.h),
-      contentPadding: EdgeInsetsDirectional.fromSTEB(20.w, 8.h, 20.w, 0),
-      actionsPadding: EdgeInsetsDirectional.fromSTEB(12.w, 8.h, 12.w, 12.h),
-      title: Row(
-        children: [
-          Expanded(
-            child: Text(
-              TranslationUtils.tr('edit_plan_bottom_sheet_edit_plan'),
-              style: AppTextStyles.bodyText.copyWith(
-                color: AppColors.primary,
-                fontSize: 17.sp,
-                fontWeight: FontWeight.w800,
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildHeader(),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 12.h),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_hasActiveInvestors) ...[
+                        _buildLockBanner(),
+                        SizedBox(height: 12.h),
+                      ],
+                      _buildLabel(
+                        TranslationUtils.tr('pmam_edit_plan_plan_name'),
+                        required: true,
+                      ),
+                      _buildField(
+                        controller: _name,
+                        textInputAction: TextInputAction.next,
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) {
+                            return TranslationUtils.tr(
+                                'pmam_edit_plan_plan_name_is_required');
+                          }
+                          return null;
+                        },
+                      ),
+                      if (!_hasActiveInvestors) ...[
+                        SizedBox(height: 12.h),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _buildLabel(TranslationUtils.tr(
+                                      'pmam_edit_plan_commission_percent')),
+                                  _buildField(
+                                    controller: _commission,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                    suffix: '%',
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 10.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _buildLabel(TranslationUtils.tr(
+                                      'trader_details_screen_minimum_investment')),
+                                  _buildField(
+                                    controller: _minInvestment,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                    prefix: '\$ ',
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      SizedBox(height: 12.h),
+                      _buildLabel(TranslationUtils.tr(
+                          'trader_details_screen_strategy_description')),
+                      _buildField(
+                        controller: _strategy,
+                        minLines: 2,
+                        maxLines: 4,
+                      ),
+                      SizedBox(height: 12.h),
+                      _buildLabel(TranslationUtils.tr(
+                          'copy_trading_create_plan_risk_information')),
+                      _buildField(
+                        controller: _risk,
+                        minLines: 2,
+                        maxLines: 4,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
+            _buildActions(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    final name = (widget.plan['plan_name'] ?? '').toString();
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 4.w, 8.h),
+      child: Column(
+        children: [
+          Container(
+            width: 36.w,
+            height: 4.h,
+            decoration: BoxDecoration(
+              color: AppColors.border,
+              borderRadius: BorderRadius.circular(4.r),
+            ),
           ),
-          IconButton(
-            icon: Icon(Icons.close, color: AppColors.textGrey, size: 22.sp),
-            onPressed: () => Navigator.of(context).pop(false),
+          SizedBox(height: 8.h),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      TranslationUtils.tr('edit_plan_bottom_sheet_edit_plan'),
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: AppColors.textPrimary,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    if (name.isNotEmpty)
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bodyText.copyWith(
+                          color: AppColors.textGrey,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: TranslationUtils.tr('general_cancel'),
+                icon: Icon(Icons.close, color: AppColors.textGrey, size: 20.sp),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+            ],
           ),
+          Divider(height: 1, color: AppColors.border.withValues(alpha: 0.3)),
         ],
       ),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_hasActiveInvestors) ...[
-                  _buildLockBanner(),
-                  SizedBox(height: 16.h),
-                ],
-                _buildLabel(TranslationUtils.tr('pmam_edit_plan_plan_name'),
-                    required: true),
-                SizedBox(height: 6.h),
-                _buildField(
-                  controller: _name,
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) {
-                      return TranslationUtils.tr(
-                          'pmam_edit_plan_plan_name_is_required');
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 14.h),
-                _buildLabel(TranslationUtils.tr(
-                    'master_plan_detail_screen_strategy_description')),
-                SizedBox(height: 6.h),
-                _buildField(
-                  controller: _strategy,
-                  maxLines: 3,
-                  minLines: 3,
-                ),
-                SizedBox(height: 14.h),
-                _buildLabel(TranslationUtils.tr(
-                    'copy_trading_create_plan_risk_information')),
-                SizedBox(height: 6.h),
-                _buildField(
-                  controller: _risk,
-                  maxLines: 3,
-                  minLines: 3,
-                ),
-                if (!_hasActiveInvestors) ...[
-                  SizedBox(height: 14.h),
-                  _buildLabel(
-                      TranslationUtils.tr('pmam_edit_plan_commission_percent')),
-                  SizedBox(height: 6.h),
-                  _buildField(
-                    controller: _commission,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    suffix: '%',
-                  ),
-                  SizedBox(height: 14.h),
-                  _buildLabel(TranslationUtils.tr(
-                      'trader_details_screen_minimum_investment')),
-                  SizedBox(height: 6.h),
-                  _buildField(
-                    controller: _minInvestment,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    prefix: '\$',
-                  ),
-                ],
-              ],
-            ),
+    );
+  }
+
+  Widget _buildActions() {
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          border: Border(
+            top: BorderSide(color: AppColors.border.withValues(alpha: 0.3)),
           ),
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _saving ? null : () => Navigator.of(context).pop(false),
-          style: TextButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.r),
-              side: BorderSide(color: AppColors.border),
-            ),
-            foregroundColor: AppColors.textPrimary,
-          ),
-          child: Text(
-            TranslationUtils.tr('general_cancel'),
-            style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w600),
-          ),
-        ),
-        ElevatedButton(
-          onPressed: _saving ? null : _save,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.brandPrimary,
-            foregroundColor: AppColors.onColoredBackground,
-            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            elevation: 0,
-          ),
-          child: _saving
-              ? SizedBox(
-                  width: 16.w,
-                  height: 16.w,
-                  child: const CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed:
+                    _saving ? null : () => Navigator.of(context).pop(false),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: Size(0, 42.h),
+                  side: BorderSide(color: AppColors.border),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
                   ),
-                )
-              : Text(
-                  TranslationUtils.tr('edit_plan_bottom_sheet_save_changes'),
+                ),
+                child: Text(
+                  TranslationUtils.tr('general_cancel'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
-                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              flex: 2,
+              child: ElevatedButton(
+                onPressed: _saving ? null : _save,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.brandPrimary,
+                  foregroundColor: AppColors.onColoredBackground,
+                  minimumSize: Size(0, 42.h),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                ),
+                child: _saving
+                    ? SizedBox(
+                        width: 16.w,
+                        height: 16.w,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.onColoredBackground,
+                        ),
+                      )
+                    : Text(
+                        TranslationUtils.tr(
+                            'edit_plan_bottom_sheet_save_changes'),
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 13.sp,
+                          color: AppColors.onColoredBackground,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildLockBanner() => Container(
-        padding: EdgeInsets.all(12.w),
+        padding: EdgeInsets.all(10.w),
         decoration: BoxDecoration(
-          color: AppColors.error.withValues(alpha: 0.08),
+          color: AppColors.warningText.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(color: AppColors.error.withValues(alpha: 0.18)),
+          border: Border.all(
+            color: AppColors.warningText.withValues(alpha: 0.2),
+          ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.info_outline, size: 18.sp, color: AppColors.error),
+            Icon(Icons.lock_outline, size: 16.sp, color: AppColors.warningText),
             SizedBox(width: 8.w),
             Expanded(
               child: Text(
                 TranslationUtils.tr('pmam_edit_plan_active_investors_lock'),
                 style: AppTextStyles.bodyText.copyWith(
-                  color: AppColors.error,
+                  color: AppColors.warningText,
                   fontSize: 12.sp,
                   height: 1.4,
                   fontWeight: FontWeight.w500,
@@ -316,28 +412,28 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
         ),
       );
 
-  Widget _buildLabel(String text, {bool required = false}) => Row(
-        children: [
-          Text(
-            text,
-            style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.textPrimary,
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w700,
-            ),
+  /// Same size and weight for every label so the form reads evenly.
+  Widget _buildLabel(String text, {bool required = false}) => Padding(
+        padding: EdgeInsets.only(bottom: 6.h),
+        child: Text.rich(
+          TextSpan(
+            text: text,
+            children: [
+              if (required)
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(color: AppColors.error),
+                ),
+            ],
           ),
-          if (required) ...[
-            SizedBox(width: 4.w),
-            Text(
-              '*',
-              style: AppTextStyles.bodyText.copyWith(
-                color: AppColors.error,
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ],
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyles.bodyText.copyWith(
+            color: AppColors.textGrey,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       );
 
   Widget _buildField({
@@ -345,47 +441,47 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
     int maxLines = 1,
     int? minLines,
     TextInputType? keyboardType,
+    TextInputAction? textInputAction,
     String? Function(String?)? validator,
     String? prefix,
     String? suffix,
   }) {
+    OutlineInputBorder border(Color color, [double width = 1]) =>
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: BorderSide(color: color, width: width),
+        );
     return TextFormField(
       controller: controller,
       validator: validator,
       maxLines: maxLines,
       minLines: minLines,
       keyboardType: keyboardType,
-      style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 14.sp),
+      textInputAction: textInputAction,
+      style: AppTextStyles.bodyText.copyWith(
+        color: AppColors.textPrimary,
+        fontSize: 14.sp,
+      ),
       decoration: InputDecoration(
         isDense: true,
         prefixText: prefix,
         suffixText: suffix,
-        prefixStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 14.sp),
-        suffixStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 14.sp),
-        contentPadding:
-            EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+        prefixStyle: AppTextStyles.bodyText.copyWith(
+          color: AppColors.textGrey,
+          fontSize: 14.sp,
+        ),
+        suffixStyle: AppTextStyles.bodyText.copyWith(
+          color: AppColors.textGrey,
+          fontSize: 14.sp,
+        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 11.h),
         filled: true,
-        fillColor: AppColors.background,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.r),
-          borderSide: BorderSide(color: AppColors.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.r),
-          borderSide: BorderSide(color: AppColors.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.r),
-          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.r),
-          borderSide: BorderSide(color: AppColors.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.r),
-          borderSide: BorderSide(color: AppColors.error, width: 1.5),
-        ),
+        fillColor: AppColors.tradeBackgroundCenterColor,
+        border: border(AppColors.border.withValues(alpha: 0.5)),
+        enabledBorder: border(AppColors.border.withValues(alpha: 0.5)),
+        focusedBorder: border(AppColors.primary, 1.5),
+        errorBorder: border(AppColors.error),
+        focusedErrorBorder: border(AppColors.error, 1.5),
       ),
     );
   }

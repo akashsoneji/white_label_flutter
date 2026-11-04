@@ -1,7 +1,8 @@
-import 'package:crm_app/widgets/app_svg_back_button.dart';
+
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -11,6 +12,7 @@ import '../../../../widgets/pmam_bottom_navigation.dart';
 import 'pmam_become_manager_screen.dart';
 import 'pmam_explore_managers_screen.dart';
 import 'pmam_investor_portal_screen.dart';
+import '../../../../routes/app_pages.dart';
 import 'pmam_manager_commissions_screen.dart';
 import 'pmam_manager_dashboard_screen.dart';
 import 'pmam_manager_portal_screen.dart';
@@ -40,6 +42,10 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
   /// • investor → 3 tabs → Explore is at index 1
   static const int _exploreIdxForManager = 3;
   static const int _exploreIdxForInvestor = 1;
+
+  /// Positions in the manager tab set.
+  static const int _dashboardIdx = 0;
+  static const int _myPlansIdx = 1;
 
   int? _idx; // null until first mode is known → then resolves to Explore
   PmamNavMode? _lastMode;
@@ -129,11 +135,19 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
           backgroundColor: AppColors.card,
           elevation: 0,
           centerTitle: false,
-          leading: AppSvgBackButton(
-          onPressed: () => Get.back(closeOverlays: true),
-          iconWidth: 30.w,
-          iconHeight: 30.h,
-        ),
+          // Home closes the whole PAMM stack (plan detail, commissions, …) and
+          // returns to the main shell, which is still on the More tab.
+          leading: IconButton(
+            tooltip: TranslationUtils.tr('more_title'),
+            icon: SvgPicture.asset(
+              'assets/svg/ib_dashboard/home.svg',
+              colorFilter: ColorFilter.mode(
+                AppColors.textPrimary,
+                BlendMode.srcIn,
+              ),
+            ),
+            onPressed: () => Get.until((route) => route.isFirst),
+          ),
           iconTheme: IconThemeData(color: AppColors.textPrimary),
           title: Text(
             _titleFor(mode, safeIdx),
@@ -143,18 +157,43 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
               color: AppColors.textPrimary,
             ),
           ),
+          // Every tab refreshes by pulling down. Commission History lives on
+          // the Dashboard tab only; New Plan on the My Plans tab only.
           actions: [
-            if (mode == PmamNavMode.manager)
+            if (mode == PmamNavMode.manager && safeIdx == _dashboardIdx)
               IconButton(
                 tooltip: TranslationUtils.tr('pmam_commissions_title'),
                 icon: Icon(Icons.payments_outlined, color: AppColors.textPrimary),
-                onPressed: () => Get.to(() => const PmamManagerCommissionsScreen()),
+                onPressed: () =>
+                    Get.to(() => const PmamManagerCommissionsScreen()),
               ),
-            if (mode == PmamNavMode.manager)
-              IconButton(
-                tooltip: TranslationUtils.tr('common_refresh'),
-                icon: Icon(Icons.refresh_rounded, color: AppColors.textPrimary),
-                onPressed: () => _c.loadManagerDashboard(),
+            if (mode == PmamNavMode.manager && safeIdx == _myPlansIdx)
+              Padding(
+                padding: EdgeInsetsDirectional.only(end: 12.w),
+                child: TextButton.icon(
+                  onPressed: () => Get.toNamed(AppPages.PMAM_CREATE_PLAN),
+                  icon: Icon(
+                    Icons.add_rounded,
+                    size: 18.sp,
+                    color: AppColors.onColoredBackground,
+                  ),
+                  label: Text(
+                    TranslationUtils.tr('pmam_manager_portal_screen_new_plan'),
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: AppColors.onColoredBackground,
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    backgroundColor: AppColors.brandPrimary,
+                    padding: EdgeInsets.symmetric(horizontal: 12.w),
+                    minimumSize: Size(0, 34.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ),
+                ),
               ),
           ],
         ),

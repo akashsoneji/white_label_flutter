@@ -8,6 +8,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/pmam/pmam_controller.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/screens/home/more/pmam/pmam_manager_commissions_screen.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:crm_app/services/language_service.dart';
@@ -44,8 +45,12 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
     } else {
       _ctrl = Get.put(PmamController());
     }
-    _ctrl.loadManagerDashboard();
     super.initState();
+    // Built inside the PAMM shell's Obx; touching Rx state synchronously here
+    // throws "setState() called during build".
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _ctrl.loadManagerDashboard();
+    });
   }
 
   String _fmt(dynamic val) {
@@ -194,6 +199,8 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
           delta: hero['earnings']?['delta_pct']?.toString(),
           icon: Icons.payments_outlined,
           sparklineData: hero['earnings']?['series']?['data'],
+          // The dashboard is the only entry point to the Commissions page.
+          onTap: () => Get.to(() => const PmamManagerCommissionsScreen()),
         ),
         _HeroCard(
           title:
@@ -710,13 +717,29 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            TranslationUtils.tr('ibm_payouts'),
-            style: AppTextStyles.bodyText.copyWith(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                TranslationUtils.tr('ibm_payouts'),
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Get.to(() => const PmamManagerCommissionsScreen()),
+                child: Text(
+                  TranslationUtils.tr('pmam_fund_manager_view_view_all'),
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 16.h),
           Row(
@@ -952,6 +975,7 @@ class _HeroCard extends StatelessWidget {
   final IconData icon;
   final dynamic sparklineData;
   final bool deltaIsAbsolute;
+  final VoidCallback? onTap;
 
   const _HeroCard({
     required this.title,
@@ -960,6 +984,7 @@ class _HeroCard extends StatelessWidget {
     required this.icon,
     this.sparklineData,
     this.deltaIsAbsolute = false,
+    this.onTap,
   });
 
   @override
@@ -970,7 +995,7 @@ class _HeroCard extends StatelessWidget {
     String dText = isPositive ? '+${d.toStringAsFixed(1)}' : d.toStringAsFixed(1);
     if (!deltaIsAbsolute) dText += '%';
 
-    return Container(
+    final card = Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: AppColors.card,
@@ -987,7 +1012,11 @@ class _HeroCard extends StatelessWidget {
                 title,
                 style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey, fontWeight: FontWeight.w500),
               ),
-              Icon(icon, size: 16.sp, color: AppColors.primary.withOpacity(0.6)),
+              Icon(
+                onTap != null ? Icons.chevron_right_rounded : icon,
+                size: 16.sp,
+                color: AppColors.primary.withOpacity(0.6),
+              ),
             ],
           ),
           SizedBox(height: 8.h),
@@ -1022,6 +1051,12 @@ class _HeroCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+    if (onTap == null) return card;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: card,
     );
   }
 }

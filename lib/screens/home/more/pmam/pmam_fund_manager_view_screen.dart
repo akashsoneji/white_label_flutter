@@ -533,12 +533,45 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                                 ),
                               ),
                             )
-                          else if (_ctrl.eligibleAccounts.isEmpty)
+                          else if (_ctrl.eligibleAccounts.isEmpty) ...[
                             _sheetNotice(
                               TranslationUtils.tr(
                                   'pmam_no_eligible_investor_account'),
                               AppColors.textGrey,
-                            )
+                            ),
+                            SizedBox(height: 12.h),
+                            // No live account to invest from: close the sheet
+                            // and open the live-account picker. Reopening
+                            // Invest Now reloads the eligible accounts.
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.pop(ctx);
+                                Get.toNamed(AppPages.CHOOSE_ACCOUNT);
+                              },
+                              icon: Icon(
+                                Icons.add_rounded,
+                                size: 18.sp,
+                                color: AppColors.onColoredBackground,
+                              ),
+                              label: Text(
+                                TranslationUtils.tr(
+                                    'create_account_create_button'),
+                                style: AppTextStyles.bodyText.copyWith(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.onColoredBackground,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.brandPrimary,
+                                elevation: 0,
+                                minimumSize: Size(double.infinity, 46.h),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.r),
+                                ),
+                              ),
+                            ),
+                          ]
                           else
                             AppSelectField<Map<String, dynamic>>(
                               value: selectedAccount,

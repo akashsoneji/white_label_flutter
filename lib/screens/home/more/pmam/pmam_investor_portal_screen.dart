@@ -164,10 +164,11 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
             child: CommonLoadingWidget(size: 40, color: AppColors.primary),
           );
         }
-        if (widget.managerCode != null) {
-          return _buildMyInvestmentsTab();
-        }
-        return _buildMyInvestmentsTab();
+        return RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: () async => _ctrl.loadInvestorPortal(),
+          child: _buildMyInvestmentsTab(),
+        );
       }),
     );
   }
@@ -1093,6 +1094,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
         : all.where((i) => i['status'] != 'active').toList();
 
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.all(16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
