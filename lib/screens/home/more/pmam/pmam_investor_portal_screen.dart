@@ -7,10 +7,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/controllers/pmam/pmam_controller.dart';
-import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
-import 'package:crm_app/models/pmam_model.dart';
 import 'package:crm_app/screens/home/more/pmam/pmam_trade_history_screen.dart';
+import 'package:crm_app/screens/home/more/pmam/widgets/pmam_pnl_history_section.dart';
 import 'package:crm_app/utils/app_picker_theme.dart';
 import 'package:crm_app/services/language_service.dart';
 
@@ -41,9 +40,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
   late final PmamController _ctrl;
   late final TabController _tabCtrl;
 
-  String _searchQuery = '';
   String _myFilter = 'all';
-  Timer? _debounce;
 
   String _fmtMoney(dynamic v) {
     final d = double.tryParse((v ?? 0).toString()) ?? 0;
@@ -103,21 +100,12 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
     }
     // Avoid triggering reactive updates during first build.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _ctrl.loadManagersDataTable();
       _ctrl.loadInvestorPortal();
-    });
-  }
-
-  void _onSearchChanged(String value) {
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 400), () {
-      _ctrl.loadManagersDataTable(search: value);
     });
   }
 
   @override
   void dispose() {
-    _debounce?.cancel();
     _tabCtrl.dispose();
     super.dispose();
   }
@@ -310,7 +298,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                   final amt =
                                       double.tryParse(amountCtrl.text.trim()) ??
                                       0;
-                                  if (amt <= 0) return;
+                                  if (amt < 1) return;
                                   final ok = await _ctrl.depositToEnrollment(
                                     pmamInvestorId: pmamInvestorId,
                                     amount: amt,
@@ -380,6 +368,38 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
         );
       },
     );
+  }
+
+  /// All of the user's settled P&L entries (doc 2.9, page 1).
+  Widget _buildPnlHistorySection() {
+    return Obx(
+      () => PmamPnlHistorySection(rows: _ctrl.pnlHistory.toList()),
+    );
+  }
+
+  /// Withdraws a `pending` join request (doc 2.6).
+  Future<void> _confirmCancelRequest(int pmamInvestorId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(TranslationUtils.tr('pmam_cancel_request_title')),
+        content: Text(TranslationUtils.tr('pmam_cancel_request_body')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(TranslationUtils.tr('pmam_keep_request')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              TranslationUtils.tr('pmam_cancel_request'),
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) await _ctrl.cancelJoinRequest(pmamInvestorId);
   }
 
   // ignore: unused_element
@@ -1039,245 +1059,6 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
     );
   }
 
-  Widget _buildFundManagersTab() {
-    return Column(
-      children: [
-        SizedBox(height: 12.h),
-        // Search bar
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(12.r),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.border.withValues(alpha: 0.06),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: TextField(
-              onChanged: (v) {
-                setState(() => _searchQuery = v);
-                _onSearchChanged(v);
-              },
-              style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textPrimary),
-              decoration: InputDecoration(
-          hintText: TranslationUtils.tr(
-              'pmam_investor_portal_screen_search_managers_by_name_or_code'),
-                hintStyle: AppTextStyles.bodyText.copyWith(
-                  fontSize: 14.sp,
-                  color: AppColors.textGrey,
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: AppColors.textGrey,
-                  size: 20.sp,
-                ),
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: 13.h,
-                  horizontal: 16.w,
-                ),
-              ),
-            ),
-          ),
-        ),
-        SizedBox(height: 12.h),
-        // Content
-        Expanded(
-          child: Obx(() {
-            if (_ctrl.isManagersLoading.value) {
-              return Center(
-                child: CommonLoadingWidget(size: 36, color: AppColors.primary),
-              );
-            }
-            final managers = _ctrl.managersList;
-            if (managers.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.person_search_rounded,
-                      size: 48.sp,
-                      color: AppColors.textGrey.withOpacity(0.4),
-                    ),
-                    SizedBox(height: 12.h),
-                    Text(
-                      _searchQuery.isEmpty
-                  ? TranslationUtils.tr('pmam_no_fund_managers_available')
-                  : TranslationUtils.trArgs(
-                      'pmam_no_results_for', {'query': _searchQuery}),
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 14.sp,
-                        color: AppColors.textGrey,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              );
-            }
-            return RefreshIndicator(
-              color: AppColors.primary,
-              onRefresh: () =>
-                  _ctrl.loadManagersDataTable(search: _searchQuery),
-              child: ListView.separated(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                itemCount: managers.length,
-                separatorBuilder: (_, __) => SizedBox(height: 10.h),
-                itemBuilder: (_, i) {
-                  // Map model properties
-                  final PmamManager manager = managers[i];
-                  final name = manager.managerName ??
-                      TranslationUtils.tr('investment_detail_unknown');
-                  final code = manager.managerCode;
-                  final initials = name
-                      .split(' ')
-                      .take(2)
-                      .map((e) => e.isNotEmpty ? e[0].toUpperCase() : '')
-                      .join();
-                  final profit = manager.profitPercentage;
-                  final profitIsPos = profit >= 0;
-                  final totalAum = manager.totalAum.toStringAsFixed(0);
-                  final investorsCount = manager.totalInvestors;
-                  final avgCommission = manager.avgCommission.toStringAsFixed(
-                    0,
-                  );
-                  final memberSince = manager.memberSince ?? '';
-
-                  return GestureDetector(
-                    onTap: () => Get.toNamed(
-                      AppPages.PMAM_MANAGER_DETAIL,
-                      arguments: manager,
-                    ),
-                    child: Container(
-                      padding: EdgeInsets.all(14.w),
-                      decoration: BoxDecoration(
-                        color: AppColors.card,
-                        borderRadius: BorderRadius.circular(12.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.border.withValues(alpha: 0.04),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Header row
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              CircleAvatar(
-                                radius: 22.r,
-                                backgroundColor: AppColors.primary.withOpacity(
-                                  0.15,
-                                ),
-                                child: Text(
-                                  initials,
-                                  style: AppTextStyles.bodyText.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 14.sp,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 12.w),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      name,
-                                      style: AppTextStyles.bodyText.copyWith(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    if (code.isNotEmpty)
-                                      Text(
-                                        code,
-                                        style: AppTextStyles.bodyText.copyWith(
-                                          fontSize: 11.sp,
-                                          color: AppColors.primary,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    if (memberSince.isNotEmpty)
-                                      Text(
-                    TranslationUtils.trArgs(
-                        'pmam_since', {'date': memberSince}),
-                                        style: AppTextStyles.bodyText.copyWith(
-                                          fontSize: 10.sp,
-                                          color: AppColors.textGrey,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                              Icon(
-                                Icons.chevron_right_rounded,
-                                color: AppColors.textGrey,
-                                size: 24.sp,
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 12.h),
-                          // Stats chips
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                _PerfChip(
-                                  label:
-                                      TranslationUtils.tr('pmam_profit_percent'),
-                                  value:
-                                      '${profitIsPos ? '+' : ''}${profit.toStringAsFixed(2)}%',
-                                  color: profitIsPos
-                                      ? AppColors.green
-                                      : AppColors.error,
-                                ),
-                                SizedBox(width: 8.w),
-                                _PerfChip(
-                                    label: TranslationUtils.tr('pmam_aum'),
-                                    value: '\$$totalAum'),
-                                SizedBox(width: 8.w),
-                                _PerfChip(
-                                  label: TranslationUtils.tr('pmam_nav_investors'),
-                                  value: '$investorsCount',
-                                ),
-                                SizedBox(width: 8.w),
-                                _PerfChip(
-                                  label:
-                                      TranslationUtils.tr('general_commission'),
-                                  value: '$avgCommission%',
-                                  color: AppColors.primary,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            );
-          }),
-        ),
-      ],
-    );
-  }
-
   Widget _buildMyInvestmentsTab() {
     var all = _ctrl.enrollments.toList();
     if (widget.managerCode != null) {
@@ -1447,11 +1228,12 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                     double.tryParse((inv['total_pnl'] ?? 0).toString()) ?? 0;
                 final pmamInvestorId =
                     int.tryParse((inv['id'] ?? 0).toString()) ?? 0;
-                final statusColor = status == 'active'
-                    ? AppColors.green
-                    : status == 'pending'
-                    ? AppColors.warningText
-                    : AppColors.textGrey;
+                final statusColor = switch (status) {
+                  'active' => AppColors.green,
+                  'pending' => AppColors.warningText,
+                  'rejected' => AppColors.error,
+                  _ => AppColors.textGrey, // inactive / cancelled
+                };
                 return Container(
                   padding: EdgeInsets.all(14.w),
                   decoration: BoxDecoration(
@@ -1540,7 +1322,11 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                         _fmtMoney(inv['pmam_locked_amount']),
                       ),
                       SizedBox(height: 8.h),
-                      Row(
+                      // Buttons disable while any PAMM call is in flight so a
+                      // double tap can't cancel / unsubscribe twice.
+                      Obx(() {
+                        final busy = _ctrl.isLoading.value;
+                        return Row(
                         children: [
                           Expanded(
                             child: OutlinedButton(
@@ -1570,12 +1356,43 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                               ),
                             ),
                           ),
+                          if (status == 'pending' && pmamInvestorId > 0) ...[
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: busy
+                                    ? null
+                                    : () =>
+                                        _confirmCancelRequest(pmamInvestorId),
+                                style: OutlinedButton.styleFrom(
+                                  side: BorderSide(
+                                    color: AppColors.error.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.r),
+                                  ),
+                                  padding: EdgeInsets.symmetric(vertical: 8.h),
+                                ),
+                                child: Text(
+                                  TranslationUtils.tr('pmam_cancel_request'),
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    color: AppColors.error,
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                           if (status == 'active' && pmamInvestorId > 0) ...[
                             SizedBox(width: 8.w),
                             Expanded(
                               child: OutlinedButton(
-                                onPressed: () =>
-                                    _showAddFundsDialog(pmamInvestorId),
+                                onPressed: busy
+                                    ? null
+                                    : () => _showAddFundsDialog(pmamInvestorId),
                                 style: OutlinedButton.styleFrom(
                                   side: BorderSide(
                                     color: AppColors.primary.withOpacity(0.6),
@@ -1599,8 +1416,9 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                             SizedBox(width: 8.w),
                             Expanded(
                               child: OutlinedButton(
-                                onPressed: () =>
-                                    _confirmUnsubscribe(pmamInvestorId),
+                                onPressed: busy
+                                    ? null
+                                    : () => _confirmUnsubscribe(pmamInvestorId),
                                 style: OutlinedButton.styleFrom(
                                   side: BorderSide(
                                     color: AppColors.error.withValues(
@@ -1624,12 +1442,15 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                             ),
                           ],
                         ],
-                      ),
+                      );
+                      }),
                     ],
                   ),
                 );
               },
             ),
+          SizedBox(height: 14.h),
+          _buildPnlHistorySection(),
           SizedBox(height: 14.h),
           Container(
             decoration: BoxDecoration(
@@ -2076,40 +1897,6 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
               ),
             ),
           SizedBox(height: 40.h),
-        ],
-      ),
-    );
-  }
-}
-
-class _PerfChip extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color? color;
-  const _PerfChip({required this.label, required this.value, this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: AppColors.tradeBackgroundCenterColor,
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: AppTextStyles.bodyText.copyWith(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w700,
-              color: color ?? AppColors.textPrimary,
-            ),
-          ),
-          Text(
-            label,
-            style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey),
-          ),
         ],
       ),
     );

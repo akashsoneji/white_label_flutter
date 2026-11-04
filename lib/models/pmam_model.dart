@@ -51,6 +51,69 @@ class PmamManager {
   }
 }
 
+/// One row of `POST user/pmam/plans/datatable` (doc 1.7) — the Explore feed.
+class PmamExplorePlan {
+  final int id;
+  final String planName;
+  final String managerCode;
+  final String managerName;
+  final String? memberSince;
+  final double minimumInvestment;
+  final double commissionPercentage;
+  final double totalAum;
+  final int activeInvestors;
+  final bool hideInvestors;
+  final double profitPercentage;
+  final double maxDrawdown;
+  final int riskScore;
+  final bool managerBalanceOk;
+  final bool isEnrolled;
+
+  const PmamExplorePlan({
+    required this.id,
+    required this.planName,
+    required this.managerCode,
+    required this.managerName,
+    this.memberSince,
+    this.minimumInvestment = 0,
+    this.commissionPercentage = 0,
+    this.totalAum = 0,
+    this.activeInvestors = 0,
+    this.hideInvestors = false,
+    this.profitPercentage = 0,
+    this.maxDrawdown = 0,
+    this.riskScore = 1,
+    this.managerBalanceOk = true,
+    this.isEnrolled = false,
+  });
+
+  static double _d(dynamic v) => double.tryParse('${v ?? ''}') ?? 0;
+  static bool _b(dynamic v) => v == true || v == 1 || v == '1' || v == 'true';
+
+  factory PmamExplorePlan.fromJson(Map<String, dynamic> json) {
+    final since = (json['member_since'] ?? '').toString();
+    return PmamExplorePlan(
+      id: int.tryParse('${json['id'] ?? ''}') ?? 0,
+      planName: (json['plan_name'] ?? '').toString(),
+      managerCode: (json['manager_code'] ?? '').toString(),
+      managerName: (json['manager_name'] ?? '').toString(),
+      memberSince: since.isEmpty ? null : since,
+      minimumInvestment: _d(json['minimum_investment']),
+      commissionPercentage: _d(json['commission_percentage']),
+      totalAum: _d(json['total_aum']),
+      activeInvestors: int.tryParse('${json['active_investors'] ?? ''}') ?? 0,
+      hideInvestors: _b(json['hide_investors']),
+      profitPercentage: _d(json['profit_percentage']),
+      maxDrawdown: _d(json['max_drawdown']),
+      riskScore: int.tryParse('${json['risk_score'] ?? ''}') ?? 1,
+      // Missing key means the server did not flag a problem.
+      managerBalanceOk: json['manager_balance_ok'] == null ||
+          _b(json['manager_balance_ok']),
+      isEnrolled: _b(json['is_enrolled']),
+    );
+  }
+}
+
 class PmamPlan {
   final int id;
   final int pmamManagerId;
@@ -93,4 +156,79 @@ class PmamPlan {
       isLocked: json['is_locked'] ?? false,
     );
   }
+}
+
+/// One paid add-on from `GET investor/purchase-options` (doc 2.4).
+class PmamPurchaseOption {
+  final int id;
+  final String name;
+  final double feeInUsd;
+  final String description;
+
+  const PmamPurchaseOption({
+    required this.id,
+    required this.name,
+    required this.feeInUsd,
+    required this.description,
+  });
+
+  factory PmamPurchaseOption.fromJson(Map<String, dynamic> json) {
+    return PmamPurchaseOption(
+      id: int.tryParse('${json['id'] ?? ''}') ?? 0,
+      name: (json['name'] ?? '').toString(),
+      feeInUsd: double.tryParse('${json['fee_in_usd'] ?? ''}') ?? 0,
+      description: (json['description'] ?? '').toString(),
+    );
+  }
+}
+
+/// `data` of `GET investor/purchase-options`. The dropdown is shown only when
+/// [enabled] is true.
+class PmamPurchaseOptions {
+  final bool enabled;
+  final List<PmamPurchaseOption> options;
+  final double walletBalance;
+
+  const PmamPurchaseOptions({
+    required this.enabled,
+    required this.options,
+    required this.walletBalance,
+  });
+
+  static const PmamPurchaseOptions none =
+      PmamPurchaseOptions(enabled: false, options: [], walletBalance: 0);
+
+  bool get isAvailable => enabled && options.isNotEmpty;
+
+  factory PmamPurchaseOptions.fromJson(Map<String, dynamic> json) {
+    final raw = json['options'];
+    return PmamPurchaseOptions(
+      enabled: json['enabled'] == true,
+      options: raw is List
+          ? raw
+              .whereType<Map>()
+              .map((e) => PmamPurchaseOption.fromJson(e.cast<String, dynamic>()))
+              .where((o) => o.id > 0)
+              .toList()
+          : const [],
+      walletBalance: double.tryParse('${json['wallet_balance'] ?? ''}') ?? 0,
+    );
+  }
+}
+
+/// Outcome of `POST investor/request-join` (doc 2.5). [shortage] is set only
+/// for the 422 `insufficient_wallet` error; [purchase] only when an add-on was
+/// bought (the server sends `""` otherwise).
+class PmamJoinResult {
+  final bool ok;
+  final String message;
+  final double? shortage;
+  final Map<String, dynamic>? purchase;
+
+  const PmamJoinResult({
+    required this.ok,
+    required this.message,
+    this.shortage,
+    this.purchase,
+  });
 }

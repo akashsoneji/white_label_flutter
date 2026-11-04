@@ -8,6 +8,7 @@ import 'package:crm_app/controllers/pmam/pmam_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/utils/app_picker_theme.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/screens/home/more/pmam/widgets/pmam_pnl_history_section.dart';
 
 class PmamTradeHistoryScreen extends StatefulWidget {
   const PmamTradeHistoryScreen({super.key, required this.enrollment});
@@ -29,6 +30,23 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
   DateTime _to = DateTime.now();
   final ScrollController _listCtrl = ScrollController();
   bool _isLoadingMore = false;
+
+  /// This enrollment's settled P&L (doc 2.9 with `investor_id`).
+  List<Map<String, dynamic>> _pnlRows = const [];
+  bool _pnlLoading = true;
+
+  Future<void> _loadPnl() async {
+    if (_investorId <= 0) {
+      setState(() => _pnlLoading = false);
+      return;
+    }
+    final rows = await _ctrl.loadPnlHistoryFor(_investorId);
+    if (!mounted) return;
+    setState(() {
+      _pnlRows = rows;
+      _pnlLoading = false;
+    });
+  }
 
   String _fmtYmd(DateTime dt) {
     final y = dt.year.toString().padLeft(4, '0');
@@ -71,6 +89,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _load();
+      _loadPnl();
     });
 
     _listCtrl.addListener(() {
@@ -369,6 +388,8 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                   ),
                 );
               }),
+              SizedBox(height: 12.h),
+              PmamPnlHistorySection(rows: _pnlRows, isLoading: _pnlLoading),
               SizedBox(height: 12.h),
               Expanded(
                 child: Obx(() {

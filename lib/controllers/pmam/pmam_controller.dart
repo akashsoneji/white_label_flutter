@@ -6,19 +6,22 @@ import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/models/pmam_model.dart';
 import 'package:crm_app/services/language_service.dart';
 
-/// One row of `GET pmam/managers/search` or `GET pmam/plans/search`.
-/// Both resolve to a manager profile, so [managerCode] is what a tap opens.
+/// One row of `GET pmam/managers/search` (1.3) or `GET pmam/plans/search`
+/// (1.8). Picking one filters the Explore plan table: a manager sets
+/// `manager_code`, a plan sets `plan_id` (its `code` is the plan id).
 class PmamSearchOption {
   final String title;
   final String subtitle;
   final String managerCode;
   final bool isPlan;
+  final int? planId;
 
   const PmamSearchOption({
     required this.title,
     required this.subtitle,
     required this.managerCode,
     required this.isPlan,
+    this.planId,
   });
 
   factory PmamSearchOption.manager(Map<String, dynamic> json) {
@@ -33,10 +36,11 @@ class PmamSearchOption {
 
   factory PmamSearchOption.plan(Map<String, dynamic> json) {
     return PmamSearchOption(
-      title: (json['plan_name'] ?? json['name'] ?? '').toString(),
-      subtitle: (json['manager_name'] ?? json['meta'] ?? '').toString(),
-      managerCode: (json['manager_code'] ?? json['master_code'] ?? '').toString(),
+      title: (json['name'] ?? json['plan_name'] ?? '').toString(),
+      subtitle: (json['meta'] ?? json['manager_name'] ?? '').toString(),
+      managerCode: (json['manager_code'] ?? '').toString(),
       isPlan: true,
+      planId: int.tryParse('${json['code'] ?? json['id'] ?? ''}'),
     );
   }
 }
@@ -51,6 +55,10 @@ class PmamController extends GetxController {
   // ── Manager state ──
   final RxString managerStatus = ''.obs; // pending | approved | rejected | ''
   final RxString managerCode = ''.obs;
+
+  /// `data.master_enrollments_enabled` from manager/status; false means new
+  /// master applications are closed, so Apply is hidden.
+  final RxBool masterEnrollmentsEnabled = true.obs;
 
   final RxMap<String, dynamic> dashboardStats = <String, dynamic>{}.obs;
   final RxList<Map<String, dynamic>> managerPlans =
@@ -85,11 +93,16 @@ class PmamController extends GetxController {
       <Map<String, dynamic>>[].obs;
 
   // ── Investor state ──
-  final RxList<PmamManager> managersList = <PmamManager>[].obs; // from datatable API
-  final RxBool isManagersLoading = false.obs;
-  final RxInt managersTotal = 0.obs;
-  final RxList<Map<String, dynamic>> availablePlans =
-      <Map<String, dynamic>>[].obs;
+  /// Explore feed rows from `POST plans/datatable` (1.7).
+  final RxList<PmamExplorePlan> explorePlans = <PmamExplorePlan>[].obs;
+  final RxBool isExploreLoading = false.obs;
+  final RxString exploreError = ''.obs;
+  final RxInt exploreTotal = 0.obs;
+
+  /// Active Explore filters picked from the search suggestions.
+  final Rxn<PmamSearchOption> exploreManagerFilter = Rxn<PmamSearchOption>();
+  final Rxn<PmamSearchOption> explorePlanFilter = Rxn<PmamSearchOption>();
+
   final RxList<Map<String, dynamic>> myInvestments =
       <Map<String, dynamic>>[].obs; // legacy: currently mirrors fundEntries
   final RxList<Map<String, dynamic>> enrollments =
@@ -135,20 +148,25 @@ class PmamController extends GetxController {
   // MANAGER APIs
   // ══════════════════════════════════════════
 
+  /// `GET manager/status`. "No manager application found" comes back as
+  /// `data: {master_enrollments_enabled}` with no `status`, which leaves
+  /// [managerStatus] empty (= never applied).
   Future<void> loadManagerStatus() async {
     try {
       isLoading.value = true;
       final response = await PmamService.getManagerStatus();
-      if (response.success && response.data != null) {
-        final data = response.data as Map<String, dynamic>;
-        final inner = data['data'];
-        if (inner is Map<String, dynamic>) {
-          managerStatus.value = (inner['status'] ?? '').toString();
-          managerCode.value = (inner['manager_code'] ?? '').toString();
-        } else {
-          managerStatus.value = '';
-          managerCode.value = '';
+      final root = response.data is Map ? response.data as Map : const {};
+      final inner = root['data'];
+      if (inner is Map) {
+        managerStatus.value = (inner['status'] ?? '').toString();
+        managerCode.value = (inner['manager_code'] ?? '').toString();
+        if (inner.containsKey('master_enrollments_enabled')) {
+          masterEnrollmentsEnabled.value =
+              inner['master_enrollments_enabled'] == true;
         }
+      } else if (response.success) {
+        managerStatus.value = '';
+        managerCode.value = '';
       }
     } catch (e) {
       errorMessage.value = e.toString();
@@ -157,6 +175,8 @@ class PmamController extends GetxController {
     }
   }
 
+  /// `POST manager/apply` (doc 3.2). Shows the server's reason on failure
+  /// (IB partner, already applied, applications closed, KYC/profile missing).
   Future<bool> applyAsManager() async {
     try {
       isLoading.value = true;
@@ -171,15 +191,16 @@ class PmamController extends GetxController {
         return true;
       } else {
         CustomToastService.showError(
-          message:
-              response.message ??
-              TranslationUtils.tr('copy_trading_failed_to_submit_application'),
+          message: friendlyError(
+            response.message,
+            TranslationUtils.tr('copy_trading_failed_to_submit_application'),
+          ),
         );
         return false;
       }
     } catch (e) {
       CustomToastService.showError(
-        message: '${TranslationUtils.tr('close_position_error')}: $e',
+        message: TranslationUtils.tr('copy_trading_failed_to_submit_application'),
       );
       return false;
     } finally {
@@ -482,6 +503,25 @@ class PmamController extends GetxController {
     managerPlans.refresh();
   }
 
+  /// `GET manager/plans` — loaded when My Plans, Investors and Commissions
+  /// open (per the client-portal flow). Adds the keys the plan cards read.
+  Future<void> loadManagerPlans() async {
+    try {
+      final response = await PmamService.getManagerPlans();
+      final list = response.data is Map ? (response.data as Map)['data'] : null;
+      if (!response.success || list is! List) return;
+      managerPlans.assignAll(
+        list.whereType<Map>().map((p) {
+          final m = Map<String, dynamic>.from(p);
+          m['total_locked_aum'] = m['total_locked'] ?? m['total_locked_aum'];
+          return m;
+        }).toList(),
+      );
+    } catch (e) {
+      errorMessage.value = e.toString();
+    }
+  }
+
   Future<bool> createPlan(Map<String, dynamic> body) async {
     try {
       isCreatePlanLoading.value = true;
@@ -639,26 +679,65 @@ class PmamController extends GetxController {
   // INVESTOR APIs
   // ══════════════════════════════════════════
 
-  /// Load managers list via datatable POST API (supports server-side search)
-  Future<void> loadManagersDataTable({String search = ''}) async {
+  /// Explore feed (`POST plans/datatable`, doc 1.7), filtered by the picked
+  /// manager / plan. The reply is DataTables-shaped with no `success` key, so
+  /// rows are read straight from `data`.
+  Future<void> loadExplorePlans() async {
     try {
-      isManagersLoading.value = true;
-      final response = await PmamService.getManagersDataTable(search: search);
-      if (response.success && response.data != null) {
-        final d = response.data as Map<String, dynamic>;
-        final list = d['data'];
-        managersTotal.value = (d['recordsTotal'] ?? 0) as int;
-        if (list is List) {
-          managersList.assignAll(
-            list.map((i) => PmamManager.fromJson(i as Map<String, dynamic>)).toList(),
-          );
-        }
+      isExploreLoading.value = true;
+      exploreError.value = '';
+      final response = await PmamService.getPlansDataTable(
+        managerCode: exploreManagerFilter.value?.managerCode,
+        planId: explorePlanFilter.value?.planId,
+      );
+      final body = response.data;
+      final rows = body is Map ? body['data'] : null;
+      if (rows is! List) {
+        exploreError.value = friendlyError(
+          response.message,
+          TranslationUtils.tr('pmam_failed_to_load_plans'),
+        );
+        return;
       }
+      explorePlans.assignAll(
+        rows.whereType<Map>().map(
+              (e) => PmamExplorePlan.fromJson(e.cast<String, dynamic>()),
+            ),
+      );
+      exploreTotal.value =
+          int.tryParse('${(body as Map)['recordsFiltered'] ?? ''}') ??
+              explorePlans.length;
     } catch (e) {
-      errorMessage.value = e.toString();
+      exploreError.value = TranslationUtils.tr('pmam_failed_to_load_plans');
+      if (kDebugMode) debugPrint('[PMAM] loadExplorePlans error: $e');
     } finally {
-      isManagersLoading.value = false;
+      isExploreLoading.value = false;
     }
+  }
+
+  /// Apply a picked search suggestion as an Explore filter and reload.
+  /// A manager pick clears a plan filter of another manager.
+  Future<void> applyExploreFilter(PmamSearchOption option) async {
+    clearSearchOptions();
+    if (option.isPlan) {
+      explorePlanFilter.value = option;
+    } else {
+      exploreManagerFilter.value = option;
+      final plan = explorePlanFilter.value;
+      if (plan != null && plan.managerCode != option.managerCode) {
+        explorePlanFilter.value = null;
+      }
+    }
+    await loadExplorePlans();
+  }
+
+  Future<void> clearExploreFilter({required bool plan}) async {
+    if (plan) {
+      explorePlanFilter.value = null;
+    } else {
+      exploreManagerFilter.value = null;
+    }
+    await loadExplorePlans();
   }
 
   /// Server suggestions for the Explore search box: managers and plans
@@ -673,7 +752,10 @@ class PmamController extends GetxController {
     }
     final responses = await Future.wait([
       PmamService.searchManagers(query),
-      PmamService.searchPlans(query),
+      PmamService.searchPlans(
+        query,
+        managerCode: exploreManagerFilter.value?.managerCode,
+      ),
     ]);
     if (query != _lastSearchQuery) return;
 
@@ -692,6 +774,17 @@ class PmamController extends GetxController {
   void clearSearchOptions() {
     _lastSearchQuery = '';
     searchOptions.clear();
+  }
+
+  /// Server text is shown as-is, except Laravel's raw model-not-found text
+  /// ("No query results for model [...]"), which leaks internals (doc 2.6).
+  static String friendlyError(String? message, String fallback) {
+    final m = (message ?? '').trim();
+    if (m.isEmpty) return fallback;
+    if (m.startsWith('No query results for model')) {
+      return TranslationUtils.tr('pmam_not_found');
+    }
+    return m;
   }
 
   /// Manager's own accounts for the Create Plan picker
@@ -777,26 +870,22 @@ class PmamController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
       final futures = <Future>[
-        PmamService.getAvailablePlans(),
+        PmamService.getPnlHistory(),
         PmamService.getInvestorEnrollments(),
         PmamService.getMyOpenAllocations(),
         PmamService.getMyFundEntries(),
-        if (planId != null) PmamService.getEligibleAccounts(planId),
+        PmamService.getEligibleAccounts(planId),
       ];
       final results = await Future.wait(futures);
 
-      final plansResp = results[0];
-      if (plansResp.success && plansResp.data != null) {
-        final d = plansResp.data as Map<String, dynamic>;
-        final list = d['data'];
-        if (list is List) {
-          availablePlans.assignAll(
-            list.whereType<Map<String, dynamic>>().toList(),
-          );
-        }
-      } else if (!plansResp.success) {
-        errorMessage.value =
-            plansResp.message ?? TranslationUtils.tr('ibm_failed_to_load_plans');
+      // pnl-history is paginated: `data: {data: [...], current_page, ...}`.
+      final pnlResp = results[0];
+      if (pnlResp.success && pnlResp.data is Map) {
+        final page = (pnlResp.data as Map)['data'];
+        final rows = page is Map ? page['data'] : null;
+        pnlHistory.assignAll(
+          rows is List ? rows.whereType<Map<String, dynamic>>() : const [],
+        );
       }
 
       final enrollResp = results[1];
@@ -865,23 +954,19 @@ class PmamController extends GetxController {
             TranslationUtils.tr('pmam_failed_to_load_fund_entries');
       }
 
-      if (planId != null && results.length > 4) {
-        final accountsResp = results[4];
-        if (accountsResp.success && accountsResp.data != null) {
-          final d = accountsResp.data as Map<String, dynamic>;
-          final list = d['data'];
-          if (list is List) {
-            eligibleAccounts.assignAll(
-              list.whereType<Map<String, dynamic>>().toList(),
-            );
-          }
-        } else if (!accountsResp.success) {
-          errorMessage.value =
-              accountsResp.message ??
-              TranslationUtils.tr(
-                'copy_trading_failed_to_load_eligible_accounts',
-              );
+      final accountsResp = results[4];
+      if (accountsResp.success && accountsResp.data != null) {
+        final d = accountsResp.data as Map<String, dynamic>;
+        final list = d['data'];
+        if (list is List) {
+          eligibleAccounts.assignAll(
+            list.whereType<Map<String, dynamic>>().toList(),
+          );
         }
+      } else if (!accountsResp.success) {
+        errorMessage.value =
+            accountsResp.message ??
+            TranslationUtils.tr('copy_trading_failed_to_load_eligible_accounts');
       }
     } catch (e) {
       errorMessage.value = e.toString();
@@ -1054,45 +1139,155 @@ class PmamController extends GetxController {
     }
   }
 
-  Future<bool> requestJoin({
+  /// Add-ons + wallet balance for the Invest drawer (doc 2.4). Falls back to
+  /// [PmamPurchaseOptions.none] so a failure just hides the dropdown.
+  Future<PmamPurchaseOptions> loadPurchaseOptions() async {
+    try {
+      final response = await PmamService.getPurchaseOptions();
+      final data = response.data is Map ? (response.data as Map)['data'] : null;
+      if (response.success && data is Map) {
+        return PmamPurchaseOptions.fromJson(data.cast<String, dynamic>());
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('[PMAM] loadPurchaseOptions error: $e');
+    }
+    return PmamPurchaseOptions.none;
+  }
+
+  /// P&L entries of one enrollment (doc 2.9 `investor_id`), for the
+  /// per-investment screen. Returns an empty list on failure.
+  Future<List<Map<String, dynamic>>> loadPnlHistoryFor(int enrollmentId) async {
+    try {
+      final response =
+          await PmamService.getPnlHistory(enrollmentId: enrollmentId);
+      final page = response.data is Map ? (response.data as Map)['data'] : null;
+      final rows = page is Map ? page['data'] : null;
+      if (response.success && rows is List) {
+        return rows.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList();
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('[PMAM] loadPnlHistoryFor error: $e');
+    }
+    return const [];
+  }
+
+  /// Only `GET investor/enrollments` (doc 2.2) — what the manager profile
+  /// needs to know whether the user already invests with this manager.
+  Future<void> loadEnrollments() async {
+    try {
+      final response = await PmamService.getInvestorEnrollments();
+      final list = response.data is Map ? (response.data as Map)['data'] : null;
+      if (response.success && list is List) {
+        enrollments.assignAll(
+          list.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList(),
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('[PMAM] loadEnrollments error: $e');
+    }
+  }
+
+  /// `POST investor/request-join` (doc 2.5). Toasts are left to the caller so
+  /// the Invest drawer can stay open on a 422 (wallet shortage, stale add-on).
+  Future<PmamJoinResult> requestJoin({
     required int planId,
     required int accountId,
     required double amount,
+    int? purchaseOptionId,
   }) async {
     try {
-      isLoading.value = true;
       final response = await PmamService.requestJoin({
         'pmam_plan_id': planId,
         'investor_account_id': accountId,
         'invested_amount': amount,
+        if (purchaseOptionId != null) 'purchase_option_id': purchaseOptionId,
       });
       if (response.success) {
-        CustomToastService.showSuccess(
-          message: TranslationUtils.tr('pmam_join_request_submitted'),
+        final data = response.data is Map ? (response.data as Map)['data'] : null;
+        final purchase = data is Map ? data['purchase'] : null;
+        await loadEnrollments();
+        return PmamJoinResult(
+          ok: true,
+          message: friendlyError(
+            response.data is Map ? (response.data as Map)['message']?.toString() : null,
+            TranslationUtils.tr('pmam_join_request_submitted'),
+          ),
+          purchase: purchase is Map ? purchase.cast<String, dynamic>() : null,
         );
-        await loadInvestorPortal(planId: planId);
-        return true;
-      } else {
+      }
+      final err = response.data;
+      final isWalletShort = err is Map && err['code'] == 'insufficient_wallet';
+      return PmamJoinResult(
+        ok: false,
+        message: friendlyError(
+          response.message,
+          TranslationUtils.tr('pmam_failed_to_submit_join_request'),
+        ),
+        shortage: isWalletShort
+            ? double.tryParse('${err['shortage'] ?? ''}') ?? 0
+            : null,
+      );
+    } catch (e) {
+      if (kDebugMode) debugPrint('[PMAM] requestJoin error: $e');
+      return PmamJoinResult(
+        ok: false,
+        message: TranslationUtils.tr('pmam_failed_to_submit_join_request'),
+      );
+    }
+  }
+
+  /// Join without add-on, toasting the outcome. Used by the older manager
+  /// detail screen; the Invest drawer calls [requestJoin] directly.
+  Future<bool> joinPlan(int accountId, int planId, double amount) async {
+    final result =
+        await requestJoin(planId: planId, accountId: accountId, amount: amount);
+    if (result.ok) {
+      CustomToastService.showSuccess(message: result.message);
+    } else {
+      CustomToastService.showError(message: result.message);
+    }
+    return result.ok;
+  }
+
+  /// `POST investor/cancel/{id}` for a `pending` request (doc 2.6). The toast
+  /// mentions the add-on refund when `addon_refunded > 0`.
+  Future<bool> cancelJoinRequest(int enrollmentId) async {
+    try {
+      isLoading.value = true;
+      final response = await PmamService.cancelRequest(enrollmentId);
+      if (!response.success) {
         CustomToastService.showError(
-          message:
-              response.message ??
-              TranslationUtils.tr('pmam_failed_to_submit_join_request'),
+          message: friendlyError(
+            response.message,
+            TranslationUtils.tr('pmam_cancel_request_failed'),
+          ),
         );
         return false;
       }
+      final root = response.data is Map ? response.data as Map : const {};
+      final data = root['data'];
+      final refunded = data is Map
+          ? double.tryParse('${data['addon_refunded'] ?? ''}') ?? 0
+          : 0.0;
+      final base = (root['message'] ?? '').toString().trim().isNotEmpty
+          ? root['message'].toString()
+          : TranslationUtils.tr('pmam_request_cancelled');
+      CustomToastService.showSuccess(
+        message: refunded > 0
+            ? '$base ${TranslationUtils.trArgs('pmam_addon_refunded', {'amount': refunded.toStringAsFixed(2)})}'
+            : base,
+      );
+      await loadInvestorPortal();
+      return true;
     } catch (e) {
       CustomToastService.showError(
-        message: '${TranslationUtils.tr('close_position_error')}: $e',
+        message: TranslationUtils.tr('pmam_cancel_request_failed'),
       );
       return false;
     } finally {
       isLoading.value = false;
     }
   }
-
-  // Alias for requestJoin used in UI
-  Future<bool> joinPlan(int accountId, int planId, double amount) =>
-      requestJoin(planId: planId, accountId: accountId, amount: amount);
 
   Future<bool> unsubscribe(int investorId) async {
     try {

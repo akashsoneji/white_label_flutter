@@ -64,6 +64,34 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
       _ctrl.managerStatus.value == 'pending' ||
       _ctrl.managerStatus.value == 'approved';
 
+  /// Rejected users may re-apply; pending/approved users and closed
+  /// applications (`master_enrollments_enabled == false`) may not.
+  bool get _canApply =>
+      !_pmamApplied && _ctrl.masterEnrollmentsEnabled.value;
+
+  /// Banner text + colour for the current manager status, or null.
+  (String, Color)? get _statusNotice {
+    switch (_ctrl.managerStatus.value) {
+      case 'pending':
+        return (
+          TranslationUtils.tr('pmam_manager_status_pending'),
+          AppColors.warningText,
+        );
+      case 'rejected':
+        return (
+          TranslationUtils.tr('pmam_manager_status_rejected'),
+          AppColors.error,
+        );
+    }
+    if (!_ctrl.masterEnrollmentsEnabled.value) {
+      return (
+        TranslationUtils.tr('pmam_manager_applications_closed'),
+        AppColors.textGrey,
+      );
+    }
+    return null;
+  }
+
   Future<void> _submit() async {
     if (!_emailVerified || !_mobileVerified || !_personalInfoDone) {
       Get.snackbar(
@@ -230,6 +258,28 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Obx(() {
+              final notice = _statusNotice;
+              if (notice == null) return const SizedBox.shrink();
+              return Container(
+                width: double.infinity,
+                margin: EdgeInsets.fromLTRB(22.w, 12.h, 22.w, 0),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: notice.$2.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(color: notice.$2.withValues(alpha: 0.3)),
+                ),
+                child: Text(
+                  notice.$1,
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 12.sp,
+                    color: notice.$2,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              );
+            }),
             Obx(
               () => Padding(
                 padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 16.h),
@@ -239,7 +289,9 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
                     width: double.infinity,
                     height: 44.h,
                     child: ElevatedButton(
-                      onPressed: (_termsAccepted && !_ctrl.isLoading.value)
+                      onPressed: (_termsAccepted &&
+                              _canApply &&
+                              !_ctrl.isLoading.value)
                           ? _submit
                           : null,
                       style: ElevatedButton.styleFrom(

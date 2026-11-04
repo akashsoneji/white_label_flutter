@@ -55,7 +55,8 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
 
   Future<void> _loadAll() async {
     await Future.wait([
-      _ctrl.loadManagerDashboard(),
+      _ctrl.loadManagerPlans(),
+      _ctrl.loadManagerEligibleAccounts(),
       _ctrl.loadManagerInvestors(),
     ]);
   }
@@ -663,7 +664,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
       }
       return RefreshIndicator(
         color: AppColors.primary,
-        onRefresh: _ctrl.loadManagerDashboard,
+        onRefresh: _ctrl.loadManagerPlans,
         child: ListView.separated(
           padding: EdgeInsets.all(16.w),
           itemCount: plans.length,

@@ -28,9 +28,10 @@ class _PmamManagerCommissionsScreenState
   void initState() {
     super.initState();
     _scroll.addListener(_onScroll);
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _c.loadManagerCommissions(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _c.loadManagerCommissions();
+      _c.loadManagerPlans();
+    });
   }
 
   @override
