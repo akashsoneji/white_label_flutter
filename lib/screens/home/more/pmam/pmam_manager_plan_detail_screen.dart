@@ -420,6 +420,9 @@ class _RequestCard extends StatelessWidget {
     final amount = req['invested_amount'];
     final status = (req['status'] ?? 'pending').toString();
     final createdAt = req['created_at']?.toString();
+    // API sends "" (not null) for addon_name / addon_fee when no add-on was picked.
+    final addonName = (req['addon_name'] ?? '').toString().trim();
+    final addonFee = req['addon_fee'];
 
     final isPending = status == 'pending';
     final isProcessing = processing.contains(id);
@@ -527,6 +530,13 @@ class _RequestCard extends StatelessWidget {
           SizedBox(height: 10.h),
           _kv(TranslationUtils.tr('pmam_requested_at'),
               _formatDate(createdAt)),
+          if (addonName.isNotEmpty) ...[
+            SizedBox(height: 10.h),
+            _kv(
+              TranslationUtils.tr('pmam_addon'),
+              '$addonName · ${fmtMoney(addonFee)}',
+            ),
+          ],
 
           if (isPending) ...[
             SizedBox(height: 12.h),

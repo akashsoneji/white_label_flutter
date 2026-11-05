@@ -9,6 +9,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/services/language_service.dart';
 
+/// Investor detail for a PAMM master — `GET manager/investors/{id}/detail`
+/// (doc 3.21). Same sections as the web drawer (summary, open trades,
+/// payouts, fund entries), laid out for a phone.
 class PmamManagerInvestorDetailScreen extends StatefulWidget {
   final int investorId;
   final String investorName;
@@ -37,297 +40,17 @@ class _PmamManagerInvestorDetailScreenState
     _load();
   }
 
-  String _fmtMoney(dynamic v) {
-    final n = (v is num) ? v.toDouble() : double.tryParse(v?.toString() ?? '');
-    return '\$${(n ?? 0).toStringAsFixed(2)}';
-  }
-
-  String _fmtPct(dynamic v) {
-    final n = (v is num) ? v.toDouble() : double.tryParse(v?.toString() ?? '');
-    return '${(n ?? 0).toStringAsFixed(2)}%';
-  }
-
-  String _fmtDateLong(DateTime? dt) {
-    if (dt == null) return '-';
-    final months = [
-      TranslationUtils.tr('month_short_jan'),
-      TranslationUtils.tr('month_short_feb'),
-      TranslationUtils.tr('month_short_mar'),
-      TranslationUtils.tr('month_short_apr'),
-      TranslationUtils.tr('month_short_may'),
-      TranslationUtils.tr('month_short_jun'),
-      TranslationUtils.tr('month_short_jul'),
-      TranslationUtils.tr('month_short_aug'),
-      TranslationUtils.tr('month_short_sep'),
-      TranslationUtils.tr('month_short_oct'),
-      TranslationUtils.tr('month_short_nov'),
-      TranslationUtils.tr('month_short_dec'),
-    ];
-    final m = months[(dt.month - 1).clamp(0, 11)];
-    return '$m ${dt.day}, ${dt.year}';
-  }
-
-  TextStyle _labelStyle(BuildContext context) {
-    final theme = Theme.of(context);
-    return theme.textTheme.bodySmall?.copyWith(
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w700,
-          color: AppColors.textGrey,
-        ) ??
-        AppTextStyles.bodyText.copyWith(
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w700,
-          color: AppColors.textGrey,
-        );
-  }
-
-  TextStyle _valueStyle(BuildContext context, {Color? color}) {
-    final theme = Theme.of(context);
-    return theme.textTheme.bodySmall?.copyWith(
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w700,
-          color: color ?? AppColors.textPrimary,
-        ) ??
-        AppTextStyles.bodyText.copyWith(
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w700,
-          color: color ?? AppColors.textPrimary,
-        );
-  }
-
-  Widget _richLabelValue(
-    BuildContext context, {
-    required String label,
-    required String value,
-    Color? valueColor,
-    TextAlign align = TextAlign.start,
-  }) {
-    return RichText(
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      softWrap: false,
-      textAlign: align,
-      text: TextSpan(
-        children: [
-          TextSpan(text: '$label: ', style: _labelStyle(context)),
-          TextSpan(text: value, style: _valueStyle(context, color: valueColor)),
-        ],
-      ),
-    );
-  }
-
-  BoxDecoration _cardDecoration() {
-    return BoxDecoration(
-      color: AppColors.card,
-      borderRadius: BorderRadius.circular(12.r),
-      boxShadow: [
-        BoxShadow(
-          color: AppColors.border.withValues(alpha: 0.05),
-          blurRadius: 10,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    );
-  }
-
-  Widget _openAllocationCard(PmamOpenAllocation a) {
-    final lotText = a.allocatedLot == 0
-        ? '-'
-        : a.allocatedLot
-            .toStringAsFixed(2)
-            .replaceAll(RegExp(r'\.?0+$'), '');
-    final openPriceText = a.openPrice == 0 ? '-' : a.openPrice.toStringAsFixed(5);
-    final openTimeText = _fmtDateLong(a.openTime);
-
-    return Container(
-      decoration: _cardDecoration(),
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Line 1: Symbol + Lot
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  a.symbol.isEmpty ? '-' : a.symbol,
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: false,
-                ),
-              ),
-              SizedBox(width: 10.w),
-              _richLabelValue(
-                context,
-                label: TranslationUtils.tr('scratch_card_screen_lot'),
-                value: lotText,
-                valueColor: AppColors.textPrimary,
-                align: TextAlign.right,
-              ),
-            ],
-          ),
-
-          SizedBox(height: 6.h),
-
-          // Line 2: Open Price + Open Time
-          Row(
-            children: [
-              Expanded(
-                child: _richLabelValue(
-                  context,
-                  label: TranslationUtils.tr('open_price'),
-                  value: openPriceText,
-                  valueColor: AppColors.textPrimary,
-                ),
-              ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: _richLabelValue(
-                  context,
-                  label: TranslationUtils.tr('open_time'),
-                  value: openTimeText,
-                  valueColor: AppColors.textPrimary,
-                  align: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _settlementCard(PmamDistribution d) {
-    final net = d.netProfitCredited;
-    final netColor = net >= 0 ? AppColors.green : AppColors.error;
-    final grossColor =
-        d.grossProfitShare >= 0 ? AppColors.green : AppColors.error;
-    return Container(
-      decoration: _cardDecoration(),
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Line 1: Date + Net
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _fmtDateLong(d.settledAt),
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: false,
-                ),
-              ),
-              SizedBox(width: 10.w),
-              _richLabelValue(
-                context,
-                label: TranslationUtils.tr('pmam_net'),
-                value: _fmtMoney(d.netProfitCredited),
-                valueColor: netColor,
-                align: TextAlign.right,
-              ),
-            ],
-          ),
-
-          SizedBox(height: 6.h),
-
-          // Line 2: Gross + Commission
-          Row(
-            children: [
-              Expanded(
-                child: _richLabelValue(
-                  context,
-                  label: TranslationUtils.tr('pmam_gross'),
-                  value: _fmtMoney(d.grossProfitShare),
-                  valueColor: grossColor,
-                ),
-              ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: _richLabelValue(
-                  context,
-                  label: TranslationUtils.tr('general_commission'),
-                  value: _fmtMoney(d.commissionCharged),
-                  valueColor: d.commissionCharged > 0
-                      ? AppColors.primary
-                      : AppColors.textPrimary,
-                  align: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _fundEntryCard(PmamFundEntry f) {
-    final type = (f.typeLabel.isNotEmpty ? f.typeLabel : f.type).trim();
-    return Container(
-      decoration: _cardDecoration(),
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Line 1: Amount + Type
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _fmtMoney(f.amount),
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: false,
-                ),
-              ),
-              SizedBox(width: 10.w),
-              _richLabelValue(
-                context,
-                label: TranslationUtils.tr('common_type'),
-                value: type.isEmpty ? '-' : type,
-                valueColor: AppColors.textPrimary,
-                align: TextAlign.right,
-              ),
-            ],
-          ),
-
-          SizedBox(height: 6.h),
-
-          // Line 2: Date
-          _richLabelValue(
-            context,
-            label: TranslationUtils.tr('common_date'),
-            value: _fmtDateLong(f.entryTime),
-            valueColor: AppColors.textPrimary,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _load() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+  /// [silent] keeps the current content on screen during pull-to-refresh.
+  Future<void> _load({bool silent = false}) async {
+    if (!silent) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+    }
     try {
       final resp = await PmamService.getManagerInvestorDetail(widget.investorId);
+      if (!mounted) return;
       if (!resp.success || resp.data == null) {
         setState(() {
           _error =
@@ -337,12 +60,13 @@ class _PmamManagerInvestorDetailScreenState
         });
         return;
       }
-
       setState(() {
         _data = PmamManagerInvestorDetailResponse.fromApi(resp.data);
+        _error = null;
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _loading = false;
@@ -350,71 +74,128 @@ class _PmamManagerInvestorDetailScreenState
     }
   }
 
-  Widget _metricCard({
-    required String label,
-    required String value,
-  }) {
-    return Container(
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.border.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+  /// Settlements arrive newest first; group them under one date label so
+  /// the date is not repeated on every row.
+  List<Widget> _payoutGroups(List<PmamDistribution> items) {
+    final groups = <String, List<PmamDistribution>>{};
+    for (final d in items) {
+      groups.putIfAbsent(_fmtDate(d.settledAt), () => []).add(d);
+    }
+    return [
+      for (final group in groups.entries) ...[
+        Padding(
+          padding: EdgeInsets.only(left: 2.w, bottom: 6.h),
+          child: Text(
+            group.key,
+            style: _ts(10.5, FontWeight.w700, AppColors.textGrey),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+        _CardBox(
+          child: Column(
+            children: [
+              for (var i = 0; i < group.value.length; i++)
+                _PayoutTile(item: group.value[i], showDivider: i > 0),
+            ],
+          ),
+        ),
+        SizedBox(height: 8.h),
+      ],
+    ];
+  }
+
+  Widget _content() {
+    final data = _data;
+    if (data == null) return const SizedBox.shrink();
+    final openItems = data.openAllocations;
+    final payouts = data.distributions;
+    final funds = data.fundEntries;
+
+    return RefreshIndicator(
+      color: AppColors.primary,
+      onRefresh: () => _load(silent: true),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 12.h),
         children: [
-          Text(
-            label,
-            style: AppTextStyles.bodyText.copyWith(
-              fontSize: 12.sp,
-              color: AppColors.textGrey,
-              fontWeight: FontWeight.w500,
-            ),
+          _SectionHeader(
+            title: TranslationUtils.tr('master_plan_detail_screen_plan_details'),
           ),
-          SizedBox(height: 8.h),
-          Text(
-            value,
-            style: AppTextStyles.bodyText.copyWith(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w800,
-              color: AppColors.primary,
-            ),
+          _SummaryCard(investor: data.investor),
+          _SectionHeader(
+            title: TranslationUtils.tr('dc_open'),
+            count: openItems.length,
           ),
+          if (openItems.isEmpty)
+            _EmptyCard(text: TranslationUtils.tr('pmam_no_open_positions'))
+          else
+            _CardBox(
+              child: Column(
+                children: [
+                  for (var i = 0; i < openItems.length; i++)
+                    _OpenAllocationTile(item: openItems[i], showDivider: i > 0),
+                ],
+              ),
+            ),
+          _SectionHeader(
+            title: TranslationUtils.tr('ibm_payouts'),
+            count: payouts.length,
+          ),
+          if (payouts.isEmpty)
+            _EmptyCard(text: TranslationUtils.tr('pmam_no_settlements_yet'))
+          else
+            ..._payoutGroups(payouts),
+          _SectionHeader(
+            title: TranslationUtils.tr('pmam_tab_fund_entries'),
+            count: funds.length,
+          ),
+          if (funds.isEmpty)
+            _EmptyCard(text: TranslationUtils.tr('pmam_no_fund_entries'))
+          else
+            _CardBox(
+              child: Column(
+                children: [
+                  for (var i = 0; i < funds.length; i++)
+                    _FundEntryTile(item: funds[i], showDivider: i > 0),
+                ],
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget _emptyHint(String text) {
+  Widget _errorView() {
     return Padding(
-      padding: EdgeInsets.only(bottom: 6.h),
-      child: Text(
-        text,
-        style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textGrey),
+      padding: EdgeInsets.all(12.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(_error!, style: _ts(12.5, FontWeight.w600, AppColors.error)),
+          SizedBox(height: 10.h),
+          ElevatedButton(
+            onPressed: _load,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.brandPrimary,
+              foregroundColor: AppColors.onColoredBackground,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+            ),
+            child: Text(TranslationUtils.tr('common_retry')),
+          ),
+        ],
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final inv = _data?.investor;
-    final invested = inv?.investedAmount ?? 0;
-    final pnl = inv?.totalPnl ?? 0;
-    final currentValue = inv?.currentValue ?? 0;
-    final poolShare = inv?.allocationPct ?? 0;
-
-    // P&L colors are applied inside cards where needed.
+    final name = _data?.investor.name ?? '';
 
     return Scaffold(
-      backgroundColor: AppColors.card,
-       appBar:AppBar(
+      backgroundColor: AppColors.tradeBackgroundCenterColor,
+      appBar: AppBar(
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
@@ -422,287 +203,516 @@ class _PmamManagerInvestorDetailScreenState
           onPressed: () => Get.back(),
           icon: SvgPicture.asset(
             'assets/svg/trade/arro_back.svg',
-            colorFilter: ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
+            colorFilter:
+                ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
           ),
         ),
         title: Text(
-            '${TranslationUtils.tr('pmam_investor_label')}: ${widget.investorName}',
-            style: AppTextStyles.heading),
+          name.isNotEmpty ? name : widget.investorName,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyles.heading,
+        ),
         centerTitle: true,
       ),
       body: SafeArea(
+        top: false,
         child: _loading
             ? Center(
                 child: CommonLoadingWidget(size: 36, color: AppColors.primary),
               )
-            : _error != null
-                ? Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 18.w, vertical: 18.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        
-                        Text(
-                          _error!,
-                          style: AppTextStyles.bodyText.copyWith(
-                            fontSize: 13.sp,
-                            color: AppColors.error,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(height: 14.h),
-                        ElevatedButton(
-                          onPressed: _load,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.brandPrimary,
-                            foregroundColor: AppColors.onColoredBackground,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.r),
-                            ),
-                          ),
-                          child: Text(TranslationUtils.tr('common_retry')),
-                        ),
-                      ],
-                    ),
-                  )
-                : DefaultTabController(
-                    length: 3,
-                    child: NestedScrollView(
-                      headerSliverBuilder: (context, innerBoxIsScrolled) {
-                        return [
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 18.w,
-                                vertical: 12.h,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                 
-                                  Text(
-                                    TranslationUtils.tr(
-                                        'pmam_investor_portal_screen_investment_summary'),
-                                    style: AppTextStyles.bodyText.copyWith(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                  SizedBox(height: 12.h),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _metricCard(
-                                          label: TranslationUtils.tr(
-                                              'pmam_invested'),
-                                          value: _fmtMoney(invested),
-                                        ),
-                                      ),
-                                      SizedBox(width: 12.w),
-                                      Expanded(
-                                        child: _metricCard(
-                                          label: TranslationUtils.tr('pmam_pnl'),
-                                          value: _fmtMoney(pnl),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 12.h),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _metricCard(
-                                          label: TranslationUtils.tr(
-                                              'pmam_current_value'),
-                                          value: _fmtMoney(currentValue),
-                                        ),
-                                      ),
-                                      SizedBox(width: 12.w),
-                                      Expanded(
-                                        child: _metricCard(
-                                          label: TranslationUtils.tr(
-                                              'pmam_pool_share'),
-                                          value: _fmtPct(poolShare),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 14.h),
-                                ],
-                              ),
-                            ),
-                          ),
-                          SliverPersistentHeader(
-                            pinned: true,
-                            delegate: _TabBarHeaderDelegate(
-                              height: kTextTabBarHeight,
-                              child: Container(
-                                height: kTextTabBarHeight,
-                                color: AppColors.card,
-                                padding: EdgeInsets.symmetric(horizontal: 18.w),
-                                child: TabBar(
-                                  isScrollable: false,
-                                  indicatorSize: TabBarIndicatorSize.tab,
-                                  labelColor: AppColors.primary,
-                                  unselectedLabelColor: AppColors.textGrey,
-                                  indicatorColor: AppColors.primary,
-                                  // indicatorWeight: 2.5,
-                                  labelStyle: AppTextStyles.bodyText.copyWith(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  unselectedLabelStyle: AppTextStyles.bodyText.copyWith(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  tabs: [
-                                    Tab(
-                                      child: Center(
-                                        child: Text(
-                                          TranslationUtils.tr(
-                                              'pmam_tab_open_allocations'),
-                                          textAlign: TextAlign.center,
-                                          maxLines: 2,
-                                        ),
-                                      ),
-                                    ),
-                                    Tab(
-                                      child: Center(
-                                        child: Text(
-                                          TranslationUtils.tr(
-                                              'pmam_tab_settlement_history'),
-                                          textAlign: TextAlign.center,
-                                          maxLines: 2,
-                                        ),
-                                      ),
-                                    ),
-                                    Tab(
-                                      child: Center(
-                                        child: Text(
-                                          TranslationUtils.tr(
-                                              'pmam_tab_fund_entries'),
-                                          textAlign: TextAlign.center,
-                                          maxLines: 2,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ];
-                      },
-                      body: TabBarView(
-                        children: [
-                          Builder(
-                            builder: (context) {
-                              final items = _data?.openAllocations ?? [];
-                              if (items.isEmpty) {
-                                return Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 18.w,
-                                    vertical: 12.h,
-                                  ),
-                                  child: _emptyHint(TranslationUtils.tr(
-                                      'pmam_no_open_positions')),
-                                );
-                              }
-                              return ListView.separated(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 18.w,
-                                  vertical: 12.h,
-                                ),
-                                itemCount: items.length,
-                                separatorBuilder: (_, __) => SizedBox(height: 10.h),
-                                itemBuilder: (_, i) => _openAllocationCard(items[i]),
-                              );
-                            },
-                          ),
-                          Builder(
-                            builder: (context) {
-                              final settlements = _data?.distributions ?? [];
-                              return ListView(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 18.w,
-                                  vertical: 12.h,
-                                ),
-                                children: [
-                                  if (settlements.isEmpty)
-                                    _emptyHint(TranslationUtils.tr(
-                                        'pmam_no_settlements_yet'))
-                                  else
-                                    ...List.generate(settlements.length, (i) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(bottom: 10.h),
-                                        child: _settlementCard(settlements[i]),
-                                      );
-                                    }),
-                                  SizedBox(height: 12.h),
-                                ],
-                              );
-                            },
-                          ),
-                          Builder(
-                            builder: (context) {
-                              final funds = _data?.fundEntries ?? [];
-                              if (funds.isEmpty) {
-                                return Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 18.w,
-                                    vertical: 12.h,
-                                  ),
-                                  child: _emptyHint(TranslationUtils.tr(
-                                      'pmam_no_fund_entries')),
-                                );
-                              }
-                              return ListView.separated(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 18.w,
-                                  vertical: 12.h,
-                                ),
-                                itemCount: funds.length,
-                                separatorBuilder: (_, __) => SizedBox(height: 10.h),
-                                itemBuilder: (_, i) => _fundEntryCard(funds[i]),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+            : _error != null && _data == null
+                ? _errorView()
+                : _content(),
       ),
     );
   }
 }
 
-class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final double height;
+TextStyle _ts(double size, FontWeight weight, [Color? color]) {
+  return AppTextStyles.bodyText.copyWith(
+    fontSize: size.sp,
+    fontWeight: weight,
+    color: color ?? AppColors.textPrimary,
+  );
+}
+
+String _fmtMoney(double value) {
+  final sign = value < 0 ? '-' : '';
+  return '$sign\$${value.abs().toStringAsFixed(2)}';
+}
+
+String _fmtPct(double value) {
+  final text = value.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
+  return '${text.isEmpty ? '0' : text}%';
+}
+
+String _fmtDate(DateTime? dt) {
+  if (dt == null) return '-';
+  final local = dt.toLocal();
+  final months = [
+    TranslationUtils.tr('month_short_jan'),
+    TranslationUtils.tr('month_short_feb'),
+    TranslationUtils.tr('month_short_mar'),
+    TranslationUtils.tr('month_short_apr'),
+    TranslationUtils.tr('month_short_may'),
+    TranslationUtils.tr('month_short_jun'),
+    TranslationUtils.tr('month_short_jul'),
+    TranslationUtils.tr('month_short_aug'),
+    TranslationUtils.tr('month_short_sep'),
+    TranslationUtils.tr('month_short_oct'),
+    TranslationUtils.tr('month_short_nov'),
+    TranslationUtils.tr('month_short_dec'),
+  ];
+  return '${months[(local.month - 1).clamp(0, 11)]} ${local.day}, ${local.year}';
+}
+
+String _fmtTime(DateTime? dt) {
+  if (dt == null) return '-';
+  final local = dt.toLocal();
+  final hh = local.hour.toString().padLeft(2, '0');
+  final mm = local.minute.toString().padLeft(2, '0');
+  return '$hh:$mm';
+}
+
+Color _signedColor(double v) => v >= 0 ? AppColors.green : AppColors.error;
+
+Widget _thinDivider() => Divider(
+      height: 1,
+      thickness: 1,
+      color: AppColors.border.withValues(alpha: 0.15),
+    );
+
+class _CardBox extends StatelessWidget {
+  const _CardBox({required this.child});
+
   final Widget child;
 
-  const _TabBarHeaderDelegate({required this.height, required this.child});
-
   @override
-  double get minExtent => height;
-
-  @override
-  double get maxExtent => height;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return SizedBox.expand(child: child);
-  }
-
-  @override
-  bool shouldRebuild(covariant _TabBarHeaderDelegate oldDelegate) {
-    return oldDelegate.height != height || oldDelegate.child != child;
+  Widget build(BuildContext context) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
+      ),
+      child: child,
+    );
   }
 }
 
+class _EmptyCard extends StatelessWidget {
+  const _EmptyCard({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return _CardBox(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+        child: Text(text, style: _ts(12, FontWeight.w500, AppColors.textGrey)),
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title, this.count});
+
+  final String title;
+  final int? count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(left: 2.w, top: 12.h, bottom: 8.h),
+      child: Row(
+        children: [
+          Text(title, style: _ts(13.5, FontWeight.w800)),
+          if (count != null) ...[
+            SizedBox(width: 6.w),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 1.h),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Text(
+                '$count',
+                style: _ts(10.5, FontWeight.w700, AppColors.primary),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryCard extends StatelessWidget {
+  const _SummaryCard({required this.investor});
+
+  final PmamInvestorSummary investor;
+
+  @override
+  Widget build(BuildContext context) {
+    final dividerColor = AppColors.border.withValues(alpha: 0.15);
+
+    Widget cell(String label, String value, [Color? color]) {
+      return Expanded(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: _ts(11, FontWeight.w500, AppColors.textGrey),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: _ts(15, FontWeight.w800, color ?? AppColors.primary),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Widget pair(Widget left, Widget right) {
+      return IntrinsicHeight(
+        child: Row(
+          children: [
+            left,
+            VerticalDivider(width: 1, thickness: 1, color: dividerColor),
+            right,
+          ],
+        ),
+      );
+    }
+
+    return _CardBox(
+      child: Column(
+        children: [
+          pair(
+            cell(
+              TranslationUtils.tr('pmam_invested'),
+              _fmtMoney(investor.investedAmount),
+            ),
+            cell(
+              TranslationUtils.tr('pmam_pnl'),
+              _fmtMoney(investor.totalPnl),
+              _signedColor(investor.totalPnl),
+            ),
+          ),
+          _thinDivider(),
+          pair(
+            cell(
+              TranslationUtils.tr('pmam_current_value'),
+              _fmtMoney(investor.currentValue),
+            ),
+            cell(
+              TranslationUtils.tr('pmam_pool_share'),
+              _fmtPct(investor.allocationPct),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _KeyValue extends StatelessWidget {
+  const _KeyValue({required this.label, required this.value, this.color});
+
+  final String label;
+  final String value;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: _ts(10.5, FontWeight.w500, AppColors.textGrey),
+        ),
+        SizedBox(height: 2.h),
+        Text(value, style: _ts(12, FontWeight.w700, color)),
+      ],
+    );
+  }
+}
+
+/// One settlement: trade and net amount up front; tap to see the
+/// gross share and the commission behind it.
+class _PayoutTile extends StatefulWidget {
+  const _PayoutTile({required this.item, required this.showDivider});
+
+  final PmamDistribution item;
+  final bool showDivider;
+
+  @override
+  State<_PayoutTile> createState() => _PayoutTileState();
+}
+
+class _PayoutTileState extends State<_PayoutTile> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final d = widget.item;
+    final commissionColor =
+        d.commissionCharged > 0 ? AppColors.error : AppColors.textGrey;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (widget.showDivider) _thinDivider(),
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => setState(() => _expanded = !_expanded),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            d.tradeId > 0 ? '#${d.tradeId}' : '-',
+                            style: _ts(12.5, FontWeight.w700),
+                          ),
+                          SizedBox(height: 2.h),
+                          Text(
+                            _fmtTime(d.settledAt),
+                            style: _ts(10.5, FontWeight.w500, AppColors.textGrey),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      _fmtMoney(d.netProfitCredited),
+                      style: _ts(
+                        13,
+                        FontWeight.w800,
+                        _signedColor(d.netProfitCredited),
+                      ),
+                    ),
+                    SizedBox(width: 4.w),
+                    AnimatedRotation(
+                      turns: _expanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 18.sp,
+                        color: AppColors.textGrey,
+                      ),
+                    ),
+                  ],
+                ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOut,
+                  alignment: Alignment.topCenter,
+                  child: _expanded
+                      ? Padding(
+                          padding: EdgeInsets.only(top: 8.h),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: _KeyValue(
+                                  label: TranslationUtils.tr(
+                                    'pmam_manager_dashboard_screen_total_aum',
+                                  ),
+                                  value: _fmtMoney(d.grossProfitShare),
+                                  color: _signedColor(d.grossProfitShare),
+                                ),
+                              ),
+                              Expanded(
+                                child: _KeyValue(
+                                  label: TranslationUtils.tr(
+                                    'general_commission',
+                                  ),
+                                  value: _fmtMoney(d.commissionCharged),
+                                  color: commissionColor,
+                                ),
+                              ),
+                              Expanded(
+                                child: _KeyValue(
+                                  label: TranslationUtils.tr(
+                                    'pmam_net_balance',
+                                  ),
+                                  value: _fmtMoney(d.netProfitCredited),
+                                  color: _signedColor(d.netProfitCredited),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : const SizedBox(width: double.infinity),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FundEntryTile extends StatelessWidget {
+  const _FundEntryTile({required this.item, required this.showDivider});
+
+  final PmamFundEntry item;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    final f = item;
+    final type = f.type.trim().toLowerCase();
+    final Color typeColor = switch (type) {
+      'unsubscribe' => AppColors.error,
+      'subscribe' => AppColors.green,
+      _ => AppColors.primary,
+    };
+    final typeLabel = f.typeLabel.isNotEmpty ? f.typeLabel : f.type;
+    final status = f.status.trim();
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (showDivider) _thinDivider(),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                decoration: BoxDecoration(
+                  color: typeColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
+                child: Text(
+                  typeLabel.isEmpty ? '-' : typeLabel,
+                  style: _ts(10.5, FontWeight.w700, typeColor),
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _fmtDate(f.entryTime),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _ts(12, FontWeight.w600),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      _fmtTime(f.entryTime),
+                      style: _ts(10.5, FontWeight.w500, AppColors.textGrey),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(_fmtMoney(f.amount), style: _ts(13, FontWeight.w800)),
+                  if (status.isNotEmpty) ...[
+                    SizedBox(height: 2.h),
+                    Text(
+                      status[0].toUpperCase() + status.substring(1),
+                      style: _ts(10.5, FontWeight.w500, AppColors.textGrey),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _OpenAllocationTile extends StatelessWidget {
+  const _OpenAllocationTile({required this.item, required this.showDivider});
+
+  final PmamOpenAllocation item;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    final a = item;
+    final lotText = a.allocatedLot == 0
+        ? '-'
+        : a.allocatedLot.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
+    final openPriceText =
+        a.openPrice == 0 ? '-' : a.openPrice.toStringAsFixed(5);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (showDivider) _thinDivider(),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      a.symbol.isEmpty ? '-' : a.symbol,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _ts(12.5, FontWeight.w700),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      '${_fmtDate(a.openTime)}, ${_fmtTime(a.openTime)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _ts(10.5, FontWeight.w500, AppColors.textGrey),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${TranslationUtils.tr('scratch_card_screen_lot')} $lotText',
+                    style: _ts(12, FontWeight.w700),
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    '${TranslationUtils.tr('open_price')} $openPriceText',
+                    style: _ts(10.5, FontWeight.w500, AppColors.textGrey),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}

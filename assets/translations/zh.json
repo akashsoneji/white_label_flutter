@@ -3969,6 +3969,7 @@
   "pmam_request_cancelled": "加入申请已取消。",
   "pmam_wallet_balance": "钱包余额：${amount}",
   "pmam_wallet_shortage": "您的钱包余额不足以购买此附加服务，还差 ${amount}。请充值或选择不使用附加服务。",
+  "copy_trading_addon_not_refunded": "附加服务费用从您的钱包扣除，停止跟单后不予退还。",
   "pmam_invest": "投资",
   "pmam_available_plans": "可用计划",
   "pmam_failed_to_load_plans": "无法加载计划",

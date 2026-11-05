@@ -53,7 +53,7 @@ class DashboardScreen extends StatelessWidget {
           Get.isRegistered<WalletController>()
               ? Get.find<WalletController>()
               : Get.put(WalletController());
-      walletCtrl.fetchWalletData();
+      await walletCtrl.fetchWalletData();
     } catch (_) {}
     // Refresh banners
     try {

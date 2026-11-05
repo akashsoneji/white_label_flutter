@@ -25,6 +25,30 @@ class PmamFundManagerViewScreen extends StatefulWidget {
       _PmamFundManagerViewScreenState();
 }
 
+/// Disposes [controller] when the sheet is really unmounted. The sheet
+/// future completes on pop, while the exit animation still rebuilds the
+/// TextField, so disposing in `whenComplete` crashes.
+class _SheetControllerOwner extends StatefulWidget {
+  const _SheetControllerOwner({required this.controller, required this.child});
+
+  final TextEditingController controller;
+  final Widget child;
+
+  @override
+  State<_SheetControllerOwner> createState() => _SheetControllerOwnerState();
+}
+
+class _SheetControllerOwnerState extends State<_SheetControllerOwner> {
+  @override
+  void dispose() {
+    widget.controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
 class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
   String _managerCode = '';
   late PmamController _ctrl;
@@ -51,6 +75,9 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
 
   bool _showAllOpenPositions = false;
   bool _showAllTrades = false;
+
+  /// Selected Performance chip: 1W / 1M / 3M / 6M / 1Y / All.
+  String _chartRange = '1M';
 
   @override
   void initState() {
@@ -315,7 +342,9 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
       context: btnCtx,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => StatefulBuilder(
+      builder: (ctx) => _SheetControllerOwner(
+        controller: amountCtrl,
+        child: StatefulBuilder(
         builder: (ctx, setState) {
           setSheetState = setState;
 
@@ -715,7 +744,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                               action: TextButton(
                                 onPressed: () {
                                   Navigator.pop(ctx);
-                                  Get.toNamed(AppPages.DEPOSIT);
+                                  Get.toNamed(AppPages.WALLET);
                                 },
                                 child: Text(
                                   TranslationUtils.tr('pmam_deposit_to_wallet'),
@@ -851,11 +880,9 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
             ),
           );
         },
+        ),
       ),
-    ).whenComplete(() {
-      sheetOpen = false;
-      amountCtrl.dispose();
-    });
+    ).whenComplete(() => sheetOpen = false);
   }
 
   /// Small bordered message used inside the Invest drawer.
@@ -1328,6 +1355,54 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
     return Container(width: 1, height: 30.h, color: AppColors.border);
   }
 
+  static const List<String> _chartRanges = ['1W', '1M', '3M', '6M', '1Y', 'All'];
+
+  /// Cumulative closed-trade P&L inside the selected range. Built from
+  /// `managers/{code}/trades` because `managers/{code}` has no time series.
+  /// x = close time in epoch ms, y = running P&L (starts at 0 at range start).
+  List<FlSpot> _buildPnlSpots() {
+    final closedTrades = <(DateTime, double)>[];
+    for (final trade in _trades) {
+      final closedAt =
+          DateTime.tryParse((trade['close_time'] ?? '').toString());
+      if (closedAt == null) continue;
+      closedTrades.add((closedAt, _num(trade['profit'])));
+    }
+    if (closedTrades.isEmpty) return [];
+    closedTrades.sort((a, b) => a.$1.compareTo(b.$1));
+
+    final rangeDays = switch (_chartRange) {
+      '1W' => 7,
+      '1M' => 30,
+      '3M' => 90,
+      '6M' => 180,
+      '1Y' => 365,
+      _ => null,
+    };
+    final rangeStart = rangeDays == null
+        ? closedTrades.first.$1
+        : DateTime.now().subtract(Duration(days: rangeDays));
+    final inRange = closedTrades.where((t) => !t.$1.isBefore(rangeStart));
+    if (inRange.isEmpty) return [];
+
+    var cumulativePnl = 0.0;
+    final spots = [FlSpot(rangeStart.millisecondsSinceEpoch.toDouble(), 0)];
+    for (final (closedAt, profit) in inRange) {
+      cumulativePnl += profit;
+      spots.add(
+        FlSpot(closedAt.millisecondsSinceEpoch.toDouble(), cumulativePnl),
+      );
+    }
+    return spots;
+  }
+
+  String _chartDateLabel(double epochMs) {
+    final date = DateTime.fromMillisecondsSinceEpoch(epochMs.toInt());
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '$month-$day';
+  }
+
   Widget _buildPerformanceChart() {
     return Container(
       decoration: BoxDecoration(
@@ -1353,30 +1428,34 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
               Flexible(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: ['1W', '1M', '3M', '6M', '1Y', 'All'].map((e) {
-                    final isSelected = e == '1M';
-                    return Container(
-                      margin: EdgeInsetsDirectional.only(start: 3.w),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 7.w,
-                        vertical: 3.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.textPrimary
-                            : AppColors.chipSurface,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        e,
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 9.sp,
-                          fontWeight: FontWeight.bold,
+                  children: _chartRanges.map((range) {
+                    final isSelected = range == _chartRange;
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => setState(() => _chartRange = range),
+                      child: Container(
+                        margin: EdgeInsetsDirectional.only(start: 3.w),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 7.w,
+                          vertical: 3.h,
+                        ),
+                        decoration: BoxDecoration(
                           color: isSelected
-                              ? AppColors.isDarkMode
-                                    ? AppColors.pureBlack
-                                    : Colors.white
-                              : AppColors.textGrey,
+                              ? AppColors.textPrimary
+                              : AppColors.chipSurface,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          range,
+                          style: AppTextStyles.bodyText.copyWith(
+                            fontSize: 9.sp,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected
+                                ? AppColors.isDarkMode
+                                      ? AppColors.pureBlack
+                                      : Colors.white
+                                : AppColors.textGrey,
+                          ),
                         ),
                       ),
                     );
@@ -1386,96 +1465,112 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
             ],
           ),
           SizedBox(height: 12.h),
-          SizedBox(
-            height: 180.h,
-            child: LineChart(
-              LineChartData(
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  horizontalInterval: 100,
-                  getDrawingHorizontalLine: (value) {
-                    return FlLine(color: AppColors.chipSurface, strokeWidth: 1);
-                  },
-                ),
-                titlesData: FlTitlesData(
-                  show: true,
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 22,
-                      interval: 1,
-                      getTitlesWidget: (value, meta) {
-                        if (value == 0) {
-                          return _bottomTitle(
-                              TranslationUtils.tr('transaction_history_start'));
-                        }
-                        if (value == 3) return _bottomTitle('2026-04-10');
-                        if (value == 6) return _bottomTitle('2026-04-13');
-                        if (value == 9) return _bottomTitle('2026-04-16');
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      interval: 100,
-                      reservedSize: 30,
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          value == 0 ? '\$0' : '\$${value.toInt()}',
-                          style: AppTextStyles.bodyText.copyWith(
-                            color: AppColors.textGreyLight,
-                            fontSize: 9.sp,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                borderData: FlBorderData(show: false),
-                minX: 0,
-                maxX: 10,
-                minY: -100,
-                maxY: 600,
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: [
-                      FlSpot(0, 0),
-                      FlSpot(1, 150),
-                      FlSpot(2, 300),
-                      FlSpot(3, 450),
-                      FlSpot(4, 550),
-                      FlSpot(4.5, 480),
-                      FlSpot(4.8, 500),
-                      FlSpot(5, 100),
-                      FlSpot(5.5, 120),
-                      FlSpot(6, 40),
-                      FlSpot(7, 40),
-                      FlSpot(7.5, 200),
-                      FlSpot(8, 200),
-                      FlSpot(9, 80),
-                      FlSpot(10, 80),
-                    ],
-                    isCurved: true,
-                    color: AppColors.textPrimary,
-                    barWidth: 2,
-                    isStrokeCapRound: true,
-                    dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: AppColors.textPrimary.withValues(alpha: 0.05),
-                    ),
-                  ),
-                ],
+          SizedBox(height: 180.h, child: _buildPerformanceChartBody()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPerformanceChartBody() {
+    if (_loadingTrades) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final spots = _buildPnlSpots();
+    if (spots.length < 2) {
+      return Center(
+        child: Text(
+          TranslationUtils.tr(
+            'master_dashboard_overview_tab_no_performance_data_for_this_range',
+          ),
+          style: AppTextStyles.bodyText.copyWith(
+            fontSize: 11.sp,
+            color: AppColors.textGrey,
+          ),
+        ),
+      );
+    }
+
+    final minX = spots.first.x;
+    var maxX = spots.last.x;
+    // A single trade closing at the range start would give a zero-width axis.
+    if (maxX - minX < Duration.millisecondsPerDay) {
+      maxX = minX + Duration.millisecondsPerDay;
+    }
+
+    var minY = 0.0;
+    var maxY = 0.0;
+    for (final spot in spots) {
+      if (spot.y < minY) minY = spot.y;
+      if (spot.y > maxY) maxY = spot.y;
+    }
+    final ySpan = (maxY - minY) == 0 ? 1.0 : maxY - minY;
+    minY -= ySpan * 0.1;
+    maxY += ySpan * 0.1;
+    final yInterval = (maxY - minY) / 4;
+    final xInterval = (maxX - minX) / 3;
+
+    return LineChart(
+      LineChartData(
+        minX: minX,
+        maxX: maxX,
+        minY: minY,
+        maxY: maxY,
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          horizontalInterval: yInterval,
+          getDrawingHorizontalLine: (value) {
+            return FlLine(color: AppColors.chipSurface, strokeWidth: 1);
+          },
+        ),
+        titlesData: FlTitlesData(
+          show: true,
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 22,
+              interval: xInterval,
+              getTitlesWidget: (value, meta) => _bottomTitle(
+                value == minX
+                    ? TranslationUtils.tr('transaction_history_start')
+                    : _chartDateLabel(value),
               ),
+            ),
+          ),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: yInterval,
+              reservedSize: 44,
+              getTitlesWidget: (value, meta) {
+                return Text(
+                  _money(value),
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: AppColors.textGreyLight,
+                    fontSize: 9.sp,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        borderData: FlBorderData(show: false),
+        lineBarsData: [
+          LineChartBarData(
+            spots: spots,
+            color: AppColors.textPrimary,
+            barWidth: 2,
+            isStrokeCapRound: true,
+            dotData: const FlDotData(show: false),
+            belowBarData: BarAreaData(
+              show: true,
+              color: AppColors.textPrimary.withValues(alpha: 0.05),
             ),
           ),
         ],

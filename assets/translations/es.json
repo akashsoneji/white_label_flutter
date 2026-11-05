@@ -3969,6 +3969,7 @@
   "pmam_request_cancelled": "Solicitud de unión cancelada.",
   "pmam_wallet_balance": "Saldo de la billetera: ${amount}",
   "pmam_wallet_shortage": "A tu billetera le faltan ${amount} para este complemento. Deposita o elige sin complemento.",
+  "copy_trading_addon_not_refunded": "La tarifa del complemento se cobra de tu billetera y no se reembolsa si dejas de copiar.",
   "pmam_invest": "Invertir",
   "pmam_available_plans": "Planes disponibles",
   "pmam_failed_to_load_plans": "No se pudieron cargar los planes",

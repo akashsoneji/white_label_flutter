@@ -3969,6 +3969,7 @@
   "pmam_request_cancelled": "Đã hủy yêu cầu tham gia.",
   "pmam_wallet_balance": "Số dư ví: ${amount}",
   "pmam_wallet_shortage": "Ví của bạn còn thiếu ${amount} cho tiện ích này. Hãy nạp tiền vào ví hoặc chọn không dùng tiện ích.",
+  "copy_trading_addon_not_refunded": "Phí tiện ích được trừ từ ví của bạn và không được hoàn lại nếu bạn ngừng sao chép.",
   "pmam_invest": "Đầu tư",
   "pmam_available_plans": "Gói hiện có",
   "pmam_failed_to_load_plans": "Không thể tải danh sách gói",

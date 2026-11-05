@@ -1154,23 +1154,6 @@ class PmamController extends GetxController {
     return PmamPurchaseOptions.none;
   }
 
-  /// P&L entries of one enrollment (doc 2.9 `investor_id`), for the
-  /// per-investment screen. Returns an empty list on failure.
-  Future<List<Map<String, dynamic>>> loadPnlHistoryFor(int enrollmentId) async {
-    try {
-      final response =
-          await PmamService.getPnlHistory(enrollmentId: enrollmentId);
-      final page = response.data is Map ? (response.data as Map)['data'] : null;
-      final rows = page is Map ? page['data'] : null;
-      if (response.success && rows is List) {
-        return rows.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList();
-      }
-    } catch (e) {
-      if (kDebugMode) debugPrint('[PMAM] loadPnlHistoryFor error: $e');
-    }
-    return const [];
-  }
-
   /// Only `GET investor/enrollments` (doc 2.2) — what the manager profile
   /// needs to know whether the user already invests with this manager.
   Future<void> loadEnrollments() async {

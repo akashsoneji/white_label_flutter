@@ -17,6 +17,9 @@ import 'package:crm_app/utils/currency_format.dart';
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/widgets/app_select_field.dart';
+import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/screens/wallet/view_models/wallet_controller.dart';
 
 class SubscribeToPlanScreen extends StatefulWidget {
   final String masterCode;
@@ -385,6 +388,8 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
                   } else {
                     _investmentCtrl.text = '';
                   }
+                  // Doc 5.1: re-fetch add-ons each time step 2 opens.
+                  sub.loadPurchaseOptions();
                   _step.value = 1;
                 },
                 onSubscribe: _onSubscribePressed,
@@ -452,6 +457,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
                             onQuickFill: (value) => _investmentCtrl.text = value,
                           ),
                           SizedBox(height: 12.h),
+                          _AddonCard(controller: sub),
                         ],
                         _CopySettingsCard(
                           controller: sub,
@@ -684,9 +690,33 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
       return;
     }
 
+    final shortage = sub.addonShortage;
+    if (shortage > 0) {
+      sub.errorMessage.value = TranslationUtils.trArgs(
+        'pmam_wallet_shortage',
+        {'amount': shortage.toStringAsFixed(2)},
+      );
+      _showTopError(sub.errorMessage.value);
+      return;
+    }
+
     final investment = num.tryParse(_investmentCtrl.text.trim()) ?? 0;
     final res = await sub.subscribe(investmentAmount: investment);
     if (res.success) {
+      var message = res.message ??
+          TranslationUtils.tr('copy_trading_successfully_subscribed');
+      final purchase = sub.lastPurchase;
+      if (purchase != null) {
+        double money(dynamic v) => double.tryParse('${v ?? ''}') ?? 0;
+        message += '\n${TranslationUtils.trArgs('pmam_addon_purchased', {
+              'name': (purchase['option_name'] ?? '').toString(),
+              'amount': money(purchase['amount']).toStringAsFixed(2),
+              'wallet': money(purchase['wallet_balance_after']).toStringAsFixed(2),
+            })}';
+        if (Get.isRegistered<WalletController>()) {
+          Get.find<WalletController>().fetchWalletData();
+        }
+      }
       if (Get.isRegistered<CopyTradingHubController>()) {
         await Get.find<CopyTradingHubController>().refreshAll(showLoading: false);
       }
@@ -694,14 +724,97 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         Get.back();
         _showTopSuccess(
           title: TranslationUtils.tr('copy_trading_subscribed'),
-          message: res.message ??
-              TranslationUtils.tr('copy_trading_successfully_subscribed'),
+          message: message,
         );
       }
     } else {
       sub.errorMessage.value = res.message ?? sub.errorMessage.value;
       _showTopError(sub.errorMessage.value);
     }
+  }
+}
+
+/// Optional paid add-on (doc 5.1/5.2). Hidden when the server disables
+/// add-ons; the fee comes from the wallet and is not refunded on stop.
+class _AddonCard extends StatelessWidget {
+  final CopyTradingSubscribeController controller;
+  const _AddonCard({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final addons = controller.addons.value;
+      final shortage = controller.addonShortage;
+      if (!addons.isAvailable) return const SizedBox.shrink();
+      return Padding(
+        padding: EdgeInsets.only(bottom: 12.h),
+        child: _Card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                TranslationUtils.tr('pmam_addon_label'),
+                style: AppTextStyles.label.copyWith(fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 10.h),
+              AppSelectField<int>(
+                value: controller.selectedAddonId.value,
+                hint: TranslationUtils.tr('pmam_addon_none'),
+                sheetTitle: TranslationUtils.tr('pmam_addon_label'),
+                backgroundColor: AppColors.card,
+                valueEquals: (a, b) => a == b,
+                options: [
+                  AppSelectOption<int>(
+                    value: 0,
+                    title: TranslationUtils.tr('pmam_addon_none'),
+                  ),
+                  ...addons.options.map(
+                    (o) => AppSelectOption<int>(
+                      value: o.id,
+                      title: '${o.name} — \$${o.feeInUsd.toStringAsFixed(2)}',
+                      subtitle: o.description.isEmpty ? null : o.description,
+                    ),
+                  ),
+                ],
+                onChanged: (val) => controller.selectAddon(val ?? 0),
+              ),
+              SizedBox(height: 6.h),
+              Text(
+                TranslationUtils.trArgs('pmam_wallet_balance', {
+                  'amount': addons.walletBalance.toStringAsFixed(2),
+                }),
+                style: AppTextStyles.caption,
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                TranslationUtils.tr('copy_trading_addon_not_refunded'),
+                style: AppTextStyles.caption,
+              ),
+              if (shortage > 0) ...[
+                SizedBox(height: 10.h),
+                Text(
+                  TranslationUtils.trArgs('pmam_wallet_shortage', {
+                    'amount': shortage.toStringAsFixed(2),
+                  }),
+                  style: AppTextStyles.error,
+                ),
+                TextButton(
+                  onPressed: () => Get.toNamed(AppPages.DEPOSIT),
+                  child: Text(
+                    TranslationUtils.tr('pmam_deposit_to_wallet'),
+                    style: AppTextStyles.bodyText.copyWith(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    });
   }
 }
 

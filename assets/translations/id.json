@@ -3969,6 +3969,7 @@
   "pmam_request_cancelled": "Permintaan bergabung dibatalkan.",
   "pmam_wallet_balance": "Saldo dompet: ${amount}",
   "pmam_wallet_shortage": "Dompet Anda kurang ${amount} untuk add-on ini. Lakukan deposit atau pilih tanpa add-on.",
+  "copy_trading_addon_not_refunded": "Biaya add-on diambil dari dompet Anda dan tidak dikembalikan jika Anda berhenti menyalin.",
   "pmam_invest": "Investasi",
   "pmam_available_plans": "Paket Tersedia",
   "pmam_failed_to_load_plans": "Gagal memuat paket",

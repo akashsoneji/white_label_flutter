@@ -311,9 +311,12 @@ class _WalletScreenState extends State<WalletScreen> {
                   icon: Icons.add_rounded,
                   label: languageService.tr('wallet_deposit_wallet'),
                   isPrimary: true,
+                  // Passing the wallet id makes the Deposit screen preselect
+                  // the wallet in "Deposit to" instead of the first MT5 account.
                   onTap:
-                      () =>
-                          Get.to(() => PaymentMethodsScreen(accountNumber: '')),
+                      () => Get.to(
+                        () => PaymentMethodsScreen(accountNumber: walletId),
+                      ),
                 ),
                 SizedBox(width: 10.w),
                 _buildHeaderAction(

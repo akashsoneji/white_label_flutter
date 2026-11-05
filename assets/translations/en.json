@@ -3969,6 +3969,7 @@
   "pmam_request_cancelled": "Join request cancelled.",
   "pmam_wallet_balance": "Wallet balance: ${amount}",
   "pmam_wallet_shortage": "Your wallet is short by ${amount} for this add-on. Deposit to your wallet or choose no add-on.",
+  "copy_trading_addon_not_refunded": "The add-on fee is taken from your wallet and is not refunded if you stop copying.",
   "pmam_invest": "Invest",
   "pmam_available_plans": "Available Plans",
   "pmam_failed_to_load_plans": "Could not load plans",

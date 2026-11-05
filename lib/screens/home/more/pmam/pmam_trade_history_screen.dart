@@ -8,7 +8,7 @@ import 'package:crm_app/controllers/pmam/pmam_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/utils/app_picker_theme.dart';
 import 'package:crm_app/services/language_service.dart';
-import 'package:crm_app/screens/home/more/pmam/widgets/pmam_pnl_history_section.dart';
+
 
 class PmamTradeHistoryScreen extends StatefulWidget {
   const PmamTradeHistoryScreen({super.key, required this.enrollment});
@@ -31,22 +31,6 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
   final ScrollController _listCtrl = ScrollController();
   bool _isLoadingMore = false;
 
-  /// This enrollment's settled P&L (doc 2.9 with `investor_id`).
-  List<Map<String, dynamic>> _pnlRows = const [];
-  bool _pnlLoading = true;
-
-  Future<void> _loadPnl() async {
-    if (_investorId <= 0) {
-      setState(() => _pnlLoading = false);
-      return;
-    }
-    final rows = await _ctrl.loadPnlHistoryFor(_investorId);
-    if (!mounted) return;
-    setState(() {
-      _pnlRows = rows;
-      _pnlLoading = false;
-    });
-  }
 
   String _fmtYmd(DateTime dt) {
     final y = dt.year.toString().padLeft(4, '0');
@@ -66,18 +50,6 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
     return '$dd/$mm/${dt.year}';
   }
 
-  String _fmtDateTimeShort(dynamic v) {
-    if (v == null) return '-';
-    final s = v.toString();
-    if (s.isEmpty) return '-';
-    final dt = DateTime.tryParse(s);
-    if (dt == null) return s;
-    final dd = dt.day.toString().padLeft(2, '0');
-    final mm = dt.month.toString().padLeft(2, '0');
-    final hh = dt.hour.toString().padLeft(2, '0');
-    final mi = dt.minute.toString().padLeft(2, '0');
-    return '$dd/$mm/${dt.year} $hh:$mi';
-  }
 
   @override
   void initState() {
@@ -89,7 +61,6 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _load();
-      _loadPnl();
     });
 
     _listCtrl.addListener(() {
@@ -339,7 +310,6 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                 final settled = _ctrl.tradesSettledPnl.value;
 
                 final netPos = net >= 0;
-                final commPos = comm >= 0;
                 final settledPos = settled >= 0;
 
                 return Container(
@@ -372,8 +342,8 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                           metric(
                             TranslationUtils.tr(
                                 'pmam_trade_history_commission_label'),
-                            '${commPos ? '+' : ''}\$${comm.abs().toStringAsFixed(2)}',
-                            commPos ? AppColors.green : AppColors.error,
+                            _fmtCommission(comm),
+                            comm.abs() > 0 ? AppColors.error : AppColors.textGrey,
                           ),
                           SizedBox(width: 10.w),
                           metric(
@@ -388,8 +358,6 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                   ),
                 );
               }),
-              SizedBox(height: 12.h),
-              PmamPnlHistorySection(rows: _pnlRows, isLoading: _pnlLoading),
               SizedBox(height: 12.h),
               Expanded(
                 child: Obx(() {
@@ -435,7 +403,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                     controller: _listCtrl,
                     padding: EdgeInsets.only(bottom: 8.h),
                     itemCount: rows.length + 1,
-                    separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                    separatorBuilder: (_, __) => SizedBox(height: 8.h),
                     itemBuilder: (_, i) {
                       if (i >= rows.length) {
                         final currentPage = _ctrl.tradesPage.value;
@@ -484,160 +452,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                           ),
                         );
                       }
-                      final t = rows[i];
-                      final posId = (t['position_id'] ?? '-').toString();
-                      final symbol = (t['symbol'] ?? '-').toString();
-                      final type = (t['type'] ?? '-').toString();
-                      final lot = (t['lot_size'] ?? '-').toString();
-                      final closePrice = (t['close_price'] ?? '-').toString();
-                      final closeTime = _fmtDateTimeShort(t['close_time']);
-                      final profit =
-                          double.tryParse((t['profit'] ?? 0).toString()) ?? 0;
-                      final comm =
-                          double.tryParse(
-                            (t['commission_charged'] ?? 0).toString(),
-                          ) ??
-                          0;
-
-                      final isBuy = type.toLowerCase() == 'buy';
-                      final pnlPos = profit >= 0;
-                      final pnlColor = pnlPos ? AppColors.green : AppColors.error;
-                      final typeBg =
-                          isBuy
-                              ? AppColors.green.withValues(alpha: 0.12)
-                              : AppColors.error.withValues(alpha: 0.12);
-                      final typeFg = isBuy ? AppColors.green : AppColors.error;
-
-                      Widget kv(String k, String v, {Color? vColor}) {
-                        return Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                k,
-                                style: AppTextStyles.bodyText.copyWith(
-                                  fontSize: 10.sp,
-                                  color: AppColors.textGrey,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              SizedBox(height: 3.h),
-                              Text(
-                                v,
-                                style: AppTextStyles.bodyText.copyWith(
-                                  fontSize: 12.sp,
-                                  color: vColor ?? AppColors.textPrimary,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-
-                      return Container(
-                        padding: EdgeInsets.all(12.w),
-                        decoration: BoxDecoration(
-                          color: AppColors.card,
-                          borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(color: AppColors.border),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.border.withValues(alpha: 0.04),
-                              blurRadius: 10,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    symbol,
-                                    style: AppTextStyles.bodyText.copyWith(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 10.w,
-                                    vertical: 5.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: typeBg,
-                                    borderRadius: BorderRadius.circular(999.r),
-                                  ),
-                                  child: Text(
-                                    type.toUpperCase(),
-                                    style: AppTextStyles.bodyText.copyWith(
-                                      fontSize: 10.sp,
-                                      fontWeight: FontWeight.w900,
-                                      color: typeFg,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 6.h),
-                            Row(
-                              children: [
-                                Text(
-                                TranslationUtils.trArgs(
-                                    'pmam_position_number', {'id': '$posId'}),
-                                  style: AppTextStyles.bodyText.copyWith(
-                                    fontSize: 11.sp,
-                                    color: AppColors.textGrey,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const Spacer(),
-                                Text(
-                                  '${pnlPos ? '+' : ''}\$${profit.abs().toStringAsFixed(2)}',
-                                  style: AppTextStyles.bodyText.copyWith(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w900,
-                                    color: pnlColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 10.h),
-                            Row(
-                              children: [
-                                kv(TranslationUtils.tr('scratch_card_screen_lot'),
-                                    lot),
-                                SizedBox(width: 10.w),
-                                kv(TranslationUtils.tr('close_price'),
-                                    closePrice),
-                              ],
-                            ),
-                            SizedBox(height: 10.h),
-                            Row(
-                              children: [
-                                kv(TranslationUtils.tr('close_time'),
-                                    closeTime),
-                                SizedBox(width: 10.w),
-                                kv(
-                                  TranslationUtils.tr('general_commission'),
-                                  '${comm >= 0 ? '+' : ''}\$${comm.abs().toStringAsFixed(2)}',
-                                  vColor:
-                                      comm >= 0
-                                          ? AppColors.green
-                                          : AppColors.error,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
+                      return _TradeCard(trade: rows[i]);
                     },
                   );
                 }),
@@ -649,3 +464,194 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
     );
   }
 }
+
+/// Commission is a charge, so it reads as a negative amount, as on the web.
+String _fmtCommission(double value) => '-\$${value.abs().toStringAsFixed(2)}';
+
+/// `d Mon, HH:mm` in device time, the same as the web table.
+String _fmtCloseTime(dynamic v) {
+  final dt = DateTime.tryParse('${v ?? ''}');
+  if (dt == null) return '-';
+  final l = dt.toLocal();
+  const monthKeys = [
+    'month_short_jan', 'month_short_feb', 'month_short_mar',
+    'month_short_apr', 'month_short_may', 'month_short_jun',
+    'month_short_jul', 'month_short_aug', 'month_short_sep',
+    'month_short_oct', 'month_short_nov', 'month_short_dec',
+  ];
+  final hh = l.hour.toString().padLeft(2, '0');
+  final mi = l.minute.toString().padLeft(2, '0');
+  return '${l.day} ${TranslationUtils.tr(monthKeys[l.month - 1])}, $hh:$mi';
+}
+
+/// One closed trade (doc `managers/{code}/plans/{id}/trades` row). Starts
+/// collapsed with symbol, side, position, time and P&L; tap for lot, close
+/// price and commission.
+class _TradeCard extends StatefulWidget {
+  const _TradeCard({required this.trade});
+
+  final Map<String, dynamic> trade;
+
+  @override
+  State<_TradeCard> createState() => _TradeCardState();
+}
+
+class _TradeCardState extends State<_TradeCard> {
+  bool _expanded = false;
+
+  TextStyle _ts(double size, FontWeight weight, Color color) {
+    return AppTextStyles.bodyText.copyWith(
+      fontSize: size.sp,
+      fontWeight: weight,
+      color: color,
+    );
+  }
+
+  Widget _detail(String label, String value, {Color? color}) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: _ts(10.5, FontWeight.w600, AppColors.textGrey),
+          ),
+          SizedBox(height: 2.h),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: _ts(12, FontWeight.w700, color ?? AppColors.textPrimary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = widget.trade;
+    final posId = (t['position_id'] ?? '-').toString();
+    final symbol = (t['symbol'] ?? '-').toString();
+    final type = (t['type'] ?? '-').toString();
+    final lot = (t['lot_size'] ?? '-').toString();
+    final closePrice = (t['close_price'] ?? '-').toString();
+    final profit = double.tryParse((t['profit'] ?? 0).toString()) ?? 0;
+    final comm = double.tryParse((t['commission_charged'] ?? 0).toString()) ?? 0;
+
+    final isBuy = type.toLowerCase() == 'buy';
+    final sideColor = isBuy ? AppColors.green : AppColors.error;
+    final pnlColor = profit >= 0 ? AppColors.green : AppColors.error;
+    final pnlText =
+        '${profit >= 0 ? '+' : '-'}\$${profit.abs().toStringAsFixed(2)}';
+
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+      ),
+      child: InkWell(
+        onTap: () => setState(() => _expanded = !_expanded),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                    decoration: BoxDecoration(
+                      color: sideColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(5.r),
+                    ),
+                    child: Text(
+                      type.toUpperCase(),
+                      style: _ts(9.5, FontWeight.w800, sideColor),
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          symbol,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: _ts(13, FontWeight.w800, AppColors.textPrimary),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          '#$posId  •  ${_fmtCloseTime(t['close_time'])}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: _ts(10.5, FontWeight.w500, AppColors.textGrey),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Text(pnlText, style: _ts(13, FontWeight.w800, pnlColor)),
+                  SizedBox(width: 2.w),
+                  AnimatedRotation(
+                    turns: _expanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 18.sp,
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+                ],
+              ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                alignment: Alignment.topCenter,
+                child: _expanded
+                    ? Column(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8.h),
+                            child: Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: AppColors.border.withValues(alpha: 0.25),
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              _detail(
+                                TranslationUtils.tr('scratch_card_screen_lot'),
+                                lot,
+                              ),
+                              _detail(
+                                TranslationUtils.tr('close_price'),
+                                closePrice,
+                              ),
+                              _detail(
+                                TranslationUtils.tr('general_commission'),
+                                _fmtCommission(comm),
+                                color: comm.abs() > 0
+                                    ? AppColors.error
+                                    : AppColors.textGrey,
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
+                    : const SizedBox(width: double.infinity),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+

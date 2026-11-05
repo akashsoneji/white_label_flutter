@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/api_const.dart';
+import 'package:crm_app/models/pmam_model.dart';
 import 'package:crm_app/services/api_service.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:get/get.dart';
@@ -99,10 +100,68 @@ class CopyTradingSubscribeController extends GetxController {
   final RxDouble takeProfitDollar = 0.0.obs;
   final RxDouble stopLossDollar = 0.0.obs;
 
+  /// Paid add-ons from `GET copier/purchase-options` (same shape as PAMM, own
+  /// option list — ids are not interchangeable with PAMM).
+  final Rx<PmamPurchaseOptions> addons = PmamPurchaseOptions.none.obs;
+
+  /// 0 = no add-on.
+  final RxInt selectedAddonId = 0.obs;
+
+  /// Shortage reported by a 422 `insufficient_wallet`; cleared on re-pick.
+  final RxnDouble serverShortage = RxnDouble();
+
+  /// `data.purchase` of the last successful subscribe; null when no add-on.
+  Map<String, dynamic>? lastPurchase;
+
+  PmamPurchaseOption? get selectedAddon =>
+      addons.value.options.firstWhereOrNull((o) => o.id == selectedAddonId.value);
+
+  /// Amount the wallet is short for the picked add-on (0 when it is enough).
+  double get addonShortage {
+    final fromServer = serverShortage.value;
+    if (fromServer != null) return fromServer;
+    final addon = selectedAddon;
+    if (addon == null) return 0;
+    final short = addon.feeInUsd - addons.value.walletBalance;
+    return short > 0 ? double.parse(short.toStringAsFixed(2)) : 0;
+  }
+
   @override
   void onInit() {
     super.onInit();
     loadEligibleAccounts(showLoading: true);
+  }
+
+  /// Re-fetched each time step 2 opens: admin can disable an option any time.
+  Future<void> loadPurchaseOptions() async {
+    try {
+      final res = await ApiService.get(
+        endpoint: ApiConstants.copyTradingCopierPurchaseOptions,
+        queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch.toString()},
+      );
+      final data = res.data is Map ? (res.data as Map)['data'] : null;
+      addons.value = res.success && data is Map
+          ? PmamPurchaseOptions.fromJson(data.cast<String, dynamic>())
+          : PmamPurchaseOptions.none;
+    } catch (_) {
+      addons.value = PmamPurchaseOptions.none;
+    }
+    if (selectedAddon == null) selectedAddonId.value = 0;
+    serverShortage.value = null;
+  }
+
+  void selectAddon(int id) {
+    selectedAddonId.value = id;
+    serverShortage.value = null;
+  }
+
+  /// Error `data` of a failed subscribe, whether the client kept the whole
+  /// envelope or only its `data`.
+  Map<String, dynamic>? _errorData(dynamic raw) {
+    if (raw is! Map) return null;
+    if (raw['code'] != null) return raw.cast<String, dynamic>();
+    final inner = raw['data'];
+    return inner is Map ? inner.cast<String, dynamic>() : null;
   }
 
   Future<void> loadEligibleAccounts({bool showLoading = false}) async {
@@ -195,6 +254,10 @@ class CopyTradingSubscribeController extends GetxController {
           break;
       }
 
+      if (selectedAddon != null) {
+        payload['purchase_option_id'] = selectedAddonId.value;
+      }
+
       payload['overrides_sl_tp'] = overridesSlTp.value;
       if (overridesSlTp.value) {
         payload['sl_tp_mode'] = slTpMode.value;
@@ -207,10 +270,23 @@ class CopyTradingSubscribeController extends GetxController {
         }
       }
 
+      lastPurchase = null;
       final res = await ApiService.post(endpoint: ApiConstants.copyTradingCopierSubscribe, data: payload);
-      if (!res.success) {
-        errorMessage.value =
-            res.message ?? TranslationUtils.tr('copy_trading_failed_to_subscribe');
+      if (res.success) {
+        final data = res.data is Map ? (res.data as Map)['data'] : null;
+        // `purchase` is "" (not null) when no add-on was bought.
+        final purchase = data is Map ? data['purchase'] : null;
+        lastPurchase = purchase is Map ? purchase.cast<String, dynamic>() : null;
+        return res;
+      }
+      errorMessage.value =
+          res.message ?? TranslationUtils.tr('copy_trading_failed_to_subscribe');
+      final err = _errorData(res.data);
+      if (err?['code'] == 'insufficient_wallet') {
+        serverShortage.value = double.tryParse('${err!['shortage'] ?? ''}') ?? 0;
+      } else if (selectedAddon != null) {
+        // Option disabled / switch turned off meanwhile: refresh the list.
+        await loadPurchaseOptions();
       }
       return res;
     } catch (e) {

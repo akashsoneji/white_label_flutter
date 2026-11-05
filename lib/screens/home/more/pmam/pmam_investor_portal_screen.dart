@@ -38,6 +38,10 @@ class PmamInvestorPortalScreen extends StatefulWidget {
 class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
     with SingleTickerProviderStateMixin {
   late final PmamController _ctrl;
+  // Add funds (investor/deposit, doc 2.7) is hidden for now; flip to true to
+  // bring the button back — the dialog and API call are still wired.
+  static const bool _showAddFunds = false;
+
   late final TabController _tabCtrl;
 
   String _myFilter = 'all';
@@ -1076,22 +1080,28 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
     final openAllocations = _ctrl.openAllocations;
     final fundEntries = _ctrl.fundEntries;
 
+    // pending / rejected / cancelled requests never locked money (it is only
+    // locked on manager approval), so they must not count in the totals.
     double totalInvested = 0, totalPnl = 0, netBalance = 0;
     int activePlans = 0;
     for (final inv in all) {
+      final status = (inv['status'] ?? '').toString();
+      final isActive = status == 'active';
+      final hasTraded = isActive || status == 'inactive';
+      if (!hasTraded) continue;
+      // P&L is "all time", so investments already left still count.
+      totalPnl += double.tryParse((inv['total_pnl'] ?? 0).toString()) ?? 0;
+      if (!isActive) continue;
+      activePlans++;
       totalInvested +=
           double.tryParse((inv['invested_amount'] ?? 0).toString()) ?? 0;
-      totalPnl += double.tryParse((inv['total_pnl'] ?? 0).toString()) ?? 0;
       netBalance +=
           double.tryParse((inv['current_value'] ?? 0).toString()) ?? 0;
-      if ((inv['status'] ?? '') == 'active') activePlans++;
     }
 
     final filtered = _myFilter == 'all'
         ? all
-        : _myFilter == 'active'
-        ? all.where((i) => i['status'] == 'active').toList()
-        : all.where((i) => i['status'] != 'active').toList();
+        : all.where((i) => i['status'] == _myFilter).toList();
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -1195,7 +1205,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                 SizedBox(width: 8.w),
                 _SmallFilterChip(
                   label:
-                      'Inactive (${all.where((i) => i['status'] != 'active').length})',
+                      'Inactive (${all.where((i) => i['status'] == 'inactive').length})',
                   selected: _myFilter == 'inactive',
                   onTap: () => setState(() => _myFilter = 'inactive'),
                 ),
@@ -1319,10 +1329,14 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                         TranslationUtils.tr('pmam_current_value'),
                         _fmtMoney(inv['current_value']),
                       ),
-                      _InvestmentInfoRow(
-                        TranslationUtils.tr('kyc_intro_screen_locked'),
-                        _fmtMoney(inv['pmam_locked_amount']),
-                      ),
+                      // pmam_locked_amount is per account, not per
+                      // enrollment — on a rejected/pending row it would show
+                      // money locked by another investment on that account.
+                      if (status == 'active')
+                        _InvestmentInfoRow(
+                          TranslationUtils.tr('kyc_intro_screen_locked'),
+                          _fmtMoney(inv['pmam_locked_amount']),
+                        ),
                       SizedBox(height: 8.h),
                       // Buttons disable while any PAMM call is in flight so a
                       // double tap can't cancel / unsubscribe twice.
@@ -1389,32 +1403,36 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                             ),
                           ],
                           if (status == 'active' && pmamInvestorId > 0) ...[
-                            SizedBox(width: 8.w),
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: busy
-                                    ? null
-                                    : () => _showAddFundsDialog(pmamInvestorId),
-                                style: OutlinedButton.styleFrom(
-                                  side: BorderSide(
-                                    color: AppColors.primary.withOpacity(0.6),
+                            if (_showAddFunds) ...[
+                              SizedBox(width: 8.w),
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: busy
+                                      ? null
+                                      : () =>
+                                          _showAddFundsDialog(pmamInvestorId),
+                                  style: OutlinedButton.styleFrom(
+                                    side: BorderSide(
+                                      color: AppColors.primary.withOpacity(0.6),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8.r),
+                                    ),
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 8.h),
                                   ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.r),
-                                  ),
-                                  padding: EdgeInsets.symmetric(vertical: 8.h),
-                                ),
-                                child: Text(
-                                TranslationUtils.tr(
-                                    'pmam_investor_portal_screen_add_funds'),
-                                  style: AppTextStyles.bodyText.copyWith(
-                                    color: AppColors.primary,
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w600,
+                                  child: Text(
+                                    TranslationUtils.tr(
+                                        'pmam_investor_portal_screen_add_funds'),
+                                    style: AppTextStyles.bodyText.copyWith(
+                                      color: AppColors.primary,
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                            ],
                             SizedBox(width: 8.w),
                             Expanded(
                               child: OutlinedButton(
@@ -1433,7 +1451,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                   padding: EdgeInsets.symmetric(vertical: 8.h),
                                 ),
                                 child: Text(
-                                TranslationUtils.tr('dashboard_withdraw'),
+                                TranslationUtils.tr('pmam_unsubscribe'),
                                   style: AppTextStyles.bodyText.copyWith(
                                     color: AppColors.error,
                                     fontSize: 12.sp,

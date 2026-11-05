@@ -611,6 +611,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                                 TranslationUtils.tr('ibm_approve'),
                                                 style: AppTextStyles.bodyText.copyWith(
                                                   fontSize: 13.sp,
+                                                  color: AppColors.whiteColor,
                                                   fontWeight: FontWeight.w700,
                                                 ),
                                               ),

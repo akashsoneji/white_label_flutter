@@ -245,6 +245,8 @@ class ApiConstants {
       '${ajax}copytrading/copier/eligible-accounts';
   static const String copyTradingCopierSubscribe =
       '${ajax}copytrading/copier/subscribe';
+  static const String copyTradingCopierPurchaseOptions =
+      '${ajax}copytrading/copier/purchase-options';
   static String copyTradingCopierSubscriptionsList({
     int page = 1,
     int perPage = 20,

@@ -3969,6 +3969,7 @@
   "pmam_request_cancelled": "تم إلغاء طلب الانضمام.",
   "pmam_wallet_balance": "رصيد المحفظة: ${amount}",
   "pmam_wallet_shortage": "ينقص محفظتك ${amount} لهذه الإضافة. أودع في محفظتك أو اختر بدون إضافة.",
+  "copy_trading_addon_not_refunded": "تُخصم رسوم الإضافة من محفظتك ولا تُسترد إذا توقفت عن النسخ.",
   "pmam_invest": "استثمر",
   "pmam_available_plans": "الخطط المتاحة",
   "pmam_failed_to_load_plans": "تعذر تحميل الخطط",

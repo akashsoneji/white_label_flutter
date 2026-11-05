@@ -23,6 +23,7 @@ import 'dashboard_screen.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
+import 'package:crm_app/screens/wallet/view_models/wallet_controller.dart';
 import 'package:crm_app/screens/trading/view_models/banner_controller.dart';
 import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/flavor_config.dart';
@@ -346,6 +347,12 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
         } catch (e) {
           print('Error checking app status on dashboard tab: $e');
         }
+        // Accounts tab shows the wallet balance chip — refresh it on every
+        // visit so it reflects deposits/transfers made elsewhere.
+        final walletCtrl = Get.isRegistered<WalletController>()
+            ? Get.find<WalletController>()
+            : Get.put(WalletController());
+        unawaited(walletCtrl.fetchWalletData());
       });
     }
 
