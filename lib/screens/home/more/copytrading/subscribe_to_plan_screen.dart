@@ -799,7 +799,12 @@ class _AddonCard extends StatelessWidget {
                   style: AppTextStyles.error,
                 ),
                 TextButton(
-                  onPressed: () => Get.toNamed(AppPages.DEPOSIT),
+                  // Same target as PAMM: the Wallet screen. Reload the
+                  // add-ons on return so the new wallet balance shows here.
+                  onPressed: () async {
+                    await Get.toNamed(AppPages.WALLET);
+                    controller.loadPurchaseOptions();
+                  },
                   child: Text(
                     TranslationUtils.tr('pmam_deposit_to_wallet'),
                     style: AppTextStyles.bodyText.copyWith(

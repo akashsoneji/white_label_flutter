@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:crm_app/widgets/active_notices_banner.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
+import 'package:crm_app/widgets/account_enrollment_badge.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -2715,14 +2716,26 @@ class DashboardScreen extends StatelessWidget {
                         ],
                       ),
                       SizedBox(height: 2.h),
-                      Text(
-                        account.masterGroupId,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textGrey,
-                        ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              account.masterGroupId,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.bodyText.copyWith(
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textGrey,
+                              ),
+                            ),
+                          ),
+                          if (account.enrollmentBadge != null) ...[
+                            SizedBox(width: 6.w),
+                            Flexible(
+                              child: AccountEnrollmentBadge(account: account),
+                            ),
+                          ],
+                        ],
                       ),
                     ],
                   ),

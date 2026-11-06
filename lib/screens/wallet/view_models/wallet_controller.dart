@@ -93,6 +93,10 @@ class UserMT5Account {
   final String masterGroupId;
   final String balance;
   final double? availableForTransfer;
+  /// Server's reason this account cannot send funds; empty = not blocked.
+  final String transferBlockedReason;
+  /// USC account: balance and transfer amounts are in cents (100 USC = 1 USD).
+  final bool isCentAccount;
 
   UserMT5Account({
     required this.id,
@@ -101,6 +105,8 @@ class UserMT5Account {
     required this.masterGroupId,
     required this.balance,
     this.availableForTransfer,
+    this.transferBlockedReason = '',
+    this.isCentAccount = false,
   });
 
   factory UserMT5Account.fromJson(Map<String, dynamic> json) {
@@ -111,6 +117,13 @@ class UserMT5Account {
       masterGroupId: json['master_group_id']?.toString() ?? '',
       balance: json['balance']?.toString() ?? '0.0',
       availableForTransfer: double.tryParse(json['available_for_transfer']?.toString() ?? ''),
+      transferBlockedReason:
+          json['transfer_blocked_reason']?.toString().trim() ?? '',
+      isCentAccount: json['is_cent_account'] == true ||
+          json['is_cent_account'] == 1 ||
+          json['is_cent_account']?.toString() == '1' ||
+          json['is_cent_account']?.toString().toLowerCase() == 'true' ||
+          json['currency']?.toString().toUpperCase() == 'USC',
     );
   }
 }
@@ -175,6 +188,10 @@ class WalletController extends GetxController {
   final RxBool isOtpLoading = false.obs;
   final RxBool isTransferLoading = false.obs;
   final RxString otpMessage = ''.obs;
+  /// Where the last internal-transfer OTP went (sendOTP `data.channel`).
+  final RxString otpChannel = ''.obs;
+  /// Set when `GET internaltransfer` fails; empty after a successful load.
+  final RxString walletError = ''.obs;
   final Rx<UserMT5Account?> selectedFromAccount = Rxn<UserMT5Account>();
   final Rx<String?> selectedFromAccountType =
       Rxn<String>(); // 'mt5', 'wallet', 'ib'
@@ -306,6 +323,49 @@ class WalletController extends GetxController {
     }
   }
 
+  /// Same server check as [checkBalance] but without toasts, for the live
+  /// "Balance sufficient" banner on the transfer screen.
+  Future<({bool valid, String message})> validateBalance(
+    String accountNumber,
+    double amount,
+  ) async {
+    try {
+      final token = await SecureStorageService.getAuthToken();
+      final response = await _repo.checkBalance(
+        token: token ?? '',
+        payload: {'account_number': accountNumber, 'amount': amount},
+      );
+      if (response.success && response.data != null) {
+        final responseData = response.data as Map<String, dynamic>?;
+        final nestedData = responseData?['data'] as Map<String, dynamic>?;
+        final isValid = nestedData?['valid'] == true;
+        final apiMessage = responseData?['message']?.toString().trim() ?? '';
+        return (
+          valid: isValid,
+          message: isValid
+              ? ''
+              : (apiMessage.isNotEmpty
+                  ? apiMessage
+                  : TranslationUtils.tr(
+                      'wallet_controller_insufficient_balance_for_this_transfer',
+                    )),
+        );
+      }
+      final message = response.message?.trim() ?? '';
+      return (
+        valid: false,
+        message: message.isNotEmpty
+            ? message
+            : TranslationUtils.tr('wallet_controller_failed_to_check_balance'),
+      );
+    } catch (_) {
+      return (
+        valid: false,
+        message: TranslationUtils.tr('wallet_controller_failed_to_check_balance'),
+      );
+    }
+  }
+
   // Check balance before transfer
   Future<bool> checkBalance(String accountNumber, double amount) async {
     try {
@@ -364,6 +424,9 @@ class WalletController extends GetxController {
 
       if (response.success && response.data != null) {
         isOtpSent.value = true;
+        final otpData = response.data['data'];
+        otpChannel.value =
+            otpData is Map ? otpData['channel']?.toString() ?? '' : '';
         otpMessage.value = response.data['message'] ??
             TranslationUtils.tr('wallet_controller_otp_sent_successfully');
         CustomToastService.showSuccess(
@@ -586,6 +649,7 @@ class WalletController extends GetxController {
     try {
       await _waitForBuildToFinish();
       isLoading.value = true;
+      walletError.value = '';
 
       final token = await SecureStorageService.getAuthToken();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -605,8 +669,13 @@ class WalletController extends GetxController {
           // Fallback wallet & balance
           wallet.value = parsed.wallet;
           balance.value = parsed.wallet.walletBalance;
+        } else {
+          walletError.value = legacyResponse.message ??
+              TranslationUtils.tr('internal_transfer_screen_load_failed');
         }
       } catch (e, stack) {
+        walletError.value =
+            TranslationUtils.tr('internal_transfer_screen_load_failed');
         print("WalletController: Error fetching legacy wallet data: $e\n$stack");
       }
 

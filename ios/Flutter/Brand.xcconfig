@@ -1,10 +1,10 @@
 // GENERATED — Do not edit manually. Regenerate with:
-//   dart run scripts/prepare_flavor.dart tenax
-// Active flavor: tenax
-PRODUCT_BUNDLE_IDENTIFIER=com.tenax.app
-BRAND_DISPLAY_NAME=Tenax
+//   dart run scripts/prepare_flavor.dart pippro
+// Active flavor: pippro
+PRODUCT_BUNDLE_IDENTIFIER=com.pippro.app
+BRAND_DISPLAY_NAME=PipPro
 FLUTTER_TARGET=lib/main.dart
-DART_DEFINES=Q0xJRU5UPXRlbmF4,RkxBVk9SPXRlbmF4
-DEEP_LINK_HOST=
-DEEP_LINK_HOST_ALT=
-BRAND_ENTITLEMENTS=Runner/Runner.entitlements
+DART_DEFINES=Q0xJRU5UPXBpcHBybw==,RkxBVk9SPXBpcHBybw==
+DEEP_LINK_HOST=my.pipze.com
+DEEP_LINK_HOST_ALT=my.pipze.com
+BRAND_ENTITLEMENTS=Runner/RunnerDeepLink.entitlements

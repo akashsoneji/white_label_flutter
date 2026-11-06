@@ -18,6 +18,20 @@ bool _parseCentFlag(Map<String, dynamic> json) {
   return false;
 }
 
+bool _parseFlag(dynamic raw) {
+  if (raw is bool) return raw;
+  if (raw is num) return raw != 0;
+  if (raw is String) {
+    final v = raw.toLowerCase().trim();
+    return v == 'true' || v == '1' || v == 'yes';
+  }
+  return false;
+}
+
+/// Single badge shown on an account card, from `enrollment` in
+/// mt5accounts/get. Declared in the web portal's priority order.
+enum AccountEnrollmentKind { pmamPool, pmamInvestor, copyMaster, copySlave, demoContest }
+
 class MT5Account {
   final int userId;
   final String metaAccountNumber;
@@ -49,6 +63,11 @@ class MT5Account {
   final int leverageMin;
   final int leverageMax;
   final List<int> leverageOptions;
+  final bool pmamInvestor;
+  final bool pmamPool;
+  final bool copyMaster;
+  final bool copySlave;
+  final String demoContestName;
 
   MT5Account({
     required this.isActive,
@@ -81,9 +100,17 @@ class MT5Account {
     this.leverageMin = 100,
     this.leverageMax = 500,
     this.leverageOptions = const [],
+    this.pmamInvestor = false,
+    this.pmamPool = false,
+    this.copyMaster = false,
+    this.copySlave = false,
+    this.demoContestName = '',
   });
 
   factory MT5Account.fromJson(Map<String, dynamic> json) {
+    final enrollment = json['enrollment'] is Map
+        ? Map<String, dynamic>.from(json['enrollment'] as Map)
+        : const <String, dynamic>{};
     return MT5Account(
       userId: _parseInt(json['user_id']) ?? 0,
       metaAccountNumber: json['meta_account_number']?.toString() ?? '',
@@ -119,6 +146,11 @@ class MT5Account {
               .whereType<int>()
               .toList() ??
           const [],
+      pmamInvestor: _parseFlag(enrollment['pmam_investor']),
+      pmamPool: _parseFlag(enrollment['pmam_pool']),
+      copyMaster: _parseFlag(enrollment['copy_master']),
+      copySlave: _parseFlag(enrollment['copy_slave']),
+      demoContestName: enrollment['demo_contest_name']?.toString().trim() ?? '',
     );
   }
 
@@ -174,7 +206,24 @@ class MT5Account {
       'leverage_min': leverageMin,
       'leverage_max': leverageMax,
       'leverage_options': leverageOptions,
+      'enrollment': {
+        'pmam_investor': pmamInvestor,
+        'pmam_pool': pmamPool,
+        'copy_master': copyMaster,
+        'copy_slave': copySlave,
+        'demo_contest_name': demoContestName,
+      },
     };
+  }
+
+  /// First flag that is set, in the web portal's order; null shows no badge.
+  AccountEnrollmentKind? get enrollmentBadge {
+    if (pmamPool) return AccountEnrollmentKind.pmamPool;
+    if (pmamInvestor) return AccountEnrollmentKind.pmamInvestor;
+    if (copyMaster) return AccountEnrollmentKind.copyMaster;
+    if (copySlave) return AccountEnrollmentKind.copySlave;
+    if (demoContestName.isNotEmpty) return AccountEnrollmentKind.demoContest;
+    return null;
   }
 
   // Helper method to check if this is a real account
@@ -261,6 +310,11 @@ class MT5Account {
     int? leverageMin,
     int? leverageMax,
     List<int>? leverageOptions,
+    bool? pmamInvestor,
+    bool? pmamPool,
+    bool? copyMaster,
+    bool? copySlave,
+    String? demoContestName,
   }) {
     return MT5Account(
       userId: userId ?? this.userId,
@@ -293,6 +347,11 @@ class MT5Account {
       leverageMin: leverageMin ?? this.leverageMin,
       leverageMax: leverageMax ?? this.leverageMax,
       leverageOptions: leverageOptions ?? this.leverageOptions,
+      pmamInvestor: pmamInvestor ?? this.pmamInvestor,
+      pmamPool: pmamPool ?? this.pmamPool,
+      copyMaster: copyMaster ?? this.copyMaster,
+      copySlave: copySlave ?? this.copySlave,
+      demoContestName: demoContestName ?? this.demoContestName,
     );
   }
 }
