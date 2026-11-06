@@ -1,21 +1,21 @@
 {
-  "default": "tenax",
+  "default": "kantara",
   "brands": [
-    "tenax",
-    "vantage"
+    "kantara",
+    "celestial"
   ],
   "brandDetails": [
     {
-      "name": "tenax",
+      "name": "kantara",
       "type": "child",
-      "inheritsFrom": "vantage",
-      "label": "Tenax",
+      "inheritsFrom": "celestial",
+      "label": "Kantara",
       "themeMode": "both"
     },
     {
-      "name": "vantage",
+      "name": "celestial",
       "type": "parent",
-      "label": "Vantage",
+      "label": "Celestial",
       "themeMode": "both"
     }
   ]
