@@ -212,36 +212,6 @@
             "preLaunchTask": "prepare-moneygenius"
         },
         {
-            "name": "PipPro (parent: Vantage) (debug)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "pippro", "--dart-define=CLIENT=pippro", "--dart-define=FLAVOR=pippro", "--dart-define=PARENT=vantage", "--no-enable-impeller"],
-            "flutterMode": "debug",
-            "console": "terminal",
-            "preLaunchTask": "prepare-pippro"
-        },
-        {
-            "name": "PipPro (parent: Vantage) (profile)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "pippro", "--dart-define=CLIENT=pippro", "--dart-define=FLAVOR=pippro", "--dart-define=PARENT=vantage"],
-            "flutterMode": "profile",
-            "console": "terminal",
-            "preLaunchTask": "prepare-pippro"
-        },
-        {
-            "name": "PipPro (parent: Vantage) (release)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "pippro", "--dart-define=CLIENT=pippro", "--dart-define=FLAVOR=pippro", "--dart-define=PARENT=vantage"],
-            "flutterMode": "release",
-            "console": "terminal",
-            "preLaunchTask": "prepare-pippro"
-        },
-        {
             "name": "Pipze (parent: iQuote) (debug)",
             "request": "launch",
             "type": "dart",
@@ -300,6 +270,36 @@
             "flutterMode": "release",
             "console": "terminal",
             "preLaunchTask": "prepare-pipze"
+        },
+        {
+            "name": "Proactive (parent: Vantage) (debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "proactive", "--dart-define=CLIENT=proactive", "--dart-define=FLAVOR=proactive", "--dart-define=PARENT=vantage", "--no-enable-impeller"],
+            "flutterMode": "debug",
+            "console": "terminal",
+            "preLaunchTask": "prepare-proactive"
+        },
+        {
+            "name": "Proactive (parent: Vantage) (profile)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "proactive", "--dart-define=CLIENT=proactive", "--dart-define=FLAVOR=proactive", "--dart-define=PARENT=vantage"],
+            "flutterMode": "profile",
+            "console": "terminal",
+            "preLaunchTask": "prepare-proactive"
+        },
+        {
+            "name": "Proactive (parent: Vantage) (release)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "proactive", "--dart-define=CLIENT=proactive", "--dart-define=FLAVOR=proactive", "--dart-define=PARENT=vantage"],
+            "flutterMode": "release",
+            "console": "terminal",
+            "preLaunchTask": "prepare-proactive"
         },
         {
             "name": "Riyadex (parent: Vantage) (debug)",

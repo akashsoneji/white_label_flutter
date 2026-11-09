@@ -1,16 +1,16 @@
-name: pippro
+name: proactive
 type: child
 inheritsFrom: vantage
-label: PipPro
+label: Proactive
 themeMode: both
 
 android:
   applicationId: "com.pippro.app"
-  appName: "PipPro"
+  appName: "Proactive"
 
 ios:
   bundleId: "com.pippro.app"
-  appName: "PipPro"
+  appName: "Proactive"
 
 colors:
   primary: "#5F259E"
@@ -40,5 +40,5 @@ deepLink:
   host: my.pipze.com
   # hostAlt: www.example.com
   iosTeamId: 8WXRXCSTK2
-  iosAppStoreId: "<PIPPRO_APP_STORE_ID>"
-  androidSha256: "<PIPPRO_UPLOAD_SHA256>,<PIPPRO_PLAY_SIGNING_SHA256>"
+  iosAppStoreId: "<PROACTIVE_APP_STORE_ID>"
+  androidSha256: "<PROACTIVE_UPLOAD_SHA256>,<PROACTIVE_PLAY_SIGNING_SHA256>"

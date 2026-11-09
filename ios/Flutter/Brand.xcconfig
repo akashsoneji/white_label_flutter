@@ -1,10 +1,10 @@
 // GENERATED — Do not edit manually. Regenerate with:
-//   dart run scripts/prepare_flavor.dart pippro
-// Active flavor: pippro
+//   dart run scripts/prepare_flavor.dart proactive
+// Active flavor: proactive
 PRODUCT_BUNDLE_IDENTIFIER=com.pippro.app
-BRAND_DISPLAY_NAME=PipPro
+BRAND_DISPLAY_NAME=Proactive
 FLUTTER_TARGET=lib/main.dart
-DART_DEFINES=Q0xJRU5UPXBpcHBybw==,RkxBVk9SPXBpcHBybw==
+DART_DEFINES=Q0xJRU5UPXByb2FjdGl2ZQ==,RkxBVk9SPXByb2FjdGl2ZQ==
 DEEP_LINK_HOST=my.pipze.com
 DEEP_LINK_HOST_ALT=my.pipze.com
 BRAND_ENTITLEMENTS=Runner/RunnerDeepLink.entitlements

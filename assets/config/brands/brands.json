@@ -1,15 +1,15 @@
 {
-  "default": "pippro",
+  "default": "proactive",
   "brands": [
-    "pippro",
+    "proactive",
     "vantage"
   ],
   "brandDetails": [
     {
-      "name": "pippro",
+      "name": "proactive",
       "type": "child",
       "inheritsFrom": "vantage",
-      "label": "PipPro",
+      "label": "Proactive",
       "themeMode": "both"
     },
     {

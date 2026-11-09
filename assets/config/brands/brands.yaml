@@ -199,39 +199,6 @@ brands:
  features:
  useNewChart: "false"
 
-  - name: pippro
-    type: child
-    inheritsFrom: vantage
-    label: PipPro
-    themeMode: both
- android:
- applicationId: "com.pippro.app"
- appName: "PipPro"
- ios:
- bundleId: "com.pippro.app"
- appName: "PipPro"
- colors:
- primary: "#5F259E"
- secondary: "#F8F3FF"
- accent: "#FFC93C"
- splashColor: "#5F259E"
- launcherBackground: "#5F259E"
- urls:
- api: "https://my.pipze.com/api/"
- websocket: "wss://my.pipze.com/trade-engine"
- chart: "https://my.pipze.com"
- assets:
- appIcon: "assets/brands/pippro/icon.png"
- logo: "assets/brands/pippro/logo.svg"
- splashLogo: "assets/brands/pippro/home_icon.png"
- features:
- useNewChart: "false"
- deepLink:
- host: "my.pipze.com"
- iosTeamId: "8WXRXCSTK2"
- iosAppStoreId: "<PIPPRO_APP_STORE_ID>"
- androidSha256: "<PIPPRO_UPLOAD_SHA256>,<PIPPRO_PLAY_SIGNING_SHA256>"
-
   - name: pipze
     type: child
     inheritsFrom: vantage
@@ -259,6 +226,39 @@ brands:
  splashLogo: "assets/brands/pipze/home_icon.png"
  features:
  useNewChart: "false"
+
+  - name: proactive
+    type: child
+    inheritsFrom: vantage
+    label: Proactive
+    themeMode: both
+ android:
+ applicationId: "com.pippro.app"
+ appName: "Proactive"
+ ios:
+ bundleId: "com.pippro.app"
+ appName: "Proactive"
+ colors:
+ primary: "#5F259E"
+ secondary: "#F8F3FF"
+ accent: "#FFC93C"
+ splashColor: "#5F259E"
+ launcherBackground: "#5F259E"
+ urls:
+ api: "https://my.pipze.com/api/"
+ websocket: "wss://my.pipze.com/trade-engine"
+ chart: "https://my.pipze.com"
+ assets:
+ appIcon: "assets/brands/proactive/icon.png"
+ logo: "assets/brands/proactive/logo.svg"
+ splashLogo: "assets/brands/proactive/home_icon.png"
+ features:
+ useNewChart: "false"
+ deepLink:
+ host: "my.pipze.com"
+ iosTeamId: "8WXRXCSTK2"
+ iosAppStoreId: "<PROACTIVE_APP_STORE_ID>"
+ androidSha256: "<PROACTIVE_UPLOAD_SHA256>,<PROACTIVE_PLAY_SIGNING_SHA256>"
 
   - name: riyadex
     type: child

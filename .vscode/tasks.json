@@ -159,12 +159,12 @@
       }
     },
     {
-      "label": "prepare-pippro",
+      "label": "prepare-pipze",
       "type": "shell",
       "command": "bash",
       "args": [
         "-lc",
-        "CLIENT=all dart run scripts/generate_brand_config.dart && dart run scripts/prepare_flavor.dart pippro && bash scripts/fast_clean.sh && flutter pub get"
+        "CLIENT=all dart run scripts/generate_brand_config.dart && dart run scripts/prepare_flavor.dart pipze && bash scripts/fast_clean.sh && flutter pub get"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -178,12 +178,12 @@
       }
     },
     {
-      "label": "prepare-pipze",
+      "label": "prepare-proactive",
       "type": "shell",
       "command": "bash",
       "args": [
         "-lc",
-        "CLIENT=all dart run scripts/generate_brand_config.dart && dart run scripts/prepare_flavor.dart pipze && bash scripts/fast_clean.sh && flutter pub get"
+        "CLIENT=all dart run scripts/generate_brand_config.dart && dart run scripts/prepare_flavor.dart proactive && bash scripts/fast_clean.sh && flutter pub get"
       ],
       "options": {
         "cwd": "${workspaceFolder}"

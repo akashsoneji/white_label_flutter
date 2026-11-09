@@ -18,7 +18,7 @@ class AppStatusController extends GetxController {
 
   // Brands for which the force/update dialog must never be shown.
   static const String _client = String.fromEnvironment('CLIENT');
-  static const Set<String> _updateDialogDisabledClients = {'pippro'};
+  static const Set<String> _updateDialogDisabledClients = {'proactive'};
   bool get _isUpdateDialogDisabled =>
       _updateDialogDisabledClients.contains(_client.toLowerCase());
 

@@ -118,7 +118,7 @@ const Map<String, String> _uiParentByClient = {
   'starfx': 'celestial',
   'gtxprime': 'vantage',
   'riyadex': 'vantage',
-  'pippro': 'vantage',
+  'proactive': 'vantage',
   'moneygenius': 'celestial',
 };
 
