@@ -234,7 +234,7 @@ brands:
     themeMode: both
  android:
  applicationId: "com.pippro.app"
- appName: "Proactive"
+ appName: "PipPro"
  ios:
  bundleId: "com.pippro.app"
  appName: "Proactive"

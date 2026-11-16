@@ -283,60 +283,48 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
     List<Map<String, dynamic>> groupsPayload = [];
     _selectedGroups.forEach((groupId, data) {
       final Map<String, dynamic> ratesMap = {};
-      final List<Map<String, dynamic>> catList = [];
       if (data['rates'] is Map) {
         (data['rates'] as Map).forEach((catId, rate) {
-          final double r = double.tryParse(rate.toString()) ?? 0.0;
-          ratesMap[catId.toString()] = r;
-          catList.add({
-            'category_id': int.tryParse(catId.toString()) ?? catId,
-            'rate': r,
-          });
+          ratesMap[catId.toString()] = double.tryParse(rate.toString()) ?? 0.0;
         });
       }
 
       final Map<String, dynamic> symRatesMap = {};
-      final List<Map<String, dynamic>> symList = [];
       if (data['symbol_rates'] is Map) {
         (data['symbol_rates'] as Map).forEach((symId, rate) {
-          final double r = double.tryParse(rate.toString()) ?? 0.0;
-          symRatesMap[symId.toString()] = r;
-          symList.add({
-            'symbol_id': int.tryParse(symId.toString()) ?? symId,
-            'rate': r,
-          });
+          symRatesMap[symId.toString()] =
+              double.tryParse(rate.toString()) ?? 0.0;
         });
       }
 
-      // Convert blocked symbol strings to IDs if possible
+      // The server matches blocked symbols by name (same as the web portal);
+      // numeric entries are symbol IDs loaded from an existing plan.
+      final List<String> blockedSymbolNames = [];
       final List<int> blockedSymbolIds = [];
       if (data['blocked'] is List) {
         for (var item in data['blocked']) {
-          final sName = item.toString().toUpperCase();
-          if (_symbolNameToId.containsKey(sName)) {
-            blockedSymbolIds.add(_symbolNameToId[sName]!);
+          final value = item.toString().trim();
+          if (value.isEmpty) continue;
+          final id = int.tryParse(value);
+          if (id != null) {
+            blockedSymbolIds.add(id);
           } else {
-            final id = int.tryParse(sName);
-            if (id != null) {
-              blockedSymbolIds.add(id);
-            }
+            blockedSymbolNames.add(value.toUpperCase());
           }
         }
       }
 
       groupsPayload.add({
-        'plan_group_id': data['plan_group_id'] ?? groupId,
         'group_id': groupId,
         'rates': ratesMap,
-        'categories': catList,
-        'symbols': symList,
         'symbol_rates': symRatesMap,
-        'blocked_symbol_ids': blockedSymbolIds,
+        'blocked_symbol_names': blockedSymbolNames,
+        if (blockedSymbolIds.isNotEmpty) 'blocked_symbol_ids': blockedSymbolIds,
       });
     });
 
     final payload = {
-      'name': name,
+      'plan_name': name,
       'description': _descController.text.trim(),
       'is_active': _isActive,
       'groups': groupsPayload,

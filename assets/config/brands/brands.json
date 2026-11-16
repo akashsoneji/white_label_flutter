@@ -1,15 +1,15 @@
 {
-  "default": "proactive",
+  "default": "tenax",
   "brands": [
-    "proactive",
+    "tenax",
     "vantage"
   ],
   "brandDetails": [
     {
-      "name": "proactive",
+      "name": "tenax",
       "type": "child",
       "inheritsFrom": "vantage",
-      "label": "Proactive",
+      "label": "Tenax",
       "themeMode": "both"
     },
     {

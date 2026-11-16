@@ -93,6 +93,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
   // ── Controller shortcuts ─────────────────────────────────────────────
   TradingController get _trade => Get.find<TradingController>();
   ChartSocketController get _socket => Get.find<ChartSocketController>();
+  SymbolSelectionService get _symService => Get.find<SymbolSelectionService>();
   AccountController get _account => Get.find<AccountController>();
   LanguageService get _lang => Get.find<LanguageService>();
 
@@ -104,8 +105,11 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     _volumeController = TextEditingController(text: _volume.toStringAsFixed(2));
     // Push the active symbol into the socket so its bid/ask maps start
     // streaming ticks for the selected instrument.
+    // Before the saved symbol is read from storage, _rawSymbol() is only the
+    // first watchlist entry; pushing that would overwrite the user's choice.
+    // The socket follows SymbolSelectionService on its own once it restores.
     final initial = _rawSymbol();
-    if (initial.isNotEmpty) {
+    if (initial.isNotEmpty && _symService.isRestored) {
       _socket.changeSymbol(initial);
     }
     // Live tick → bump _tick so SELL/BUY sub-labels refresh.
@@ -113,11 +117,11 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
       if (mounted) _tick.value++;
     });
     // Listen to symbol changes from Prices/Watchlist/Search screens
-    _symSub = Get.find<SymbolSelectionService>().lastSymbolRx.listen((sym) {
-      if (mounted && sym.isNotEmpty) {
-        setState(() {});
-        _socket.changeSymbol(_rawSymbol());
-      }
+    // ChartSocketController already follows the service; a second
+    // changeSymbol here is untracked, gets echoed back into the service and
+    // makes two symbols ping-pong (chart keeps reloading between them).
+    _symSub = _symService.lastSymbolRx.listen((sym) {
+      if (mounted && sym.isNotEmpty) setState(() {});
     });
   }
 
@@ -1013,7 +1017,12 @@ class _ChartAreaState extends State<_ChartArea> {
         // No saved choice, no favourite and no broker instrument yet: loading a
         // WebView with an empty symbol shows a blank chart, so show a state
         // instead. This Obx re-runs once instruments or a selection arrive.
-        if (effective.isEmpty) return _buildNoSymbolState();
+        // Also wait for the saved symbol: after the OS kills the app in the
+        // background, instruments can arrive first and the WebView would open
+        // on the first watchlist symbol, which a later JS switch can't undo.
+        if (!_symService.isRestored || effective.isEmpty) {
+          return _buildNoSymbolState();
+        }
 
         if (useNew) {
           final initial = _initialSymbol ?? '';
@@ -1040,7 +1049,7 @@ class _ChartAreaState extends State<_ChartArea> {
     final instrumentsLoaded =
         Get.isRegistered<InstrumentsController>() &&
         Get.find<InstrumentsController>().hasAttemptedInitialLoad.value;
-    if (!instrumentsLoaded) {
+    if (!instrumentsLoaded || !_symService.isRestored) {
       return Center(
         child: SizedBox(
           width: 24.w,

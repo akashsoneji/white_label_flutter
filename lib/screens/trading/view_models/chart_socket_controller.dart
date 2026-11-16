@@ -89,6 +89,10 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
         }
         return;
       }
+      // Until the saved symbol is restored, a socket switch can only come from
+      // a fallback (first watchlist entry); writing it would replace the
+      // user's choice. The service drives the socket once it restores.
+      if (!symService.isRestored) return;
       if (symService.currentSymbol != sym) {
         symService.setSymbol(sym);
       }

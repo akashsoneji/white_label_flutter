@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:crm_app/widgets/responsive_layout.dart';
+
 import 'package:get/get.dart';
 
 import '../../../../constants/color.dart';
@@ -767,21 +767,37 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
 
   // ── Plan cards ────────────────────────────────────────────────────────────
 
+  /// Rows of cards sized by their content (not a fixed aspect ratio), so the
+  /// card never leaves a gap under Invest or overflows at large text scales.
   Widget _buildGrid() {
     final plans = _visible;
+    final columns = MediaQuery.sizeOf(context).width >= 600 ? 3 : 2;
+    final rowCount = (plans.length / columns).ceil();
     return SliverPadding(
       padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 0),
-      sliver: SliverGrid(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 10.w,
-          mainAxisSpacing: 10.h,
-          childAspectRatio: ResponsiveGrid.aspectRatio(0.58),
-        ),
-        delegate: SliverChildBuilderDelegate(
-          (ctx, i) => _PlanCard(plan: plans[i], compact: true),
-          childCount: plans.length,
-        ),
+      sliver: SliverList.separated(
+        itemCount: rowCount,
+        separatorBuilder: (_, __) => SizedBox(height: 10.h),
+        itemBuilder: (_, row) {
+          final cells = <Widget>[];
+          for (var col = 0; col < columns; col++) {
+            final index = row * columns + col;
+            if (col > 0) cells.add(SizedBox(width: 10.w));
+            cells.add(
+              Expanded(
+                child: index < plans.length
+                    ? _PlanCard(plan: plans[index], compact: true)
+                    : const SizedBox.shrink(),
+              ),
+            );
+          }
+          return IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: cells,
+            ),
+          );
+        },
       ),
     );
   }

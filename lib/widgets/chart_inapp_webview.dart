@@ -41,8 +41,15 @@ class ChartInAppWebView extends StatefulWidget {
   State<ChartInAppWebView> createState() => ChartInAppWebViewState();
 }
 
-class ChartInAppWebViewState extends State<ChartInAppWebView> {
+class ChartInAppWebViewState extends State<ChartInAppWebView>
+    with WidgetsBindingObserver {
+  /// Matches the chart page's own "stale after sleep" threshold. Past it, the
+  /// page may have been killed or left on another symbol (see
+  /// [_recoverAfterResume]).
+  static const Duration _reloadAfterBackground = Duration(seconds: 30);
+
   InAppWebViewController? _controller;
+  DateTime? _backgroundedAt;
   bool _isLoading = true;
   bool _hasError = false;
   bool _isReady = false;
@@ -89,8 +96,29 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _startLoadingTimeout();
     _ensureDatafeedResolved();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+        _backgroundedAt ??= DateTime.now();
+      case AppLifecycleState.resumed:
+        final backgroundedAt = _backgroundedAt;
+        _backgroundedAt = null;
+        if (backgroundedAt == null) return;
+        final away = DateTime.now().difference(backgroundedAt);
+        if (away < _reloadAfterBackground) return;
+        _pendingSymbol = null;
+        unawaited(_recoverAfterResume());
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.detached:
+        break;
+    }
   }
 
   void _ensureDatafeedResolved() {
@@ -150,6 +178,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _loadingTimeout?.cancel();
     _pendingSymbolTimer?.cancel();
     _df.dispose();
@@ -193,6 +222,27 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
     );
   }
 
+  /// A freshly loaded page shows the symbol baked into its URL, which can be
+  /// stale: the WebView is pre-warmed at splash and reloaded when the app comes
+  /// back from the background, while the screen may have moved to another
+  /// symbol meanwhile. Queue the current symbol so the chart matches the header.
+  Future<void> _syncSymbolWithPage(InAppWebViewController controller) async {
+    if (_pendingSymbol != null) return;
+    final current = _resolveSymbol(widget.symbol);
+    if (current.isEmpty) return;
+    final loadedUrl = await controller.getUrl();
+    if (!mounted) return;
+    final loaded = loadedUrl?.queryParameters['symbol'] ?? '';
+    if (_withoutSuffix(loaded) == _withoutSuffix(current)) return;
+    _pendingSymbol = current;
+  }
+
+  /// `XAUUSD.c` → `XAUUSD`, case-insensitive.
+  static String _withoutSuffix(String symbol) {
+    final dot = symbol.lastIndexOf('.');
+    return (dot > 0 ? symbol.substring(0, dot) : symbol).toUpperCase();
+  }
+
   // ─── Public API ───────────────────────────────────────────────────────────
 
   /// Forces a complete reload of the WebView URL.
@@ -219,6 +269,44 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
     );
   }
 
+  /// The chart page refetches its own history on resume (visibilitychange →
+  /// resetData), so a live page is left alone: a full reload here only adds a
+  /// loader and a second history fetch. The page is reloaded only when it is
+  /// gone (WebView killed / blank after OS suspension), and re-pointed only
+  /// when the screen moved to another symbol while backgrounded.
+  Future<void> _recoverAfterResume() async {
+    final controller = _controller;
+    if (controller == null || !_isReady) {
+      loadUrlWithSymbol(widget.symbol);
+      return;
+    }
+    Object? pageSymbol;
+    try {
+      pageSymbol = await controller.evaluateJavascript(
+        source: '''
+        (function() {
+          try {
+            var w = window.__tvChartWidget;
+            if (w && typeof w.activeChart === 'function') {
+              return String(window.__tvCurrentSymbol || '');
+            }
+          } catch(e) {}
+          return null;
+        })();
+      ''',
+      );
+    } catch (_) {}
+    if (!mounted) return;
+    if (pageSymbol is! String) {
+      loadUrlWithSymbol(widget.symbol);
+      return;
+    }
+    final current = _resolveSymbol(widget.symbol);
+    if (_withoutSuffix(pageSymbol) == _withoutSuffix(current)) return;
+    _pendingSymbol = current;
+    _applyPendingSymbol();
+  }
+
   /// Switch symbol via JS — returns true if the chart accepted it.
   Future<bool> updateSymbol(String symbol) async {
     // debugPrint('📊 ChartInAppWebView: updateSymbol called for $symbol');
@@ -241,6 +329,17 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
         var sym = ${_jsStr(s)};
         function trySet(t) {
           try { if (typeof selectedSymbol !== 'undefined') selectedSymbol = t; } catch(e) {}
+          // The hosted mobile-chart page owns the symbol in its own state and
+          // exposes window.changeSymbol for the app. Its self-heal and resume
+          // rebuild always restore that state, so a direct widget setSymbol is
+          // reverted to the URL's symbol — the page hook must be used. It keeps
+          // the current timeframe.
+          try {
+            if (typeof window.changeSymbol === 'function') {
+              window.changeSymbol(t);
+              return true;
+            }
+          } catch(e) {}
           try {
             if (typeof window.__changeSymbol === 'function') {
               var res = window.__changeSymbol(t);
@@ -297,6 +396,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
     try {
       // debugPrint('📊 ChartInAppWebView: Executing JS for $targetSymbol (attempt 1)');
       var res = await _controller!.evaluateJavascript(source: jsSource(targetSymbol));
+
       if (res == 'ok') return true;
 
       // debugPrint(
@@ -502,6 +602,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
                   _isReady = true;
                 });
                 widget.onReady?.call();
+                await _syncSymbolWithPage(controller);
                 if (_pendingSymbol != null) {
                   _applyPendingSymbol();
                 }
@@ -510,6 +611,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
             shouldOverrideUrlLoading: (controller, action) async {
               return NavigationActionPolicy.ALLOW;
             },
+
             onLoadStart: (controller, url) {
               debugPrint(
                 '⏱️ Chart WebView: LOAD START at ${DateTime.now().toIso8601String()} for url: $url',
@@ -534,6 +636,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
                 _isReady = true;
               });
               widget.onReady?.call();
+              await _syncSymbolWithPage(controller);
 
               // If a symbol was requested while the WebView was loading, apply it now
               if (_pendingSymbol != null) {

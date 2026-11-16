@@ -10,7 +10,7 @@ class ProactiveConfig extends BaseClientConfig {
   const ProactiveConfig()
       : super(
           brandName: 'Proactive',
-          appTitle: 'Proactive',
+          appTitle: 'PipPro',
           primaryColor: const Color(0xFF5F259E),
           darkPrimaryColor: const Color(0xFFFFFFFF),
           secondaryColor: const Color(0xFFF8F3FF),

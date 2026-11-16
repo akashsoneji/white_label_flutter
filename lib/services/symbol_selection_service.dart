@@ -13,6 +13,7 @@ class SymbolSelectionService extends GetxService {
   final RxBool _hasUserSelection = false.obs;
   bool _initialized = false;
   bool _isRestoredSelection = false;
+  final RxBool _isRestored = false.obs;
 
   @override
   void onInit() {
@@ -29,6 +30,11 @@ class SymbolSelectionService extends GetxService {
   String get currentSymbol => _lastSymbol.value;
   RxString get lastSymbolRx => _lastSymbol;
   bool get hasUserSelection => _hasUserSelection.value;
+
+  /// False until the saved symbol has been read from storage. Before that an
+  /// empty [currentSymbol] does not mean "nothing selected", so callers must
+  /// not fall back to [fallbackSymbol] yet. Reactive, safe to read in `Obx`.
+  bool get isRestored => _isRestored.value;
 
   /// True while the current symbol is the one restored from the previous
   /// session (cleared as soon as a symbol is picked in this session).
@@ -95,6 +101,7 @@ class SymbolSelectionService extends GetxService {
       // Fallback to empty if storage fails
     } finally {
       _initialized = true;
+      _isRestored.value = true;
     }
   }
 }

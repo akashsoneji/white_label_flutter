@@ -317,10 +317,17 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
           Get.isRegistered<SymbolSelectionService>()
               ? Get.find<SymbolSelectionService>()
               : Get.put(SymbolSelectionService(), permanent: true);
-      selectedSymbol =
-          symbolSelectionService.currentSymbol.isNotEmpty
-              ? symbolSelectionService.currentSymbol
-              : SymbolSelectionService.fallbackSymbol();
+      // Before the saved symbol is restored, the fallback (first watchlist
+      // entry) would be pushed to the socket and win over the user's choice;
+      // _loadPersistedSymbol fills it in once storage is read.
+      final savedSymbol = symbolSelectionService.currentSymbol;
+      if (savedSymbol.isNotEmpty) {
+        selectedSymbol = savedSymbol;
+      } else if (symbolSelectionService.isRestored) {
+        selectedSymbol = SymbolSelectionService.fallbackSymbol();
+      } else {
+        selectedSymbol = '';
+      }
       ChartScreen._selectedSymbolNotifier.value = selectedSymbol;
       _loadPersistedSymbol();
 
@@ -525,7 +532,12 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
       await symbolSelectionService.ensureDefault();
       final loadedSymbol = symbolSelectionService.currentSymbol;
 
-      if (!mounted || loadedSymbol.isEmpty) return;
+      if (!mounted) return;
+      if (loadedSymbol.isEmpty) {
+        // Nothing saved: only now is the first watchlist symbol a real default.
+        _initializeWithFirstInstrument();
+        return;
+      }
 
       if (loadedSymbol != selectedSymbol) {
         _handleSymbolChange(loadedSymbol);
@@ -943,6 +955,10 @@ Placing Order:
     if (!mounted || newSymbol == selectedSymbol) {
       return;
     }
+    // Once a symbol is chosen in this session the restored one is gone, so the
+    // stale-restore check must not fire later (e.g. when instruments refresh
+    // after a resume) and swap the user's choice for the preferred instrument.
+    _staleRestoredSymbolChecked = true;
 
     print('🔄 CHART SYMBOL CHANGE PROCESS:');
     print('🎯 New Symbol: $newSymbol');
@@ -1539,6 +1555,7 @@ Placing Order:
           //dev.log('Chart Screen: Reconnecting socket on app resume');
           chartSocketController.handleAppRestart();
         }
+        _resyncSymbolAfterResume();
         break;
       case AppLifecycleState.paused:
         //dev.log('Chart Screen: App paused - socket may disconnect');
@@ -1553,6 +1570,17 @@ Placing Order:
       case AppLifecycleState.hidden:
         //dev.log('Chart Screen: App hidden');
         break;
+    }
+  }
+
+  /// Re-applies the user's saved symbol to the header after a resume. The
+  /// chart WebView reloads itself for that symbol after a long background
+  /// (see ChartInAppWebView.didChangeAppLifecycleState).
+  void _resyncSymbolAfterResume() {
+    if (!mounted) return;
+    final savedSymbol = symbolSelectionService.currentSymbol;
+    if (savedSymbol.isNotEmpty && savedSymbol != selectedSymbol) {
+      _handleSymbolChange(savedSymbol);
     }
   }
 
@@ -1615,7 +1643,8 @@ Placing Order:
       // Only set initial symbol if selectedSymbol AND currentSymbol are completely empty
       if (selectedSymbol.isEmpty &&
           symbolSelectionService.currentSymbol.isEmpty &&
-          !symbolSelectionService.hasUserSelection) {
+          !symbolSelectionService.hasUserSelection &&
+          symbolSelectionService.isRestored) {
         final preferredInstrument = _findPreferredInstrument(
           instrumentsController.allInstruments,
         );
@@ -2031,6 +2060,9 @@ Placing Order:
   // Initialize chart with first available instrument from socket data
   // Prioritizes XAUUSD on first run, falls back to first instrument
   void _initializeWithFirstInstrument() {
+    // Saved symbol not read yet: picking the first instrument now would
+    // replace it. _loadPersistedSymbol calls this again after the restore.
+    if (!symbolSelectionService.isRestored) return;
     final instrumentsController = Get.find<InstrumentsController>();
 
     // If we already have a cached symbol (default or user-selected), use it.

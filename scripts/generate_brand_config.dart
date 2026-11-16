@@ -419,6 +419,11 @@ Future<void> generateBrandConfigs(List<Map<String, dynamic>> brands) async {
     final splashLogo =
         assets['splashLogo'] ?? 'assets/brands/$name/splash_logo.svg';
     final className = _brandClassName(name);
+    // MaterialApp.title is what Android shows in the recent-apps switcher, so it
+    // must match the Android launcher name (which can differ from iOS / label).
+    final android =
+        brand['android'] is Map ? brand['android'] as Map : const {};
+    final appTitle = android['appName']?.toString() ?? label;
 
     // Features
     final features =
@@ -444,7 +449,7 @@ class ${className}Config extends BaseClientConfig {
   const ${className}Config()
       : super(
           brandName: '${_dartString(label)}',
-          appTitle: '${_dartString(label)}',
+          appTitle: '${_dartString(appTitle)}',
           primaryColor: const Color(0xFF${colorToHex(primary)}),
           darkPrimaryColor: const Color(0xFF${colorToHex(darkPrimary)}),
           secondaryColor: const Color(0xFF${colorToHex(secondary)}),
