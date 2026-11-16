@@ -388,6 +388,7 @@
   "create_account_screen_last_name": "Họ",
   "create_account_screen_password": "Mật khẩu",
   "create_account_screen_phone_number": "Số điện thoại",
+  "create_account_screen_phone_number_optional": "Số điện thoại (Không bắt buộc)",
   "create_account_screen_please_check_email_email_is_not": "Vui lòng kiểm tra lại, email không hợp lệ",
   "create_account_screen_please_enter_your_email_address": "Vui lòng nhập địa chỉ email của bạn",
   "create_account_screen_sign_up": "Đăng ký",

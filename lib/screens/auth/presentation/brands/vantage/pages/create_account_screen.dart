@@ -4,6 +4,7 @@ import 'package:crm_app/utils/agreement_launcher.dart';
 
 import 'package:country_picker/country_picker.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
 import 'package:crm_app/services/language_service.dart';
@@ -52,6 +53,10 @@ class _VantageCreateAccountScreenState
   final LanguageService _languageService = Get.find<LanguageService>();
   bool _enableBiometricAfterRegister = false;
 
+  // Apple 5.1.1(v): Proactive must not require a phone number at signup.
+  bool get _isPhoneOptional =>
+      FlavorConfig.instance.flavor.name.toLowerCase() == 'proactive';
+
   @override
   void initState() {
     super.initState();
@@ -83,7 +88,7 @@ class _VantageCreateAccountScreenState
       _isFormValid =
           _firstNameController.text.isNotEmpty &&
           _lastNameController.text.isNotEmpty &&
-          _phoneController.text.isNotEmpty &&
+          (_isPhoneOptional || _phoneController.text.isNotEmpty) &&
           _emailController.text.isNotEmpty &&
           _passwordController.text.isNotEmpty;
     });
@@ -147,15 +152,19 @@ class _VantageCreateAccountScreenState
     String? otp,
   }) {
     final phonePayload = _buildPhonePayload();
+    final hasPhone = phonePayload['mobile']!.isNotEmpty;
+    final includePhone = hasPhone || !_isPhoneOptional;
     final data = <String, dynamic>{
       'first_name': _firstNameController.text.trim(),
       'last_name': _lastNameController.text.trim(),
       'email': _emailController.text.trim(),
       'password': _passwordController.text.trim(),
-      'mobile': phonePayload['mobile'],
-      'phone_number': phonePayload['national'],
-      'country_code': phonePayload['country_code'],
-      'register_country_code': phonePayload['country_code'],
+      if (includePhone) ...{
+        'mobile': phonePayload['mobile'],
+        'phone_number': phonePayload['national'],
+        'country_code': phonePayload['country_code'],
+        'register_country_code': phonePayload['country_code'],
+      },
       'country': phonePayload['country'],
       'country_slug': phonePayload['country_slug'],
       'otp_verification_type': 'email',
@@ -246,6 +255,7 @@ class _VantageCreateAccountScreenState
       phone: _phoneController.text.trim(),
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
+      phoneRequired: !_isPhoneOptional,
     );
     if (!AuthFormValidation.showErrorsIfAny(errors)) return;
 
@@ -317,7 +327,9 @@ class _VantageCreateAccountScreenState
                     onChanged: (_) => _validateForm(),
                     decoration: VantageAuthTheme.pillDecoration(
                       hintText: _languageService.tr(
-                        'create_account_screen_phone_number',
+                        _isPhoneOptional
+                            ? 'create_account_screen_phone_number_optional'
+                            : 'create_account_screen_phone_number',
                       ),
                     ),
                   ),

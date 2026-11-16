@@ -388,6 +388,7 @@
   "create_account_screen_last_name": "اسم العائلة",
   "create_account_screen_password": "كلمة المرور",
   "create_account_screen_phone_number": "رقم الهاتف",
+  "create_account_screen_phone_number_optional": "رقم الهاتف (اختياري)",
   "create_account_screen_please_check_email_email_is_not": "يرجى التحقق من البريد الإلكتروني، فهو غير صالح",
   "create_account_screen_please_enter_your_email_address": "Please enter your email IP",
   "create_account_screen_sign_up": "تسجيل",

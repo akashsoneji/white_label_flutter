@@ -388,6 +388,7 @@
   "create_account_screen_last_name": "姓",
   "create_account_screen_password": "密码",
   "create_account_screen_phone_number": "电话号码",
+  "create_account_screen_phone_number_optional": "电话号码（可选）",
   "create_account_screen_please_check_email_email_is_not": "请检查邮箱，邮箱格式无效",
   "create_account_screen_please_enter_your_email_address": "请输入您的邮箱地址",
   "create_account_screen_sign_up": "注册",

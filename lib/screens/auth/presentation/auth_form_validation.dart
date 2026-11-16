@@ -49,6 +49,7 @@ class AuthFormValidation {
     required String phone,
     required String email,
     required String password,
+    bool phoneRequired = true,
   }) {
     final errors = <String>[];
     if (firstName.isEmpty) {
@@ -57,7 +58,7 @@ class AuthFormValidation {
     if (lastName.isEmpty) {
       errors.add('${languageService.tr('validation_required')} (Last Name)');
     }
-    if (phone.isEmpty) {
+    if (phoneRequired && phone.isEmpty) {
       errors.add('${languageService.tr('validation_required')} (Phone)');
     }
     if (email.isEmpty) {

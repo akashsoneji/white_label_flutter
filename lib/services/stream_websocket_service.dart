@@ -38,6 +38,12 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
   StreamSubscription<dynamic>? _sub;
 
   MT5Account? _currentAccount;
+
+  /// True once `connect()` has opened a session for this login, with or
+  /// without a trading account. Reconnect / resume key off this instead of
+  /// `_currentAccount`, because a user with no MT5 account still connects
+  /// (`trading_account: null`) to receive watchlist prices.
+  bool _hasSession = false;
   final Set<String> _symbols = <String>{};
   List<String> _channels = const <String>[
     'prices',
@@ -164,11 +170,10 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
         return;
       }
 
-      final current = accountController.activeMT5Account;
-      if (current != null) {
-        // Fire-and-forget; errors are logged inside connect().
-        unawaited(connect(account: current));
-      }
+      // No trading account yet → still connect with `trading_account: null`
+      // so prices flow; the worker below reconnects once an account exists.
+      // Fire-and-forget; errors are logged inside connect().
+      unawaited(connect(account: accountController.activeMT5Account));
 
       _accountWorker?.dispose();
       _accountWorker =
@@ -198,6 +203,7 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
     _accountWorker?.dispose();
     _accountWorker = null;
     _currentAccount = null;
+    _hasSession = false;
     _symbols.clear();
     _pinnedSymbol = null;
     isAuthenticated.value = false;
@@ -242,7 +248,7 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
   /// avoids the "frozen P&L after 2 min background" symptom.
   Future<void> resume() async {
     final account = _currentAccount;
-    if (account == null) {
+    if (!_hasSession) {
       _pausedByLifecycle = false;
       return;
     }
@@ -305,7 +311,7 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
     );
     _resumeWatchdog?.cancel();
     _resumeWatchdog = Timer(const Duration(seconds: 4), () {
-      if (_currentAccount == null) return;
+      if (!_hasSession) return;
       if (_lastFrameAt.isAfter(resumeAt)) return;
       print('StreamWS: resume watchdog — no frames, forcing reconnect');
       _pendingResumeResync = true;
@@ -363,7 +369,7 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
   DateTime? _lastResumeAt;
 
   Future<void> connect({
-    required MT5Account account,
+    MT5Account? account,
     List<String> symbols = const <String>[],
     List<String> channels = const <String>[
       'prices',
@@ -380,7 +386,7 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
     final inFlight = _connectInFlight;
     if (inFlight != null && !inFlight.isCompleted) {
       final sameAccount =
-          _currentAccount?.metaAccountNumber == account.metaAccountNumber;
+          _currentAccount?.metaAccountNumber == account?.metaAccountNumber;
       if (sameAccount) {
         print('StreamWS: connect skipped (in-flight)');
         return inFlight.future;
@@ -400,12 +406,12 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
   }
 
   Future<void> _connectImpl(
-    MT5Account account,
+    MT5Account? account,
     List<String> symbols,
     List<String> channels,
   ) async {
     final sameAccount =
-        _currentAccount?.metaAccountNumber == account.metaAccountNumber;
+        _currentAccount?.metaAccountNumber == account?.metaAccountNumber;
     if (_channel != null && sameAccount && isAuthenticated.value) {
       // Already connected AND authenticated — just reconcile symbols.
       await setSymbols(symbols);
@@ -416,6 +422,7 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
     _manualClose = false;
 
     _currentAccount = account;
+    _hasSession = true;
     _channels = channels;
     // Merge: keep any symbols already queued by `addSymbols` before the
     // connect call landed; add the ones explicitly passed in `symbols`.
@@ -425,7 +432,7 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
 
     final url = WebSocketEndpointHelper.getStreamUrl();
     if (kDebugMode) {
-      debugPrint('StreamWS: connecting $url for ${account.metaAccountNumber}');
+      debugPrint('StreamWS: connecting $url for ${account?.metaAccountNumber}');
     }
     final channel = WebSocketChannel.connect(Uri.parse(url));
     _channel = channel;
@@ -467,7 +474,7 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
     final authPayload = <String, dynamic>{
       'type': 'authenticate',
       'authID': token,
-      'trading_account': account.metaAccountNumber,
+      'trading_account': account?.metaAccountNumber,
       'channels': _channels,
       'symbols': _symbols.toList(),
     };
@@ -686,8 +693,8 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
   // ─── Reconnect backoff ─────────────────────────────────────────────────
   void _scheduleReconnect() {
     if (_manualClose) return;
+    if (!_hasSession) return;
     final account = _currentAccount;
-    if (account == null) return;
     _reconnectTimer?.cancel();
     final attempt = _reconnectAttempt.clamp(0, 10);
     final delayMs =
@@ -826,8 +833,8 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
       case 'group_changed':
         // Fresh socket required (ws-stream-reference.md §3).
         Future.delayed(const Duration(milliseconds: 500), () async {
+          if (!_hasSession) return;
           final account = _currentAccount;
-          if (account == null) return;
           _manualClose = false;
           await disconnect();
           _manualClose = false;

@@ -388,6 +388,7 @@
   "create_account_screen_last_name": "Nama Belakang",
   "create_account_screen_password": "Kata Sandi",
   "create_account_screen_phone_number": "Nomor Telepon",
+  "create_account_screen_phone_number_optional": "Nomor Telepon (Opsional)",
   "create_account_screen_please_check_email_email_is_not": "Periksa email, email tidak valid",
   "create_account_screen_please_enter_your_email_address": "Silakan masukkan alamat email Anda",
   "create_account_screen_sign_up": "Daftar",
