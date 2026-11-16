@@ -253,7 +253,7 @@ brands:
  logo: "assets/brands/proactive/logo.svg"
  splashLogo: "assets/brands/proactive/home_icon.png"
  features:
- useNewChart: "false"
+ useNewChart: "true"
  deepLink:
  host: "my.pipze.com"
  iosTeamId: "8WXRXCSTK2"
@@ -399,7 +399,7 @@ brands:
  logo: "assets/brands/tenax/logo.svg"
  splashLogo: "assets/brands/tenax/splash_logo.svg"
  features:
- useNewChart: "false"
+ useNewChart: "true"
 
   - name: vantage
     type: parent

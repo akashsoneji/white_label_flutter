@@ -23,7 +23,7 @@ import 'pending_order_content.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_pending_order_content.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_pending_order_quote_pill.dart';
 import 'dart:async';
-import 'package:crm_app/widgets/tenax_chart_webview.dart';
+import 'package:crm_app/widgets/chart/app_tenax_chart.dart';
 
 class PendingOrderScreen extends StatefulWidget {
   final String? symbol;
@@ -761,12 +761,10 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12.r),
-                  child: FlavorConfig.instance.useNewChart
-                      ? TenaxChartWebView(
-                          symbol: _datafeedSymbolForSelected.isNotEmpty
-                              ? _datafeedSymbolForSelected
-                              : selectedSymbol,
-                          isDark: AppColors.chartTheme == 'dark',
+                  child: AppTenaxChart.isSupported
+                      ? AppTenaxChart(
+                          symbol: _removeSymbolSuffixForDisplay(selectedSymbol),
+                          allowOrderActions: false,
                         )
                       : ChartInAppWebView(
                           key: ValueKey(
@@ -904,12 +902,10 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
           // Chart WebView (only when chart is enabled)
           if (showChart)
             Expanded(
-              child: FlavorConfig.instance.useNewChart
-                  ? TenaxChartWebView(
-                      symbol: _datafeedSymbolForSelected.isNotEmpty
-                          ? _datafeedSymbolForSelected
-                          : selectedSymbol,
-                      isDark: AppColors.chartTheme == 'dark',
+              child: AppTenaxChart.isSupported
+                  ? AppTenaxChart(
+                      symbol: _removeSymbolSuffixForDisplay(selectedSymbol),
+                      allowOrderActions: false,
                     )
                   : ChartInAppWebView(
                       key: ValueKey(

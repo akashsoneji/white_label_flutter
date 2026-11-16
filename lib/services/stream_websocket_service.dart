@@ -105,6 +105,14 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
       StreamController<dynamic>.broadcast();
   final StreamController<Map<String, dynamic>> _controlCtrl =
       StreamController<Map<String, dynamic>>.broadcast();
+  final StreamController<List<dynamic>> _barsCtrl =
+      StreamController<List<dynamic>>.broadcast();
+
+  /// `k` frames: `[symbol, tf, t, o, h, l, c, v, closed, digits]`.
+  Stream<List<dynamic>> get bars => _barsCtrl.stream;
+
+  /// Open `subscribe_bars` pairs (`SYMBOL|tf`) → number of charts using them.
+  final Map<String, int> _barSubscriptions = <String, int>{};
 
   Stream<dynamic> get prices => _pricesCtrl.stream;
   Stream<dynamic> get positions => _positionsCtrl.stream;
@@ -147,6 +155,7 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
     _ordersCtrl.close();
     _accountsCtrl.close();
     _controlCtrl.close();
+    _barsCtrl.close();
     super.onClose();
   }
 
@@ -614,6 +623,57 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
     }));
   }
 
+  /// Subscribe to server-built bars for [symbol]/[tf] (`subscribe_bars`).
+  /// Reference-counted so two charts on one pair share a subscription; sent
+  /// once the socket is authenticated, and again after every reconnect.
+  void subscribeBars(String symbol, String tf) {
+    final key = _barKey(symbol, tf);
+    final count = _barSubscriptions[key] ?? 0;
+    _barSubscriptions[key] = count + 1;
+    if (count > 0) return;
+    _sendBarAction('subscribe_bars', _normalize(symbol), tf: tf);
+  }
+
+  void unsubscribeBars(String symbol, String tf) {
+    final key = _barKey(symbol, tf);
+    final count = _barSubscriptions[key];
+    if (count == null) return;
+    if (count > 1) {
+      _barSubscriptions[key] = count - 1;
+      return;
+    }
+    _barSubscriptions.remove(key);
+    final normalized = _normalize(symbol);
+    // The engine unsubscribes by symbol only, so any other timeframe still
+    // open on the same symbol is subscribed again.
+    _sendBarAction('unsubscribe_bars', normalized);
+    for (final remaining in _barSubscriptions.keys) {
+      final parts = remaining.split('|');
+      if (parts[0] == normalized) {
+        _sendBarAction('subscribe_bars', parts[0], tf: parts[1]);
+      }
+    }
+  }
+
+  void _resendBarSubscriptions() {
+    for (final key in _barSubscriptions.keys) {
+      final parts = key.split('|');
+      _sendBarAction('subscribe_bars', parts[0], tf: parts[1]);
+    }
+  }
+
+  void _sendBarAction(String action, String symbol, {String? tf}) {
+    if (_channel == null || !isAuthenticated.value) return;
+    _channel!.sink.add(jsonEncode(<String, dynamic>{
+      'action': action,
+      'symbol': symbol,
+      if (tf != null) 'tf': tf,
+    }));
+  }
+
+  static String _barKey(String symbol, String tf) =>
+      '${_normalize(symbol)}|$tf';
+
   /// Spec §5: tear down channel subscriptions without closing the socket.
   void tearDownSubscriptions() {
     if (_channel == null) return;
@@ -795,6 +855,7 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
         print(
           'StreamWS: authenticated=$ok symbols=${_symbols.length} resync=$_pendingResumeResync',
         );
+        if (ok) _resendBarSubscriptions();
         if (ok && _channel != null && _symbols.isNotEmpty) {
           _channel!.sink.add(jsonEncode(<String, dynamic>{
             'action': 'subscribe',
@@ -885,6 +946,18 @@ class StreamWebSocketService extends GetxService with WidgetsBindingObserver {
       case 'accounts':
         _accountsCtrl.add(payload);
         _forwardToAccount(payload);
+        break;
+      case 'k':
+        // `['k', [symbol, tf, t, o, h, l, c, v, closed, digits]]`; a batch
+        // arrives as a list of those rows.
+        final inner = _unwrap(payload);
+        if (inner is List && inner.isNotEmpty && inner.first is List) {
+          for (final row in inner) {
+            if (row is List) _barsCtrl.add(row);
+          }
+        } else if (inner is List && inner.isNotEmpty) {
+          _barsCtrl.add(inner);
+        }
         break;
       default:
         _controlCtrl.add(<String, dynamic>{

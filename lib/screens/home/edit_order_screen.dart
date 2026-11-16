@@ -22,7 +22,7 @@ import 'package:crm_app/services/stream_websocket_service.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 import 'package:crm_app/flavor_config.dart';
-import 'package:crm_app/widgets/tenax_chart_webview.dart';
+import 'package:crm_app/widgets/chart/app_tenax_chart.dart';
 
 class EditOrderScreen extends StatefulWidget {
   final TradePosition position;
@@ -960,10 +960,12 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
           // Chart WebView (only when chart is enabled)
           if (showChart)
             Expanded(
-              child: FlavorConfig.instance.useNewChart
-                  ? TenaxChartWebView(
+              // Read-only here: the levels are edited through this screen's own form.
+              child: AppTenaxChart.isSupported
+                  ? AppTenaxChart(
+                      key: ValueKey(widget.position.symbol),
                       symbol: widget.position.symbol,
-                      isDark: AppColors.chartTheme == 'dark',
+                      allowOrderActions: false,
                     )
                   : ChartInAppWebView(
                       key: ValueKey(widget.position.symbol),

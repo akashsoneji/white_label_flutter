@@ -48,7 +48,8 @@ import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/services/favorites_storage_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
-import 'package:crm_app/widgets/tenax_chart_webview.dart';
+
+import 'package:crm_app/widgets/chart/app_tenax_chart.dart';
 import 'package:crm_app/services/symbol_details_cache_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/price_alert_dialog.dart';
@@ -925,11 +926,10 @@ class _Header extends StatelessWidget {
 //  Chart area  :  TradingView WebView (free widget if enabled)
 // ────────────────────────────────────────────────────────────────────
 //
-// For Pipze: StatefulWidget that owns the TenaxChartWebView key locally
-// and subscribes to SymbolSelectionService directly (no GlobalKey
-// propagation through Obx parents). When the symbol changes, it calls
-// updateSymbol() on the TenaxChartWebView state directly — guaranteed
-// to reach the controller without any widget-tree matching ambiguity.
+// Subscribes to SymbolSelectionService directly. The legacy chart gets
+// symbol changes via updateSymbol() on its state; the Tenax chart
+// (useNewChart brands) gets them through the Obx rebuild below, which
+// TenaxChartView applies in place without reloading the page.
 // ────────────────────────────────────────────────────────────────────
 class _ChartArea extends StatefulWidget {
   final bool isDark;
@@ -942,13 +942,6 @@ class _ChartArea extends StatefulWidget {
 }
 
 class _ChartAreaState extends State<_ChartArea> {
-  // Local key owned by this State — never passed through Obx rebuild chains.
-  final _tenaxKey = GlobalKey<TenaxChartWebViewState>();
-
-  // The symbol the TenaxChartWebView was FIRST built with. Never changes so
-  // the WebView is never torn down. Symbol updates go through the controller.
-  String? _initialSymbol;
-
   late SymbolSelectionService _symService;
   StreamSubscription<String>? _symSub;
 
@@ -957,11 +950,8 @@ class _ChartAreaState extends State<_ChartArea> {
     super.initState();
     _symService = Get.find<SymbolSelectionService>();
 
-    // Seed the initial symbol synchronously.
-    _initialSymbol = _stripDot(_symService.currentSymbol);
-
-    // Listen for future symbol changes and push them into the chart
-    // controller directly — no rebuild of TenaxChartWebView needed.
+    // Listen for future symbol changes and push them into the legacy chart
+    // controller directly — no WebView rebuild needed.
     _symSub = _symService.lastSymbolRx.listen(_onSymbolChanged);
   }
 
@@ -983,9 +973,7 @@ class _ChartAreaState extends State<_ChartArea> {
       raw,
       acc,
     );
-    _initialSymbol = effective;
     // Push the new symbol into the running WebView without rebuilding.
-    _tenaxKey.currentState?.updateSymbol(effective);
     widget.webViewKey.currentState?.updateSymbol(effective);
   }
 
@@ -1024,14 +1012,9 @@ class _ChartAreaState extends State<_ChartArea> {
           return _buildNoSymbolState();
         }
 
-        if (useNew) {
-          final initial = _initialSymbol ?? '';
-          return TenaxChartWebView(
-            key: _tenaxKey,
-            symbol: initial.isNotEmpty ? initial : effective,
-            isDark: widget.isDark,
-          );
-        }
+        // The bundled chart switches symbol in place on rebuild, so it takes
+        // the live symbol rather than the first one.
+        if (useNew) return AppTenaxChart(symbol: effective);
 
         final url =
             '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${widget.isDark ? 'dark' : 'light'}';

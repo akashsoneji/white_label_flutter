@@ -30,7 +30,7 @@ assets:
   splashLogo: home_icon.png
 
 features:
-  useNewChart: false
+  useNewChart: true
 
 # Universal links / App Links. Remove this block to disable deep linking for
 # the flavor. Keys stay flat (no nested ios:/android:) because the brand

@@ -22,7 +22,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 # FOR STAGING
 # version: 1.0.99+96
-version: 1.0.232+2
+version: 1.0.234+3
 # for OTHERS 
 # version: 2.0.7+8
 #For PIPZE
@@ -97,6 +97,10 @@ dependencies:
   
   # TradingView Charting Library
   flutter_inappwebview: ^6.0.0
+
+  # Bundled Tenax chart (brands with features.useNewChart)
+  tenax_chart:
+    path: packages/tenax_chart
   
   # Local Notifications
   # flutter_local_notifications: ^16.3.2

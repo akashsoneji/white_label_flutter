@@ -10,7 +10,7 @@ import 'package:crm_app/models/instrument.dart';
 import 'package:crm_app/models/socket_response.dart';
 import 'package:crm_app/widgets/app_switch_tile.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
-import 'package:crm_app/widgets/tenax_chart_webview.dart';
+import 'package:crm_app/widgets/chart/app_tenax_chart.dart';
 import 'package:crm_app/services/chart_webview_prewarmer.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/services/language_service.dart';
@@ -1986,11 +1986,10 @@ Placing Order:
       child: Directionality(
         textDirection: TextDirection.ltr,
         child:
-            FlavorConfig.instance.useNewChart
-                ? TenaxChartWebView(
-                  symbol: effectiveDatafeedSymbol,
-                  isDark: AppColors.chartTheme == 'dark',
-                )
+            AppTenaxChart.isSupported
+                // A symbol change is sent to the same WebView by message, so
+                // no key per symbol.
+                ? AppTenaxChart(symbol: displaySymbol)
                 : ChartInAppWebView(
                   key: _webViewKey,
                   symbol:

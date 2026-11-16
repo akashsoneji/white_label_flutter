@@ -33,4 +33,4 @@ assets:
  splashLogo: splash_logo.svg
 
 features:
- useNewChart: false
+ useNewChart: true

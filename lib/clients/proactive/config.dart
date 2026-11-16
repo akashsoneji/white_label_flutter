@@ -21,6 +21,6 @@ class ProactiveConfig extends BaseClientConfig {
  apiBaseUrl: 'https://my.pipze.com/api/',
  websocketUrl: 'wss://my.pipze.com/trade-engine',
  chartBaseUrl: 'https://my.pipze.com',
- useNewChart: false,
+ useNewChart: true,
  );
 }
