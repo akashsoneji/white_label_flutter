@@ -350,14 +350,11 @@ class FlavorConfig {
   /// (`/ws/stream`) instead of the legacy 5-socket layout
   /// (`/ws/op`, `/ws/po`, `/ws/symbol`, `/ws/marketwatch`, `/ws/account`).
   ///
-  /// Only tenax / proactive / pipze / moneygenius are migrated for now; every
-  /// other flavor keeps the legacy multi-socket behavior. The bundled Tenax
-  /// chart's live bars (`subscribe_bars` → `k` frames) only exist on this
-  /// socket, so every `useNewChart` brand must be in this set.
+  /// Only proactive / pipze / moneygenius are migrated for now; every other
+  /// flavor keeps the legacy multi-socket behavior.
   static bool get usesSingleStreamSocket {
     final name = (_instance?.flavor.name ?? '').toLowerCase();
-    return const <String>{'tenax', 'proactive', 'pipze', 'moneygenius'}
-        .contains(name);
+    return const <String>{'proactive', 'pipze', 'moneygenius'}.contains(name);
   }
 
   /// Applies a Tenax multi-broker runtime payload onto the active
