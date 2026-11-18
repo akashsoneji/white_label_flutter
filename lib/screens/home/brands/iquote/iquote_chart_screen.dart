@@ -52,6 +52,7 @@ import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
 import 'package:crm_app/widgets/chart/app_tenax_chart.dart';
+import 'package:crm_app/widgets/chart/landscape_chart/landscape_chart_page.dart';
 
 // ── palette ─────────────────────────────────────────────────────────────────
 // MA-line + bullish/bearish colors stay the same across themes — they're
@@ -143,6 +144,10 @@ class IQuoteChartScreen extends StatefulWidget {
 class _IQuoteChartScreenState extends State<IQuoteChartScreen> {
   final GlobalKey<ChartInAppWebViewState> _webViewKey =
       GlobalKey<ChartInAppWebViewState>();
+  // Keeps the Tenax chart's state when it moves into the landscape route.
+  final GlobalKey _tenaxChartKey = GlobalKey();
+  final ValueNotifier<bool> _isLandscapeChartOpen = ValueNotifier(false);
+  final TextEditingController _landscapeLotController = TextEditingController();
   late final IQuoteChartController _ctrl;
 
   @override
@@ -153,6 +158,79 @@ class _IQuoteChartScreenState extends State<IQuoteChartScreen> {
     if (widget.symbol != null && widget.symbol!.isNotEmpty) {
       _ctrl.forceSwitchSymbol(widget.symbol!);
     }
+  }
+
+  @override
+  void dispose() {
+    if (_isLandscapeChartOpen.value) restorePortraitOrientation();
+    _isLandscapeChartOpen.dispose();
+    _landscapeLotController.dispose();
+    super.dispose();
+  }
+
+  // Candle chart: never mirror the price/time axes. Obx so the landscape
+  // copy follows symbol changes too.
+  Widget _buildChart() {
+    return Obx(() {
+      // URL is FIXED — never embed ctrl.symbol in it.
+      // Only the `symbol` prop changes, keeping all redraws as JS-only updates.
+      final stableUrl =
+          '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child:
+            AppTenaxChart.isSupported
+                ? AppTenaxChart(key: _tenaxChartKey, symbol: _ctrl.symbol)
+                : ChartInAppWebView(
+                  key: _webViewKey,
+                  symbol: _ctrl.symbol,
+                  url: stableUrl,
+                ),
+      );
+    });
+  }
+
+  // Same formatting as the bottom bar's Buy/Sell pills.
+  String _formatPrice(double? price) =>
+      price != null && price > 0
+          ? price.toStringAsFixed(_ctrl.priceDigits.value)
+          : '—';
+
+  // The landscape panel has its own lot stepper, so SELL/BUY place a market
+  // order directly through the same controller path one-click trading uses.
+  void _placeLandscapeOrder(String side) {
+    final vol = _ctrl.lastVolume.value > 0 ? _ctrl.lastVolume.value : 0.01;
+    _ctrl.submitOrder(side: side, orderKind: 'market', volume: vol, price: '');
+  }
+
+  Future<void> _openLandscapeChart() {
+    _landscapeLotController.text = _ctrl.lastVolume.value.toStringAsFixed(2);
+    return openLandscapeChart(
+      context,
+      isOpen: _isLandscapeChartOpen,
+      pageBuilder:
+          (_) => LandscapeChartPage(
+            isOpen: _isLandscapeChartOpen,
+            chartBuilder: (_) => _buildChart(),
+            currentSymbol: () => _ctrl.symbol,
+            onSymbolChanged: (raw) => _ctrl.symbol = raw,
+            symbolStream: _ctrl.symbolRx.stream,
+            volumeController: _landscapeLotController,
+            minLot: () => 0.01,
+            // The portrait order sheet has no upper limit either.
+            maxLot: () => double.infinity,
+            onVolumeChanged: (value) => _ctrl.lastVolume.value = value,
+            priceStream: _ctrl.lastBid.stream,
+            bid: () => _formatPrice(_ctrl.lastBid.value),
+            ask: () => _formatPrice(_ctrl.lastAsk.value),
+            spread: () {
+              final spread = _ctrl.lastSpread.value;
+              return spread > 0 ? spread.toStringAsFixed(0) : '0';
+            },
+            onSell: () => _placeLandscapeOrder('sell'),
+            onBuy: () => _placeLandscapeOrder('buy'),
+          ),
+    );
   }
 
   @override
@@ -173,31 +251,25 @@ class _IQuoteChartScreenState extends State<IQuoteChartScreen> {
           backgroundColor: palette.bg,
           body: SafeArea(
             bottom: false,
-            child: Obx(() {
-              // URL is FIXED — never embed ctrl.symbol in it.
-              // Only the `symbol` prop changes, keeping all redraws as JS-only updates.
-              final stableUrl =
-                  '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
-              return Column(
-                children: [
-                  _Header(ctrl: ctrl, palette: palette),
-                  Expanded(
-                    // Candle chart: never mirror the price/time axes.
-                    child: Directionality(
-                      textDirection: TextDirection.ltr,
-                      child: AppTenaxChart.isSupported
-                          ? AppTenaxChart(symbol: ctrl.symbol)
-                          : ChartInAppWebView(
-                              key: _webViewKey,
-                              symbol: ctrl.symbol,
-                              url: stableUrl,
-                            ),
-                    ),
+            child: Column(
+              children: [
+                _Header(
+                  ctrl: ctrl,
+                  palette: palette,
+                  onFullscreen: _openLandscapeChart,
+                ),
+                Expanded(
+                  // The landscape page holds the keyed chart while it is open.
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: _isLandscapeChartOpen,
+                    builder:
+                        (_, isOpen, __) =>
+                            isOpen ? const SizedBox.shrink() : _buildChart(),
                   ),
-                  _BottomBar(ctrl: ctrl, palette: palette),
-                ],
-              );
-            }),
+                ),
+                _BottomBar(ctrl: ctrl, palette: palette),
+              ],
+            ),
           ),
         );
       },
@@ -207,9 +279,14 @@ class _IQuoteChartScreenState extends State<IQuoteChartScreen> {
 
 // ── header (back + account pill + balance + info) ──────────────────────────
 class _Header extends StatelessWidget {
-  const _Header({required this.ctrl, required this.palette});
+  const _Header({
+    required this.ctrl,
+    required this.palette,
+    required this.onFullscreen,
+  });
   final IQuoteChartController ctrl;
   final _ChartPalette palette;
+  final VoidCallback onFullscreen;
 
   @override
   Widget build(BuildContext context) {
@@ -249,6 +326,14 @@ class _Header extends StatelessWidget {
             ),
           ),
           const Spacer(),
+          FullscreenChartButton(
+            onTap: onFullscreen,
+            size: 32.h,
+            radius: 8.r,
+            backgroundColor: palette.sheetFieldBg,
+            iconColor: AppColors.textPrimary,
+          ),
+          SizedBox(width: 8.w),
           GestureDetector(
             onTap: () => showDashboardBottomSheet(context),
             child: Obx(() {

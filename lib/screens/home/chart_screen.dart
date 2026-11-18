@@ -11,6 +11,7 @@ import 'package:crm_app/models/socket_response.dart';
 import 'package:crm_app/widgets/app_switch_tile.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 import 'package:crm_app/widgets/chart/app_tenax_chart.dart';
+import 'package:crm_app/widgets/chart/landscape_chart/landscape_chart_page.dart';
 import 'package:crm_app/services/chart_webview_prewarmer.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/services/language_service.dart';
@@ -176,6 +177,14 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
   // GlobalKey to access WebView state for explicit symbol updates
   final GlobalKey<ChartInAppWebViewState> _webViewKey =
       GlobalKey<ChartInAppWebViewState>();
+
+  // True while the chart lives in the landscape fullscreen route. The chart is
+  // keyed by a GlobalKey, so the portrait layout must not build it meanwhile.
+  final ValueNotifier<bool> _isLandscapeChartOpen = ValueNotifier(false);
+
+  // Keeps the same Tenax chart (timeframe, drawings, loaded bars) when it moves
+  // between the portrait layout and the landscape fullscreen route.
+  final GlobalKey _tenaxChartKey = GlobalKey();
 
   // Helper method to remove symbol suffixes (.c, .r, etc.)
   // IMPORTANT: Use this ONLY for display and chart iframe
@@ -1498,6 +1507,11 @@ Placing Order:
 
   @override
   void dispose() {
+    if (_isLandscapeChartOpen.value) {
+      restorePortraitOrientation();
+    }
+    _isLandscapeChartOpen.dispose();
+
     // Cancel stream subscriptions
     _priceStreamSubscription1?.cancel();
     _priceStreamSubscription2?.cancel();
@@ -1720,7 +1734,15 @@ Placing Order:
                           : isLargeScreen
                           ? 4
                           : 3,
-                  child: _buildChartArea(),
+                  // The landscape page holds the keyed chart while it is open.
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: _isLandscapeChartOpen,
+                    builder:
+                        (_, isOpen, __) =>
+                            isOpen
+                                ? const SizedBox.shrink()
+                                : _buildChartArea(),
+                  ),
                 ),
 
                 // Interactive Icons - Fixed height
@@ -1739,6 +1761,39 @@ Placing Order:
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _openLandscapeChart() {
+    return openLandscapeChart(
+      context,
+      isOpen: _isLandscapeChartOpen,
+      pageBuilder:
+          (_) => LandscapeChartPage(
+            isOpen: _isLandscapeChartOpen,
+            chartBuilder: (_) => _buildChartArea(),
+            currentSymbol: () => selectedSymbol,
+            onSymbolChanged: _onSymbolChanged,
+            displaySymbol: _removeSymbolSuffix,
+            symbolListenable: ChartScreen._selectedSymbolNotifier,
+            volumeController: _volumeController,
+            minLot: () => _minLot,
+            maxLot: () => _maxLot,
+            onVolumeChanged: (value) {
+              if (mounted) setState(() => volume = value);
+            },
+            priceStream: chartSocketController.priceStream,
+            spread:
+                () => chartSocketController.getDifference()?.toString() ?? '0',
+            // SELL/BUY keep their portrait order handlers; only the look
+            // changes in landscape.
+            tradeButtonsBuilder:
+                (_, lotStepper) => _buildTradingControls(
+                  isLandscape: true,
+                  lotStepper: lotStepper,
+                ),
+            overlay: _buildNotificationStack(),
+          ),
     );
   }
 
@@ -1989,7 +2044,7 @@ Placing Order:
             AppTenaxChart.isSupported
                 // A symbol change is sent to the same WebView by message, so
                 // no key per symbol.
-                ? AppTenaxChart(symbol: displaySymbol)
+                ? AppTenaxChart(key: _tenaxChartKey, symbol: displaySymbol)
                 : ChartInAppWebView(
                   key: _webViewKey,
                   symbol:
@@ -2269,36 +2324,35 @@ Placing Order:
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () {
-              // Navigate to fullscreen pending order screen
-              Get.to(
-                () => PendingOrderScreen(
-                  symbol: selectedSymbol,
-                  onNavigateToTrade: widget.onNavigateToTrade,
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                // Navigate to fullscreen pending order screen
+                Get.to(
+                  () => PendingOrderScreen(
+                    symbol: selectedSymbol,
+                    onNavigateToTrade: widget.onNavigateToTrade,
+                  ),
+                );
+              },
+              child: Container(
+                height: 45.h,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(7.r),
+                  color:
+                      AppColors.isDarkMode
+                          ? AppColors.primary.withOpacity(0.1)
+                          : AppColors.primary,
                 ),
-              );
-            },
-            child: Container(
-              height: 45.h,
-              width:
-                  Get.width /
-                  1.5, // Reduced width to accommodate the new notification button
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(7.r),
-                color:
-                    AppColors.isDarkMode
-                        ? AppColors.primary.withOpacity(0.1)
-                        : AppColors.primary,
-              ),
-              child: Text(
-                languageService.tr('chart_pending_order_header'),
-                style: AppTextStyles.labelOnTradeButton,
+                child: Text(
+                  languageService.tr('chart_pending_order_header'),
+                  style: AppTextStyles.labelOnTradeButton,
+                ),
               ),
             ),
           ),
-          Spacer(),
+          SizedBox(width: 8.w),
 
           if (_priceAlertEnabled) ...[
             GestureDetector(
@@ -2336,7 +2390,16 @@ Placing Order:
                 child: Icon(Icons.notifications, color: AppColors.primary),
               ),
             ),
+            SizedBox(width: 8.w),
           ],
+
+          // Both chart types are keyed (_tenaxChartKey / _webViewKey), so the
+          // same instance moves into landscape without reloading.
+          FullscreenChartButton(
+            onTap: _openLandscapeChart,
+            size: 45.h,
+            radius: 7.r,
+          ),
           // SizedBox(width: 8.w),
 
           // Debug info button
@@ -2377,7 +2440,10 @@ Placing Order:
     );
   }
 
-  Widget _buildTradingControls() {
+  Widget _buildTradingControls({
+    bool isLandscape = false,
+    Widget? lotStepper,
+  }) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 400;
 
@@ -2409,11 +2475,18 @@ Placing Order:
     // }
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10.w),
+      padding:
+          isLandscape
+              ? EdgeInsets.zero
+              : EdgeInsets.symmetric(horizontal: 10.w),
       child: Container(
         child: Stack(
           children: [
             Row(
+              crossAxisAlignment:
+                  isLandscape
+                      ? CrossAxisAlignment.stretch
+                      : CrossAxisAlignment.center,
               children: [
                 // SELL Button - now wrapped in GestureDetector
                 Expanded(
@@ -2616,7 +2689,14 @@ Placing Order:
                         });
                       }
                     },
-                    child: AnimatedOpacity(
+                    child: isLandscape
+                        ? LandscapeTradeTile(
+                          label: languageService.tr('general_sell').toUpperCase(),
+                          price: bidPrice,
+                          color: AppColors.error,
+                          dimmed: _isPlacingOrder,
+                        )
+                        : AnimatedOpacity(
                       duration: Duration(milliseconds: 100),
                       opacity: _isPlacingOrder ? 0.5 : 1.0,
                       child: Container(
@@ -2651,7 +2731,12 @@ Placing Order:
                     ),
                   ),
                 ),
-                SizedBox(width: isSmallScreen ? 8.w : 16.w),
+                isLandscape
+                    ? Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: lotStepper,
+                    )
+                    : SizedBox(width: isSmallScreen ? 8.w : 16.w),
                 // BUY Button - now wrapped in GestureDetector
                 Expanded(
                   child: GestureDetector(
@@ -2853,7 +2938,14 @@ Placing Order:
                         });
                       }
                     },
-                    child: AnimatedOpacity(
+                    child: isLandscape
+                        ? LandscapeTradeTile(
+                          label: languageService.tr('general_buy').toUpperCase(),
+                          price: askPrice,
+                          color: AppColors.success,
+                          dimmed: _isPlacingOrder,
+                        )
+                        : AnimatedOpacity(
                       duration: Duration(milliseconds: 100),
                       opacity: _isPlacingOrder ? 0.5 : 1.0,
                       child: Container(
@@ -2890,27 +2982,29 @@ Placing Order:
                 ),
               ],
             ),
-            Align(
-              alignment: Alignment.center,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.height * 0.013,
-                ),
-                child: Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppColors.tradeBackgroundCenterColor,
-                    borderRadius: BorderRadius.circular(8.r),
+            // In landscape the spread sits under the lot, between the tiles.
+            if (!isLandscape)
+              Align(
+                alignment: Alignment.center,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).size.height * 0.013,
                   ),
-                  height: 26.h,
-                  width: 52.w,
-                  child: Text(
-                    difference,
-                    style: AppTextStyles.labelOnTradeDifference,
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.tradeBackgroundCenterColor,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    height: 26.h,
+                    width: 52.w,
+                    child: Text(
+                      difference,
+                      style: AppTextStyles.labelOnTradeDifference,
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

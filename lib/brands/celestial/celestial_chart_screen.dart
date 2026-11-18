@@ -35,6 +35,7 @@ import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/tenax_chart_webview.dart';
+import 'package:crm_app/widgets/chart/landscape_chart/landscape_chart_page.dart';
 
 // ── Resolution map ─────────────────────────────────────────────────────────
 const _tfMap = {
@@ -75,6 +76,13 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
   String _tf = '1h';
   double _lot = 0.01;
   bool _tradeOpen = false;
+
+  // Keyed so the chart area (with its WebView and symbol listeners) moves
+  // into the landscape route instead of reloading.
+  final GlobalKey _chartAreaKey = GlobalKey();
+  final ValueNotifier<bool> _isLandscapeChartOpen = ValueNotifier(false);
+  // Portrait edits _lot through a dialog; the landscape panel needs a field.
+  final TextEditingController _landscapeLotController = TextEditingController();
 
   // ── Tick subscription ──────────────────────────────────────────────────
   StreamSubscription<Map<String, dynamic>>? _tickSub;
@@ -120,6 +128,9 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
 
   @override
   void dispose() {
+    if (_isLandscapeChartOpen.value) restorePortraitOrientation();
+    _isLandscapeChartOpen.dispose();
+    _landscapeLotController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _tickSub?.cancel();
     _chart.stopWebSocket();
@@ -234,6 +245,71 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
   String _stripSuffix(String sym) =>
       sym.contains('.') ? sym.substring(0, sym.lastIndexOf('.')) : sym;
 
+  String _currentSymbol() =>
+      _chart.currentSymbol.value.isEmpty ? 'EURUSD' : _chart.currentSymbol.value;
+
+  void _selectSymbol(String sym) {
+    // setSymbol notifies _CelChartArea via its lastSymbolRx listener
+    if (Get.isRegistered<SymbolSelectionService>()) {
+      Get.find<SymbolSelectionService>().setSymbol(sym);
+    }
+    _chart.changeSymbol(sym);
+  }
+
+  // Same formatting as the portrait trade panel.
+  String _formatPrice({required bool isBid}) {
+    final price = _inst.priceRx(_currentSymbol()).value;
+    final dig = price.digits > 0 ? price.digits : 2;
+    return (isBid ? price.bid : price.ask).toStringAsFixed(dig);
+  }
+
+  Future<void> _openLandscapeChart() {
+    _landscapeLotController.text = _lot.toStringAsFixed(2);
+    return openLandscapeChart(
+      context,
+      isOpen: _isLandscapeChartOpen,
+      pageBuilder:
+          (_) => LandscapeChartPage(
+            isOpen: _isLandscapeChartOpen,
+            chartBuilder: (_) => _buildChartWidget(),
+            currentSymbol: _currentSymbol,
+            onSymbolChanged: _selectSymbol,
+            symbolStream: _chart.currentSymbol.stream,
+            volumeController: _landscapeLotController,
+            minLot: () => 0.01,
+            // Portrait has no upper limit either; the server rejects bad lots.
+            maxLot: () => double.infinity,
+            onVolumeChanged: (value) {
+              if (mounted) setState(() => _lot = value);
+            },
+            priceStream: _chart.priceStream,
+            bid: () => _formatPrice(isBid: true),
+            ask: () => _formatPrice(isBid: false),
+            spread:
+                () =>
+                    _inst
+                        .priceRx(_currentSymbol())
+                        .value
+                        .spreadDiff
+                        .toInt()
+                        .toString(),
+            onSell: () => _placeOrder('sell'),
+            onBuy: () => _placeOrder('buy'),
+          ),
+    );
+  }
+
+  // Candle chart: never mirror the price/time axes.
+  Widget _buildChartWidget() {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: _CelChartArea(
+        key: _chartAreaKey,
+        isDark: AppColors.chartTheme == 'dark',
+      ),
+    );
+  }
+
   bool _matchSymbol(String a, String b) =>
       a == b || _stripSuffix(a) == _stripSuffix(b);
 
@@ -315,6 +391,14 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
             ),
           ),
           const Spacer(),
+          FullscreenChartButton(
+            onTap: _openLandscapeChart,
+            size: 28.h,
+            radius: 6.r,
+            backgroundColor: CelTheme.softBg(c),
+            iconColor: CelTheme.mainText(c),
+          ),
+          SizedBox(width: 8.w),
           // Trade toggle button
           GestureDetector(
             onTap: () => setState(() => _tradeOpen = !_tradeOpen),
@@ -411,10 +495,12 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
         borderRadius: BorderRadius.circular(8.r),
         // ── _CelChartArea seeds the WebView symbol ONCE and updates it via
         // its own GlobalKey — never causes ChartInAppWebView to rebuild.
-        // Candle chart: never mirror the price/time axes.
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: _CelChartArea(isDark: AppColors.chartTheme == 'dark'),
+        // The landscape page holds the keyed chart area while it is open.
+        child: ValueListenableBuilder<bool>(
+          valueListenable: _isLandscapeChartOpen,
+          builder:
+              (_, isOpen, __) =>
+                  isOpen ? const SizedBox.shrink() : _buildChartWidget(),
         ),
       ),
     );
@@ -699,7 +785,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
 // ─────────────────────────────────────────────────────────────────────────────
 class _CelChartArea extends StatefulWidget {
   final bool isDark;
-  const _CelChartArea({required this.isDark});
+  const _CelChartArea({super.key, required this.isDark});
   @override
   State<_CelChartArea> createState() => _CelChartAreaState();
 }

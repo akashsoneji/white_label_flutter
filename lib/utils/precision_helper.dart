@@ -156,6 +156,19 @@ class PrecisionHelper {
     return round(clampedValue, decimals: decimals);
   }
 
+  /// Parse a typed lot size and clamp it to the account's lot range.
+  ///
+  /// Empty, unparsable or non-positive input falls back to [minLot].
+  ///
+  /// Example:
+  /// PrecisionHelper.parseLotInput('0.5', 0.01, 2) returns 0.5
+  /// PrecisionHelper.parseLotInput('', 0.01, 2) returns 0.01
+  static double parseLotInput(String text, double minLot, double maxLot) {
+    final parsed = double.tryParse(text.trim());
+    if (parsed == null || parsed <= 0) return round(minLot);
+    return clamp(parsed, minLot, maxLot);
+  }
+
   /// Check if two doubles are equal within precision tolerance
   ///
   /// [a] - First value
