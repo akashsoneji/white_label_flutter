@@ -24,6 +24,8 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>FlutterDeepLinkingEnabled</key>
+	<false/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
@@ -53,8 +55,6 @@
 	<string>We need photo library access for Identity verification.</string>
 	<key>NSUserNotificationUsageDescription</key>
 	<string>This app needs notification permissions to send you price alerts for your trading instruments.</string>
-	<key>FlutterDeepLinkingEnabled</key>
-	<false/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
