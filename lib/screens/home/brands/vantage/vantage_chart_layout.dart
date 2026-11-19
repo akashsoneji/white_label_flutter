@@ -50,6 +50,7 @@ import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 
 import 'package:crm_app/widgets/chart/app_tenax_chart.dart';
+import 'package:crm_app/widgets/chart/landscape_chart/landscape_chart_page.dart';
 import 'package:crm_app/services/symbol_details_cache_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/price_alert_dialog.dart';
@@ -77,6 +78,9 @@ class VantageChartLayout extends StatefulWidget {
 class _VantageChartLayoutState extends State<VantageChartLayout> {
   final GlobalKey<ChartInAppWebViewState> _webViewKey =
       GlobalKey<ChartInAppWebViewState>();
+  // Keeps the Tenax chart's state when it moves into the landscape route.
+  final GlobalKey _tenaxChartKey = GlobalKey();
+  final ValueNotifier<bool> _isLandscapeChartOpen = ValueNotifier(false);
   double _volume = 0.01;
 
   /// Editable backing field for the quantity TextField. Keeps the
@@ -128,6 +132,8 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
 
   @override
   void dispose() {
+    if (_isLandscapeChartOpen.value) restorePortraitOrientation();
+    _isLandscapeChartOpen.dispose();
     _symSub?.cancel();
     _priceSub?.cancel();
     _volumeController.dispose();
@@ -390,29 +396,9 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
                       return InkWell(
                         onTap: () {
                           Navigator.of(sheetCtx).pop();
-                          // (a) tell the rest of the app which symbol to
-                          //     use (drives chart rebuild via ValueKey in
-                          //     `_ChartArea`).
-                          Get.find<SymbolSelectionService>().setSymbol(raw);
-                          ChartScreen.setSelectedSymbol(raw);
-                          // Immediately rebuild this layout so the Header
-                          // (top-left) shows the new symbol instantly.
-                          setState(() {});
-                          // (b) flip the chart socket so the bottom dock
-                          //     bid / ask / spread refresh for the new
-                          //     symbol — same as the watchlist row tap
-                          //     flow does via `ChartScreen.setSelectedSymbol`.
-                          try {
-                            _socket.changeSymbol(raw);
-                          } catch (_) {}
-                          // (c) bump the local tick so the dock Obx
-                          //     rebuilds even before the first tick of
-                          //     the new symbol arrives (avoids stale '—').
-                          _tick.value++;
-                          // (d) notify the host — same semantics the
-                          //     watchlist gives the TradingMainScreen.
-                          widget.onSymbolSelected?.call(raw);
+                          _selectSymbol(raw);
                         },
+
                         child: Padding(
                           padding: EdgeInsets.symmetric(
                             horizontal: 16.w,
@@ -465,6 +451,62 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
           ),
         );
       },
+    );
+  }
+
+  // Same flow as a watchlist tap; used by the favourites sheet and the
+  // landscape symbol picker.
+  void _selectSymbol(String raw) {
+    // (a) tell the rest of the app which symbol to use (drives chart
+    //     rebuild via ValueKey in `_ChartArea`).
+    Get.find<SymbolSelectionService>().setSymbol(raw);
+    ChartScreen.setSelectedSymbol(raw);
+    // Immediately rebuild this layout so the Header shows the new symbol.
+    if (mounted) setState(() {});
+    // (b) flip the chart socket so the bottom dock bid / ask / spread
+    //     refresh for the new symbol — same as the watchlist row tap flow
+    //     does via `ChartScreen.setSelectedSymbol`.
+    try {
+      _socket.changeSymbol(raw);
+    } catch (_) {}
+    // (c) bump the local tick so the dock Obx rebuilds even before the
+    //     first tick of the new symbol arrives (avoids stale '—').
+    _tick.value++;
+    // (d) notify the host — same semantics the watchlist gives the
+    //     TradingMainScreen.
+    widget.onSymbolSelected?.call(raw);
+  }
+
+  Future<void> _openLandscapeChart() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return openLandscapeChart(
+      context,
+      isOpen: _isLandscapeChartOpen,
+      pageBuilder:
+          (_) => LandscapeChartPage(
+            isOpen: _isLandscapeChartOpen,
+            chartBuilder:
+                (_) => _ChartArea(
+                  isDark: isDark,
+                  webViewKey: _webViewKey,
+                  tenaxChartKey: _tenaxChartKey,
+                ),
+            currentSymbol: _rawSymbol,
+            onSymbolChanged: _selectSymbol,
+            symbolStream: _symService.lastSymbolRx.stream,
+            volumeController: _volumeController,
+            minLot: () => 0.01,
+            maxLot: () => 100.0,
+            onVolumeChanged: (value) {
+              if (mounted) setState(() => _volume = value);
+            },
+            priceStream: _socket.priceStream,
+            bid: () => _BottomDock.resolvePrices().bid,
+            ask: () => _BottomDock.resolvePrices().ask,
+            spread: () => _BottomDock.resolvePrices().spread,
+            onSell: () => _placeOrder('sell'),
+            onBuy: () => _placeOrder('buy'),
+          ),
     );
   }
 
@@ -560,7 +602,19 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
             // hairline divider exactly as in the TRADYN reference
             Container(height: 1, color: const Color(0x14000000)),
             Expanded(
-              child: _ChartArea(isDark: isDark, webViewKey: _webViewKey),
+              // The landscape page holds the keyed chart while it is open.
+              child: ValueListenableBuilder<bool>(
+                valueListenable: _isLandscapeChartOpen,
+                builder:
+                    (_, isOpen, __) =>
+                        isOpen
+                            ? const SizedBox.shrink()
+                            : _ChartArea(
+                              isDark: isDark,
+                              webViewKey: _webViewKey,
+                              tenaxChartKey: _tenaxChartKey,
+                            ),
+              ),
             ),
             Container(height: 1, color: const Color(0x14000000)),
             _BottomDock(
@@ -577,6 +631,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
               onSell: () => _placeOrder('sell'),
               onBuy: () => _placeOrder('buy'),
               onBell: _priceAlertEnabled ? _openPriceAlertSheet : null,
+              onFullscreen: _openLandscapeChart,
             ),
           ],
         ),
@@ -934,8 +989,13 @@ class _Header extends StatelessWidget {
 class _ChartArea extends StatefulWidget {
   final bool isDark;
   final GlobalKey<ChartInAppWebViewState> webViewKey;
+  final GlobalKey tenaxChartKey;
 
-  const _ChartArea({required this.isDark, required this.webViewKey});
+  const _ChartArea({
+    required this.isDark,
+    required this.webViewKey,
+    required this.tenaxChartKey,
+  });
 
   @override
   State<_ChartArea> createState() => _ChartAreaState();
@@ -1014,7 +1074,9 @@ class _ChartAreaState extends State<_ChartArea> {
 
         // The bundled chart switches symbol in place on rebuild, so it takes
         // the live symbol rather than the first one.
-        if (useNew) return AppTenaxChart(symbol: effective);
+        if (useNew) {
+          return AppTenaxChart(key: widget.tenaxChartKey, symbol: effective);
+        }
 
         final url =
             '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${widget.isDark ? 'dark' : 'light'}';
@@ -1070,6 +1132,7 @@ class _BottomDock extends StatelessWidget {
   final VoidCallback onSell;
   final VoidCallback onBuy;
   final VoidCallback? onBell;
+  final VoidCallback onFullscreen;
 
   const _BottomDock({
     required this.primary,
@@ -1085,9 +1148,10 @@ class _BottomDock extends StatelessWidget {
     required this.onSell,
     required this.onBuy,
     required this.onBell,
+    required this.onFullscreen,
   });
 
-  /// Strip trailing zeros (and a dangling `.`) so 20.00 -> "20",
+  /// Strip trailing zeros
   /// 20.50 -> "20.5", 1.08000 -> "1.08". Used to display
   /// bid/ask/spreadDiff as the server sent them, without a forced
   /// fixed-decimal count.
@@ -1097,6 +1161,93 @@ class _BottomDock extends StatelessWidget {
     s = s.replaceFirst(RegExp(r'0+$'), '');
     if (s.endsWith('.')) s = s.substring(0, s.length - 1);
     return s;
+  }
+
+  /// Bid / ask / spread as displayed in the dock, shared with the landscape
+  /// trade panel. Must be called inside an Obx/rebuild so the reads of
+  /// `realTimePrice` are tracked.
+  static ({String bid, String ask, String spread}) resolvePrices() {
+    const empty = (bid: '—', ask: '—', spread: '—');
+    // Guard against teardown (e.g. logout) where controllers are deleted
+    // while this layout is still mounted — an unguarded find throws
+    // "ChartSocketController not found" every frame.
+    if (!Get.isRegistered<ChartSocketController>()) return empty;
+    final socket = Get.find<ChartSocketController>();
+    // ignore: invalid_use_of_protected_member
+    final priceMap = socket.realTimePrice.value;
+
+    // Direct display - no digit-rounding, no pip-conversion.
+    // The server already sends bid/ask at the symbol's natural
+    // precision (5 digits for EURUSD, 2 for XAUUSD/JPY pairs,
+    // 3 for JPY crosses). bid.toString() preserves those
+    // decimals exactly.
+    // spreadDiff comes from the WS pre-converted to *points*
+    // (the controller's // spread_points comment). Display
+    // it as-is - no extra /pip math.
+    final sym =
+        socket.currentSymbol.value.isNotEmpty
+            ? socket.currentSymbol.value
+            : Get.find<SymbolSelectionService>().currentSymbol;
+
+    final priceSymbol = priceMap['symbol']?.toString();
+    final bool isMatch =
+        priceSymbol != null &&
+        (priceSymbol == sym ||
+            _VantageChartLayoutState._stripSuffix(priceSymbol) ==
+                _VantageChartLayoutState._stripSuffix(sym));
+
+    var bid =
+        isMatch && priceMap['bid'] is num
+            ? (priceMap['bid'] as num).toDouble()
+            : null;
+    var ask =
+        isMatch && priceMap['ask'] is num
+            ? (priceMap['ask'] as num).toDouble()
+            : null;
+    var spreadDiff =
+        isMatch && priceMap['spreadDiff'] is num
+            ? (priceMap['spreadDiff'] as num).toDouble()
+            : null;
+
+    if ((bid == null || bid == 0.0 || ask == null || ask == 0.0) &&
+        Get.isRegistered<InstrumentsController>()) {
+      final inst = Get.find<InstrumentsController>();
+      final live = inst.getLivePrice(sym);
+      if (live != null && live.bid > 0) {
+        bid = live.bid;
+        ask = live.ask;
+        spreadDiff = live.spreadDiff;
+      } else {
+        final match = inst.findInstrument(sym);
+        if (match != null && match.bid > 0) {
+          bid = match.bid;
+          ask = match.ask;
+          spreadDiff = match.spreadDiff;
+        }
+      }
+    }
+
+    // Absolute fallback to last valid socket price to eliminate dash lines
+    if ((bid == null || bid == 0.0) &&
+        priceMap['bid'] is num &&
+        (priceMap['bid'] as num) > 0) {
+      bid = (priceMap['bid'] as num).toDouble();
+      ask =
+          priceMap['ask'] is num ? (priceMap['ask'] as num).toDouble() : bid;
+      spreadDiff =
+          priceMap['spreadDiff'] is num
+              ? (priceMap['spreadDiff'] as num).toDouble()
+              : 0.0;
+    }
+
+    return (
+      bid: (bid != null && bid != 0.0) ? _trimTrailingZeros(bid) : '—',
+      ask: (ask != null && ask != 0.0) ? _trimTrailingZeros(ask) : '—',
+      spread:
+          (spreadDiff != null && spreadDiff > 0)
+              ? _trimTrailingZeros(spreadDiff)
+              : '—',
+    );
   }
 
   @override
@@ -1114,93 +1265,12 @@ class _BottomDock extends StatelessWidget {
       ),
       padding: EdgeInsetsDirectional.fromSTEB(12.w, 8.h, 12.w, 14.h),
       child: Obx(() {
-        // ──────────────────────────────────────────�───────────────
         // ignore: unused_local_variable
         final _ = tick.value;
-        // Guard against teardown (e.g. logout) where controllers are deleted
-        // while this layout is still mounted — an unguarded find throws
-        // "ChartSocketController not found" every frame.
         if (!Get.isRegistered<ChartSocketController>()) {
           return const SizedBox.shrink();
         }
-        final socket = Get.find<ChartSocketController>();
-        // ignore: invalid_use_of_protected_member
-        final priceMap = socket.realTimePrice.value;
-
-        // Direct display - no digit-rounding, no pip-conversion.
-        // The server already sends bid/ask at the symbol's natural
-        // precision (5 digits for EURUSD, 2 for XAUUSD/JPY pairs,
-        // 3 for JPY crosses). bid.toString() preserves those
-        // decimals exactly.
-        // spreadDiff comes from the WS pre-converted to *points*
-        // (the controller's // spread_points comment). Display
-        // it as-is - no extra /pip math.
-        final sym =
-            socket.currentSymbol.value.isNotEmpty
-                ? socket.currentSymbol.value
-                : Get.find<SymbolSelectionService>().currentSymbol;
-
-        final priceSymbol = priceMap['symbol']?.toString();
-        final bool isMatch =
-            priceSymbol != null &&
-            (priceSymbol == sym ||
-                _VantageChartLayoutState._stripSuffix(priceSymbol) ==
-                    _VantageChartLayoutState._stripSuffix(sym));
-
-        var bid =
-            isMatch && priceMap['bid'] is num
-                ? (priceMap['bid'] as num).toDouble()
-                : null;
-        var ask =
-            isMatch && priceMap['ask'] is num
-                ? (priceMap['ask'] as num).toDouble()
-                : null;
-        var spreadDiff =
-            isMatch && priceMap['spreadDiff'] is num
-                ? (priceMap['spreadDiff'] as num).toDouble()
-                : null;
-
-        if ((bid == null || bid == 0.0 || ask == null || ask == 0.0) &&
-            Get.isRegistered<InstrumentsController>()) {
-          final inst = Get.find<InstrumentsController>();
-          final live = inst.getLivePrice(sym);
-          if (live != null && live.bid > 0) {
-            bid = live.bid;
-            ask = live.ask;
-            spreadDiff = live.spreadDiff;
-          } else {
-            final match = inst.findInstrument(sym);
-            if (match != null && match.bid > 0) {
-              bid = match.bid;
-              ask = match.ask;
-              spreadDiff = match.spreadDiff;
-            }
-          }
-        }
-
-        // Absolute fallback to last valid socket price to eliminate dash lines
-        if ((bid == null || bid == 0.0) &&
-            priceMap['bid'] is num &&
-            (priceMap['bid'] as num) > 0) {
-          bid = (priceMap['bid'] as num).toDouble();
-          ask =
-              priceMap['ask'] is num
-                  ? (priceMap['ask'] as num).toDouble()
-                  : bid;
-          spreadDiff =
-              priceMap['spreadDiff'] is num
-                  ? (priceMap['spreadDiff'] as num).toDouble()
-                  : 0.0;
-        }
-
-        final bidStr =
-            (bid != null && bid != 0.0) ? _trimTrailingZeros(bid) : '—';
-        final askStr =
-            (ask != null && ask != 0.0) ? _trimTrailingZeros(ask) : '—';
-        final spreadStr =
-            (spreadDiff != null && spreadDiff > 0)
-                ? _trimTrailingZeros(spreadDiff)
-                : '—';
+        final (bid: bidStr, ask: askStr, spread: spreadStr) = resolvePrices();
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1215,6 +1285,7 @@ class _BottomDock extends StatelessWidget {
               onPlus: onPlus,
               onPending: onPending,
               onBell: onBell,
+              onFullscreen: onFullscreen,
             ),
             SizedBox(height: 10.h),
             SafeArea(
@@ -1292,6 +1363,7 @@ class _QuantityBar extends StatelessWidget {
 
   /// Null when `enabled-modules.price_alert` is off — the bell is hidden.
   final VoidCallback? onBell;
+  final VoidCallback onFullscreen;
 
   const _QuantityBar({
     required this.primary,
@@ -1304,6 +1376,7 @@ class _QuantityBar extends StatelessWidget {
     required this.onPlus,
     required this.onPending,
     required this.onBell,
+    required this.onFullscreen,
   });
 
   @override
@@ -1386,6 +1459,11 @@ class _QuantityBar extends StatelessWidget {
               color: primary,
               onTap: onBell!,
             ),
+          _QtyBtn(
+            icon: Icons.fullscreen_rounded,
+            color: primary,
+            onTap: onFullscreen,
+          ),
         ],
       ),
     );
