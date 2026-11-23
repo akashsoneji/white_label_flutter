@@ -13,9 +13,15 @@ subprojects {
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 subprojects {
-    // The Sumsub plugin compiles Java for 11 but Kotlin for 1.8, which the
-    // Kotlin Gradle plugin rejects as an inconsistent JVM target.
+    // The Sumsub plugin leaves Java and Kotlin on different JVM targets, which
+    // the Kotlin Gradle plugin rejects. Pin both to 11.
     if (project.name == "flutter_idensic_mobile_sdk_plugin") {
+        afterEvaluate {
+            extensions.findByType(com.android.build.gradle.BaseExtension::class.java)?.compileOptions?.apply {
+                sourceCompatibility = JavaVersion.VERSION_11
+                targetCompatibility = JavaVersion.VERSION_11
+            }
+        }
         tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
             compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
         }
