@@ -1,15 +1,15 @@
 {
-  "default": "proactive",
+  "default": "baazex",
   "brands": [
-    "proactive",
+    "baazex",
     "vantage"
   ],
   "brandDetails": [
     {
-      "name": "proactive",
+      "name": "baazex",
       "type": "child",
       "inheritsFrom": "vantage",
-      "label": "Proactive",
+      "label": "Baazex",
       "themeMode": "both"
     },
     {

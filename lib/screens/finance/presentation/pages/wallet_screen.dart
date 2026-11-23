@@ -9,6 +9,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/finance/presentation/pages/internal_transfer_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
+import 'package:crm_app/screens/finance_v2/finance_flow_switch.dart';
 import 'package:crm_app/screens/wallet/view_models/wallet_controller.dart';
 import 'package:crm_app/utils/navigation_helper.dart';
 import '../../../../services/language_service.dart';
@@ -315,7 +316,11 @@ class _WalletScreenState extends State<WalletScreen> {
                   // the wallet in "Deposit to" instead of the first MT5 account.
                   onTap:
                       () => Get.to(
-                        () => PaymentMethodsScreen(accountNumber: walletId),
+                        () => FinanceFlowSwitch.deposit(
+                          accountNumber: walletId,
+                          legacy:
+                              () => PaymentMethodsScreen(accountNumber: walletId),
+                        ),
                       ),
                 ),
                 SizedBox(width: 10.w),

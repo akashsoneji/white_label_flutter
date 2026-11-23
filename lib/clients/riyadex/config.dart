@@ -22,5 +22,6 @@ class RiyadexConfig extends BaseClientConfig {
  websocketUrl: 'wss://app.riyadex.com/trade-engine',
  chartBaseUrl: 'https://app.riyadex.com',
  useNewChart: false,
+ useNewDepositWithdrawFlow: false,
  );
 }

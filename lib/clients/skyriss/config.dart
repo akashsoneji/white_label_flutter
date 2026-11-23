@@ -22,5 +22,6 @@ class SkyrissConfig extends BaseClientConfig {
  websocketUrl: 'wss://login.skyriss.com/trade-engine',
  chartBaseUrl: 'https://login.skyriss.com',
  useNewChart: false,
+ useNewDepositWithdrawFlow: false,
  );
 }

@@ -22,5 +22,6 @@ class StarfxConfig extends BaseClientConfig {
  websocketUrl: 'wss://trader.starfxtrading.com/trade-engine',
  chartBaseUrl: 'https://trader.starfxtrading.com',
  useNewChart: false,
+ useNewDepositWithdrawFlow: false,
  );
 }

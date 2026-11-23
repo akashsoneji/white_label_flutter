@@ -1,3 +1,4 @@
+import 'package:crm_app/screens/finance_v2/finance_flow_switch.dart';
 import 'package:flutter/widgets.dart';
 
 import 'finance_ui_slots.dart';
@@ -42,24 +43,38 @@ class FinanceUiRegistry implements FinanceUiSlots {
 
   @override
   Widget paymentMethods({required String accountNumber}) {
-    if (_usesVantageUi) {
-      return vantage.PaymentMethodsScreen(accountNumber: accountNumber);
-    }
-    return base.PaymentMethodsScreen(accountNumber: accountNumber);
+    return FinanceFlowSwitch.deposit(
+      accountNumber: accountNumber,
+      legacy: () {
+        if (_usesVantageUi) {
+          return vantage.PaymentMethodsScreen(accountNumber: accountNumber);
+        }
+        return base.PaymentMethodsScreen(accountNumber: accountNumber);
+      },
+    );
   }
 
   @override
   Widget deposit({required String accountNumber}) {
-    if (_usesVantageUi) {
-      return vantage.DepositScreen(accountNumber: accountNumber);
-    }
-    return base.DepositScreen(accountNumber: accountNumber);
+    return FinanceFlowSwitch.deposit(
+      accountNumber: accountNumber,
+      legacy: () {
+        if (_usesVantageUi) {
+          return vantage.DepositScreen(accountNumber: accountNumber);
+        }
+        return base.DepositScreen(accountNumber: accountNumber);
+      },
+    );
   }
 
   @override
   Widget withdrawal() {
-    if (_usesVantageUi) return const vantage.WithdrawalScreen();
-    return const base.WithdrawalScreen();
+    return FinanceFlowSwitch.withdrawal(
+      legacy: () {
+        if (_usesVantageUi) return const vantage.WithdrawalScreen();
+        return const base.WithdrawalScreen();
+      },
+    );
   }
 
   @override

@@ -27,6 +27,7 @@ class BaseClientConfig {
 
   // Feature flags
   final bool useNewChart;
+  final bool useNewDepositWithdrawFlow;
 
   const BaseClientConfig({
     required this.brandName,
@@ -42,6 +43,7 @@ class BaseClientConfig {
     required this.websocketUrl,
     required this.chartBaseUrl,
     this.useNewChart = false,
+    this.useNewDepositWithdrawFlow = false,
   }) : darkPrimaryColor = darkPrimaryColor ?? primaryColor;
   /// Get the full runtime asset path for a prepared client asset.
   String getAssetPath(String clientName, String assetPath) {

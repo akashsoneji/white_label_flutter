@@ -16,6 +16,7 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:crm_app/screens/home/more/promotional/promotional_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
+import 'package:crm_app/screens/finance_v2/finance_flow_switch.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/banner_controller.dart';
@@ -283,7 +284,11 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                               textColor: textPrimary,
                               onTap:
                                   () => Get.to(
-                                    () => PaymentMethodsScreen(accountNumber: ''),
+                                    () => FinanceFlowSwitch.deposit(
+                                      accountNumber: '',
+                                      legacy:
+                                          () => PaymentMethodsScreen(accountNumber: ''),
+                                    ),
                                   ),
                             ),
                             // 8. Withdrawal

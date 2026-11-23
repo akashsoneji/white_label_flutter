@@ -22,5 +22,6 @@ class BaazexConfig extends BaseClientConfig {
  websocketUrl: 'wss://my.baazex.com/trade-engine',
  chartBaseUrl: 'https://my.baazex.com',
  useNewChart: false,
+ useNewDepositWithdrawFlow: true,
  );
 }

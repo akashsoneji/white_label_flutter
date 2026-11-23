@@ -22,5 +22,6 @@ class GtxprimeConfig extends BaseClientConfig {
  websocketUrl: 'wss://member.gtxprime.com/trade-engine',
  chartBaseUrl: 'https://member.gtxprime.com',
  useNewChart: false,
+ useNewDepositWithdrawFlow: false,
  );
 }

@@ -34,3 +34,4 @@ assets:
 
 features:
   useNewChart: false
+  useNewDepositWithdrawFlow: false

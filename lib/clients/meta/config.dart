@@ -22,5 +22,6 @@ class MetaConfig extends BaseClientConfig {
  websocketUrl: 'wss://dev.tenaxcodecrm.com/trade-engine',
  chartBaseUrl: 'https://dev.tenaxcodecrm.com',
  useNewChart: false,
+ useNewDepositWithdrawFlow: false,
  );
 }

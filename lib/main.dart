@@ -39,6 +39,7 @@ import 'core/network/network_startup_phase.dart';
 import 'services/api_service_client.dart';
 import 'package:crm_app/screens/finance/data/repositories/finance_repository_impl.dart';
 import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
+import 'package:crm_app/screens/finance_v2/data/finance_v2_repository.dart';
 import 'package:crm_app/screens/ib/data/datasources/ib_remote_data_source.dart';
 import 'package:crm_app/screens/ib/data/repositories/ib_repository_impl.dart';
 import 'package:crm_app/screens/ib/data/repositories/ib_repository.dart';
@@ -251,6 +252,10 @@ Future<void> initServices() async {
   // Finance (incremental clean architecture)
   Get.put<FinanceRepository>(
     FinanceRepositoryImpl(Get.find<ApiClient>()),
+    permanent: true,
+  );
+  Get.put<FinanceV2Repository>(
+    FinanceV2Repository(Get.find<ApiClient>()),
     permanent: true,
   );
 

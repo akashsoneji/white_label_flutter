@@ -130,7 +130,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
     try {
       final response = await ApiService.get(
         endpoint: ApiConstants.depositByReference,
-        queryParameters: {'reference': reference},
+        queryParameters: {'ref': reference},
       );
       final body = response.data;
       if (!response.success || body is! Map) return null;

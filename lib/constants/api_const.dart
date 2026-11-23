@@ -60,6 +60,8 @@ class ApiConstants {
   static const String priceAlertsUpdateFcmToken =
       '${ajax}price-alerts/update-fcm-token';
   static const String depositByReference = '${ajax}deposit/by-reference';
+  static const String financePaymentTypes = '${ajax}finance/payment-types';
+  static const String financeChannels = '${ajax}finance/channels';
   static const String profile = '${ajax}settings/profile';
   static const String getMT5Accounts = '${ajax}mt5accounts/get';
   static const String createMT5Account = '${ajax}mt5accounts/create';

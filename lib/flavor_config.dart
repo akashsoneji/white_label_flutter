@@ -3,10 +3,38 @@
 
 import 'package:flutter/material.dart';
 import 'clients/base_config.dart';
+import 'clients/baazex/config.dart';
+import 'clients/celestial/config.dart';
+import 'clients/gtxprime/config.dart';
+import 'clients/iquote/config.dart';
+import 'clients/kantara/config.dart';
+import 'clients/meta/config.dart';
+import 'clients/moneygenius/config.dart';
+import 'clients/pipze/config.dart';
 import 'clients/proactive/config.dart';
+import 'clients/riyadex/config.dart';
+import 'clients/skyriss/config.dart';
+import 'clients/starfx/config.dart';
+import 'clients/telifox/config.dart';
+import 'clients/tenax/config.dart';
+import 'clients/vantage/config.dart';
 
 enum Flavor {
+  baazex,
+  celestial,
+  gtxprime,
+  iquote,
+  kantara,
+  meta,
+  moneygenius,
+  pipze,
   proactive,
+  riyadex,
+  skyriss,
+  starfx,
+  telifox,
+  tenax,
+  vantage,
 }
 
 class FlavorConfig {
@@ -26,6 +54,7 @@ class FlavorConfig {
  final String? remoteLogoUrl;
  final Map<String, dynamic>? selectedBrokerData;
  final bool useNewChart;
+ final bool useNewDepositWithdrawFlow;
 
  static FlavorConfig? _instance;
  static Flavor? _selectedFlavor;
@@ -47,6 +76,7 @@ class FlavorConfig {
  String? remoteLogoUrl,
  Map<String, dynamic>? selectedBrokerData,
  bool useNewChart = false,
+ bool useNewDepositWithdrawFlow = false,
  }) {
  if (_selectedFlavor == null || _selectedFlavor == flavor) {
  _instance = FlavorConfig._internal(
@@ -66,6 +96,7 @@ class FlavorConfig {
  remoteLogoUrl: remoteLogoUrl,
  selectedBrokerData: selectedBrokerData,
  useNewChart: useNewChart,
+ useNewDepositWithdrawFlow: useNewDepositWithdrawFlow,
  );
  _selectedFlavor = flavor;
  }
@@ -89,9 +120,10 @@ class FlavorConfig {
  required this.remoteLogoUrl,
  required this.selectedBrokerData,
  this.useNewChart = false,
+ this.useNewDepositWithdrawFlow = false,
  }) : appTitle = title;
 
-  static FlavorConfig get instance => _instance ?? activate(Flavor.proactive);
+  static FlavorConfig get instance => _instance ?? activate(Flavor.vantage);
 
   static void reset() {
     _instance = null;
@@ -107,21 +139,103 @@ class FlavorConfig {
     final normalized = name.trim().toLowerCase();
     final flavor = Flavor.values.firstWhere(
       (value) => value.name == normalized,
-      orElse: () => Flavor.proactive,
+      orElse: () => Flavor.vantage,
     );
     return activate(flavor);
   }
 
   static FlavorConfig _configFor(Flavor flavor) {
     switch (flavor) {
+      case Flavor.baazex:
+        const config = BaazexConfig();
+        return config.toFlavorConfig(Flavor.baazex, 'baazex');
+      case Flavor.celestial:
+        const config = CelestialConfig();
+        return config.toFlavorConfig(Flavor.celestial, 'celestial');
+      case Flavor.gtxprime:
+        const config = GtxprimeConfig();
+        return config.toFlavorConfig(Flavor.gtxprime, 'gtxprime');
+      case Flavor.iquote:
+        const config = IquoteConfig();
+        return config.toFlavorConfig(Flavor.iquote, 'iquote');
+      case Flavor.kantara:
+        const config = KantaraConfig();
+        return config.toFlavorConfig(Flavor.kantara, 'kantara');
+      case Flavor.meta:
+        const config = MetaConfig();
+        return config.toFlavorConfig(Flavor.meta, 'meta');
+      case Flavor.moneygenius:
+        const config = MoneygeniusConfig();
+        return config.toFlavorConfig(Flavor.moneygenius, 'moneygenius');
+      case Flavor.pipze:
+        const config = PipzeConfig();
+        return config.toFlavorConfig(Flavor.pipze, 'pipze');
       case Flavor.proactive:
         const config = ProactiveConfig();
         return config.toFlavorConfig(Flavor.proactive, 'proactive');
+      case Flavor.riyadex:
+        const config = RiyadexConfig();
+        return config.toFlavorConfig(Flavor.riyadex, 'riyadex');
+      case Flavor.skyriss:
+        const config = SkyrissConfig();
+        return config.toFlavorConfig(Flavor.skyriss, 'skyriss');
+      case Flavor.starfx:
+        const config = StarfxConfig();
+        return config.toFlavorConfig(Flavor.starfx, 'starfx');
+      case Flavor.telifox:
+        const config = TelifoxConfig();
+        return config.toFlavorConfig(Flavor.telifox, 'telifox');
+      case Flavor.tenax:
+        const config = TenaxConfig();
+        return config.toFlavorConfig(Flavor.tenax, 'tenax');
+      case Flavor.vantage:
+        const config = VantageConfig();
+        return config.toFlavorConfig(Flavor.vantage, 'vantage');
     }
   }
 
+  static bool isBaazex() => _instance?.flavor == Flavor.baazex;
+  static FlavorConfig get baazex => activate(Flavor.baazex);
+
+  static FlavorConfig get celestial => activate(Flavor.celestial);
+
+  static bool isGtxprime() => _instance?.flavor == Flavor.gtxprime;
+  static FlavorConfig get gtxprime => activate(Flavor.gtxprime);
+
+  static bool isIquote() => _instance?.flavor == Flavor.iquote;
+  static FlavorConfig get iquote => activate(Flavor.iquote);
+
+  static bool isKantara() => _instance?.flavor == Flavor.kantara;
+  static FlavorConfig get kantara => activate(Flavor.kantara);
+
+  static bool isMeta() => _instance?.flavor == Flavor.meta;
+  static FlavorConfig get meta => activate(Flavor.meta);
+
+  static bool isMoneygenius() => _instance?.flavor == Flavor.moneygenius;
+  static FlavorConfig get moneygenius => activate(Flavor.moneygenius);
+
+  static bool isPipze() => _instance?.flavor == Flavor.pipze;
+  static FlavorConfig get pipze => activate(Flavor.pipze);
+
   static bool isProactive() => _instance?.flavor == Flavor.proactive;
   static FlavorConfig get proactive => activate(Flavor.proactive);
+
+  static bool isRiyadex() => _instance?.flavor == Flavor.riyadex;
+  static FlavorConfig get riyadex => activate(Flavor.riyadex);
+
+  static bool isSkyriss() => _instance?.flavor == Flavor.skyriss;
+  static FlavorConfig get skyriss => activate(Flavor.skyriss);
+
+  static bool isStarfx() => _instance?.flavor == Flavor.starfx;
+  static FlavorConfig get starfx => activate(Flavor.starfx);
+
+  static bool isTelifox() => _instance?.flavor == Flavor.telifox;
+  static FlavorConfig get telifox => activate(Flavor.telifox);
+
+  static bool isTenax() => _instance?.flavor == Flavor.tenax;
+  static FlavorConfig get tenax => activate(Flavor.tenax);
+
+  static FlavorConfig get vantage => activate(Flavor.vantage);
 
   static bool isVantage() => usesVantageUi();
 
@@ -130,7 +244,7 @@ class FlavorConfig {
     if (explicitParent == 'vantage') return true;
     if (explicitParent.isNotEmpty && explicitParent != 'vantage') return false;
 
-    final name = (_instance?.flavor.name ?? Flavor.proactive.name).toLowerCase();
+    final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
     return const <String>{'vantage', 'baazex', 'gtxprime', 'iquote', 'pipze', 'proactive', 'riyadex', 'telifox', 'tenax'}.contains(name);
   }
 
@@ -141,7 +255,7 @@ class FlavorConfig {
     if (explicitParent == 'celestial') return true;
     if (explicitParent.isNotEmpty && explicitParent != 'celestial') return false;
 
-    final name = (_instance?.flavor.name ?? Flavor.proactive.name).toLowerCase();
+    final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
     return const <String>{'celestial', 'kantara', 'moneygenius', 'starfx'}.contains(name);
   }
 
@@ -150,7 +264,7 @@ class FlavorConfig {
     if (explicitParent == 'iquote') return true;
     if (explicitParent.isNotEmpty && explicitParent != 'iquote') return false;
 
-    final name = (_instance?.flavor.name ?? Flavor.proactive.name).toLowerCase();
+    final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
     return const <String>{'iquote', 'skyriss'}.contains(name);
   }
 
@@ -202,6 +316,9 @@ class FlavorConfig {
  useNewChart: config['useNewChart'] is bool
  ? config['useNewChart'] as bool
  : current.useNewChart,
+ useNewDepositWithdrawFlow: config['useNewDepositWithdrawFlow'] is bool
+ ? config['useNewDepositWithdrawFlow'] as bool
+ : current.useNewDepositWithdrawFlow,
  );
  }
 
@@ -283,6 +400,7 @@ class FlavorConfig {
     String? remoteLogoUrl,
     Map<String, dynamic>? selectedBrokerData,
     bool? useNewChart,
+    bool? useNewDepositWithdrawFlow,
   }) {
     return FlavorConfig._internal(
       flavor: flavor,
@@ -301,6 +419,8 @@ class FlavorConfig {
       remoteLogoUrl: remoteLogoUrl ?? this.remoteLogoUrl,
       selectedBrokerData: selectedBrokerData ?? this.selectedBrokerData,
       useNewChart: useNewChart ?? this.useNewChart,
+      useNewDepositWithdrawFlow:
+          useNewDepositWithdrawFlow ?? this.useNewDepositWithdrawFlow,
     );
   }
  }
@@ -324,6 +444,7 @@ class FlavorConfig {
  remoteLogoUrl: null,
  selectedBrokerData: null,
  useNewChart: useNewChart,
+ useNewDepositWithdrawFlow: useNewDepositWithdrawFlow,
  );
  }
  }

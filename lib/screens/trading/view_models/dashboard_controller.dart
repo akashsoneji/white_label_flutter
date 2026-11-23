@@ -15,6 +15,7 @@ import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/finance/presentation/pages/deposit_screen.dart';
+import 'package:crm_app/screens/finance_v2/finance_flow_switch.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/withdrawal_screen.dart';
 
@@ -611,14 +612,23 @@ class DashboardController extends GetxController {
     );
     // Get.to(() => DepositRealScreen(accountNumber: accountNumber));
     await Get.to(
-      () => PaymentMethodsScreen(accountNumber: accountNumber.toString()),
+      () => FinanceFlowSwitch.deposit(
+        accountNumber: accountNumber.toString(),
+        legacy:
+            () => PaymentMethodsScreen(accountNumber: accountNumber.toString()),
+      ),
     );
     // Refresh MT5 accounts when returning from real deposit flow
     await refreshMT5Accounts();
   }
 
   void onWithdraw(String accountNumber) async {
-    await Get.to(() => WithdrawalScreen(accountNumber: accountNumber));
+    await Get.to(
+      () => FinanceFlowSwitch.withdrawal(
+        accountNumber: accountNumber,
+        legacy: () => WithdrawalScreen(accountNumber: accountNumber),
+      ),
+    );
     // Refresh MT5 accounts when returning from withdrawal
     await refreshMT5Accounts();
   }

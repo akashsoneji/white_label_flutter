@@ -19,6 +19,7 @@ import 'package:crm_app/screens/demo_contest/presentation/pages/demo_contest_my_
 import 'package:crm_app/screens/demo_contest/presentation/pages/winners_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/finance_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
+import 'package:crm_app/screens/finance_v2/finance_flow_switch.dart';
 import 'package:crm_app/widgets/kyc_lock_gate.dart';
 import 'package:crm_app/screens/ib/presentation/pages/ib_dashboard_screen.dart';
 import 'package:crm_app/screens/ib/presentation/pages/ib_main_screen.dart';
@@ -244,8 +245,15 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.PAYMENT_METHOD,
-      page: () => PaymentMethodsScreen(accountNumber: ''),
-      binding: PaymentMethodBinding(),
+      page: () => FinanceFlowSwitch.deposit(
+        accountNumber: '',
+        legacy: () => PaymentMethodsScreen(accountNumber: ''),
+      ),
+      // The new flow builds its own controllers; the legacy ones would only
+      // fire the old deposit calls.
+      binding: BindingsBuilder(() {
+        if (!FinanceFlowSwitch.useNewFlow) PaymentMethodBinding().dependencies();
+      }),
     ),
     GetPage(name: _Paths.BANK_LIST, page: () => BankListScreen()),
     GetPage(
@@ -315,11 +323,21 @@ class AppPages {
     ),
     GetPage(name: _Paths.EDIT_PROFILE, page: () => EditProfile()),
     GetPage(name: _Paths.VIEW_PROFILE, page: () => const ViewProfileScreen()),
-    GetPage(name: _Paths.WITHDRAWAL, page: () => const WithdrawalScreen()),
+    GetPage(
+      name: _Paths.WITHDRAWAL,
+      page: () => FinanceFlowSwitch.withdrawal(
+        legacy: () => const WithdrawalScreen(),
+      ),
+    ),
     GetPage(
       name: _Paths.DEPOSIT,
-      page: () => DepositScreen(accountNumber: Get.arguments ?? ''),
-      binding: DepositBinding(),
+      page: () => FinanceFlowSwitch.deposit(
+        accountNumber: Get.arguments is String ? Get.arguments as String : '',
+        legacy: () => DepositScreen(accountNumber: Get.arguments ?? ''),
+      ),
+      binding: BindingsBuilder(() {
+        if (!FinanceFlowSwitch.useNewFlow) DepositBinding().dependencies();
+      }),
     ),
     GetPage(name: _Paths.WALLET, page: () => WalletScreen()),
     GetPage(

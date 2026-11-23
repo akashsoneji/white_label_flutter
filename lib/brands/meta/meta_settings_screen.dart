@@ -9,6 +9,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
+import 'package:crm_app/screens/finance_v2/finance_flow_switch.dart';
 import 'package:crm_app/screens/home/more/one_click_trading_disclaimer_screen.dart';
 import 'package:crm_app/screens/home/more/promotional/promotional_screen.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
@@ -526,7 +527,12 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
         icon: Icons.south_west_rounded,
         label: languageService.tr('settings_deposit'),
         color: const Color(0xFF4CAF50),
-        onTap: () => Get.to(() => PaymentMethodsScreen(accountNumber: '')),
+        onTap: () => Get.to(
+          () => FinanceFlowSwitch.deposit(
+            accountNumber: '',
+            legacy: () => PaymentMethodsScreen(accountNumber: ''),
+          ),
+        ),
       ),
       _CelGridItem(
         icon: Icons.north_east_rounded,

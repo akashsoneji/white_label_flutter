@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
+import 'package:crm_app/screens/finance_v2/finance_flow_switch.dart';
 import '../constants/color.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import 'package:crm_app/screens/finance/presentation/pages/deposit_screen.dart';
@@ -291,8 +292,12 @@ class CongratulationsDialog extends StatelessWidget {
                             );
                           } else {
                             Get.to(
-                              () => PaymentMethodsScreen(
+                              () => FinanceFlowSwitch.deposit(
                                 accountNumber: accountNumber,
+                                legacy:
+                                    () => PaymentMethodsScreen(
+                                      accountNumber: accountNumber,
+                                    ),
                               ),
                             );
                           }

@@ -11,6 +11,7 @@ import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/utils/demo_contest_menu.dart';
 import 'package:crm_app/widgets/theme_bottom_sheet.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
+import 'package:crm_app/screens/finance_v2/finance_flow_switch.dart';
 import 'package:crm_app/screens/home/more/promotional/promotional_screen.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
@@ -868,7 +869,12 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                   gradient: const LinearGradient(
                     colors: [Color(0xFF10B981), Color(0xFF059669)],
                   ),
-                  onTap: () => Get.to(() => PaymentMethodsScreen(accountNumber: '')),
+                  onTap: () => Get.to(
+                    () => FinanceFlowSwitch.deposit(
+                      accountNumber: '',
+                      legacy: () => PaymentMethodsScreen(accountNumber: ''),
+                    ),
+                  ),
                 ),
               ),
               SizedBox(width: 12.w),

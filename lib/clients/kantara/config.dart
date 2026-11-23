@@ -22,5 +22,6 @@ class KantaraConfig extends BaseClientConfig {
  websocketUrl: 'wss://client.kantaracapital.io/trade-engine',
  chartBaseUrl: 'https://client.kantaracapital.io',
  useNewChart: false,
+ useNewDepositWithdrawFlow: false,
  );
 }

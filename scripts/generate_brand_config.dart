@@ -154,6 +154,9 @@ Map<String, dynamic> parseSingleBrandYaml(String yaml, String brandDir) {
   if (!features.containsKey('useNewChart')) {
     features['useNewChart'] = 'false';
   }
+  if (!features.containsKey('useNewDepositWithdrawFlow')) {
+    features['useNewDepositWithdrawFlow'] = 'false';
+  }
   brand['features'] = features;
   return brand;
 }
@@ -432,6 +435,9 @@ Future<void> generateBrandConfigs(List<Map<String, dynamic>> brands) async {
             : <String, dynamic>{};
     final useNewChart =
         (features['useNewChart']?.toString().toLowerCase() == 'true');
+    final useNewDepositWithdrawFlow =
+        (features['useNewDepositWithdrawFlow']?.toString().toLowerCase() ==
+            'true');
 
     final clientDir = Directory('lib/clients/$name');
     if (!clientDir.existsSync()) clientDir.createSync(recursive: true);
@@ -461,6 +467,7 @@ class ${className}Config extends BaseClientConfig {
  websocketUrl: '${_dartString(websocket)}',
  chartBaseUrl: '${_dartString(chart)}',
  useNewChart: $useNewChart,
+ useNewDepositWithdrawFlow: $useNewDepositWithdrawFlow,
  );
 }
 ''';
@@ -567,7 +574,11 @@ Future<void> generateBrandsJson(
           'urls': brand['urls'],
           'assets': brand['assets'],
           'features':
-              brand['features'] ?? <String, dynamic>{'useNewChart': 'false'},
+              brand['features'] ??
+              <String, dynamic>{
+                'useNewChart': 'false',
+                'useNewDepositWithdrawFlow': 'false',
+              },
         };
         if (brand['inheritsFrom'] != null)
           map['inheritsFrom'] = brand['inheritsFrom'];
@@ -678,6 +689,7 @@ class FlavorConfig {
  final String? remoteLogoUrl;
  final Map<String, dynamic>? selectedBrokerData;
  final bool useNewChart;
+ final bool useNewDepositWithdrawFlow;
 
  static FlavorConfig? _instance;
  static Flavor? _selectedFlavor;
@@ -699,6 +711,7 @@ class FlavorConfig {
  String? remoteLogoUrl,
  Map<String, dynamic>? selectedBrokerData,
  bool useNewChart = false,
+ bool useNewDepositWithdrawFlow = false,
  }) {
  if (_selectedFlavor == null || _selectedFlavor == flavor) {
  _instance = FlavorConfig._internal(
@@ -718,6 +731,7 @@ class FlavorConfig {
  remoteLogoUrl: remoteLogoUrl,
  selectedBrokerData: selectedBrokerData,
  useNewChart: useNewChart,
+ useNewDepositWithdrawFlow: useNewDepositWithdrawFlow,
  );
  _selectedFlavor = flavor;
  }
@@ -741,6 +755,7 @@ class FlavorConfig {
  required this.remoteLogoUrl,
  required this.selectedBrokerData,
  this.useNewChart = false,
+ this.useNewDepositWithdrawFlow = false,
  }) : appTitle = title;
 
   static FlavorConfig get instance => _instance ?? activate(Flavor.$fallbackBrand);
@@ -851,6 +866,9 @@ $deepLinkHostEntries
  useNewChart: config['useNewChart'] is bool
  ? config['useNewChart'] as bool
  : current.useNewChart,
+ useNewDepositWithdrawFlow: config['useNewDepositWithdrawFlow'] is bool
+ ? config['useNewDepositWithdrawFlow'] as bool
+ : current.useNewDepositWithdrawFlow,
  );
  }
 
@@ -932,6 +950,7 @@ $deepLinkHostEntries
     String? remoteLogoUrl,
     Map<String, dynamic>? selectedBrokerData,
     bool? useNewChart,
+    bool? useNewDepositWithdrawFlow,
   }) {
     return FlavorConfig._internal(
       flavor: flavor,
@@ -950,6 +969,8 @@ $deepLinkHostEntries
       remoteLogoUrl: remoteLogoUrl ?? this.remoteLogoUrl,
       selectedBrokerData: selectedBrokerData ?? this.selectedBrokerData,
       useNewChart: useNewChart ?? this.useNewChart,
+      useNewDepositWithdrawFlow:
+          useNewDepositWithdrawFlow ?? this.useNewDepositWithdrawFlow,
     );
   }
  }
@@ -973,6 +994,7 @@ $deepLinkHostEntries
  remoteLogoUrl: null,
  selectedBrokerData: null,
  useNewChart: useNewChart,
+ useNewDepositWithdrawFlow: useNewDepositWithdrawFlow,
  );
  }
  }

@@ -9,6 +9,7 @@ import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/services/crm_settings_service.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import 'package:crm_app/screens/finance/presentation/pages/deposit_screen.dart';
+import 'package:crm_app/screens/finance_v2/finance_flow_switch.dart';
 import 'package:crm_app/screens/wallet/data/repositories/wallet_repository.dart';
 
 
@@ -308,7 +309,12 @@ class WalletController extends GetxController {
 
       // await Future.delayed(const Duration(seconds: 3));
 
-      Get.to(() => DepositScreen(accountNumber: ''));
+      Get.to(
+        () => FinanceFlowSwitch.deposit(
+          accountNumber: '',
+          legacy: () => DepositScreen(accountNumber: ''),
+        ),
+      );
     } catch (e) {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(

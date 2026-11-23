@@ -6,6 +6,7 @@ import '../dashboard_screen.dart';
 import 'dart:convert';
 
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
+import 'package:crm_app/screens/finance_v2/finance_flow_switch.dart';
 import 'package:crm_app/screens/home/more/promotional/promotional_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -958,7 +959,10 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                     color: AppColors.primary,
                     onTap:
                         () => Get.to(
-                          () => PaymentMethodsScreen(accountNumber: ''),
+                          () => FinanceFlowSwitch.deposit(
+                            accountNumber: '',
+                            legacy: () => PaymentMethodsScreen(accountNumber: ''),
+                          ),
                         ),
                   ),
                   _QuickActionButton(

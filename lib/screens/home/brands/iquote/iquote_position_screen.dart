@@ -17,6 +17,7 @@ import 'package:crm_app/screens/home/close_position_screen.dart';
 import 'package:crm_app/screens/home/edit_order_screen.dart';
 import 'package:crm_app/screens/home/brands/iquote/iquote_order_details_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
+import 'package:crm_app/screens/finance_v2/finance_flow_switch.dart';
 import 'package:crm_app/screens/finance/presentation/pages/withdrawal_screen.dart';
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/constants/color.dart';
@@ -2140,16 +2141,24 @@ padding: EdgeInsetsDirectional.fromSTEB(14.w, 10.h, 14.w, 20.h),
                         onDeposit: () {
                           Get.back();
                           Get.to(
-                            () => PaymentMethodsScreen(
+                            () => FinanceFlowSwitch.deposit(
                               accountNumber: acc.metaAccountNumber,
+                              legacy:
+                                  () => PaymentMethodsScreen(
+                                    accountNumber: acc.metaAccountNumber,
+                                  ),
                             ),
                           );
                         },
                         onWithdraw: () {
                           Get.back();
                           Get.to(
-                            () => WithdrawalScreen(
+                            () => FinanceFlowSwitch.withdrawal(
                               accountNumber: acc.metaAccountNumber,
+                              legacy:
+                                  () => WithdrawalScreen(
+                                    accountNumber: acc.metaAccountNumber,
+                                  ),
                             ),
                           );
                         },

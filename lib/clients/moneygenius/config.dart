@@ -22,5 +22,6 @@ class MoneygeniusConfig extends BaseClientConfig {
  websocketUrl: 'wss://portal.moneygeniuss.com/trade-engine',
  chartBaseUrl: 'https://portal.moneygeniuss.com',
  useNewChart: false,
+ useNewDepositWithdrawFlow: false,
  );
 }
