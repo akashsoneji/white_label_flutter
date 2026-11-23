@@ -859,11 +859,14 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
       busyLabel = TranslationUtils.tr('internal_transfer_screen_submitting');
     }
     final canProceed = _canProceed;
+    // Dark-mode primary is light (white on some brands), so enabled text must
+    // contrast with it; the dimmed disabled/busy background keeps white text.
     final textStyle = AppTextStyles.bodyText.copyWith(
       fontSize: 14.sp,
       fontWeight: FontWeight.w600,
-      color: AppColors.pureWhite,
+      color: canProceed ? AppColors.onPrimary : AppColors.pureWhite,
     );
+    final busyTextStyle = textStyle.copyWith(color: AppColors.pureWhite);
 
     return Obx(() {
       final busy = _isSubmitting.value;
@@ -874,7 +877,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
           onPressed: busy || !canProceed ? null : _onActionButtonPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.pureWhite,
+            foregroundColor: AppColors.onPrimary,
             disabledBackgroundColor: AppColors.primary.withAlpha(110),
             disabledForegroundColor: AppColors.pureWhite,
             padding: EdgeInsets.zero,
@@ -890,7 +893,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                     children: [
                       ButtonLoadingWidget(size: 18.0, color: AppColors.pureWhite),
                       SizedBox(width: 10.w),
-                      Text(busyLabel, style: textStyle),
+                      Text(busyLabel, style: busyTextStyle),
                     ],
                   )
                   : Text(label, style: textStyle),
