@@ -1,9 +1,17 @@
 {
-  "default": "vantage",
+  "default": "baazex",
   "brands": [
+    "baazex",
     "vantage"
   ],
   "brandDetails": [
+    {
+      "name": "baazex",
+      "type": "child",
+      "inheritsFrom": "vantage",
+      "label": "Baazex",
+      "themeMode": "both"
+    },
     {
       "name": "vantage",
       "type": "parent",
