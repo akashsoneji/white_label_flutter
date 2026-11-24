@@ -53,7 +53,7 @@ class AmountCurrencyField extends StatelessWidget {
         onCurrencyTap != null && (currencies?.length ?? 0) > 1;
     final amountStyle = AppTextStyles.bodyText.copyWith(
       color: AppColors.textPrimary,
-      fontSize: 22.sp,
+      fontSize: 14.sp,
       fontWeight: FontWeight.w700,
     );
 
@@ -70,7 +70,9 @@ class AmountCurrencyField extends StatelessWidget {
         ),
         SizedBox(height: 4.h),
         Container(
-          padding: EdgeInsetsDirectional.fromSTEB(12.w, 4.h, 8.w, 4.h),
+          // Same height and text size as the account picker above it.
+          height: 48.h,
+          padding: EdgeInsetsDirectional.only(start: 12.w, end: 8.w),
           decoration: BoxDecoration(
             color: AppColors.textFieldBg,
             borderRadius: BorderRadius.circular(12.r),
@@ -170,7 +172,7 @@ class _CurrencyPill extends StatelessWidget {
         child: Padding(
           padding: EdgeInsetsDirectional.symmetric(
             horizontal: 12.w,
-            vertical: 8.h,
+            vertical: 5.h,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/widgets/dashBorder.dart';
 
 /// Tile for attaching the payment proof file.
 ///
@@ -16,7 +17,6 @@ import 'package:crm_app/services/language_service.dart';
 class ProofUploadTile extends StatelessWidget {
   final String? fileName;
   final String? filePath;
-  final bool isRequired;
   final bool isUploading;
   final String? errorText;
   final VoidCallback onPick;
@@ -26,7 +26,6 @@ class ProofUploadTile extends StatelessWidget {
     super.key,
     this.fileName,
     this.filePath,
-    this.isRequired = false,
     this.isUploading = false,
     this.errorText,
     required this.onPick,
@@ -40,6 +39,28 @@ class ProofUploadTile extends StatelessWidget {
     final hasFile = fileName != null && fileName.isNotEmpty;
     final hasError = errorText != null && errorText.isNotEmpty;
     final radius = BorderRadius.circular(14.r);
+    final dashColor = hasError
+        ? AppColors.error
+        : AppColors.primary.withValues(alpha: 0.5);
+
+    final content = InkWell(
+      borderRadius: radius,
+      onTap: isUploading ? null : onPick,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: 12.w,
+          vertical: hasFile ? 12.h : 16.h,
+        ),
+        child: hasFile
+            ? _FilledContent(
+                fileName: fileName,
+                filePath: filePath,
+                isUploading: isUploading,
+                onRemove: onRemove,
+              )
+            : _EmptyContent(isUploading: isUploading),
+      ),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,30 +68,23 @@ class ProofUploadTile extends StatelessWidget {
       children: [
         Material(
           color: AppColors.cardBackground,
+          // An attached file gets a solid border; the empty drop area is
+          // dashed.
           shape: RoundedRectangleBorder(
             borderRadius: radius,
-            side: BorderSide(
-              color: hasError ? AppColors.error : AppColors.border,
-            ),
+            side: hasFile
+                ? BorderSide(
+                    color: hasError ? AppColors.error : AppColors.border,
+                  )
+                : BorderSide.none,
           ),
-          child: InkWell(
-            borderRadius: radius,
-            onTap: isUploading ? null : onPick,
-            child: Padding(
-              padding: EdgeInsets.all(12.w),
-              child: hasFile
-                  ? _FilledContent(
-                      fileName: fileName,
-                      filePath: filePath,
-                      isUploading: isUploading,
-                      onRemove: onRemove,
-                    )
-                  : _EmptyContent(
-                      isRequired: isRequired,
-                      isUploading: isUploading,
-                    ),
-            ),
-          ),
+          child: hasFile
+              ? content
+              : DashedBorderBox(
+                  color: dashColor,
+                  radius: 14.r,
+                  child: content,
+                ),
         ),
         if (hasError) ...[
           SizedBox(height: 4.h),
@@ -90,79 +104,51 @@ class ProofUploadTile extends StatelessWidget {
 }
 
 class _EmptyContent extends StatelessWidget {
-  final bool isRequired;
   final bool isUploading;
 
-  const _EmptyContent({required this.isRequired, required this.isUploading});
+  const _EmptyContent({required this.isUploading});
 
   @override
   Widget build(BuildContext context) {
-    final titleStyle = AppTextStyles.bodyText.copyWith(
-      color: AppColors.textPrimary,
-      fontSize: 14.sp,
-      fontWeight: FontWeight.w700,
-    );
-
-    return Row(
-      children: [
-        Container(
-          width: 36.w,
-          height: 36.w,
-          decoration: BoxDecoration(
-            color: AppColors.iconBgPrimary,
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-          child: isUploading
-              ? Padding(
-                  padding: EdgeInsets.all(9.w),
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40.w,
+            height: 40.w,
+            decoration: BoxDecoration(
+              color: AppColors.iconBgPrimary,
+              shape: BoxShape.circle,
+            ),
+            child: isUploading
+                ? Padding(
+                    padding: EdgeInsets.all(11.w),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
+                    ),
+                  )
+                : Icon(
+                    Icons.cloud_upload_outlined,
                     color: AppColors.primary,
+                    size: 22.sp,
                   ),
-                )
-              : Icon(
-                  Icons.upload_file_rounded,
-                  color: AppColors.primary,
-                  size: 20.sp,
-                ),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text.rich(
-                TextSpan(
-                  text: TranslationUtils.tr(
-                    'deposit_instruction_screen_upload_file',
-                  ),
-                  children: [
-                    if (isRequired)
-                      TextSpan(
-                        text: ' *',
-                        style: titleStyle.copyWith(color: AppColors.error),
-                      ),
-                  ],
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: titleStyle,
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                TranslationUtils.tr('fv2_proof_helper'),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.bodyText.copyWith(
-                  color: AppColors.textGrey,
-                  fontSize: 11.sp,
-                ),
-              ),
-            ],
           ),
-        ),
-      ],
+          SizedBox(height: 8.h),
+          Text(
+            TranslationUtils.tr('fv2_proof_helper'),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyText.copyWith(
+              color: AppColors.textSecondary,
+              fontSize: 12.sp,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

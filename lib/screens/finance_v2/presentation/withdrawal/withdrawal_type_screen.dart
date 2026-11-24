@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import 'package:crm_app/constants/color.dart';
-import 'package:crm_app/constants/text_styles.dart';
+
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/finance_v2/data/models/payment_type_option.dart';
 import 'package:crm_app/screens/finance_v2/presentation/widgets/finance_v2_empty_state.dart';
 import 'package:crm_app/screens/finance_v2/presentation/widgets/finance_v2_error_retry.dart';
+
 import 'package:crm_app/screens/finance_v2/presentation/widgets/finance_v2_scaffold.dart';
 import 'package:crm_app/screens/finance_v2/presentation/widgets/finance_v2_shimmer.dart';
 import 'package:crm_app/screens/finance_v2/presentation/widgets/payment_type_tile.dart';
@@ -134,25 +134,16 @@ class _TypeList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lockReason = TranslationUtils.tr(
+    // Each locked card says so itself and carries its own way out: some
+    // methods can need verification while others are open.
+    final lockReason = TranslationUtils.tr('fv2_verification_required');
+    final lockTagLabel = TranslationUtils.tr('kyc_intro_screen_locked');
+    final lockActionLabel = TranslationUtils.tr(
       'withdrawal_screen_complete_verification',
     );
-    final captionStyle = AppTextStyles.bodyText.copyWith(
-      color: AppColors.textSecondary,
-      fontSize: 12.sp,
-      fontWeight: FontWeight.w600,
-    );
+    final availableLabel = TranslationUtils.tr('ibm_available');
 
-    final children = <Widget>[
-      Text(
-        TranslationUtils.tr('fv2_choose_how_to_receive'),
-        style: AppTextStyles.bodyText.copyWith(
-          color: AppColors.textPrimary,
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    ];
+    final children = <Widget>[];
     for (final group in groups) {
       if (!group.locked) {
         children.add(
@@ -161,20 +152,12 @@ class _TypeList extends StatelessWidget {
             iconUrls: group.rows.map((row) => row.icon).toList(growable: false),
             title: _titleOf(group),
             subtitle: _subtitleOf(group),
+            availableLabel: availableLabel,
             onTap: () => onGroupTap(group),
           ),
         );
         continue;
       }
-      children.add(
-        Padding(
-          padding: EdgeInsetsDirectional.only(top: 8.h),
-          child: Text(
-            TranslationUtils.tr('fv2_verification_required'),
-            style: captionStyle,
-          ),
-        ),
-      );
       for (final row in group.rows) {
         children.add(
           PaymentTypeTile(
@@ -183,6 +166,8 @@ class _TypeList extends StatelessWidget {
             title: row.displayName.isEmpty ? row.methodName : row.displayName,
             isLocked: true,
             lockReason: lockReason,
+            lockTagLabel: lockTagLabel,
+            lockActionLabel: lockActionLabel,
             onTap: onLockedTap,
           ),
         );
@@ -192,7 +177,7 @@ class _TypeList extends StatelessWidget {
     return ListView.separated(
       padding: EdgeInsets.symmetric(vertical: 12.h),
       itemCount: children.length,
-      separatorBuilder: (_, _) => SizedBox(height: 8.h),
+      separatorBuilder: (_, _) => SizedBox(height: 12.h),
       itemBuilder: (_, index) => children[index],
     );
   }

@@ -137,47 +137,43 @@ class _TypeList extends StatelessWidget {
         .where((group) => group.locked)
         .expand((group) => group.rows)
         .toList(growable: false);
-    final lockReason = TranslationUtils.tr(
+    // Each locked card says so itself and carries its own way out: some
+    // methods can need verification while others are open.
+    final lockReason = TranslationUtils.tr('fv2_verification_required');
+    final lockTagLabel = TranslationUtils.tr('kyc_intro_screen_locked');
+    final lockActionLabel = TranslationUtils.tr(
       'withdrawal_screen_complete_verification',
     );
+    final availableLabel = TranslationUtils.tr('ibm_available');
 
-    return ListView(
-      padding: EdgeInsets.symmetric(vertical: 16.h),
-      children: [
-        if (openGroups.isNotEmpty) ...[
-          _Caption(
-            text: TranslationUtils.tr('fv2_choose_how_to_pay'),
-            isHeading: true,
-          ),
-          SizedBox(height: 12.h),
-        ],
-        for (final group in openGroups) ...[
-          PaymentTypeTile(
-            icon: _typeIcon(group.type),
-            iconUrls: group.rows.map((row) => row.icon).toList(growable: false),
-            title: _groupTitle(group),
-            subtitle: _groupSubtitle(group),
-            onTap: () => onGroupTap(group),
-          ),
-          SizedBox(height: 10.h),
-        ],
-        if (lockedRows.isNotEmpty) ...[
-          SizedBox(height: 10.h),
-          _Caption(text: TranslationUtils.tr('fv2_verification_required')),
-          SizedBox(height: 8.h),
-          for (final row in lockedRows) ...[
-            PaymentTypeTile(
-              icon: _typeIcon(row.paymentType.trim().toLowerCase()),
-              iconUrls: <String>[row.icon],
-              title: _rowTitle(row),
-              isLocked: true,
-              lockReason: lockReason,
-              onTap: onLockedTap,
-            ),
-            SizedBox(height: 10.h),
-          ],
-        ],
-      ],
+    final children = <Widget>[
+      for (final group in openGroups)
+        PaymentTypeTile(
+          icon: _typeIcon(group.type),
+          iconUrls: group.rows.map((row) => row.icon).toList(growable: false),
+          title: _groupTitle(group),
+          subtitle: _groupSubtitle(group),
+          availableLabel: availableLabel,
+          onTap: () => onGroupTap(group),
+        ),
+      for (final row in lockedRows)
+        PaymentTypeTile(
+          icon: _typeIcon(row.paymentType.trim().toLowerCase()),
+          iconUrls: <String>[row.icon],
+          title: _rowTitle(row),
+          isLocked: true,
+          lockReason: lockReason,
+          lockTagLabel: lockTagLabel,
+          lockActionLabel: lockActionLabel,
+          onTap: onLockedTap,
+        ),
+    ];
+
+    return ListView.separated(
+      padding: EdgeInsets.symmetric(vertical: 12.h),
+      itemCount: children.length,
+      separatorBuilder: (_, _) => SizedBox(height: 12.h),
+      itemBuilder: (_, index) => children[index],
     );
   }
 
@@ -216,25 +212,6 @@ class _TypeList extends StatelessWidget {
       'card' => Icons.credit_card_rounded,
       _ => Icons.storefront_outlined,
     };
-  }
-}
-
-class _Caption extends StatelessWidget {
-  final String text;
-  final bool isHeading;
-
-  const _Caption({required this.text, this.isHeading = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: AppTextStyles.bodyText.copyWith(
-        color: isHeading ? AppColors.textPrimary : AppColors.textSecondary,
-        fontSize: isHeading ? 16.sp : 12.sp,
-        fontWeight: isHeading ? FontWeight.w700 : FontWeight.w600,
-      ),
-    );
   }
 }
 

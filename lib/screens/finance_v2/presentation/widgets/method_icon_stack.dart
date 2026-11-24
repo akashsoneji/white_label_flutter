@@ -36,13 +36,18 @@ class MethodIconStack extends StatelessWidget {
     return base?.resolveUri(uri).toString();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final urls = iconUrls
+  static List<String> _usableUrls(List<String> iconUrls) {
+    return iconUrls
         .map(resolveUrl)
         .whereType<String>()
         .toSet()
         .toList(growable: false);
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    final urls = _usableUrls(iconUrls);
     final badge = size.w;
 
     if (urls.isEmpty) {

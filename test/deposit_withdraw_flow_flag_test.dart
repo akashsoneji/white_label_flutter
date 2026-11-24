@@ -46,21 +46,26 @@ void main() {
       expect(brands.keys.toSet(), Flavor.values.map((f) => f.name).toSet());
     });
 
-    test('is off by default for every brand', () {
+    // Only these brands have switched to the new flow; every other brand
+    // must keep the old deposit/withdraw screens.
+    const newFlowBrands = {'baazex', 'tenax'};
+
+    test('is on only for the brands that switched to the new flow', () {
       final enabled = brands.entries
           .where((entry) => entry.value.useNewDepositWithdrawFlow)
           .map((entry) => entry.key)
           .toSet();
-      expect(enabled, isEmpty);
+      expect(enabled, newFlowBrands);
     });
 
-    test('every activated flavor exposes the flag as false', () {
+    test('every activated flavor exposes its brand flag', () {
       for (final flavor in Flavor.values) {
         FlavorConfig.reset();
         final config = FlavorConfig.activate(flavor);
-        expect(config.useNewDepositWithdrawFlow, isFalse,
-            reason: '${flavor.name} must keep the old deposit/withdraw flow');
-        expect(FlavorConfig.instance.useNewDepositWithdrawFlow, isFalse);
+        final expected = newFlowBrands.contains(flavor.name);
+        expect(config.useNewDepositWithdrawFlow, expected,
+            reason: '${flavor.name} must ${expected ? 'use the new' : 'keep the old'} deposit/withdraw flow');
+        expect(FlavorConfig.instance.useNewDepositWithdrawFlow, expected);
       }
     });
 

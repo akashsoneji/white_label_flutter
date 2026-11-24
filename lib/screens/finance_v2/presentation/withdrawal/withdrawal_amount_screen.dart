@@ -123,16 +123,34 @@ class _WithdrawalAmountScreenState extends State<WithdrawalAmountScreen> {
 
     setState(() => _isPreparing = true);
     final prepared = await _controller.prepareSubmit();
+    // The code is requested before the sheet opens: the server refuses it
+    // for a withdrawal it will not accept (not enough balance), and then
+    // there is nothing to type a code for. The sheet reuses this code.
+    final sent = prepared == WithdrawalOutcome.success
+        ? await _controller.requestOtpOnOpen()
+        : prepared;
     if (!mounted) return;
     setState(() => _isPreparing = false);
 
-    if (prepared == WithdrawalOutcome.quoteRefreshed) {
-      _showRatesUpdated();
-      return;
+    switch (sent) {
+      case WithdrawalOutcome.success:
+        await _askCode();
+      case WithdrawalOutcome.quoteRefreshed:
+        _showRatesUpdated();
+      case WithdrawalOutcome.kycRequired:
+        _openKyc();
+      case WithdrawalOutcome.otpSendFailed:
+        final message = _controller.otpSendError.value ?? '';
+        _controller.endSubmission();
+        _showError(
+          message.isEmpty
+              ? TranslationUtils.tr('general_something_went_wrong')
+              : message,
+        );
+      default:
+        // Nothing was sent, or the message is already on the form.
+        if (prepared == WithdrawalOutcome.success) _controller.endSubmission();
     }
-    if (prepared != WithdrawalOutcome.success) return;
-
-    await _askCode();
   }
 
   /// Opens the OTP sheet for the frozen submission and acts on its result.

@@ -43,36 +43,38 @@ class DepositPayLine {
 
 /// GET /deposit/{slug}: everything the deposit details screen needs.
 class DepositMethodDetail {
+  static const String typeCrypto = 'crypto';
+
+  /// Key of the coin / network pay line of a crypto option.
+  static const String networkLineKey = 'network';
+
   static const List<String> _payLineKeys = <String>[
     'holder_name',
     'bank_name',
     'bank_account_no',
-    'account_number',
     'ifsc_iban',
-    'ifsc_code',
     'swift_code',
-    'city',
     'upi_address',
-    'crypto_type',
-    'network',
-    'title',
+    networkLineKey,
     'crypto_address',
   ];
 
   /// Raw depositMethod object.
   final Map<String, dynamic> depositMethod;
 
-  /// gateway_details.type: bank | upi | crypto | local.
+  /// depositMethod.type: bank | upi | crypto | local for a manual option, the
+  /// gateway's own code for an online gateway.
   final String type;
 
-  /// paymentGateway.value, decoded.
+  /// depositMethod.payment_gateway.
   final Map<String, dynamic> payDetails;
   final List<DepositPayLine> payLines;
 
-  /// Must be fetched with the bearer token; a plain image URL answers 401.
+  /// A full, public URL; empty when the option has no QR.
   final String qrPath;
 
-  /// The broker's rich-text instructions (type local), else the address line.
+  /// The broker's rich text: `instructions` of an offline-channel option, or
+  /// `address` of a local option.
   final String instructions;
   final bool showProof;
   final bool requireProof;
@@ -80,7 +82,6 @@ class DepositMethodDetail {
   final bool requireUtr;
   final List<PayerField> payerFields;
   final bool clientNoteEnabled;
-  final Map<String, dynamic> savedPayer;
 
   const DepositMethodDetail({
     this.depositMethod = const <String, dynamic>{},
@@ -95,43 +96,47 @@ class DepositMethodDetail {
     this.requireUtr = false,
     this.payerFields = const <PayerField>[],
     this.clientNoteEnabled = false,
-    this.savedPayer = const <String, dynamic>{},
   });
 
   /// [json] is the `data` object; the server may nest it one level deeper.
   factory DepositMethodDetail.fromJson(Map<String, dynamic> json) {
     final root = json.containsKey('depositMethod') ? json : jsonMap(json['data']);
     final method = jsonMap(root['depositMethod']);
-    final details = jsonMap(jsonMap(method['paymentGateway'])['value']);
-    final qr = jsonString(details['qr_path']);
+    final details = jsonMap(method['payment_gateway']);
+    final type = jsonString(method['type']);
+
+    final lineValues = <String, String>{
+      for (final key in _payLineKeys) key: jsonString(details[key]),
+    };
+    // `title` names the coin only on a crypto option; elsewhere it is the
+    // option's own display name, not a line to pay to.
+    final cryptoType = jsonString(details['crypto_type']);
+    lineValues[networkLineKey] = type != typeCrypto
+        ? ''
+        : (cryptoType.isNotEmpty ? cryptoType : jsonString(details['title']));
+
+    final instructions = jsonString(details['instructions']);
 
     return DepositMethodDetail(
       depositMethod: method,
-      type: jsonString(jsonMap(method['gateway_details'])['type']),
+      type: type,
       payDetails: details,
       payLines: _payLineKeys
-          .where((key) => jsonString(details[key]).isNotEmpty)
-          .map((key) => DepositPayLine(key: key, value: jsonString(details[key])))
+          .where((key) => (lineValues[key] ?? '').isNotEmpty)
+          .map((key) => DepositPayLine(key: key, value: lineValues[key] ?? ''))
           .toList(growable: false),
-      qrPath: qr.isEmpty ? jsonString(method['qr_path']) : qr,
-      instructions: jsonString(details['address']),
+      qrPath: jsonString(details['qr_path']),
+      instructions: instructions.isNotEmpty
+          ? instructions
+          : jsonString(details['address']),
       showProof: jsonBool(method['show_proof']),
       requireProof: jsonBool(method['require_proof']),
       showUtr: jsonBool(method['show_utr']),
       requireUtr: jsonBool(method['require_utr']),
       payerFields: _parsePayerFields(method['payer_fields']),
       clientNoteEnabled: jsonBool(root['client_note_enabled']),
-      savedPayer: jsonMap(root['saved_payer']),
     );
   }
-
-  List<String> get payerFieldKeys =>
-      payerFields.map((field) => field.key).toList(growable: false);
-
-  /// Payer fields still to ask for: keys already in [savedPayer] are skipped.
-  List<PayerField> get payerFieldsToAsk => payerFields
-      .where((field) => jsonString(savedPayer[field.key]).isEmpty)
-      .toList(growable: false);
 
   static List<PayerField> _parsePayerFields(dynamic raw) {
     final fields = jsonMap(raw);

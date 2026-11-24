@@ -648,43 +648,165 @@ void main() {
   });
 
   group('DepositMethodDetail', () {
-    test('reads a nested answer with a JSON-string gateway value', () {
+    test('reads a nested bank answer with payer fields', () {
       final detail = DepositMethodDetail.fromJson(<String, dynamic>{
         'data': <String, dynamic>{
           'client_note_enabled': true,
-          'saved_payer': <String, dynamic>{'id_type': 'passport'},
           'depositMethod': <String, dynamic>{
-            'gateway_details': <String, dynamic>{'type': 'bank'},
-            'paymentGateway': <String, dynamic>{
-              'value':
-                  '{"holder_name":"Broker Ltd","bank_account_no":"001","qr_path":"/qr/1"}',
+            'type': 'bank',
+            'gateway_details': '',
+            'payment_gateway': <String, dynamic>{
+              'title': 'Main bank',
+              'holder_name': 'Broker Ltd',
+              'bank_name': 'Test Bank',
+              'bank_account_no': '001',
+              'ifsc_iban': 'TEST0001',
+              'swift_code': 'TESTINBB',
+              'status': 'active',
             },
             'show_utr': 1,
             'require_utr': true,
             'show_proof': '1',
             'payer_fields': <String, dynamic>{
               'mobile': <String, dynamic>{'label': 'Mobile', 'required': true},
-              'id_type': <String, dynamic>{
-                'label': 'ID type',
+              'payment_page': <String, dynamic>{
+                'label': 'Pay with',
                 'options': <Map<String, dynamic>>[
-                  <String, dynamic>{'value': 'passport', 'label': 'Passport'},
+                  <String, dynamic>{'value': 'p1', 'label': 'Page 1'},
                 ],
+              },
+              'id_number': <String, dynamic>{
+                'label': 'ID number',
+                'required': false,
+                'required_when': <String, dynamic>{
+                  'payment_page': <String>['p1'],
+                },
               },
             },
           },
         },
       });
       expect(detail.type, 'bank');
-      expect(detail.qrPath, '/qr/1');
-      expect(detail.payLines.map((line) => line.key).toList(),
-          <String>['holder_name', 'bank_account_no']);
+      expect(detail.qrPath, '');
+      expect(
+        detail.payLines.map((line) => line.key).toList(),
+        <String>[
+          'holder_name',
+          'bank_name',
+          'bank_account_no',
+          'ifsc_iban',
+          'swift_code',
+        ],
+      );
       expect(detail.showUtr, isTrue);
       expect(detail.requireUtr, isTrue);
       expect(detail.showProof, isTrue);
       expect(detail.requireProof, isFalse);
       expect(detail.clientNoteEnabled, isTrue);
-      expect(detail.payerFieldKeys, <String>['mobile', 'id_type']);
-      expect(detail.payerFieldsToAsk.single.fieldName, 'payer_mobile');
+      expect(
+        detail.payerFields.map((field) => field.fieldName).toList(),
+        <String>['payer_mobile', 'payer_payment_page', 'payer_id_number'],
+      );
+      expect(detail.payerFields[1].options.single.value, 'p1');
+      expect(detail.payerFields[2].requiredWhenPaymentPage, <String>['p1']);
+    });
+
+    test('reads the flat payment_gateway shape dev sends for UPI', () {
+      final detail = DepositMethodDetail.fromJson(<String, dynamic>{
+        'depositMethod': <String, dynamic>{
+          'type': 'upi',
+          'gateway_details': '',
+          'address': '',
+          'require_utr': true,
+          'show_utr': true,
+          'show_proof': true,
+          'require_proof': true,
+          'payer_fields': <dynamic>[],
+          'payment_gateway': <String, dynamic>{
+            'status': 'active',
+            'title': 'UPI 2',
+            'holder_name': 'payment Name',
+            'upi_address': 'paymentname@upi',
+            'qr_path': 'https://dev.tenaxcodecrm.com/api/user/gateway-qr/a.jpg',
+            'master_gateway': '',
+          },
+        },
+        'client_note_enabled': true,
+      });
+      expect(detail.type, 'upi');
+      expect(
+        detail.qrPath,
+        'https://dev.tenaxcodecrm.com/api/user/gateway-qr/a.jpg',
+      );
+      expect(
+        detail.payLines.map((line) => '${line.key}=${line.value}').toList(),
+        <String>['holder_name=payment Name', 'upi_address=paymentname@upi'],
+      );
+      expect(detail.instructions, '');
+      expect(detail.showUtr, isTrue);
+      expect(detail.requireUtr, isTrue);
+      expect(detail.showProof, isTrue);
+      expect(detail.requireProof, isTrue);
+      expect(detail.payerFields, isEmpty);
+      expect(detail.clientNoteEnabled, isTrue);
+    });
+
+    test('crypto: the title names the coin when there is no crypto_type', () {
+      final detail = DepositMethodDetail.fromJson(<String, dynamic>{
+        'depositMethod': <String, dynamic>{
+          'type': 'crypto',
+          'payment_gateway': <String, dynamic>{
+            'title': 'USDT TRC20',
+            'crypto_address': 'TXyz',
+          },
+        },
+      });
+      expect(
+        detail.payLines.map((line) => '${line.key}=${line.value}').toList(),
+        <String>['network=USDT TRC20', 'crypto_address=TXyz'],
+      );
+      expect(detail.instructions, '');
+    });
+
+    test('crypto offline channel: crypto_type wins and instructions are read',
+        () {
+      final detail = DepositMethodDetail.fromJson(<String, dynamic>{
+        'depositMethod': <String, dynamic>{
+          'type': 'crypto',
+          'payment_gateway': <String, dynamic>{
+            'title': 'My option',
+            'crypto_address': 'TXyz',
+            'crypto_name': 'My option',
+            'crypto_type': 'TRC20',
+            'instructions': '<p>Send only USDT</p>',
+            'qr_path': 'https://crm.test/api/user/gateway-qr/a.png',
+          },
+        },
+      });
+      expect(
+        detail.payLines.map((line) => '${line.key}=${line.value}').toList(),
+        <String>['network=TRC20', 'crypto_address=TXyz'],
+      );
+      expect(detail.instructions, '<p>Send only USDT</p>');
+      expect(detail.qrPath, 'https://crm.test/api/user/gateway-qr/a.png');
+    });
+
+    test('local: the address is the instructions and there are no pay lines',
+        () {
+      final detail = DepositMethodDetail.fromJson(<String, dynamic>{
+        'depositMethod': <String, dynamic>{
+          'type': 'local',
+          'payer_fields': <dynamic>[],
+          'payment_gateway': <String, dynamic>{
+            'title': 'Cash desk',
+            'address': '<p>Pay at the desk</p>',
+          },
+        },
+      });
+      expect(detail.type, 'local');
+      expect(detail.payLines, isEmpty);
+      expect(detail.qrPath, '');
+      expect(detail.instructions, '<p>Pay at the desk</p>');
     });
 
     test('an empty answer gives an empty detail', () {

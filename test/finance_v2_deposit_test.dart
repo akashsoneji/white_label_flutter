@@ -76,6 +76,11 @@ class _FakeRepository implements FinanceV2Repository {
   final List<String> submittedAmounts = <String>[];
   final List<String> submittedAccountIds = <String>[];
   String? submittedAccountId;
+  Map<String, dynamic> submittedExtraFields = <String, dynamic>{};
+
+  /// The `depositMethod` object of the details answer.
+  Map<String, dynamic> depositMethod = <String, dynamic>{};
+  FinanceV2Result<Set<String>> savedPayerAnswer = FinanceV2Ok(<String>{});
 
   @override
   Future<FinanceV2Result<List<FinanceChannel>>> getChannels({
@@ -104,6 +109,7 @@ class _FakeRepository implements FinanceV2Repository {
     submittedAmounts.add(amount);
     submittedAccountIds.add(mt5AccountId);
     submittedAccountId = mt5AccountId;
+    submittedExtraFields = extraFields;
     return submitAnswers[index.clamp(0, submitAnswers.length - 1)];
   }
 
@@ -113,9 +119,14 @@ class _FakeRepository implements FinanceV2Repository {
   ) async {
     return FinanceV2Ok(
       DepositMethodDetail.fromJson(<String, dynamic>{
-        'depositMethod': <String, dynamic>{},
+        'depositMethod': depositMethod,
       }),
     );
+  }
+
+  @override
+  Future<FinanceV2Result<Set<String>>> getSavedPayerKeys() async {
+    return savedPayerAnswer;
   }
 
   @override
@@ -656,6 +667,150 @@ void main() {
       addTearDown(controller.onClose);
       return controller;
     }
+
+    _FakeRepository payerRepository(Map<String, dynamic> payerFields) {
+      return _FakeRepository()
+        ..depositMethod = <String, dynamic>{'payer_fields': payerFields}
+        ..submitAnswers = [
+          FinanceV2Ok(DepositSubmitResult.fromJson(<String, dynamic>{})),
+        ];
+    }
+
+    List<String> visibleKeys(DepositDetailsController controller) {
+      return controller.visiblePayerFields
+          .map((field) => field.key)
+          .toList(growable: false);
+    }
+
+    test('a saved payer field is neither shown nor sent', () async {
+      final repository = payerRepository(<String, dynamic>{
+        'mobile': <String, dynamic>{'label': 'Mobile', 'required': true},
+        'id_number': <String, dynamic>{'label': 'ID', 'required': true},
+      })
+        ..savedPayerAnswer = FinanceV2Ok(<String>{'id_number'});
+      final controller = detailsController(repository);
+      await controller.load();
+
+      expect(visibleKeys(controller), <String>['mobile']);
+      expect(controller.canSubmit, isFalse);
+
+      controller.payerControllers['mobile']!.text = '999';
+      expect(controller.canSubmit, isTrue);
+
+      await controller.submit();
+      expect(
+        repository.submittedExtraFields,
+        <String, dynamic>{'payer_mobile': '999'},
+      );
+    });
+
+    test('a failed saved-payer call still asks for every payer field',
+        () async {
+      final repository = payerRepository(<String, dynamic>{
+        'mobile': <String, dynamic>{'label': 'Mobile', 'required': true},
+        'id_number': <String, dynamic>{'label': 'ID', 'required': true},
+      })
+        ..savedPayerAnswer = FinanceV2Err(_failure(FinanceV2FailureKind.other));
+      final controller = detailsController(repository);
+      await controller.load();
+
+      expect(controller.loadError.value, isNull);
+      expect(visibleKeys(controller), <String>['mobile', 'id_number']);
+    });
+
+    test('a payment page with one option is sent but not shown', () async {
+      final repository = payerRepository(<String, dynamic>{
+        'payment_page': <String, dynamic>{
+          'label': 'Pay with',
+          'options': <Map<String, dynamic>>[
+            <String, dynamic>{'value': 'p1', 'label': 'Page 1'},
+          ],
+        },
+        'id_number': <String, dynamic>{
+          'label': 'ID',
+          'required': false,
+          'required_when': <String, dynamic>{
+            'payment_page': <String>['p1'],
+          },
+        },
+        'card_no': <String, dynamic>{
+          'label': 'Card',
+          'required_when': <String, dynamic>{
+            'payment_page': <String>['p2'],
+          },
+        },
+      });
+      final controller = detailsController(repository);
+      await controller.load();
+
+      expect(visibleKeys(controller), <String>['id_number']);
+      expect(controller.canSubmit, isFalse);
+
+      controller.payerControllers['id_number']!.text = 'AB12';
+      expect(controller.canSubmit, isTrue);
+
+      await controller.submit();
+      expect(repository.submittedExtraFields, <String, dynamic>{
+        'payer_payment_page': 'p1',
+        'payer_id_number': 'AB12',
+      });
+    });
+
+    test('payer fields follow the payment page the client picks', () async {
+      final repository = payerRepository(<String, dynamic>{
+        'payment_page': <String, dynamic>{
+          'label': 'Pay with',
+          'options': <Map<String, dynamic>>[
+            <String, dynamic>{'value': 'p1', 'label': 'Page 1'},
+            <String, dynamic>{'value': 'p2', 'label': 'Page 2'},
+          ],
+        },
+        'id_number': <String, dynamic>{
+          'label': 'ID',
+          'required_when': <String, dynamic>{
+            'payment_page': <String>['p2'],
+          },
+        },
+      });
+      final controller = detailsController(repository);
+      await controller.load();
+      final pageField = controller.visiblePayerFields.single;
+      expect(pageField.key, DepositDetailsController.paymentPageKey);
+
+      controller.selectPayerValue(pageField, 'p2');
+      expect(controller.payerControllers['payment_page']!.text, 'Page 2');
+      expect(visibleKeys(controller), <String>['payment_page', 'id_number']);
+      expect(controller.canSubmit, isFalse);
+
+      controller.payerControllers['id_number']!.text = 'typed for page 2';
+      controller.selectPayerValue(pageField, 'p1');
+      expect(visibleKeys(controller), <String>['payment_page']);
+      expect(controller.canSubmit, isTrue);
+
+      await controller.submit();
+      expect(
+        repository.submittedExtraFields,
+        <String, dynamic>{'payer_payment_page': 'p1'},
+      );
+    });
+
+    test('payer values are cleaned before they are sent', () async {
+      final repository = payerRepository(<String, dynamic>{
+        'account_no': <String, dynamic>{'label': 'Account'},
+        'id_country': <String, dynamic>{'label': 'Country'},
+      });
+      final controller = detailsController(repository);
+      await controller.load();
+
+      controller.payerControllers['account_no']!.text = '12 34 56';
+      controller.payerControllers['id_country']!.text = 'in';
+      await controller.submit();
+
+      expect(repository.submittedExtraFields, <String, dynamic>{
+        'payer_account_no': '123456',
+        'payer_id_country': 'IN',
+      });
+    });
 
     test('keeps only a valid proof file', () async {
       final controller = detailsController(_FakeRepository());

@@ -163,7 +163,22 @@ class FinanceV2Repository {
       endpoint: '${ApiConstants.depositList}/$slug',
     );
     if (!_isOk(response)) return FinanceV2Err(_failure(response));
+
     return FinanceV2Ok(DepositMethodDetail.fromJson(jsonMap(_data(response))));
+  }
+
+  /// GET /deposit/payer-data: the keys of the payer details the server
+  /// already holds for the client (id_type, id_number, id_country). The
+  /// values are not returned: the id number is masked and must never be sent
+  /// back.
+  Future<FinanceV2Result<Set<String>>> getSavedPayerKeys() async {
+    final response = await _api.get(
+      endpoint: '${ApiConstants.depositList}/payer-data',
+    );
+    if (!_isOk(response)) return FinanceV2Err(_failure(response));
+    return FinanceV2Ok(
+      jsonMap(jsonMap(_data(response))['payer_data']).keys.toSet(),
+    );
   }
 
   /// GET /deposit/by-reference?ref=. A deposit the server does not know yet

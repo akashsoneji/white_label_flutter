@@ -457,16 +457,21 @@ class _DetailsForm extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 12.h),
       children: [
         _SummaryStrip(youPay: controller.quote.value.youPay),
-        if (detail.instructions.isNotEmpty) ...[
-          SizedBox(height: 8.h),
-          _InstructionCard(text: detail.instructions),
-        ],
         if (detail.payLines.isNotEmpty) SizedBox(height: 8.h),
         for (final line in detail.payLines)
           CopyableInfoRow(
             label: depositPayLineLabel(line.key),
             value: line.value,
           ),
+        if (detail.instructions.isNotEmpty) ...[
+          SizedBox(height: 8.h),
+          _InstructionCard(
+            text: detail.instructions,
+            // With nothing else to pay to, the instructions are the details.
+            initiallyExpanded:
+                detail.payLines.isEmpty && detail.qrPath.isEmpty,
+          ),
+        ],
         if (detail.qrPath.isNotEmpty) ...[
           gap,
           _FieldLabel(text: TranslationUtils.tr('deposit_instruction_screen_qr_code')),
@@ -485,6 +490,7 @@ class _DetailsForm extends StatelessWidget {
             ),
             controller: controller.utrController,
             errorText: controller.utrError,
+            isRequired: detail.requireUtr,
             forceLtr: true,
           ),
         ],
@@ -493,23 +499,15 @@ class _DetailsForm extends StatelessWidget {
           _FieldLabel(
             key: keyFor(DepositDetailsController.proofField),
             text: TranslationUtils.tr('deposit_instruction_screen_upload_file'),
+            isRequired: detail.requireProof,
           ),
           SizedBox(height: 4.h),
           ProofUploadTile(
             fileName: proof?.path.split(Platform.pathSeparator).last,
             filePath: proof?.path,
-            isRequired: detail.requireProof,
             errorText: controller.proofError.value,
             onPick: onPickProof,
             onRemove: proof == null ? null : controller.removeProof,
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            TranslationUtils.tr('fv2_proof_helper'),
-            style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.textGrey,
-              fontSize: 11.sp,
-            ),
           ),
         ],
         if (detail.clientNoteEnabled) ...[
@@ -522,7 +520,7 @@ class _DetailsForm extends StatelessWidget {
             maxLines: 3,
           ),
         ],
-        for (final field in detail.payerFields) ...[
+        for (final field in controller.visiblePayerFields) ...[
           gap,
           _PayerInput(
             key: keyFor(field.fieldName),
@@ -541,18 +539,35 @@ class _DetailsForm extends StatelessWidget {
 class _FieldLabel extends StatelessWidget {
   final String text;
 
-  const _FieldLabel({super.key, required this.text});
+  /// Adds a red `*` after the label.
+  final bool isRequired;
+
+  const _FieldLabel({super.key, required this.text, this.isRequired = false});
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
+    final style = AppTextStyles.bodyText.copyWith(
+      color: AppColors.textSecondary,
+      fontSize: 12.sp,
+    );
+
+    return Text.rich(
+      TextSpan(
+        text: text,
+        children: [
+          if (isRequired)
+            TextSpan(
+              text: ' *',
+              style: style.copyWith(
+                color: AppColors.error,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+        ],
+      ),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
-      style: AppTextStyles.bodyText.copyWith(
-        color: AppColors.textSecondary,
-        fontSize: 12.sp,
-      ),
+      style: style,
     );
   }
 }
@@ -560,8 +575,9 @@ class _FieldLabel extends StatelessWidget {
 /// The broker's instructions, collapsed until the client opens them.
 class _InstructionCard extends StatelessWidget {
   final String text;
+  final bool initiallyExpanded;
 
-  const _InstructionCard({required this.text});
+  const _InstructionCard({required this.text, this.initiallyExpanded = false});
 
   /// Instructions may come as rich text; tags are dropped, the wording stays.
   String get _plainText => text
@@ -584,6 +600,7 @@ class _InstructionCard extends StatelessWidget {
         data: Theme.of(context).copyWith(dividerColor: AppColors.divider),
         child: ExpansionTile(
           dense: true,
+          initiallyExpanded: initiallyExpanded,
           tilePadding: EdgeInsetsDirectional.symmetric(horizontal: 12.w),
           childrenPadding: EdgeInsetsDirectional.fromSTEB(12.w, 0, 12.w, 12.h),
           expandedAlignment: AlignmentDirectional.centerStart,
@@ -619,6 +636,7 @@ class _TextInput extends StatelessWidget {
   final String? errorText;
   final int maxLines;
   final bool forceLtr;
+  final bool isRequired;
 
   const _TextInput({
     super.key,
@@ -627,6 +645,7 @@ class _TextInput extends StatelessWidget {
     this.hint,
     this.errorText,
     this.maxLines = 1,
+    this.isRequired = false,
     this.forceLtr = false,
   });
 
@@ -642,7 +661,7 @@ class _TextInput extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        _FieldLabel(text: label),
+        _FieldLabel(text: label, isRequired: isRequired),
         SizedBox(height: 4.h),
         TextField(
           controller: controller,
