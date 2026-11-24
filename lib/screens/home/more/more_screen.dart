@@ -1082,6 +1082,20 @@ Obx(() {
                   );
                 }
 
+                if (modules?.tradingCentral ?? false) {
+                  items.add(
+                    _ServiceTile(
+                      icon: 'trading-central',
+                      iconData: Icons.insights_outlined,
+                      label: languageService.trf(
+                        'trading_central_title',
+                        'Trading Central',
+                      ),
+                      onTap: () => Get.toNamed(AppPages.TRADING_CENTRAL),
+                    ),
+                  );
+                }
+
                 return Wrap(
                   spacing: 10.w,
                   runSpacing: 10.w,

@@ -17,6 +17,7 @@ import 'package:crm_app/screens/demo_contest/presentation/pages/leaderboard_scre
 import 'package:crm_app/screens/demo_contest/presentation/pages/my_contest_history_screen.dart';
 import 'package:crm_app/screens/demo_contest/presentation/pages/demo_contest_my_stats_screen.dart';
 import 'package:crm_app/screens/demo_contest/presentation/pages/winners_screen.dart';
+import 'package:crm_app/screens/trading_central/trading_central_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/finance_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
 import 'package:crm_app/screens/finance_v2/finance_flow_switch.dart';
@@ -151,6 +152,7 @@ class AppPages {
   static const BONUS = _Paths.BONUS;
   static const SCRATCH_CARD = _Paths.SCRATCH_CARD;
   static const DEMO_CONTEST = _Paths.DEMO_CONTEST;
+  static const TRADING_CENTRAL = _Paths.TRADING_CENTRAL;
   static const DEMO_CONTEST_RULES = _Paths.DEMO_CONTEST_RULES;
   static const DEMO_CONTEST_JOIN = _Paths.DEMO_CONTEST_JOIN;
   static const DEMO_CONTEST_DETAILS = _Paths.DEMO_CONTEST_DETAILS;
@@ -425,6 +427,10 @@ class AppPages {
       page: () => const ScratchCardListScreen(),
     ),
     GetPage(name: _Paths.DEMO_CONTEST, page: () => const DemoContestScreen()),
+    GetPage(
+      name: _Paths.TRADING_CENTRAL,
+      page: () => const TradingCentralScreen(),
+    ),
     GetPage(
       name: _Paths.DEMO_CONTEST_RULES,
       page: () => const ContestRulesScreen(),

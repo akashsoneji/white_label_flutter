@@ -180,6 +180,9 @@ class ApiConstants {
   // Enabled modules (per-user feature flags)
   static const String enabledModules = '${ajax}enabled-modules';
 
+  // Trading Central (pages + per-user unlock state)
+  static const String tradingCentral = '${ajax}trading-central';
+
   // Support Ticket APIs
   static const String ticketDepartments = '${ajax}tickets/departments';
   static const String tickets = '${ajax}tickets';
