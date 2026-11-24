@@ -3,10 +3,10 @@
 
 import 'package:flutter/material.dart';
 import 'clients/base_config.dart';
-import 'clients/proactive/config.dart';
+import 'clients/vantage/config.dart';
 
 enum Flavor {
-  proactive,
+  vantage,
 }
 
 class FlavorConfig {
@@ -95,7 +95,7 @@ class FlavorConfig {
  this.useNewDepositWithdrawFlow = false,
  }) : appTitle = title;
 
-  static FlavorConfig get instance => _instance ?? activate(Flavor.proactive);
+  static FlavorConfig get instance => _instance ?? activate(Flavor.vantage);
 
   static void reset() {
     _instance = null;
@@ -111,21 +111,20 @@ class FlavorConfig {
     final normalized = name.trim().toLowerCase();
     final flavor = Flavor.values.firstWhere(
       (value) => value.name == normalized,
-      orElse: () => Flavor.proactive,
+      orElse: () => Flavor.vantage,
     );
     return activate(flavor);
   }
 
   static FlavorConfig _configFor(Flavor flavor) {
     switch (flavor) {
-      case Flavor.proactive:
-        const config = ProactiveConfig();
-        return config.toFlavorConfig(Flavor.proactive, 'proactive');
+      case Flavor.vantage:
+        const config = VantageConfig();
+        return config.toFlavorConfig(Flavor.vantage, 'vantage');
     }
   }
 
-  static bool isProactive() => _instance?.flavor == Flavor.proactive;
-  static FlavorConfig get proactive => activate(Flavor.proactive);
+  static FlavorConfig get vantage => activate(Flavor.vantage);
 
   static bool isVantage() => usesVantageUi();
 
@@ -134,7 +133,7 @@ class FlavorConfig {
     if (explicitParent == 'vantage') return true;
     if (explicitParent.isNotEmpty && explicitParent != 'vantage') return false;
 
-    final name = (_instance?.flavor.name ?? Flavor.proactive.name).toLowerCase();
+    final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
     return const <String>{'vantage', 'baazex', 'gtxprime', 'iquote', 'pipze', 'proactive', 'riyadex', 'telifox', 'tenax'}.contains(name);
   }
 
@@ -145,7 +144,7 @@ class FlavorConfig {
     if (explicitParent == 'celestial') return true;
     if (explicitParent.isNotEmpty && explicitParent != 'celestial') return false;
 
-    final name = (_instance?.flavor.name ?? Flavor.proactive.name).toLowerCase();
+    final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
     return const <String>{'celestial', 'kantara', 'moneygenius', 'starfx'}.contains(name);
   }
 
@@ -154,7 +153,7 @@ class FlavorConfig {
     if (explicitParent == 'iquote') return true;
     if (explicitParent.isNotEmpty && explicitParent != 'iquote') return false;
 
-    final name = (_instance?.flavor.name ?? Flavor.proactive.name).toLowerCase();
+    final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
     return const <String>{'iquote', 'skyriss'}.contains(name);
   }
 
