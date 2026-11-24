@@ -263,6 +263,9 @@ class WithdrawalMethod {
   final String? conversionRate;
   final bool? hasConversion;
   final num? withdrawalMargin;
+  final String? displayName;
+  final bool isLocked;
+  final String? lockReason;
 
   WithdrawalMethod({
     this.id,
@@ -286,6 +289,9 @@ class WithdrawalMethod {
     this.conversionRate,
     this.hasConversion,
     this.withdrawalMargin,
+    this.displayName,
+    this.isLocked = false,
+    this.lockReason,
   });
 
   factory WithdrawalMethod.fromJson(Map<String, dynamic> json) {
@@ -329,6 +335,9 @@ class WithdrawalMethod {
           json['withdrawal_margin'] is num
               ? json['withdrawal_margin']
               : num.tryParse(json['withdrawal_margin']?.toString() ?? ''),
+      displayName: json['display_name']?.toString(),
+      isLocked: json['is_locked'] == true,
+      lockReason: json['lock_reason']?.toString(),
     );
   }
 

@@ -18,6 +18,8 @@ import 'package:crm_app/core/network/api_response.dart';
 import 'package:crm_app/services/api_service.dart';
 import 'package:crm_app/utils/file_compression_helper.dart';
 import 'package:crm_app/utils/camera_permission_helper.dart';
+import 'package:crm_app/screens/finance/view_models/withdrawal_controller.dart'
+    show WithdrawalMethod;
 
 class KycBankController extends GetxController {
   final KycRepository _repo = Get.find<KycRepository>();
@@ -46,6 +48,12 @@ class KycBankController extends GetxController {
   // Per-method proof-image requirement from the API, e.g.
   // {bank: true, crypto: false, local: true, upi: true}.
   final RxMap<String, bool> requireProofImageByMethod = <String, bool>{}.obs;
+
+  // Methods from GET user/withdrawal, shown in the account-type sheet.
+  final RxList<WithdrawalMethod> withdrawalMethods = <WithdrawalMethod>[].obs;
+  final RxBool isMethodsLoading = false.obs;
+  final RxString methodsError = ''.obs;
+  final Rxn<WithdrawalMethod> selectedMethod = Rxn<WithdrawalMethod>();
   // final RxString selectedCurrency = 'USD'.obs;
   final RxString selectedIfscIban = 'IFSCs'.obs;
   final RxString selectedCryptoNetwork = ''.obs;
@@ -92,6 +100,7 @@ class KycBankController extends GetxController {
 
     fetchCurrencyList();
     fetchWithdrawalList();
+    fetchWithdrawalMethods();
     // Initialize camera
     initializeCamera();
 
@@ -178,6 +187,7 @@ class KycBankController extends GetxController {
         requireProofImageByMethod.value =
             currencyListModel.data?.requireProofImageByMethod ?? {};
         _applyAccountTypesFromApi();
+        _applySelectedMethodNetworks();
         print('💰 Found ${bankWithdrawalList.length} withdrawal methods');
         print('🔌 Found ${allowedCryptoNetworks.length} crypto networks');
       } else {
@@ -279,6 +289,79 @@ class KycBankController extends GetxController {
     }
   }
 
+  /// `GET user/withdrawal` — the methods the client may add.
+  Future<void> fetchWithdrawalMethods() async {
+    if (isMethodsLoading.value) return;
+    isMethodsLoading.value = true;
+    methodsError.value = '';
+    try {
+      final response = await ApiService.get(
+        endpoint: ApiConstants.withdrawalRequest,
+      );
+      final body = response.data;
+      final rows = body is Map ? body['data'] : null;
+      if (!response.success || rows is! List) {
+        methodsError.value = response.message?.isNotEmpty == true
+            ? response.message!
+            : TranslationUtils.tr(
+                'kyc_bank_controller_failed_to_fetch_withdrawal_list',
+              );
+        return;
+      }
+      withdrawalMethods.value = rows
+          .whereType<Map>()
+          .map((row) => WithdrawalMethod.fromJson(Map<String, dynamic>.from(row)))
+          .where((method) => (method.status ?? 'active') == 'active')
+          .toList();
+      _syncSelectedMethod();
+    } catch (_) {
+      methodsError.value = TranslationUtils.tr(
+        'kyc_bank_controller_failed_to_fetch_withdrawal_list',
+      );
+    } finally {
+      isMethodsLoading.value = false;
+    }
+  }
+
+  /// Account-type label the rest of the form switches on and sends as
+  /// `withdrawal_method` (lower-cased), e.g. `crypto` -> `Crypto`.
+  String _accountTypeOf(WithdrawalMethod method) {
+    final name = method.methodName ?? '';
+    return name.isEmpty ? name : '${name[0].toUpperCase()}${name.substring(1)}';
+  }
+
+  /// Links the current account type to its API method once the list loads;
+  /// falls back to the first unlocked method when it is not offered.
+  void _syncSelectedMethod() {
+    final currentType = selectedAccountType.value.toLowerCase();
+    final match = withdrawalMethods.firstWhereOrNull(
+      (m) => (m.methodName ?? '').toLowerCase() == currentType && !m.isLocked,
+    );
+    if (match != null) {
+      selectedMethod.value = match;
+      _applySelectedMethodNetworks();
+      return;
+    }
+    final firstOpen = withdrawalMethods.firstWhereOrNull((m) => !m.isLocked);
+    if (firstOpen != null) selectWithdrawalMethod(firstOpen);
+  }
+
+  void selectWithdrawalMethod(WithdrawalMethod method) {
+    if (method.isLocked) return;
+    selectedMethod.value = method;
+    setAccountType(_accountTypeOf(method));
+    _applySelectedMethodNetworks();
+  }
+
+  /// Crypto networks come from the selected method when it lists them.
+  void _applySelectedMethodNetworks() {
+    final networks = selectedMethod.value?.allowedCryptoNetworks ?? const [];
+    if (networks.isEmpty) return;
+    allowedCryptoNetworks.value = networks
+        .map((n) => AllowedCryptoNetwork(slug: n.slug, label: n.label))
+        .toList();
+  }
+
   void _notify({required bool success, required String message}) {
     if (!Get.isRegistered<AppNotificationController>()) return;
     final notifier = Get.find<AppNotificationController>();
@@ -298,8 +381,9 @@ class KycBankController extends GetxController {
         .toList();
     accountTypes.value = types;
     // Keep the current selection valid; otherwise fall back to the first type.
+    // Once GET user/withdrawal has loaded, it owns the selection.
     final currentLower = selectedAccountType.value.toLowerCase();
-    if (!keys.contains(currentLower)) {
+    if (withdrawalMethods.isEmpty && !keys.contains(currentLower)) {
       selectedAccountType.value = types.first;
     }
   }

@@ -17,6 +17,8 @@ import 'package:crm_app/screens/common/view_models/app_notification_controller.d
 
 import 'package:crm_app/widgets/kyc_scaffold.dart';
 import 'package:crm_app/models/bank_withdralList_model.dart';
+import 'package:crm_app/screens/finance/view_models/withdrawal_controller.dart'
+    show WithdrawalMethod;
 
 class KycBankScreen extends StatefulWidget {
   const KycBankScreen({Key? key}) : super(key: key);
@@ -410,7 +412,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
           readOnly: true,
           onTap: _showAccountTypeOptions,
           controller: TextEditingController(
-            text: controller.selectedAccountType.value,
+            text: _selectedAccountTypeLabel(),
           ),
           labelText: languageService.tr('kyc_bank_screen_account_type'),
           suffixIcon: InkWell(
@@ -1081,51 +1083,165 @@ class _KycBankScreenState extends State<KycBankScreen> {
     );
   }
 
-  // Helper for Account Type bottom sheet
+  // Account Type bottom sheet — methods come from GET user/withdrawal.
   void _showAccountTypeOptions() {
+    if (controller.withdrawalMethods.isEmpty &&
+        !controller.isMethodsLoading.value) {
+      controller.fetchWithdrawalMethods();
+    }
     showModalBottomSheet(
+      isScrollControlled: true,
       backgroundColor: AppColors.whiteColor,
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) {
+      builder: (sheetContext) {
+        final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.7;
         return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: EdgeInsets.all(16.w),
-                child: Text(
-                  languageService.tr('kyc_bank_screen_select_account_type'),
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxHeight),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(16.w),
+                  child: Text(
+                    languageService.tr('kyc_bank_screen_select_account_type'),
+                    style: AppTextStyles.bodyText.copyWith(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
-              ),
-              ...controller.accountTypes.map((type) {
-                return ListTile(
-                  title: Text(
-                    type,
-                    style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
-                  ),
-                  trailing:
-                      controller.selectedAccountType.value == type
-                          ? Icon(Icons.check, color: AppColors.primary)
-                          : null,
-                  onTap: () {
-                    controller.setAccountType(type);
-                    Navigator.pop(context);
-                  },
-                );
-              }).toList(),
-            ],
+                Flexible(
+                  child: Obx(() => _buildWithdrawalMethodList(sheetContext)),
+                ),
+                SizedBox(height: 16.h),
+              ],
+            ),
           ),
         );
       },
     );
+  }
+
+  Widget _buildWithdrawalMethodList(BuildContext sheetContext) {
+    final methods = controller.withdrawalMethods;
+
+    if (controller.isMethodsLoading.value && methods.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.all(32.w),
+        child: Center(
+          child: ButtonLoadingWidget(size: 24.0, color: AppColors.primary),
+        ),
+      );
+    }
+
+    if (controller.methodsError.value.isNotEmpty && methods.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.all(24.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              controller.methodsError.value,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.bodyText.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            SizedBox(height: 12.h),
+            TextButton(
+              onPressed: controller.fetchWithdrawalMethods,
+              child: Text(
+                languageService.tr('common_retry'),
+                style: AppTextStyles.bodyText.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (methods.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.all(24.w),
+        child: Text(
+          languageService.tr('common_no_data'),
+          textAlign: TextAlign.center,
+          style: AppTextStyles.bodyText.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: methods.length,
+      itemBuilder: (_, index) {
+        final method = methods[index];
+        final selected = controller.selectedMethod.value;
+        final isSelected = selected != null
+            ? selected.methodSlug == method.methodSlug
+            : (method.methodName ?? '').toLowerCase() ==
+                controller.selectedAccountType.value.toLowerCase();
+
+        return ListTile(
+          enabled: !method.isLocked,
+          leading: _WithdrawalMethodIcon(url: method.icon),
+          title: Text(
+            _methodTitle(method),
+            style: AppTextStyles.bodyText.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          subtitle: Text(
+            _methodSubtitle(method),
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 12.sp,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          trailing: method.isLocked
+              ? Icon(Icons.lock_outline, color: AppColors.icongrey)
+              : isSelected
+              ? Icon(Icons.check, color: AppColors.primary)
+              : null,
+          onTap: () {
+            controller.selectWithdrawalMethod(method);
+            Navigator.pop(sheetContext);
+          },
+        );
+      },
+    );
+  }
+
+  String _selectedAccountTypeLabel() {
+    final method = controller.selectedMethod.value;
+    return method != null
+        ? _methodTitle(method)
+        : controller.selectedAccountType.value;
+  }
+
+  String _methodTitle(WithdrawalMethod method) {
+    final displayName = method.displayName ?? '';
+    return displayName.isNotEmpty ? displayName : (method.methodName ?? '');
+  }
+
+  String _methodSubtitle(WithdrawalMethod method) {
+    final lockReason = method.lockReason ?? '';
+    if (method.isLocked && lockReason.isNotEmpty) return lockReason;
+
+    final limits = '${method.minLimit ?? '-'} - ${method.maxLimit ?? '-'}';
+    final averageTime = method.averageLabel ?? '';
+    return averageTime.isEmpty ? limits : '$limits • $averageTime';
   }
 
   Widget _buildRelationShipTypeField() {
@@ -1695,5 +1811,37 @@ class _KycBankScreenState extends State<KycBankScreen> {
       _accountNumbersMatch.value = false;
       return false;
     }
+  }
+}
+
+class _WithdrawalMethodIcon extends StatelessWidget {
+  const _WithdrawalMethodIcon({required this.url});
+
+  final String? url;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = 36.w;
+    final fallback = Icon(
+      Icons.account_balance_wallet_outlined,
+      color: AppColors.primary,
+      size: 24.w,
+    );
+    final iconUrl = url ?? '';
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: iconUrl.isEmpty
+          ? fallback
+          : ClipRRect(
+              borderRadius: BorderRadius.circular(8.r),
+              child: Image.network(
+                iconUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => fallback,
+              ),
+            ),
+    );
   }
 }
