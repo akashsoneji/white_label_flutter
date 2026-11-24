@@ -264,7 +264,9 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
               // ── Account ───────────────────────────────────────────────────
               _sectionLabel(context, TranslationUtils.tr('settings_account')),
               SizedBox(height: 8.h),
-              _buildMenuList(context, _accountItems(context, auth)),
+              // Obx: Trading Central / Help Desk follow enabled-modules,
+              // which can finish loading after this tab is first built.
+              Obx(() => _buildMenuList(context, _accountItems(context, auth))),
               SizedBox(height: 16.h),
 
               // ── Version footer ────────────────────────────────────────────
