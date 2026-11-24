@@ -68,16 +68,6 @@ class AppTenaxChartDataSource implements TenaxChartDataSource {
       if (groupId != null) 'group': '$groupId',
       if (sendAccount) 'account': mt5AccountNumber,
     });
-    if (kDebugMode) {
-      final accountLabel = hasTradingAccount
-          ? 'WITH trading account ($mt5AccountNumber, '
-              'platform=${account.platformDisplayName}, isMT5=${account.isMT5})'
-          : 'WITHOUT trading account';
-      debugPrint('📊 TenaxChart load URL [$accountLabel]');
-      debugPrint('📊   url     = $uri');
-      debugPrint('📊   account = ${uri.queryParameters['account'] ?? '(not sent)'}');
-      debugPrint('📊   group   = ${uri.queryParameters['group'] ?? '(not sent)'}');
-    }
     tenaxChartDebugLog('API → GET $uri '
         '(platform=${account?.platformDisplayName}, isMT5=${account?.isMT5})');
     final stopwatch = Stopwatch()..start();
