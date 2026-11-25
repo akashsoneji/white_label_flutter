@@ -373,6 +373,8 @@
   "create_account_terms_link": "条款和条件",
   "create_account_terms_show_more": "展开",
   "create_account_terms_show_less": "收起",
+  "create_account_bonus_code_label": "奖金代码（可选）",
+  "create_account_bonus_code_hint": "输入您的奖金代码",
   "create_account_create_mt5_password": "创建主密码",
   "create_account_create_open_account": "开立账户",
   "create_account_currency": "货币",

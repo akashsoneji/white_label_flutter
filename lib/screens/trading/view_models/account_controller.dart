@@ -1279,6 +1279,8 @@ class AccountController extends GetxController with WidgetsBindingObserver {
     required String investorPassword,
     String? leverage,
     bool termsAccepted = false,
+    String? bonusCode,
+    void Function(String message)? onBonusCodeInvalid,
   }) async {
     try {
       _setLoading(true);
@@ -1292,6 +1294,8 @@ class AccountController extends GetxController with WidgetsBindingObserver {
           investorPassword: investorPassword,
           leverage: leverage,
           termsAccepted: termsAccepted,
+          bonusCode: bonusCode,
+          onBonusCodeInvalid: onBonusCodeInvalid,
         );
       } else {
         success = await _dashboardController.createMT5Account(
@@ -1299,6 +1303,8 @@ class AccountController extends GetxController with WidgetsBindingObserver {
           investorPassword: investorPassword,
           leverage: leverage,
           termsAccepted: termsAccepted,
+          bonusCode: bonusCode,
+          onBonusCodeInvalid: onBonusCodeInvalid,
         );
       }
 

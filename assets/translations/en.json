@@ -373,6 +373,8 @@
   "create_account_terms_link": "Terms and Conditions",
   "create_account_terms_show_more": "Show more",
   "create_account_terms_show_less": "Show less",
+  "create_account_bonus_code_label": "Bonus Code (optional)",
+  "create_account_bonus_code_hint": "Enter your bonus code",
   "create_account_create_mt5_password": "Create Master Password",
   "create_account_create_open_account": "Create Open Account",
   "create_account_currency": "Currency",

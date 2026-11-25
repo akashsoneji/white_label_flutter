@@ -48,6 +48,9 @@ class PlanModel {
   bool termsEnabled;
   /// Plain text with line breaks; null when [termsEnabled] is false.
   String? termsText;
+  /// A live group with a running promo-code campaign open to this client; the
+  /// create form then shows the optional bonus code field.
+  bool acceptsPromoCode;
 
   PlanModel({
     this.id,
@@ -82,6 +85,7 @@ class PlanModel {
     this.hedgingAllowed,
     this.termsEnabled = false,
     this.termsText,
+    this.acceptsPromoCode = false,
   });
 
   PlanModel copyWith({
@@ -117,6 +121,7 @@ class PlanModel {
     int? hedgingAllowed,
     bool? termsEnabled,
     String? termsText,
+    bool? acceptsPromoCode,
   }) => PlanModel(
     id: id ?? this.id,
     groupName: groupName ?? this.groupName,
@@ -150,6 +155,7 @@ class PlanModel {
     hedgingAllowed: hedgingAllowed ?? this.hedgingAllowed,
     termsEnabled: termsEnabled ?? this.termsEnabled,
     termsText: termsText ?? this.termsText,
+    acceptsPromoCode: acceptsPromoCode ?? this.acceptsPromoCode,
   );
 
   factory PlanModel.fromJson(Map<String, dynamic> json) => PlanModel(
@@ -187,6 +193,7 @@ class PlanModel {
     hedgingAllowed: json["hedging_allowed"],
     termsEnabled: _parseBool(json["terms_enabled"]),
     termsText: json["terms_text"]?.toString(),
+    acceptsPromoCode: _parseBool(json["accepts_promo_code"]),
   );
 
   static bool _parseBool(dynamic v) =>
@@ -225,6 +232,7 @@ class PlanModel {
     "hedging_allowed": hedgingAllowed,
     "terms_enabled": termsEnabled,
     "terms_text": termsText,
+    "accepts_promo_code": acceptsPromoCode,
   };
 }
 

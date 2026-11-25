@@ -118,8 +118,13 @@ class CreateTradingAccountController extends GetxController {
   }
 
   /// [termsAccepted] is true only when the chosen group has terms enabled and
-  /// the client ticked the checkbox.
-  Future<void> createAccount({bool termsAccepted = false}) async {
+  /// the client ticked the checkbox. [bonusCode] is sent only when not empty;
+  /// [onBonusCodeInvalid] gets the server message when the code is rejected.
+  Future<void> createAccount({
+    bool termsAccepted = false,
+    String? bonusCode,
+    void Function(String message)? onBonusCodeInvalid,
+  }) async {
     // Basic validation
     if (depositAmount.value.isEmpty) {
       if (Get.isRegistered<AppNotificationController>()) {
@@ -192,6 +197,8 @@ class CreateTradingAccountController extends GetxController {
         investorPassword: investorPassword.value,
         leverage: leverage.value.isNotEmpty ? leverage.value : null,
         termsAccepted: termsAccepted,
+        bonusCode: bonusCode,
+        onBonusCodeInvalid: onBonusCodeInvalid,
       );
 
       if (accountData != null) {
@@ -202,6 +209,7 @@ class CreateTradingAccountController extends GetxController {
             title: TranslationUtils.tr('create_account_success'),
           );
         }
+        _showBonusCodeResult(accountData['data']);
 
         print('accountData wehn we crete new account plese : $accountData');
 
@@ -228,6 +236,27 @@ class CreateTradingAccountController extends GetxController {
       // No need to show duplicate error notification
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// The account is created either way; credited = false means the code was
+  /// accepted but is under review or not applied.
+  void _showBonusCodeResult(dynamic data) {
+    if (data is! Map) return;
+    final bonus = data['bonus_code'];
+    if (bonus is! Map) return;
+    final message = bonus['message']?.toString() ?? '';
+    if (message.isEmpty) return;
+    if (bonus['credited'] == true) {
+      CustomToastService.showSuccess(
+        message: message,
+        duration: const Duration(seconds: 4),
+      );
+    } else {
+      CustomToastService.showWarning(
+        message: message,
+        duration: const Duration(seconds: 4),
+      );
     }
   }
 

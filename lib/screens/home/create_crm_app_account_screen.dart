@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/screens/home/widgets/bonus_code_field.dart';
 import 'package:crm_app/screens/home/widgets/group_terms_acceptance.dart';
 import 'package:crm_app/screens/trading/view_models/create_trading_account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/plan_controller.dart';
@@ -36,6 +37,12 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
   bool _termsAccepted = false;
 
   bool get _requiresTerms => widget.plan?.termsEnabled ?? false;
+
+  final _bonusCodeController = TextEditingController();
+  String? _bonusCodeError;
+
+  bool get _acceptsBonusCode =>
+      !widget.isDemo && (widget.plan?.acceptsPromoCode ?? false);
 
   @override
   void initState() {
@@ -235,6 +242,18 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
                 ),
               ),
 
+              if (_acceptsBonusCode) ...[
+                SizedBox(height: 16.h),
+                BonusCodeField(
+                  controller: _bonusCodeController,
+                  errorText: _bonusCodeError,
+                  onChanged: (_) {
+                    if (_bonusCodeError != null) {
+                      setState(() => _bonusCodeError = null);
+                    }
+                  },
+                ),
+              ],
               if (_requiresTerms) ...[
                 SizedBox(height: 16.h),
                 GroupTermsAcceptance(
@@ -393,7 +412,17 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
     if (widget.isDemo) {
       controller.createDemoAccount(termsAccepted: termsAccepted);
     } else {
-      controller.createAccount(termsAccepted: termsAccepted);
+      setState(() => _bonusCodeError = null);
+      // Only plans that accept a promo code send one; empty sends nothing.
+      final bonusCode = _acceptsBonusCode ? _bonusCodeController.text : null;
+      controller.createAccount(
+        termsAccepted: termsAccepted,
+        bonusCode: bonusCode,
+        onBonusCodeInvalid: (message) {
+          if (!mounted) return;
+          setState(() => _bonusCodeError = message);
+        },
+      );
     }
   }
 
@@ -534,6 +563,7 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
 
   @override
   void dispose() {
+    _bonusCodeController.dispose();
     super.dispose();
   }
 }

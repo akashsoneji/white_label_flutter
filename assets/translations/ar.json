@@ -373,6 +373,8 @@
   "create_account_terms_link": "الشروط والأحكام",
   "create_account_terms_show_more": "عرض المزيد",
   "create_account_terms_show_less": "عرض أقل",
+  "create_account_bonus_code_label": "رمز المكافأة (اختياري)",
+  "create_account_bonus_code_hint": "أدخل رمز المكافأة",
   "create_account_create_mt5_password": "إنشاء كلمة المرور الرئيسية",
   "create_account_create_open_account": "إنشاء حساب مفتوح",
   "create_account_currency": "العملة",

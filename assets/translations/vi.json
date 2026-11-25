@@ -373,6 +373,8 @@
   "create_account_terms_link": "Điều khoản và Điều kiện",
   "create_account_terms_show_more": "Xem thêm",
   "create_account_terms_show_less": "Thu gọn",
+  "create_account_bonus_code_label": "Mã thưởng (không bắt buộc)",
+  "create_account_bonus_code_hint": "Nhập mã thưởng của bạn",
   "create_account_create_mt5_password": "Tạo mật khẩu chính",
   "create_account_create_open_account": "Tạo và mở tài khoản",
   "create_account_currency": "Tiền tệ",

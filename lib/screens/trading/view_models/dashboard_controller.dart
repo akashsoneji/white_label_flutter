@@ -721,6 +721,8 @@ class DashboardController extends GetxController {
     required String investorPassword,
     String? leverage,
     bool termsAccepted = false,
+    String? bonusCode,
+    void Function(String message)? onBonusCodeInvalid,
   }) async {
     try {
       print('DashboardController: Creating MT5 account...');
@@ -748,6 +750,10 @@ class DashboardController extends GetxController {
       }
       // Only groups with terms enabled need it; others send nothing new.
       if (termsAccepted) requestData['terms_accepted'] = true;
+      final trimmedBonusCode = bonusCode?.trim() ?? '';
+      if (trimmedBonusCode.isNotEmpty) {
+        requestData['bonus_code'] = trimmedBonusCode;
+      }
 
       print(
         'DashboardController: Making API call to ${ApiConstants.createMT5Account}',
@@ -782,7 +788,16 @@ class DashboardController extends GetxController {
             );
         errorMessage.value = errorMsg;
         print('DashboardController: Failed to create MT5 account: $errorMsg');
-        CustomToastService.showError(message: errorMsg);
+        // A rejected bonus code is shown under its field instead of a toast;
+        // the account was not created, so the client can fix the code.
+        final errorData = response.data;
+        final isBonusCodeError = errorData is Map &&
+            errorData['error_code'] == 'BONUS_CODE_INVALID';
+        if (isBonusCodeError && onBonusCodeInvalid != null) {
+          onBonusCodeInvalid(errorMsg);
+        } else {
+          CustomToastService.showError(message: errorMsg);
+        }
         return null;
       }
     } catch (e) {

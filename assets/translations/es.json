@@ -373,6 +373,8 @@
   "create_account_terms_link": "Términos y Condiciones",
   "create_account_terms_show_more": "Ver más",
   "create_account_terms_show_less": "Ver menos",
+  "create_account_bonus_code_label": "Código de bono (opcional)",
+  "create_account_bonus_code_hint": "Introduce tu código de bono",
   "create_account_create_mt5_password": "Crear contraseña maestra",
   "create_account_create_open_account": "Crear cuenta abierta",
   "create_account_currency": "Moneda",
