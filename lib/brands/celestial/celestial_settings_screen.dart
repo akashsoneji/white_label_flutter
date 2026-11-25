@@ -267,7 +267,9 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
               // ── Account ───────────────────────────────────────────────────
               _sectionLabel(context, TranslationUtils.tr('settings_account')),
               SizedBox(height: 8.h),
-              _buildMenuList(context, _accountItems(context, auth)),
+              // Obx: Trading Central / Help Desk follow enabled-modules,
+              // which can finish loading after this tab is first built.
+              Obx(() => _buildMenuList(context, _accountItems(context, auth))),
               SizedBox(height: 16.h),
 
               // ── Version footer ────────────────────────────────────────────
@@ -770,6 +772,13 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
           label: DemoContestMenu.label,
           color: const Color(0xFFFFC107),
           onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
+        ),
+      if (EnabledModulesService.flags.tradingCentral)
+        _CelMenuItem(
+          icon: Icons.insights_rounded,
+          label: languageService.trf('trading_central_title', 'Trading Central'),
+          color: const Color(0xFF2196F3),
+          onTap: () => Get.toNamed(AppPages.TRADING_CENTRAL),
         ),
       if (EnabledModulesService.flags.helpdesk)
         _CelMenuItem(

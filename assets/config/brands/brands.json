@@ -1,17 +1,9 @@
 {
-  "default": "proactive",
+  "default": "vantage",
   "brands": [
-    "proactive",
     "vantage"
   ],
   "brandDetails": [
-    {
-      "name": "proactive",
-      "type": "child",
-      "inheritsFrom": "vantage",
-      "label": "Proactive",
-      "themeMode": "both"
-    },
     {
       "name": "vantage",
       "type": "parent",

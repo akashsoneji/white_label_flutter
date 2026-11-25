@@ -45,6 +45,7 @@ abstract class Routes {
   static const BONUS = _Paths.BONUS;
   static const SCRATCH_CARD = _Paths.SCRATCH_CARD;
   static const DEMO_CONTEST = _Paths.DEMO_CONTEST;
+  static const TRADING_CENTRAL = _Paths.TRADING_CENTRAL;
   static const DEMO_CONTEST_RULES = _Paths.DEMO_CONTEST_RULES;
   static const DEMO_CONTEST_JOIN = _Paths.DEMO_CONTEST_JOIN;
   static const DEMO_CONTEST_DETAILS = _Paths.DEMO_CONTEST_DETAILS;
@@ -147,6 +148,7 @@ abstract class _Paths {
   static const BONUS = '/bonus';
   static const SCRATCH_CARD = '/scratch-card';
   static const DEMO_CONTEST = '/demo-contest';
+  static const TRADING_CENTRAL = '/trading-central';
   static const DEMO_CONTEST_RULES = '/demo-contest/rules';
   static const DEMO_CONTEST_JOIN = '/demo-contest/join';
   static const DEMO_CONTEST_DETAILS = '/demo-contest/details';

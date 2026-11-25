@@ -1202,6 +1202,19 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
         );
       }
 
+      if (EnabledModulesService.flags.tradingCentral) {
+        items.add(
+          _buildModernOptionTile(
+            icon: Icons.insights_rounded,
+            iconColor: const Color(0xFF3B82F6),
+            title: languageService?.trf('trading_central_title', 'Trading Central') ?? 'Trading Central',
+            subtitle: languageService?.trf('trading_central_subtitle', 'Market analysis, calendar & education') ?? 'Market analysis, calendar & education',
+            textPrimary: textPrimary,
+            onTap: () => Get.toNamed(AppPages.TRADING_CENTRAL),
+          ),
+        );
+      }
+
       return Container(
         decoration: BoxDecoration(
           color: cardBg,
