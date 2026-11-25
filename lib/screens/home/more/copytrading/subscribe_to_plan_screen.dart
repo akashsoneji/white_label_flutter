@@ -728,7 +728,8 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         );
       }
     } else {
-      sub.errorMessage.value = res.message ?? sub.errorMessage.value;
+      // subscribe() already filled errorMessage (server text, or the add-on
+      // price-changed / unavailable message).
       _showTopError(sub.errorMessage.value);
     }
   }

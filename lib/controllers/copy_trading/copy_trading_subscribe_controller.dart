@@ -133,6 +133,8 @@ class CopyTradingSubscribeController extends GetxController {
   }
 
   /// Re-fetched each time step 2 opens: admin can disable an option any time.
+  /// A failed request keeps the current list, so a network blip does not
+  /// silently drop the add-on the user picked.
   Future<void> loadPurchaseOptions() async {
     try {
       final res = await ApiService.get(
@@ -140,11 +142,11 @@ class CopyTradingSubscribeController extends GetxController {
         queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch.toString()},
       );
       final data = res.data is Map ? (res.data as Map)['data'] : null;
-      addons.value = res.success && data is Map
-          ? PmamPurchaseOptions.fromJson(data.cast<String, dynamic>())
-          : PmamPurchaseOptions.none;
+      if (res.success && data is Map) {
+        addons.value = PmamPurchaseOptions.fromJson(data.cast<String, dynamic>());
+      }
     } catch (_) {
-      addons.value = PmamPurchaseOptions.none;
+      // Keep the previous options.
     }
     if (selectedAddon == null) selectedAddonId.value = 0;
     serverShortage.value = null;
@@ -254,8 +256,12 @@ class CopyTradingSubscribeController extends GetxController {
           break;
       }
 
-      if (selectedAddon != null) {
-        payload['purchase_option_id'] = selectedAddonId.value;
+      final addon = selectedAddon;
+      if (addon != null) {
+        payload['purchase_option_id'] = addon.id;
+        // Price lock: the server rejects the purchase if the fee changed since
+        // the client saw it.
+        payload['purchase_option_fee'] = addon.feeInUsd;
       }
 
       payload['overrides_sl_tp'] = overridesSlTp.value;
@@ -279,15 +285,36 @@ class CopyTradingSubscribeController extends GetxController {
         lastPurchase = purchase is Map ? purchase.cast<String, dynamic>() : null;
         return res;
       }
-      errorMessage.value =
+      var message =
           res.message ?? TranslationUtils.tr('copy_trading_failed_to_subscribe');
       final err = _errorData(res.data);
-      if (err?['code'] == 'insufficient_wallet') {
+      final code = err?['code'];
+      if (code == 'insufficient_wallet') {
         serverShortage.value = double.tryParse('${err!['shortage'] ?? ''}') ?? 0;
-      } else if (selectedAddon != null) {
-        // Option disabled / switch turned off meanwhile: refresh the list.
+      } else if (addon != null) {
+        // Fee changed or option disabled meanwhile: show the fresh list.
         await loadPurchaseOptions();
+        if (code == 'purchase_option_changed') {
+          final refreshed = selectedAddon;
+          final newFee = double.tryParse('${err!['fee'] ?? ''}') ??
+              (refreshed?.id == addon.id ? refreshed!.feeInUsd : null);
+          // Without a known new fee, the server's own text is more honest
+          // than repeating the old price.
+          if (newFee != null && newFee != addon.feeInUsd) {
+            message = TranslationUtils.trArgs(
+              'copy_trading_addon_price_changed',
+              {'name': addon.name, 'fee': newFee.toStringAsFixed(2)},
+            );
+          }
+        } else if (code == 'purchase_option_unavailable') {
+          selectedAddonId.value = 0;
+          message = TranslationUtils.trArgs(
+            'copy_trading_addon_unavailable',
+            {'name': addon.name},
+          );
+        }
       }
+      errorMessage.value = message;
       return res;
     } catch (e) {
       errorMessage.value =

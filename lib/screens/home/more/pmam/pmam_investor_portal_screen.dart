@@ -12,6 +12,7 @@ import 'package:crm_app/screens/home/more/pmam/pmam_trade_history_screen.dart';
 import 'package:crm_app/screens/home/more/pmam/widgets/pmam_pnl_history_section.dart';
 import 'package:crm_app/utils/app_picker_theme.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/widgets/addon_purchase_line.dart';
 
 class PmamInvestorPortalScreen extends StatefulWidget {
   const PmamInvestorPortalScreen({
@@ -49,6 +50,12 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
   String _fmtMoney(dynamic v) {
     final d = double.tryParse((v ?? 0).toString()) ?? 0;
     return '\$${d.toStringAsFixed(2)}';
+  }
+
+  /// `addon_refunded` may come as the refunded amount or as a flag.
+  bool _isAddonRefunded(dynamic v) {
+    if (v is bool) return v;
+    return (num.tryParse('${v ?? ''}') ?? 0) > 0;
   }
 
   String _fmtYmd(DateTime dt) {
@@ -1337,6 +1344,15 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                           TranslationUtils.tr('kyc_intro_screen_locked'),
                           _fmtMoney(inv['pmam_locked_amount']),
                         ),
+                      // addon_name is "" (not null) when no add-on was bought.
+                      if ((inv['addon_name'] ?? '').toString().isNotEmpty) ...[
+                        SizedBox(height: 6.h),
+                        AddonPurchaseLine(
+                          name: inv['addon_name'].toString(),
+                          fee: num.tryParse('${inv['addon_fee'] ?? ''}') ?? 0,
+                          refunded: _isAddonRefunded(inv['addon_refunded']),
+                        ),
+                      ],
                       SizedBox(height: 8.h),
                       // Buttons disable while any PAMM call is in flight so a
                       // double tap can't cancel / unsubscribe twice.

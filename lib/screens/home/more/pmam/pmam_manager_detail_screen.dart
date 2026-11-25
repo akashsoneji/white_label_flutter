@@ -481,7 +481,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      '${TranslationUtils.tr('pmam_manager_detail_screen_min_investment')}: $minInvest',
+                      '${TranslationUtils.tr('pmam_manager_detail_screen_min_investment')} $minInvest',
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.textGrey,

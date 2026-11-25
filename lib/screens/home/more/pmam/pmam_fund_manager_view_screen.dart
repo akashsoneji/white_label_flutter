@@ -540,7 +540,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                             ),
                           SizedBox(height: 6.h),
                           Text(
-                            '${TranslationUtils.tr('pmam_manager_detail_screen_min_investment')}: \$${minInvest.toStringAsFixed(2)}',
+                            '${TranslationUtils.tr('pmam_manager_detail_screen_min_investment')} \$${minInvest.toStringAsFixed(2)}',
                             style: hintStyle,
                           ),
                           SizedBox(height: 20.h),
@@ -1224,7 +1224,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                 Align(
                   alignment: AlignmentDirectional.centerEnd,
                   child: Text(
-                    '${TranslationUtils.tr('pmam_manager_detail_screen_min_investment')}: \$${minInv.toStringAsFixed(0)}',
+                    '${TranslationUtils.tr('pmam_manager_detail_screen_min_investment')} \$${minInv.toStringAsFixed(0)}',
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 9.sp,
                       color: AppColors.textGrey,

@@ -15,6 +15,7 @@ import 'package:crm_app/controllers/copy_trading/copy_trading_master_details_con
 import 'package:crm_app/controllers/copy_trading/copy_trading_hub_controller.dart';
 import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/widgets/addon_purchase_line.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
@@ -904,6 +905,14 @@ class _InvestmentRow extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (item.hasAddon) ...[
+                  SizedBox(height: 10.h),
+                  AddonPurchaseLine(
+                    name: item.addonName,
+                    fee: item.addonFee,
+                    refunded: item.isAddonRefunded,
+                  ),
+                ],
                 SizedBox(height: 12.h),
 
                 // Action buttons

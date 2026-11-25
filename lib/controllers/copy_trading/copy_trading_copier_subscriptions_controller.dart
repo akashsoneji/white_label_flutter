@@ -141,6 +141,12 @@ class CopierSubscriptionItem {
   // subscription itself stays `active`, so `status` alone can't show it.
   final bool planCopyingPaused;
   final bool pausedByMasterInactive;
+  /// Paid add-on bought with this subscription (`addon_purchase`); empty name
+  /// means none.
+  final String addonName;
+  final num addonFee;
+  final String addonStatus;
+  final String addonRefundedAt;
 
   const CopierSubscriptionItem({
     required this.id,
@@ -188,6 +194,10 @@ class CopierSubscriptionItem {
     this.accountBalance = 0,
     this.planCopyingPaused = false,
     this.pausedByMasterInactive = false,
+    this.addonName = '',
+    this.addonFee = 0,
+    this.addonStatus = '',
+    this.addonRefundedAt = '',
   });
 
   factory CopierSubscriptionItem.fromJson(Map<String, dynamic> json) {
@@ -203,6 +213,9 @@ class CopierSubscriptionItem {
       if (v is num) return v;
       return num.tryParse(v.toString()) ?? 0;
     }
+
+    final rawAddon = json['addon_purchase'];
+    final addon = rawAddon is Map ? rawAddon : const {};
 
     return CopierSubscriptionItem(
       id: _i(json['id']),
@@ -250,10 +263,19 @@ class CopierSubscriptionItem {
       accountBalance: _n(json['account_balance']),
       planCopyingPaused: json['plan_copying_paused'] == true,
       pausedByMasterInactive: json['paused_by_master_inactive'] == true,
+      addonName: (addon['option_name'] ?? '').toString(),
+      addonFee: _n(addon['fee']),
+      addonStatus: (addon['status'] ?? '').toString(),
+      addonRefundedAt: (addon['refunded_at'] ?? '').toString(),
     );
   }
 
   bool get isActive => status.toLowerCase() == 'active';
+
+  bool get hasAddon => addonName.isNotEmpty;
+
+  bool get isAddonRefunded =>
+      addonRefundedAt.isNotEmpty || addonStatus.toLowerCase() == 'refunded';
 
   bool get isPausedByMaster => planCopyingPaused || pausedByMasterInactive;
 
