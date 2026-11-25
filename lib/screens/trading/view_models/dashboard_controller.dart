@@ -720,6 +720,7 @@ class DashboardController extends GetxController {
     required String mainPassword,
     required String investorPassword,
     String? leverage,
+    bool termsAccepted = false,
   }) async {
     try {
       print('DashboardController: Creating MT5 account...');
@@ -745,6 +746,8 @@ class DashboardController extends GetxController {
           if (leverage != null && leverage.isNotEmpty) 'leverage': leverage,
         };
       }
+      // Only groups with terms enabled need it; others send nothing new.
+      if (termsAccepted) requestData['terms_accepted'] = true;
 
       print(
         'DashboardController: Making API call to ${ApiConstants.createMT5Account}',

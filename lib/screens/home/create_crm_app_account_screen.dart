@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/screens/home/widgets/group_terms_acceptance.dart';
 import 'package:crm_app/screens/trading/view_models/create_trading_account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/plan_controller.dart';
 import 'package:crm_app/services/language_service.dart';
@@ -30,6 +31,11 @@ class CreateCrmAppAccountScreen extends StatefulWidget {
 class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
   late final CreateTradingAccountController controller;
   String selectedLeverage = '';
+  // Kept in this screen's state, so it starts unticked every time the screen
+  // opens and whenever the client goes back and picks another plan.
+  bool _termsAccepted = false;
+
+  bool get _requiresTerms => widget.plan?.termsEnabled ?? false;
 
   @override
   void initState() {
@@ -229,7 +235,15 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
                 ),
               ),
 
-              // Create Account Button
+              if (_requiresTerms) ...[
+                SizedBox(height: 16.h),
+                GroupTermsAcceptance(
+                  termsText: widget.plan?.termsText,
+                  accepted: _termsAccepted,
+                  onChanged: (v) => setState(() => _termsAccepted = v),
+                ),
+              ],
+              SizedBox(height: 16.h),
             ],
           ),
         ),
@@ -373,18 +387,27 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
     );
   }
 
+  void _submit() {
+    // Sent only for groups with terms; other groups get the same request as before.
+    final termsAccepted = _requiresTerms && _termsAccepted;
+    if (widget.isDemo) {
+      controller.createDemoAccount(termsAccepted: termsAccepted);
+    } else {
+      controller.createAccount(termsAccepted: termsAccepted);
+    }
+  }
+
   Widget _buildCreateAccountButton() {
+    final blockedByTerms = _requiresTerms && !_termsAccepted;
     return Obx(
       () => ElevatedButton(
+        key: const Key('create_account_submit'),
         onPressed:
-            controller.isLoading.value
-                ? null
-                : (widget.isDemo)
-                ? controller.createDemoAccount
-                : controller.createAccount,
+            controller.isLoading.value || blockedByTerms ? null : _submit,
         style: ElevatedButton.styleFrom(
           backgroundColor:
               controller.isLoading.value ? Colors.grey : AppColors.primary,
+          disabledBackgroundColor: Colors.grey,
           foregroundColor: AppColors.whiteColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.r),

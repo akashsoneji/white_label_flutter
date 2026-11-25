@@ -117,7 +117,9 @@ class CreateTradingAccountController extends GetxController {
     investorPassword.value = value;
   }
 
-  Future<void> createAccount() async {
+  /// [termsAccepted] is true only when the chosen group has terms enabled and
+  /// the client ticked the checkbox.
+  Future<void> createAccount({bool termsAccepted = false}) async {
     // Basic validation
     if (depositAmount.value.isEmpty) {
       if (Get.isRegistered<AppNotificationController>()) {
@@ -189,6 +191,7 @@ class CreateTradingAccountController extends GetxController {
         mainPassword: tradingPassword.value,
         investorPassword: investorPassword.value,
         leverage: leverage.value.isNotEmpty ? leverage.value : null,
+        termsAccepted: termsAccepted,
       );
 
       if (accountData != null) {
@@ -228,7 +231,7 @@ class CreateTradingAccountController extends GetxController {
     }
   }
 
-  Future<void> createDemoAccount() async {
+  Future<void> createDemoAccount({bool termsAccepted = false}) async {
     // Basic validation
     if (depositAmount.value.isEmpty) {
       CustomToastService.showError(
@@ -287,6 +290,7 @@ class CreateTradingAccountController extends GetxController {
         mainPassword: tradingPassword.value,
         investorPassword: investorPassword.value,
         leverage: leverage.value.isNotEmpty ? leverage.value : null,
+        termsAccepted: termsAccepted,
       );
 
       if (accountData != null) {
