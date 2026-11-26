@@ -51,6 +51,9 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
   final _fixedRatioLotStepCtrl = TextEditingController();
   final _tpCtrl = TextEditingController();
   final _slCtrl = TextEditingController();
+  final _maxDrawdownCtrl = TextEditingController();
+  final _dailyLossCtrl = TextEditingController();
+  final _equityFloorCtrl = TextEditingController();
 
   final _editLoading = true.obs;
   final _editLoadError = ''.obs;
@@ -135,6 +138,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
       if (sub == null) return;
       sub.applySubscriptionDetail(subJson);
       _syncControllersFromSubscribe(sub);
+      await sub.loadSafetySettings();
 
       await sub.loadEligibleAccounts(showLoading: true);
       final matched = _matchEligibleAccount(sub.eligibleAccounts, item, subJson);
@@ -174,6 +178,94 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     }
     _customMultiplier.value = false;
     _multiplierCtrl.text = '';
+    _maxDrawdownCtrl.text = _numText(sub.maxDrawdownPct.value);
+    _dailyLossCtrl.text = _numText(sub.dailyLossPct.value);
+    _equityFloorCtrl.text = _numText(sub.equityFloor.value);
+  }
+
+  String _numText(double? v) => v == null ? '' : _fmtNum(v);
+
+  /// Empty → null (broker default). Returns false when the text is not a number.
+  bool _readLimit(TextEditingController ctrl, RxnDouble target) {
+    final t = ctrl.text.trim();
+    if (t.isEmpty) {
+      target.value = null;
+      return true;
+    }
+    final v = double.tryParse(t);
+    if (v == null) return false;
+    target.value = v;
+    return true;
+  }
+
+  String _lossLimitFieldName(LossLimitField f) => switch (f) {
+        LossLimitField.maxDrawdown => TranslationUtils.tr('copy_trading_max_drawdown_short'),
+        LossLimitField.dailyLoss => TranslationUtils.tr('copy_trading_daily_loss_short'),
+        LossLimitField.equityFloor => TranslationUtils.tr('copy_trading_equity_floor_short'),
+      };
+
+  /// Same texts as the web Start Copy drawer.
+  String _lossLimitMessage(LossLimitIssue issue) {
+    final field = _lossLimitFieldName(issue.field);
+    switch (issue.problem) {
+      case LossLimitProblem.outOfRange:
+        return issue.field == LossLimitField.equityFloor
+            ? TranslationUtils.tr('copy_trading_equity_floor_invalid')
+            : TranslationUtils.trArgs('copy_trading_loss_limit_pct_range', {'field': field});
+      case LossLimitProblem.aboveMax:
+        return TranslationUtils.trArgs('copy_trading_loss_limit_above_cap', {
+          'field': field,
+          'cap': _fmtNum(issue.limit),
+        });
+      case LossLimitProblem.belowMin:
+        return TranslationUtils.trArgs('copy_trading_equity_floor_at_least', {
+          'min': '\$${issue.limit.toStringAsFixed(2)}',
+        });
+    }
+  }
+
+  /// Reads + checks the loss limit fields; shows the error and returns false
+  /// when one is wrong. [investment] null skips the equity floor minimum.
+  bool _validateLossLimits(CopyTradingSubscribeController sub, {num? investment}) {
+    if (!sub.safety.value.lossLimitsAllowed) return true;
+    final fields = {
+      LossLimitField.maxDrawdown: (_maxDrawdownCtrl, sub.maxDrawdownPct),
+      LossLimitField.dailyLoss: (_dailyLossCtrl, sub.dailyLossPct),
+      LossLimitField.equityFloor: (_equityFloorCtrl, sub.equityFloor),
+    };
+    for (final entry in fields.entries) {
+      if (!_readLimit(entry.value.$1, entry.value.$2)) {
+        sub.errorMessage.value = _lossLimitMessage(LossLimitIssue(entry.key, LossLimitProblem.outOfRange));
+        _showTopError(sub.errorMessage.value);
+        return false;
+      }
+    }
+    final issue = sub.safety.value.validate(
+      maxDrawdownPct: sub.maxDrawdownPct.value,
+      dailyLossPct: sub.dailyLossPct.value,
+      equityFloor: sub.equityFloor.value,
+      investment: investment,
+    );
+    if (issue == null) return true;
+    sub.errorMessage.value = _lossLimitMessage(issue);
+    _showTopError(sub.errorMessage.value);
+    return false;
+  }
+
+  /// Last-step checks the button state already reflects; repeated here so a
+  /// tap that races a reload still gets a clear message.
+  bool _checkTermsAndKyc(CopyTradingSubscribeController sub) {
+    final s = sub.safety.value;
+    String? msg;
+    if (s.kycRequired) {
+      msg = TranslationUtils.tr('copy_trading_kyc_required');
+    } else if (s.termsRequired && !sub.termsAccepted.value) {
+      msg = TranslationUtils.tr('copy_trading_terms_required_error');
+    }
+    if (msg == null) return true;
+    sub.errorMessage.value = msg;
+    _showTopError(msg);
+    return false;
   }
 
   EligibleCopyAccount? _matchEligibleAccount(
@@ -214,6 +306,9 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     _fixedRatioLotStepCtrl.dispose();
     _tpCtrl.dispose();
     _slCtrl.dispose();
+    _maxDrawdownCtrl.dispose();
+    _dailyLossCtrl.dispose();
+    _equityFloorCtrl.dispose();
     final current = controller;
     if (current != null) {
       Get.delete<CopyTradingSubscribeController>(tag: '${widget.masterCode}:${current.planId}', force: true);
@@ -330,6 +425,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
                     isEditMode: _isEditMode,
                     onNext: () {},
                     onSubscribe: _onSubscribePressed,
+                    submitBlocked: controller?.safetyLoading.value ?? false,
                   );
                 }),
               ],
@@ -353,10 +449,17 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
             ),
             Obx(() {
               final loading = (controller?.isLoading.value ?? false) || _editLoading.value;
+              final current = controller;
+              final safety = current?.safety.value ?? CopierSafetySettings.none;
+              final submitBlocked = current != null &&
+                  (current.safetyLoading.value ||
+                      safety.kycRequired ||
+                      (safety.termsRequired && !current.termsAccepted.value));
               return _BottomBar(
                 isLoading: loading,
                 step: _step,
                 isEditMode: _isEditMode,
+                submitBlocked: submitBlocked,
                 onNext: () {
                   final plan = _selectedPlan.value;
                   final sub = controller;
@@ -390,6 +493,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
                   }
                   // Doc 5.1: re-fetch add-ons each time step 2 opens.
                   sub.loadPurchaseOptions();
+                  sub.loadSafetySettings();
                   _step.value = 1;
                 },
                 onSubscribe: _onSubscribePressed,
@@ -422,6 +526,9 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
                           _fixedLotCtrl.text = '';
                           _tpCtrl.text = '';
                           _slCtrl.text = '';
+                          _maxDrawdownCtrl.text = '';
+                          _dailyLossCtrl.text = '';
+                          _equityFloorCtrl.text = '';
                           _multiplierCtrl.text = '';
                           _customMultiplier.value = false;
                           _ensureSubscribeController(p.planId);
@@ -511,6 +618,16 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
                           },
                         ),
                         SizedBox(height: 12.h),
+                        _LossLimitsCard(
+                          controller: sub,
+                          maxDrawdownCtrl: _maxDrawdownCtrl,
+                          dailyLossCtrl: _dailyLossCtrl,
+                          equityFloorCtrl: _equityFloorCtrl,
+                          investmentCtrl: isEditMode ? null : _investmentCtrl,
+                          fixedInvestment: isEditMode ? widget.editSubscription?.capitalAmount : null,
+                        ),
+                        SizedBox(height: 12.h),
+                        if (!isEditMode) _TermsAndKycCard(controller: sub),
                         Obx(() {
                           final err = sub.errorMessage.value;
                           if (err.isEmpty) return const SizedBox.shrink();
@@ -663,6 +780,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     }
 
     if (_isEditMode) {
+      if (!_validateLossLimits(sub)) return;
       final item = widget.editSubscription!;
       final res = await sub.updateSubscription(subscriptionId: item.id);
       if (res.success) {
@@ -690,6 +808,10 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
       return;
     }
 
+    final investmentAmount = num.tryParse(_investmentCtrl.text.trim()) ?? 0;
+    if (!_validateLossLimits(sub, investment: investmentAmount)) return;
+    if (!_checkTermsAndKyc(sub)) return;
+
     final shortage = sub.addonShortage;
     if (shortage > 0) {
       sub.errorMessage.value = TranslationUtils.trArgs(
@@ -700,8 +822,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
       return;
     }
 
-    final investment = num.tryParse(_investmentCtrl.text.trim()) ?? 0;
-    final res = await sub.subscribe(investmentAmount: investment);
+    final res = await sub.subscribe(investmentAmount: investmentAmount);
     if (res.success) {
       var message = res.message ??
           TranslationUtils.tr('copy_trading_successfully_subscribed');
@@ -732,6 +853,249 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
       // price-changed / unavailable message).
       _showTopError(sub.errorMessage.value);
     }
+  }
+}
+
+/// `20.0` → `20`, `2.5` → `2.5`.
+String _fmtNum(num v) => v == v.roundToDouble() ? v.toInt().toString() : v.toString();
+
+/// Copier loss limits (TSK-0216). Inputs only when the broker allows the
+/// client to set them; otherwise the broker limits as read-only text.
+class _LossLimitsCard extends StatelessWidget {
+  final CopyTradingSubscribeController controller;
+  final TextEditingController maxDrawdownCtrl;
+  final TextEditingController dailyLossCtrl;
+  final TextEditingController equityFloorCtrl;
+
+  /// Start Copy: the live investment field (equity floor is a % of it).
+  final TextEditingController? investmentCtrl;
+
+  /// Edit: the subscription's capital.
+  final num? fixedInvestment;
+
+  const _LossLimitsCard({
+    required this.controller,
+    required this.maxDrawdownCtrl,
+    required this.dailyLossCtrl,
+    required this.equityFloorCtrl,
+    this.investmentCtrl,
+    this.fixedInvestment,
+  });
+
+  String _pct(double v) => v > 0 ? '${_fmtNum(v)}%' : TranslationUtils.tr('copy_trading_none');
+
+  String _usd(double v) => v > 0 ? '\$${v.toStringAsFixed(2)}' : TranslationUtils.tr('copy_trading_none');
+
+  /// "Broker default: 20% · Max 50%" (web: loss_limit_default_value + loss_limit_cap).
+  String _hint(String def, String? extra) {
+    final base = TranslationUtils.trArgs('copy_trading_broker_default', {'value': def});
+    return extra == null ? base : '$base · $extra';
+  }
+
+  String? _capText(double cap) =>
+      cap > 0 ? TranslationUtils.trArgs('copy_trading_loss_limit_cap', {'cap': _fmtNum(cap)}) : null;
+
+  Widget _field(String label, TextEditingController ctrl, String hint, {bool usd = false}) {
+    return Padding(
+      padding: EdgeInsets.only(top: 10.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LabeledAppTextField(
+            label: label,
+            controller: ctrl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            hintText: TranslationUtils.tr('copy_trading_optional'),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+              const SingleDecimalTextFormatter(),
+            ],
+            prefixIcon: usd
+                ? Padding(padding: EdgeInsets.zero, child: Text(r'$', style: AppTextStyles.input))
+                : null,
+          ),
+          SizedBox(height: 4.h),
+          Text(hint, style: AppTextStyles.caption),
+        ],
+      ),
+    );
+  }
+
+  Widget _content(num investment) {
+    return Obx(() {
+      final s = controller.safety.value;
+      final title = Text(
+        TranslationUtils.tr('copy_trading_loss_limits'),
+        style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+      );
+      if (controller.safetyLoading.value) {
+        return _Card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              title,
+              Padding(
+                padding: EdgeInsets.all(12.r),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+            ],
+          ),
+        );
+      }
+      if (controller.safetyError.value.isNotEmpty) {
+        return _Card(
+          child: _InlineError(
+            message: controller.safetyError.value,
+            onRetry: controller.loadSafetySettings,
+          ),
+        );
+      }
+      final floorDefault = investment > 0 && s.defaultEquityFloorPct > 0
+          ? _usd(s.equityFloorDefaultUsd(investment))
+          : _pct(s.defaultEquityFloorPct);
+      final floorMin = s.equityFloorPctMin > 0
+          ? TranslationUtils.trArgs('copy_trading_loss_limit_floor_min', {
+              'min': _usd(s.equityFloorMinUsd(investment)),
+              'pct': _fmtNum(s.equityFloorPctMin),
+            })
+          : null;
+      final note = Text(TranslationUtils.tr('copy_trading_loss_limits_note'), style: AppTextStyles.caption);
+
+      if (!s.lossLimitsAllowed) {
+        return _Card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              title,
+              SizedBox(height: 8.h),
+              Text(TranslationUtils.tr('copy_trading_loss_limits_set_by_broker'), style: AppTextStyles.cardSubtitle),
+              SizedBox(height: 6.h),
+              Text(
+                TranslationUtils.trArgs('copy_trading_broker_limits', {
+                  'dd': _pct(s.defaultMaxDrawdownPct),
+                  'daily': _pct(s.defaultDailyLossPct),
+                  'floor': floorDefault,
+                }),
+                style: AppTextStyles.caption,
+              ),
+              SizedBox(height: 6.h),
+              note,
+            ],
+          ),
+        );
+      }
+      return _Card(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            title,
+            _field(
+              TranslationUtils.tr('copy_trading_max_drawdown_pct'),
+              maxDrawdownCtrl,
+              _hint(_pct(s.defaultMaxDrawdownPct), _capText(s.maxDrawdownPctMax)),
+            ),
+            _field(
+              TranslationUtils.tr('copy_trading_daily_loss_pct'),
+              dailyLossCtrl,
+              _hint(_pct(s.defaultDailyLossPct), _capText(s.dailyLossPctMax)),
+            ),
+            _field(
+              TranslationUtils.tr('copy_trading_equity_floor_usd'),
+              equityFloorCtrl,
+              _hint(floorDefault, floorMin),
+              usd: true,
+            ),
+            SizedBox(height: 10.h),
+            note,
+          ],
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ctrl = investmentCtrl;
+    if (ctrl == null) return _content(fixedInvestment ?? 0);
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: ctrl,
+      builder: (_, value, __) => _content(num.tryParse(value.text.trim()) ?? 0),
+    );
+  }
+}
+
+/// Terms + risk checkbox (when the broker requires it) and the KYC block.
+/// Subscribe stays disabled until both are satisfied.
+class _TermsAndKycCard extends StatelessWidget {
+  final CopyTradingSubscribeController controller;
+  const _TermsAndKycCard({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final s = controller.safety.value;
+      if (controller.safetyLoading.value || (!s.termsRequired && !s.kycRequired)) {
+        return const SizedBox.shrink();
+      }
+      return Padding(
+        padding: EdgeInsets.only(bottom: 12.h),
+        child: _Card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (s.kycRequired) ...[
+                Text(TranslationUtils.tr('copy_trading_kyc_required'), style: AppTextStyles.error),
+                TextButton(
+                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                  onPressed: () async {
+                    await Get.toNamed(AppPages.KYC_VERIFICATION);
+                    controller.loadSafetySettings();
+                  },
+                  child: Text(
+                    TranslationUtils.tr('copy_trading_complete_kyc'),
+                    style: AppTextStyles.bodyText.copyWith(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ],
+              if (s.termsRequired) ...[
+                InkWell(
+                  onTap: () => controller.termsAccepted.toggle(),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 24.r,
+                        height: 24.r,
+                        child: Checkbox(
+                          value: controller.termsAccepted.value,
+                          activeColor: AppColors.brandPrimary,
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          onChanged: (v) => controller.termsAccepted.value = v ?? false,
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 3.h),
+                          child: Text(
+                            TranslationUtils.tr('copy_trading_terms_accept'),
+                            style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textPrimary),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    });
   }
 }
 
@@ -1985,12 +2349,17 @@ class _BottomBar extends StatelessWidget {
   final bool isEditMode;
   final VoidCallback onNext;
   final Future<void> Function() onSubscribe;
+
+  /// Disables Subscribe / Save on the last step (terms not ticked, KYC
+  /// missing, safety settings still loading).
+  final bool submitBlocked;
   const _BottomBar({
     required this.isLoading,
     required this.step,
     required this.isEditMode,
     required this.onNext,
     required this.onSubscribe,
+    this.submitBlocked = false,
   });
 
   @override
@@ -2038,7 +2407,7 @@ class _BottomBar extends StatelessWidget {
                 child: SizedBox(
                   height: 44.h,
                   child: ElevatedButton(
-                    onPressed: loading
+                    onPressed: loading || (s == 1 && submitBlocked)
                         ? null
                         : () async {
                             if (s == 0) {

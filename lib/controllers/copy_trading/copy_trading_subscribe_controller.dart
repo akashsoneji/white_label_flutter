@@ -38,6 +38,113 @@ class EligibleCopyAccount {
   }
 }
 
+enum LossLimitField { maxDrawdown, dailyLoss, equityFloor }
+
+/// outOfRange: % not in (0, 100], or a negative equity floor.
+enum LossLimitProblem { outOfRange, aboveMax, belowMin }
+
+/// A loss-limit value the app refuses before calling subscribe/update.
+/// [limit] is the cap (%) for [LossLimitProblem.aboveMax] and the minimum
+/// (USD) for [LossLimitProblem.belowMin].
+class LossLimitIssue {
+  final LossLimitField field;
+  final LossLimitProblem problem;
+  final double limit;
+  const LossLimitIssue(this.field, this.problem, [this.limit = 0]);
+}
+
+/// `GET copier/safety-settings`. Every number is a float; 0 means "none".
+class CopierSafetySettings {
+  final bool lossLimitsAllowed;
+  final double defaultMaxDrawdownPct;
+  final double defaultDailyLossPct;
+  final double defaultEquityFloorPct;
+  final double maxDrawdownPctMax;
+  final double dailyLossPctMax;
+  final double equityFloorPctMin;
+  final bool termsRequired;
+  final bool kycRequired;
+
+  const CopierSafetySettings({
+    this.lossLimitsAllowed = false,
+    this.defaultMaxDrawdownPct = 0,
+    this.defaultDailyLossPct = 0,
+    this.defaultEquityFloorPct = 0,
+    this.maxDrawdownPctMax = 0,
+    this.dailyLossPctMax = 0,
+    this.equityFloorPctMin = 0,
+    this.termsRequired = false,
+    this.kycRequired = false,
+  });
+
+  static const none = CopierSafetySettings();
+
+  factory CopierSafetySettings.fromJson(Map<String, dynamic> json) {
+    double n(dynamic v) => v is num ? v.toDouble() : double.tryParse('${v ?? ''}') ?? 0;
+    Map<String, dynamic> m(dynamic v) => v is Map ? v.cast<String, dynamic>() : const {};
+    final defaults = m(json['defaults']);
+    final caps = m(json['caps']);
+    return CopierSafetySettings(
+      lossLimitsAllowed: json['loss_limits_allowed'] == true,
+      defaultMaxDrawdownPct: n(defaults['max_drawdown_pct']),
+      defaultDailyLossPct: n(defaults['daily_loss_pct']),
+      defaultEquityFloorPct: n(defaults['equity_floor_pct']),
+      maxDrawdownPctMax: n(caps['max_drawdown_pct_max']),
+      dailyLossPctMax: n(caps['daily_loss_pct_max']),
+      equityFloorPctMin: n(caps['equity_floor_pct_min']),
+      termsRequired: json['terms_required'] == true,
+      kycRequired: json['kyc_required'] == true,
+    );
+  }
+
+  double _pctOf(double pct, num investment) =>
+      double.parse((investment * pct / 100).toStringAsFixed(2));
+
+  /// Minimum equity floor in USD for [investment]; 0 = no minimum.
+  double equityFloorMinUsd(num investment) => _pctOf(equityFloorPctMin, investment);
+
+  /// Broker default equity floor in USD for [investment]; 0 = none.
+  double equityFloorDefaultUsd(num investment) => _pctOf(defaultEquityFloorPct, investment);
+
+  /// Same checks the web drawer makes before sending. A null value means
+  /// "broker default" and is always valid. Pass [investment] null to skip the
+  /// equity floor minimum (edit: the server checks it against the
+  /// subscription's own baseline equity, which the app does not have).
+  LossLimitIssue? validate({
+    double? maxDrawdownPct,
+    double? dailyLossPct,
+    double? equityFloor,
+    num? investment,
+  }) {
+    if (maxDrawdownPct != null) {
+      if (maxDrawdownPct <= 0 || maxDrawdownPct > 100) {
+        return const LossLimitIssue(LossLimitField.maxDrawdown, LossLimitProblem.outOfRange);
+      }
+      if (maxDrawdownPctMax > 0 && maxDrawdownPct > maxDrawdownPctMax) {
+        return LossLimitIssue(LossLimitField.maxDrawdown, LossLimitProblem.aboveMax, maxDrawdownPctMax);
+      }
+    }
+    if (dailyLossPct != null) {
+      if (dailyLossPct <= 0 || dailyLossPct > 100) {
+        return const LossLimitIssue(LossLimitField.dailyLoss, LossLimitProblem.outOfRange);
+      }
+      if (dailyLossPctMax > 0 && dailyLossPct > dailyLossPctMax) {
+        return LossLimitIssue(LossLimitField.dailyLoss, LossLimitProblem.aboveMax, dailyLossPctMax);
+      }
+    }
+    if (equityFloor != null) {
+      if (equityFloor < 0) {
+        return const LossLimitIssue(LossLimitField.equityFloor, LossLimitProblem.outOfRange);
+      }
+      final min = investment == null ? 0.0 : equityFloorMinUsd(investment);
+      if (min > 0 && equityFloor < min) {
+        return LossLimitIssue(LossLimitField.equityFloor, LossLimitProblem.belowMin, min);
+      }
+    }
+    return null;
+  }
+}
+
 class CopyTradingSubscribeController extends GetxController {
   final String masterCode;
   final int planId;
@@ -112,6 +219,69 @@ class CopyTradingSubscribeController extends GetxController {
 
   /// `data.purchase` of the last successful subscribe; null when no add-on.
   Map<String, dynamic>? lastPurchase;
+
+  final Rx<CopierSafetySettings> safety = CopierSafetySettings.none.obs;
+  final RxBool safetyLoading = false.obs;
+  final RxString safetyError = ''.obs;
+  final RxBool termsAccepted = false.obs;
+
+  /// The client's own loss limits; null = broker default (empty field).
+  /// Equity floor is in USD.
+  final RxnDouble maxDrawdownPct = RxnDouble();
+  final RxnDouble dailyLossPct = RxnDouble();
+  final RxnDouble equityFloor = RxnDouble();
+
+  /// `safety.effective` of the subscription being edited (null = no limit).
+  Map<String, dynamic>? effectiveLimits;
+
+  /// Called when the Start Copy last step or the Edit screen opens: the
+  /// broker can change limits, terms and KYC rules at any time.
+  Future<void> loadSafetySettings() async {
+    safetyLoading.value = true;
+    safetyError.value = '';
+    try {
+      final res = await ApiService.get(
+        endpoint: ApiConstants.copyTradingCopierSafetySettings,
+        queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch.toString()},
+      );
+      final data = res.data is Map ? (res.data as Map)['data'] : null;
+      if (res.success && data is Map) {
+        safety.value = CopierSafetySettings.fromJson(data.cast<String, dynamic>());
+      } else {
+        safetyError.value =
+            res.message ?? TranslationUtils.tr('copy_trading_loss_limits_load_failed');
+      }
+    } catch (e) {
+      safetyError.value = '${TranslationUtils.tr('copy_trading_loss_limits_load_failed')}: $e';
+    } finally {
+      safetyLoading.value = false;
+    }
+  }
+
+  /// Subscribe: only the limits the client typed (left out = broker default).
+  /// Nothing when the broker sets the limits, or the server rejects the call.
+  Map<String, dynamic> lossLimitSubscribeFields() {
+    final out = <String, dynamic>{};
+    final s = safety.value;
+    if (s.lossLimitsAllowed) {
+      if (maxDrawdownPct.value != null) out['max_drawdown_pct'] = maxDrawdownPct.value;
+      if (dailyLossPct.value != null) out['daily_loss_pct'] = dailyLossPct.value;
+      if (equityFloor.value != null) out['equity_floor'] = equityFloor.value;
+    }
+    if (s.termsRequired) out['terms_accepted'] = termsAccepted.value;
+    return out;
+  }
+
+  /// Update: a left-out key keeps the saved limit, so all 3 keys are sent and
+  /// null clears a limit back to the broker default.
+  Map<String, dynamic> lossLimitUpdateFields() {
+    if (!safety.value.lossLimitsAllowed) return const {};
+    return <String, dynamic>{
+      'max_drawdown_pct': maxDrawdownPct.value,
+      'daily_loss_pct': dailyLossPct.value,
+      'equity_floor': equityFloor.value,
+    };
+  }
 
   PmamPurchaseOption? get selectedAddon =>
       addons.value.options.firstWhereOrNull((o) => o.id == selectedAddonId.value);
@@ -264,6 +434,8 @@ class CopyTradingSubscribeController extends GetxController {
         payload['purchase_option_fee'] = addon.feeInUsd;
       }
 
+      payload.addAll(lossLimitSubscribeFields());
+
       payload['overrides_sl_tp'] = overridesSlTp.value;
       if (overridesSlTp.value) {
         payload['sl_tp_mode'] = slTpMode.value;
@@ -406,6 +578,7 @@ class CopyTradingSubscribeController extends GetxController {
       'stop_loss_pips': slPips,
       'take_profit_dollar': tpUsd,
       'stop_loss_dollar': slUsd,
+      ...lossLimitUpdateFields(),
     };
   }
 
@@ -495,6 +668,18 @@ class CopyTradingSubscribeController extends GetxController {
     if (tpd != null && tpd > 0) takeProfitDollar.value = tpd.toDouble();
     final sld = n(json['stop_loss_dollar']);
     if (sld != null && sld > 0) stopLossDollar.value = sld.toDouble();
+
+    final safetyJson = json['safety'];
+    if (safetyJson is Map) {
+      final own = safetyJson['own'];
+      if (own is Map) {
+        maxDrawdownPct.value = n(own['max_drawdown_pct'])?.toDouble();
+        dailyLossPct.value = n(own['daily_loss_pct'])?.toDouble();
+        equityFloor.value = n(own['equity_floor'])?.toDouble();
+      }
+      final effective = safetyJson['effective'];
+      effectiveLimits = effective is Map ? effective.cast<String, dynamic>() : null;
+    }
   }
 }
 
