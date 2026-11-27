@@ -1,6 +1,7 @@
 import 'package:crm_app/screens/home/widgets/bonus_code_field.dart';
 import 'package:crm_app/screens/trading/view_models/plan_controller.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/widgets/congratulations_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -44,16 +45,29 @@ void main() {
     });
   });
 
-  group('BonusCodeField', () {
-    testWidgets('keeps at most 8 allowed characters', (tester) async {
+  group('BonusCodeField (TSK-0224)', () {
+    testWidgets('keeps the case and characters, drops only spaces', (tester) async {
       final controller = TextEditingController();
       addTearDown(controller.dispose);
       await _pump(tester, controller: controller);
 
-      await tester.enterText(find.byType(TextField), 'WEL COME!12_-3');
+      await tester.enterText(find.byType(TextField), 'Wel come!12_-3');
       await tester.pump();
 
-      expect(controller.text, 'WELCOME1');
+      expect(controller.text, 'Welcome!12_-3');
+      final field = tester.widget<TextField>(find.byType(TextField));
+      expect(field.textCapitalization, TextCapitalization.none);
+    });
+
+    testWidgets('allows up to 64 characters', (tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      await _pump(tester, controller: controller);
+
+      await tester.enterText(find.byType(TextField), 'A' * 70);
+      await tester.pump();
+
+      expect(controller.text.length, 64);
     });
 
     testWidgets('shows the server error under the field', (tester) async {
@@ -76,6 +90,64 @@ void main() {
       final field = tester.widget<TextField>(find.byType(TextField));
       expect(field.autocorrect, isFalse);
       expect(field.enableSuggestions, isFalse);
+    });
+  });
+
+  group('BonusCodeOutcome.fromBlock (TSK-0224)', () {
+    test('credited true is credited', () {
+      expect(
+        BonusCodeOutcome.fromBlock({'credited': true, 'amount': 50}),
+        BonusCodeOutcome.credited,
+      );
+    });
+
+    test('not credited with an amount is pending review', () {
+      expect(
+        BonusCodeOutcome.fromBlock({'credited': false, 'amount': 50}),
+        BonusCodeOutcome.pending,
+      );
+    });
+
+    test('not credited without an amount is not applied', () {
+      expect(
+        BonusCodeOutcome.fromBlock({'credited': false, 'amount': null}),
+        BonusCodeOutcome.notApplied,
+      );
+    });
+  });
+
+  group('CongratulationsDialog bonus note (TSK-0224)', () {
+    Future<void> pumpDialog(WidgetTester tester, {String? message}) {
+      return tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(375, 812),
+          builder: (_, __) => GetMaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: CongratulationsDialog(
+                  accountNumber: '2000231',
+                  serverName: 'Standard',
+                  bonusMessage: message,
+                  bonusOutcome: message == null ? null : BonusCodeOutcome.credited,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('shows the server message when a code was sent', (tester) async {
+      await pumpDialog(tester, message: 'Bonus of \$50.00 credited to your account.');
+
+      expect(find.byKey(const Key('congratulations_bonus_code_note')), findsOneWidget);
+      expect(find.text('Bonus of \$50.00 credited to your account.'), findsOneWidget);
+    });
+
+    testWidgets('no note without a bonus_code block', (tester) async {
+      await pumpDialog(tester);
+
+      expect(find.byKey(const Key('congratulations_bonus_code_note')), findsNothing);
     });
   });
 }
