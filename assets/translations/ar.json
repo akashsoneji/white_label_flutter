@@ -1050,6 +1050,7 @@
   "kyc_account_holder_name": "اسم صاحب الحساب *",
   "kyc_add_bank_title": "إضافة بنك",
   "kyc_add_proof": "إضافة إثبات *",
+  "kyc_add_proof_optional": "إضافة إثبات (اختياري)",
   "kyc_address_holder_name": "اسم صاحب العنوان *",
   "kyc_address_proof": "إثبات العنوان",
   "kyc_address_proof_back": "إثبات العنوان (خلفي)",

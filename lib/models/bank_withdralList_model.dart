@@ -22,23 +22,73 @@ class BankWithdrawleList {
   }
 }
 
+/// How the proof upload behaves for one withdrawal method.
+enum ProofUploadMode { hidden, optional, required }
+
+/// Rules shared with the web portal (SettingsBankAccounts.vue):
+/// - card never takes a document;
+/// - [requireProofImageByMethod] decides whether the upload is shown; a method
+///   missing from the map is hidden, while a server that sends no map at all
+///   keeps the old "always shown" behaviour;
+/// - when shown, [proofDocumentRequired] (Admin > Settings > Financial Rules)
+///   makes it required (true) or optional (false).
+ProofUploadMode resolveProofUploadMode({
+  required String method,
+  required Map<String, bool>? requireProofImageByMethod,
+  required bool proofDocumentRequired,
+}) {
+  final key = method.toLowerCase();
+  if (key.isEmpty || key == 'card') return ProofUploadMode.hidden;
+  final isShown =
+      requireProofImageByMethod == null || requireProofImageByMethod[key] == true;
+  if (!isShown) return ProofUploadMode.hidden;
+  return proofDocumentRequired
+      ? ProofUploadMode.required
+      : ProofUploadMode.optional;
+}
+
+/// Multipart field POST user/withdrawal expects the proof file in.
+String? proofFieldNameFor(String method) {
+  switch (method.toLowerCase()) {
+    case 'bank':
+      return 'bank_proof_img';
+    case 'upi':
+      return 'upi_proof_img';
+    case 'crypto':
+      return 'crypto_proof_img';
+    case 'local':
+      return 'local_proof_img';
+    default:
+      return null;
+  }
+}
+
 class Data {
   List<WithdrawalMethods>? withdrawalMethods;
   List<Currencies>? currencies;
   List<AllowedCryptoNetwork>? allowedCryptoNetworks;
   Map<String, bool>? requireProofImageByMethod;
 
+  /// Broker switch for a compulsory proof document. Servers without
+  /// TSK-0049 don't send the key; treat that as ON to keep the old behaviour.
+  bool proofDocumentRequired = true;
+
   Data({
     this.withdrawalMethods,
     this.currencies,
     this.allowedCryptoNetworks,
     this.requireProofImageByMethod,
+    this.proofDocumentRequired = true,
   });
 
   Data.fromJson(Map<String, dynamic> json) {
     if (json['require_proof_image_by_method'] is Map) {
       requireProofImageByMethod = (json['require_proof_image_by_method'] as Map)
-          .map((k, v) => MapEntry(k.toString(), v == true));
+          .map((k, v) => MapEntry(k.toString().toLowerCase(), _isTrue(v)));
+    }
+    if (json.containsKey('proof_document_required') &&
+        json['proof_document_required'] != null) {
+      proofDocumentRequired = _isTrue(json['proof_document_required']);
     }
     if (json['withdrawalMethods'] != null) {
       withdrawalMethods = <WithdrawalMethods>[];
@@ -73,8 +123,15 @@ class Data {
       data['allowed_crypto_networks'] =
           this.allowedCryptoNetworks!.map((v) => v.toJson()).toList();
     }
+    if (this.requireProofImageByMethod != null) {
+      data['require_proof_image_by_method'] = this.requireProofImageByMethod;
+    }
+    data['proof_document_required'] = this.proofDocumentRequired;
     return data;
   }
+
+  static bool _isTrue(dynamic value) =>
+      value == true || value == 1 || value == '1' || value == 'true';
 }
 
 class AllowedCryptoNetwork {

@@ -220,7 +220,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
 
                                     // Proof upload section — only when the
                                     // API requires proof for this method.
-                                    if (controller.isProofRequired)
+                                    if (controller.isProofShown)
                                       _buildProofUploadSection(),
 
                                     // OTP section
@@ -328,7 +328,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
 
                                     // Proof upload section — only when the
                                     // API requires proof for this method.
-                                    if (controller.isProofRequired)
+                                    if (controller.isProofShown)
                                       _buildProofUploadSection(),
 
                                     // OTP section
@@ -564,6 +564,9 @@ class _KycBankScreenState extends State<KycBankScreen> {
         return _buildCryptoFields();
       case 'upi':
         return _buildUpiFields();
+      case 'local':
+        // Local only needs the holder name shown above.
+        return [];
       default:
         return [
           Container(
@@ -656,7 +659,11 @@ class _KycBankScreenState extends State<KycBankScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          languageService.tr('kyc_add_proof'),
+          languageService.tr(
+            controller.isProofRequired
+                ? 'kyc_add_proof'
+                : 'kyc_add_proof_optional',
+          ),
           style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, fontWeight: FontWeight.w500),
         ),
         SizedBox(height: 8.h),

@@ -1050,6 +1050,7 @@
   "kyc_account_holder_name": "Account Holder Name *",
   "kyc_add_bank_title": "Add Bank",
   "kyc_add_proof": "Add Proof *",
+  "kyc_add_proof_optional": "Add Proof (Optional)",
   "kyc_address_holder_name": "Address Holder Name *",
   "kyc_address_proof": "Address Proof",
   "kyc_address_proof_back": "Address Proof Back",

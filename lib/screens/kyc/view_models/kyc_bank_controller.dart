@@ -45,9 +45,13 @@ class KycBankController extends GetxController {
       <WithdrawalMethods>[].obs;
   final RxList<AllowedCryptoNetwork> allowedCryptoNetworks =
       <AllowedCryptoNetwork>[].obs;
-  // Per-method proof-image requirement from the API, e.g.
+  // Per-method proof-image visibility from the API, e.g.
   // {bank: true, crypto: false, local: true, upi: true}.
   final RxMap<String, bool> requireProofImageByMethod = <String, bool>{}.obs;
+  // False while the server has not sent require_proof_image_by_method.
+  final RxBool hasProofImageMap = false.obs;
+  // Broker switch (Financial Rules): shown upload is required vs optional.
+  final RxBool proofDocumentRequired = true.obs;
 
   // Methods from GET user/withdrawal, shown in the account-type sheet.
   final RxList<WithdrawalMethod> withdrawalMethods = <WithdrawalMethod>[].obs;
@@ -184,8 +188,11 @@ class KycBankController extends GetxController {
             currencyListModel.data?.withdrawalMethods ?? [];
         allowedCryptoNetworks.value =
             currencyListModel.data?.allowedCryptoNetworks ?? [];
-        requireProofImageByMethod.value =
-            currencyListModel.data?.requireProofImageByMethod ?? {};
+        final proofMap = currencyListModel.data?.requireProofImageByMethod;
+        requireProofImageByMethod.value = proofMap ?? {};
+        hasProofImageMap.value = proofMap != null;
+        proofDocumentRequired.value =
+            currencyListModel.data?.proofDocumentRequired ?? true;
         _applyAccountTypesFromApi();
         _applySelectedMethodNetworks();
         print('💰 Found ${bankWithdrawalList.length} withdrawal methods');
@@ -388,13 +395,18 @@ class KycBankController extends GetxController {
     }
   }
 
-  /// Whether the currently selected account type needs a proof image,
-  /// driven by the API's require_proof_image_by_method map. Defaults to true
-  /// when the method isn't listed (safer to require than to silently skip).
-  bool get isProofRequired {
-    final key = selectedAccountType.value.toLowerCase();
-    return requireProofImageByMethod[key] ?? true;
-  }
+  /// Proof upload state for the selected method (hidden / optional / required).
+  ProofUploadMode get proofUploadMode => resolveProofUploadMode(
+    method: selectedAccountType.value,
+    requireProofImageByMethod: hasProofImageMap.value
+        ? Map<String, bool>.from(requireProofImageByMethod)
+        : null,
+    proofDocumentRequired: proofDocumentRequired.value,
+  );
+
+  bool get isProofShown => proofUploadMode != ProofUploadMode.hidden;
+
+  bool get isProofRequired => proofUploadMode == ProofUploadMode.required;
 
   // Set account type
   void setAccountType(String accountType) {
@@ -538,7 +550,9 @@ class KycBankController extends GetxController {
 
       // Use multipart upload for file submission
       ApiResponse response;
-      if (proofFile.value != null) {
+      final canSendProof = isProofShown &&
+          proofFieldNameFor(selectedAccountType.value) != null;
+      if (proofFile.value != null && canSendProof) {
         response = await _uploadWithdrawalWithFile(token!);
       } else {
         // Fallback to regular POST if no file
@@ -752,8 +766,7 @@ class KycBankController extends GetxController {
         }
         return false;
       }
-    } else {
-      // UPI case
+    } else if (selectedAccountType.value.toLowerCase() == "upi") {
       if (upiAddress.value.isEmpty) {
         errorMessage.value = TranslationUtils.tr(
           'kyc_bank_controller_please_enter_upi_address',
@@ -812,6 +825,8 @@ class KycBankController extends GetxController {
         "crypto_address": cryptoAddress.value,
         "crypto_network": selectedCryptoNetwork.value,
       });
+    } else if (selectedAccountType.value.toLowerCase() == "local") {
+      params.addAll({"local_holder_name": accountHolderName.value});
     } else {
       // UPI case
       params.addAll({
@@ -837,37 +852,14 @@ class KycBankController extends GetxController {
     final params = _buildOtpRequestParams();
     params.addAll({'otp': otp.value});
 
-    // Add proof image with method-specific field name
-    String proofFieldName = _getProofFieldName();
-    if (proofFile.value != null) {
-      params[proofFieldName] = proofFile.value!.path;
-    }
-
     return params;
-  }
-
-  // Get the correct proof field name based on withdrawal method
-  String _getProofFieldName() {
-    switch (selectedAccountType.value.toLowerCase()) {
-      case 'bank':
-        return 'bank_proof_img';
-      case 'upi':
-        return 'upi_proof_img';
-      case 'crypto':
-        return 'crypto_proof_img';
-      default:
-        return 'deposit_proof';
-    }
   }
 
   // Upload withdrawal request with file using multipart
   Future<ApiResponse> _uploadWithdrawalWithFile(String token) async {
     try {
       final params = _buildWithdrawalRequestParams();
-      final proofFieldName = _getProofFieldName();
-
-      // Remove the proof file path from params as it will be handled by multipart
-      params.remove(proofFieldName);
+      final proofFieldName = proofFieldNameFor(selectedAccountType.value)!;
 
       final headers = {
         'Accept': 'application/json',

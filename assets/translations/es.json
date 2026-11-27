@@ -1050,6 +1050,7 @@
   "kyc_account_holder_name": "Nombre del titular de la cuenta *",
   "kyc_add_bank_title": "Agregar banco",
   "kyc_add_proof": "Agregar comprobante *",
+  "kyc_add_proof_optional": "Agregar comprobante (opcional)",
   "kyc_address_holder_name": "Nombre del titular de la dirección *",
   "kyc_address_proof": "Comprobante de domicilio",
   "kyc_address_proof_back": "Comprobante de domicilio (reverso)",

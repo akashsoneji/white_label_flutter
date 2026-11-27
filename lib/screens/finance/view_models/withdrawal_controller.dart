@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/models/bank_withdralList_model.dart'
-    show AllowedCryptoNetwork;
+    show AllowedCryptoNetwork, proofFieldNameFor;
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/core/network/api_response.dart';
 import 'package:crm_app/services/crm_settings_service.dart';
@@ -988,10 +988,11 @@ class WithdrawalController extends GetxController {
 
       // Use the same approach as KYC controller - always use multipart/form-data
       ApiResponse response;
-      if (withdrawalMethod.toLowerCase() == 'local' ||
+      final proofFieldName = proofFieldNameFor(withdrawalMethod);
+      if (proofFieldName == null ||
           proofImagePath == null ||
           proofImagePath.isEmpty) {
-        // For local method, use postForm (multipart without file)
+        // No document (or card): multipart without file
         response = await _repo.postWithdrawalRequestForm(
           token: token ?? '',
           formData: requestParams,
@@ -1003,7 +1004,7 @@ class WithdrawalController extends GetxController {
           token: token,
           file: File(proofImagePath),
           formData: requestParams,
-          fileFieldName: _getFileFieldName(withdrawalMethod),
+          fileFieldName: proofFieldName,
         );
       }
 
@@ -1074,11 +1075,6 @@ class WithdrawalController extends GetxController {
     }
   }
 
-  // Helper method to get the correct file field name based on withdrawal method
-  String _getFileFieldName(String withdrawalMethod) {
-    // Use the same field name as KYC controller
-    return 'deposit_proof';
-  }
 
   // Build withdrawal method request parameters - Based on KYC controller logic
   Map<String, dynamic> _buildWithdrawalMethodParams({
@@ -1145,11 +1141,6 @@ class WithdrawalController extends GetxController {
           '',
       "otp": otp,
     });
-
-    // Add proof file path if provided
-    if (proofImagePath != null && proofImagePath.isNotEmpty) {
-      params['deposit_proof'] = proofImagePath;
-    }
 
     return params;
   }

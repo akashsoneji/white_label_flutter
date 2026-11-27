@@ -1050,6 +1050,7 @@
   "kyc_account_holder_name": "账户持有人姓名 *",
   "kyc_add_bank_title": "添加银行",
   "kyc_add_proof": "添加证明 *",
+  "kyc_add_proof_optional": "添加证明（可选）",
   "kyc_address_holder_name": "地址持有人姓名 *",
   "kyc_address_proof": "地址证明",
   "kyc_address_proof_back": "地址证明背面",

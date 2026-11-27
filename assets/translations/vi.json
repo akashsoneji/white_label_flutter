@@ -1050,6 +1050,7 @@
   "kyc_account_holder_name": "Tên chủ tài khoản *",
   "kyc_add_bank_title": "Thêm ngân hàng",
   "kyc_add_proof": "Thêm chứng từ *",
+  "kyc_add_proof_optional": "Thêm chứng từ (Không bắt buộc)",
   "kyc_address_holder_name": "Tên chủ địa chỉ *",
   "kyc_address_proof": "Giấy tờ chứng minh địa chỉ",
   "kyc_address_proof_back": "Mặt sau giấy tờ địa chỉ",

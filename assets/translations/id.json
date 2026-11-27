@@ -1050,6 +1050,7 @@
   "kyc_account_holder_name": "Nama Pemilik Rekening *",
   "kyc_add_bank_title": "Tambah Bank",
   "kyc_add_proof": "Tambah Bukti *",
+  "kyc_add_proof_optional": "Tambah Bukti (Opsional)",
   "kyc_address_holder_name": "Nama Pemilik Alamat *",
   "kyc_address_proof": "Bukti Alamat",
   "kyc_address_proof_back": "Bukti Alamat Belakang",
