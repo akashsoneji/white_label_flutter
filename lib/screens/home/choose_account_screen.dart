@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -8,7 +6,6 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/trading/view_models/plan_controller.dart';
 import 'package:crm_app/screens/home/create_crm_app_account_screen.dart';
-import 'package:crm_app/widgets/dashBorder.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/services/language_service.dart';
@@ -24,9 +21,9 @@ class ChooseAccountScreen extends StatefulWidget {
 }
 
 class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
-  static const double _cardViewportFraction = 0.85;
-  late final PageController _pageController;
-  int _currentIndex = 0;
+  /// Narrowest a plan card may get; the grid adds a column only when every
+  /// card still has this much room (1 on phones, 2 on tablets, 3 wider).
+  static const double _minCardWidth = 300.0;
 
   final PlanController planController = Get.put(PlanController());
   final LanguageService languageService = Get.find<LanguageService>();
@@ -34,15 +31,8 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: _cardViewportFraction);
     // Fetch plans based on isDemo parameter (default to false for live accounts)
     planController.fetchPlan(isDemo: widget.isDemo ?? false);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 
   @override
@@ -128,194 +118,115 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
       if (planController.errorMessage.isNotEmpty) {
         return Center(child: Text(planController.errorMessage.value));
       }
-      if (planController.plan.value != null) {
-        return Center(child: _buildAccountCard(planController.plan.value!, 0));
-      }
-      if (planController.plans.isNotEmpty) {
-        print('planController.plans.length ${planController.plans.length}');
-        return PageView.builder(
-          controller: _pageController,
-          clipBehavior: Clip.none,
-          padEnds: true,
-          physics: const BouncingScrollPhysics(),
-          onPageChanged: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          itemCount: planController.plans.length,
-          itemBuilder: (context, index) {
-            return _buildAccountCard(planController.plans[index], index);
-          },
+      final List<PlanModel> plans =
+          planController.plan.value != null
+              ? [planController.plan.value!]
+              : planController.plans.toList();
+      if (plans.isEmpty) {
+        return Center(
+          child: Text(languageService.tr('choose_account_no_plans')),
         );
       }
-      return Center(child: Text(languageService.tr('choose_account_no_plans')));
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final double horizontalPadding = 16.w;
+          final double spacing = 12.w;
+          final double availableWidth =
+              constraints.maxWidth - horizontalPadding * 2;
+          final int columns =
+              (availableWidth / _minCardWidth).floor().clamp(1, 3).toInt();
+          final double cardWidth =
+              (availableWidth - spacing * (columns - 1)) / columns;
+          return SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: 8.h,
+            ),
+            child: Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              children: [
+                for (final plan in plans)
+                  SizedBox(width: cardWidth, child: _buildAccountCard(plan)),
+              ],
+            ),
+          );
+        },
+      );
     });
   }
 
-  Widget _buildAccountCard(PlanModel accountType, int index) {
-    final bool isCurrentCard = index == _currentIndex;
-    final double cardWidth = _calculateCardWidth(context);
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: cardWidth, minWidth: cardWidth),
-        child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-          padding: EdgeInsets.all(Platform.isIOS ? 16.w : 20.w),
-          decoration: BoxDecoration(
-            color: AppColors.whiteColor,
-            borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(color: AppColors.primary),
-            boxShadow:
-                isCurrentCard
-                    ? [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.12),
-                        blurRadius: 18,
-                        offset: Offset(0, 10),
-                        spreadRadius: 2,
-                      ),
-                    ]
-                    : [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: Offset(0, 6),
-                      ),
-                    ],
+  Widget _buildAccountCard(PlanModel accountType) {
+    final List<MapEntry<String, String>> specs = [
+      MapEntry(
+        languageService.tr('choose_account_spread_from'),
+        accountType.spread?.toString() ?? '',
+      ),
+      MapEntry(
+        languageService.tr('bonus_screen_min_deposit'),
+        accountType.minimumDeposit ?? '',
+      ),
+      MapEntry(
+        languageService.tr('choose_account_maximum_leverage'),
+        accountType.leverage ?? '',
+      ),
+      MapEntry(
+        languageService.tr('choose_account_stop_out_level'),
+        accountType.stopOutLevel ?? '',
+      ),
+      for (final property in accountType.customProperties)
+        MapEntry(property.label, property.value),
+    ];
+    final String instruments = accountType.tradingInstruments ?? '';
+
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.primary.withOpacity(0.6)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            accountType.planTitle ?? '',
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+              height: 1.3,
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${accountType.planTitle ?? ''}',
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.primary,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 12.h),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildSpecificationRow(
-                    languageService.tr('choose_account_spread_from'),
-                    accountType.spread?.toString() ?? "",
-                  ),
-                  _buildDivider(),
-                  _buildSpecificationRow(
-                    languageService.tr('instruments_title'),
-                    accountType.tradingInstruments ?? "",
-                    maxLine: 2,
-                  ),
-                  _buildDivider(),
-                  _buildSpecificationRow(
-                    languageService.tr('bonus_screen_min_deposit'),
-                    accountType.minimumDeposit ?? "",
-                  ),
-                  _buildDivider(),
-                  _buildSpecificationRow(
-                    languageService.tr('choose_account_maximum_leverage'),
-                    accountType.leverage ?? "",
-                  ),
-                  // _buildDivider(),
-                  // _buildSpecificationRow(
-                  //   'Margin call',
-                  //   accountType.marginCallLevel ?? "-",
-                  // ),
-                  _buildDivider(),
-                  _buildSpecificationRow(
-                    languageService.tr('choose_account_stop_out_level'),
-                    accountType.stopOutLevel ?? "",
-                  ),
-                ],
-              ),
-              SizedBox(height: 14.h),
-              SizedBox(
-                width: double.infinity,
-                height: 44.h,
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12.r),
-                    onTap: () => _onOpenAccount(accountType),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        languageService.tr('dashboard_open_account'),
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.whiteColor,
-                          height: 1.6,
-                        ),
-                      ),
+          SizedBox(height: 8.h),
+          _buildSpecTiles(specs),
+          if (instruments.isNotEmpty) ...[
+            SizedBox(height: 6.h),
+            _buildSpecTile(
+              languageService.tr('instruments_title'),
+              instruments,
+            ),
+          ],
+          SizedBox(height: 10.h),
+          SizedBox(
+            height: 38.h,
+            child: Material(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(10.r),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10.r),
+                onTap: () => _onOpenAccount(accountType),
+                child: Center(
+                  child: Text(
+                    languageService.tr('dashboard_open_account'),
+                    style: AppTextStyles.bodyText.copyWith(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.whiteColor,
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  double _calculateCardWidth(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    const double maxWidth = 420.0;
-    const double minWidth = 320.0;
-    final double width = screenWidth * _cardViewportFraction;
-    if (width > maxWidth) return maxWidth;
-    if (width < minWidth) return minWidth;
-    return width;
-  }
-
-  Widget _buildSpecificationRow(String label, String value, {int maxLine = 1}) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 12.h),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w400,
-                color: AppColors.textPrimary,
-                height: 1.38,
-              ),
-            ),
-          ),
-          SizedBox(width: 10.w),
-          Expanded(
-            flex: 2,
-            child: Text(
-              value,
-              maxLines: maxLine,
-              textAlign: TextAlign.end,
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 13.sp,
-                overflow: TextOverflow.ellipsis,
-                fontWeight: FontWeight.w500,
-                color: AppColors.icongrey,
-                height: 1.57,
               ),
             ),
           ),
@@ -324,9 +235,63 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
     );
   }
 
-  Widget _buildDivider() {
-    return DashedUnderline();
-    // return Container(height: 1, color: Colors.grey[200]);
+  /// Two tiles per row; long values wrap inside their tile instead of being
+  /// cut off.
+  Widget _buildSpecTiles(List<MapEntry<String, String>> specs) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double gap = 6.w;
+        // Floored so two tiles plus the gap never round past the row width.
+        final double tileWidth =
+            ((constraints.maxWidth - gap) / 2).floorToDouble();
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: [
+            for (final spec in specs)
+              SizedBox(
+                width: tileWidth,
+                child: _buildSpecTile(spec.key, spec.value),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSpecTile(String label, String value) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w400,
+              color: AppColors.icongrey,
+              height: 1.3,
+            ),
+          ),
+          SizedBox(height: 2.h),
+          Text(
+            value.isEmpty ? '-' : value,
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+              height: 1.35,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _onOpenAccount(PlanModel accountType) {

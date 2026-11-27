@@ -43,14 +43,21 @@ class PlanModel {
   String? currency;
   String? groupCategory;
   int? hedgingAllowed;
+
   /// The client must accept [termsText] before an account can be opened in
   /// this group; the server rejects the create call otherwise.
   bool termsEnabled;
+
   /// Plain text with line breaks; null when [termsEnabled] is false.
   String? termsText;
+
   /// A live group with a running promo-code campaign open to this client; the
   /// create form then shows the optional bonus code field.
   bool acceptsPromoCode;
+
+  /// Extra label/value rows the admin added to this group; shown under the
+  /// standard specs on the plan card.
+  List<PlanCustomProperty> customProperties;
 
   PlanModel({
     this.id,
@@ -86,6 +93,7 @@ class PlanModel {
     this.termsEnabled = false,
     this.termsText,
     this.acceptsPromoCode = false,
+    this.customProperties = const [],
   });
 
   PlanModel copyWith({
@@ -122,6 +130,7 @@ class PlanModel {
     bool? termsEnabled,
     String? termsText,
     bool? acceptsPromoCode,
+    List<PlanCustomProperty>? customProperties,
   }) => PlanModel(
     id: id ?? this.id,
     groupName: groupName ?? this.groupName,
@@ -156,6 +165,7 @@ class PlanModel {
     termsEnabled: termsEnabled ?? this.termsEnabled,
     termsText: termsText ?? this.termsText,
     acceptsPromoCode: acceptsPromoCode ?? this.acceptsPromoCode,
+    customProperties: customProperties ?? this.customProperties,
   );
 
   factory PlanModel.fromJson(Map<String, dynamic> json) => PlanModel(
@@ -194,10 +204,20 @@ class PlanModel {
     termsEnabled: _parseBool(json["terms_enabled"]),
     termsText: json["terms_text"]?.toString(),
     acceptsPromoCode: _parseBool(json["accepts_promo_code"]),
+    customProperties: _parseCustomProperties(json["custom_properties"]),
   );
 
   static bool _parseBool(dynamic v) =>
       v == true || v == 1 || v == '1' || v == 'true';
+
+  static List<PlanCustomProperty> _parseCustomProperties(dynamic v) {
+    if (v is! List) return const [];
+    return v
+        .whereType<Map>()
+        .map((e) => PlanCustomProperty.fromJson(Map<String, dynamic>.from(e)))
+        .where((p) => p.label.isNotEmpty)
+        .toList();
+  }
 
   Map<String, dynamic> toJson() => {
     "id": id,
@@ -233,7 +253,23 @@ class PlanModel {
     "terms_enabled": termsEnabled,
     "terms_text": termsText,
     "accepts_promo_code": acceptsPromoCode,
+    "custom_properties": customProperties.map((p) => p.toJson()).toList(),
   };
+}
+
+class PlanCustomProperty {
+  final String label;
+  final String value;
+
+  const PlanCustomProperty({required this.label, required this.value});
+
+  factory PlanCustomProperty.fromJson(Map<String, dynamic> json) =>
+      PlanCustomProperty(
+        label: json["label"]?.toString().trim() ?? '',
+        value: json["value"]?.toString().trim() ?? '',
+      );
+
+  Map<String, dynamic> toJson() => {"label": label, "value": value};
 }
 
 class PlanController extends GetxController {
@@ -306,7 +342,9 @@ class PlanController extends GetxController {
               "Expected Map with 'data' but got ${data.runtimeType}";
         }
       } else {
-        errorMessage.value = response.message ?? TranslationUtils.tr('plan_controller_failed_to_fetch_plan');
+        errorMessage.value =
+            response.message ??
+            TranslationUtils.tr('plan_controller_failed_to_fetch_plan');
       }
     } catch (e, t) {
       errorMessage.value = "Error: $e";
