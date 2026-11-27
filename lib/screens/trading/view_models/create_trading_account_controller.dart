@@ -209,7 +209,7 @@ class CreateTradingAccountController extends GetxController {
             title: TranslationUtils.tr('create_account_success'),
           );
         }
-        _showBonusCodeResult(accountData['data']);
+        final bonus = _bonusCodeBlock(accountData['data']);
 
         print('accountData wehn we crete new account plese : $accountData');
 
@@ -223,6 +223,9 @@ class CreateTradingAccountController extends GetxController {
             accountType:
                 accountData['data']['account_type']?.toString() ?? 'live',
             leverage: accountData['data']['leverage']?.toString() ?? '',
+            bonusMessage: bonus?['message']?.toString(),
+            bonusOutcome:
+                bonus == null ? null : BonusCodeOutcome.fromBlock(bonus),
           ),
           barrierDismissible: false,
         );
@@ -239,25 +242,12 @@ class CreateTradingAccountController extends GetxController {
     }
   }
 
-  /// The account is created either way; credited = false means the code was
-  /// accepted but is under review or not applied.
-  void _showBonusCodeResult(dynamic data) {
-    if (data is! Map) return;
+  /// The `bonus_code` block of the create response; present only when a code
+  /// was sent. The account is created in every outcome.
+  Map? _bonusCodeBlock(dynamic data) {
+    if (data is! Map) return null;
     final bonus = data['bonus_code'];
-    if (bonus is! Map) return;
-    final message = bonus['message']?.toString() ?? '';
-    if (message.isEmpty) return;
-    if (bonus['credited'] == true) {
-      CustomToastService.showSuccess(
-        message: message,
-        duration: const Duration(seconds: 4),
-      );
-    } else {
-      CustomToastService.showWarning(
-        message: message,
-        duration: const Duration(seconds: 4),
-      );
-    }
+    return bonus is Map ? bonus : null;
   }
 
   Future<void> createDemoAccount({bool termsAccepted = false}) async {

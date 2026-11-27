@@ -6,9 +6,9 @@ import 'package:crm_app/services/language_service.dart';
 
 /// Optional promo bonus code for live groups with `accepts_promo_code`.
 ///
-/// The server accepts 6-8 letters, digits, `-` or `_` and ignores case, so
-/// the field only limits length and characters; [errorText] carries the
-/// server's BONUS_CODE_INVALID message.
+/// The server matches the code exactly as stored (up to 64 characters) and
+/// is the only place it is validated, so the field keeps the client's case
+/// and characters; [errorText] carries the server's BONUS_CODE_INVALID message.
 class BonusCodeField extends StatelessWidget {
   const BonusCodeField({
     super.key,
@@ -17,7 +17,7 @@ class BonusCodeField extends StatelessWidget {
     this.onChanged,
   });
 
-  static const int maxLength = 8;
+  static const int maxLength = 64;
 
   final TextEditingController controller;
   final String? errorText;
@@ -38,10 +38,10 @@ class BonusCodeField extends StatelessWidget {
       controller: controller,
       autocorrect: false,
       enableSuggestions: false,
-      textCapitalization: TextCapitalization.characters,
+      textCapitalization: TextCapitalization.none,
       maxLength: maxLength,
       inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9_-]')),
+        FilteringTextInputFormatter.deny(RegExp(r'\s')),
       ],
       onChanged: onChanged,
       decoration: InputDecoration(

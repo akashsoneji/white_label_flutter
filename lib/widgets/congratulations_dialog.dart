@@ -12,11 +12,34 @@ import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import '../services/account_websocket_service.dart';
 import '../services/language_service.dart';
 
+/// Result of a promo bonus code sent with the create call (`bonus_code` block).
+enum BonusCodeOutcome {
+  /// `credited: true` — the bonus is already on the account.
+  credited,
+
+  /// `credited: false` with an amount — accepted, credit is under review.
+  pending,
+
+  /// `credited: false`, `amount: null` — could not be applied after create.
+  notApplied;
+
+  static BonusCodeOutcome fromBlock(Map bonus) {
+    if (bonus['credited'] == true) return BonusCodeOutcome.credited;
+    return bonus['amount'] == null
+        ? BonusCodeOutcome.notApplied
+        : BonusCodeOutcome.pending;
+  }
+}
+
 class CongratulationsDialog extends StatelessWidget {
   final String accountNumber;
   final String serverName;
   final String? accountType;
   final String? leverage;
+
+  /// Server text from `bonus_code.message`, shown as it is.
+  final String? bonusMessage;
+  final BonusCodeOutcome? bonusOutcome;
 
   const CongratulationsDialog({
     Key? key,
@@ -24,6 +47,8 @@ class CongratulationsDialog extends StatelessWidget {
     required this.serverName,
     this.accountType,
     this.leverage,
+    this.bonusMessage,
+    this.bonusOutcome,
   }) : super(key: key);
 
   // Helper method to refresh accounts when navigating back to dashboard
@@ -116,6 +141,14 @@ class CongratulationsDialog extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
+
+                  if (bonusMessage != null && bonusMessage!.isNotEmpty) ...[
+                    SizedBox(height: 16.h),
+                    _BonusCodeNote(
+                      message: bonusMessage!,
+                      outcome: bonusOutcome ?? BonusCodeOutcome.notApplied,
+                    ),
+                  ],
 
                   SizedBox(height: 28.h),
 
@@ -371,6 +404,49 @@ class CongratulationsDialog extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _BonusCodeNote extends StatelessWidget {
+  const _BonusCodeNote({required this.message, required this.outcome});
+
+  final String message;
+  final BonusCodeOutcome outcome;
+
+  @override
+  Widget build(BuildContext context) {
+    final (Color color, IconData icon) = switch (outcome) {
+      BonusCodeOutcome.credited => (AppColors.success, Icons.card_giftcard_rounded),
+      BonusCodeOutcome.pending => (AppColors.primary, Icons.info_outline_rounded),
+      BonusCodeOutcome.notApplied => (AppColors.warning, Icons.warning_amber_rounded),
+    };
+    return Container(
+      key: const Key('congratulations_bonus_code_note'),
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: color.withOpacity(0.4)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 20),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 13.sp,
+                color: AppColors.textPrimary,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
