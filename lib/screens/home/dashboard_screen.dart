@@ -13,7 +13,6 @@ import 'package:crm_app/models/websocket_trading_response.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/brand_switcher.dart';
 import 'package:crm_app/flavor_config.dart';
-import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/utils/currency_format.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
@@ -1000,6 +999,12 @@ class DashboardScreen extends StatelessWidget {
           accountInfo != null
               ? accountInfo.equity
               : double.tryParse(account.equity.toString()) ?? 0;
+      // A new account's opening credit arrives in mt5accounts/get before the
+      // live socket has data for it.
+      final credit =
+          accountInfo != null
+              ? accountInfo.credit
+              : double.tryParse(account.credit) ?? 0;
       final margin =
           accountInfo != null
               ? accountInfo.margin
@@ -1185,6 +1190,20 @@ class DashboardScreen extends StatelessWidget {
                           ),
                         ),
                       ),
+                      if (credit > 0) ...[
+                        SizedBox(height: 2.h),
+                        Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: Text(
+                            '${languageService.tr('Credit')} \$${credit.toStringAsFixed(2)}',
+                            style: AppTextStyles.bodyText.copyWith(
+                              color: CelTheme.subText(context),
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                   Spacer(),
@@ -2535,6 +2554,12 @@ class DashboardScreen extends StatelessWidget {
               double.tryParse(account.equity) ?? 0,
               account,
             );
+    // A new account's opening credit arrives in mt5accounts/get before the
+    // live socket has data for it.
+    final double credit =
+        accountInfo != null
+            ? accountInfo.credit
+            : double.tryParse(account.credit) ?? 0;
 
     void switchToTrade() {
       final accountController = Get.find<AccountController>();
@@ -2741,38 +2766,56 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 6.w),
-                Row(
+                Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      languageService.tr('dashboard_equity'),
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.textGrey,
-                      ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          languageService.tr('dashboard_equity'),
+                          style: AppTextStyles.bodyText.copyWith(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.textGrey,
+                          ),
+                        ),
+                        SizedBox(width: 5.w),
+                        Text(
+                          equityText,
+                          style: AppTextStyles.bodyText.copyWith(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        SizedBox(width: 3.w),
+                        InkWell(
+                          onTap: () => _showAccountInfoBottomSheet(account),
+                          borderRadius: BorderRadius.circular(999),
+                          child: AppSvgIcon(
+                            assetPath: 'assets/svg/info-circle.svg',
+                            height: 19,
+                            width: 19,
+                            color: primary,
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(width: 5.w),
-                    Text(
-                      equityText,
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                    if (credit > 0)
+                      Padding(
+                        padding: EdgeInsetsDirectional.only(end: 22.w),
+                        child: Text(
+                          '${languageService.tr('Credit')} ${CurrencyFormat.amount(credit, account)}',
+                          style: AppTextStyles.bodyText.copyWith(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textGrey,
+                          ),
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 3.w),
-                    InkWell(
-                      onTap: () => _showAccountInfoBottomSheet(account),
-                      borderRadius: BorderRadius.circular(999),
-                      child: AppSvgIcon(
-                        assetPath: 'assets/svg/info-circle.svg',
-                        height: 19,
-                        width: 19,
-                        color: primary,
-                      ),
-                    ),
                   ],
                 ),
               ],
@@ -3039,6 +3082,10 @@ class AccountInfoBottomSheet extends StatelessWidget {
 
   Widget _buildContent(BuildContext context, AccountInfo? accountInfo) {
     final languageService = Get.find<LanguageService>();
+    final credit =
+        accountInfo != null
+            ? accountInfo.credit
+            : double.tryParse(account.credit) ?? 0;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.card,
@@ -3240,10 +3287,16 @@ class AccountInfoBottomSheet extends StatelessWidget {
                         : '$symbol${account.balance} $code';
                   }(),
                 ),
-                if (accountInfo != null && accountInfo.credit > 0)
+                if (credit > 0)
                   _buildDetailRow(
                     languageService.tr('Credit'),
-                    PrecisionHelper.formatMoney(accountInfo.credit),
+                    () {
+                      final symbol = account.isCentAccount ? '¢' : '\$';
+                      final code = account.isCentAccount
+                          ? (account.currency.isNotEmpty ? account.currency : 'USC')
+                          : (account.currency.isNotEmpty ? account.currency : 'USD');
+                      return '$symbol${credit.toStringAsFixed(2)} $code';
+                    }(),
                   ),
                 _buildDetailRow(
                   languageService.tr('dashboard_equity'),
